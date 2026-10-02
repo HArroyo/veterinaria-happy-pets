@@ -605,6 +605,146 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Reloj / Horario de cita médica.
+     */
+    public static Icon crearIconoReloj(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Esfera del reloj
+        double pad = s * 0.10;
+        double d = s - pad * 2.0;
+        g.draw(new Ellipse2D.Double(pad, pad, d, d));
+
+        // Manecillas del reloj (centro a las 12 y a las 3)
+        double cx = s / 2.0;
+        double cy = s / 2.0;
+        g.drawLine((int) cx, (int) cy, (int) cx, (int) (cy - s * 0.28));
+        g.drawLine((int) cx, (int) cy, (int) (cx + s * 0.22), (int) cy);
+
+        // Punto central
+        double pr = s * 0.06;
+        g.fill(new Ellipse2D.Double(cx - pr / 2.0, cy - pr / 2.0, pr, pr));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * WhatsApp / Mensajería directa.
+     */
+    public static Icon crearIconoWhatsApp(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Bocadillo de diálogo redondeado
+        double bw = s * 0.74;
+        double bh = s * 0.62;
+        double bx = (s - bw) / 2.0;
+        double by = s * 0.12;
+        g.draw(new RoundRectangle2D.Double(bx, by, bw, bh, s * 0.25, s * 0.25));
+
+        // Cola del bocadillo abajo a la izquierda
+        int[] tx = {(int) (bx + s * 0.12), (int) (bx + s * 0.02), (int) (bx + s * 0.26)};
+        int[] ty = {(int) (by + bh - s * 0.04), (int) (s * 0.88), (int) (by + bh - s * 0.02)};
+        g.fillPolygon(tx, ty, 3);
+
+        // Teléfono auricular estilizado dentro
+        double phW = s * 0.36;
+        double phH = s * 0.24;
+        g.drawArc((int) (bx + (bw - phW) / 2.0), (int) (by + (bh - phH) / 2.0), (int) phW, (int) phH, 30, 200);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Sobre de correo / SMS.
+     */
+    public static Icon crearIconoMensaje(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Sobre
+        double w = s * 0.76;
+        double h = s * 0.54;
+        double x = (s - w) / 2.0;
+        double y = (s - h) / 2.0;
+        g.draw(new RoundRectangle2D.Double(x, y, w, h, s * 0.08, s * 0.08));
+
+        // Solapa del sobre
+        g.drawLine((int) x, (int) y, (int) (s / 2.0), (int) (y + h * 0.58));
+        g.drawLine((int) (s / 2.0), (int) (y + h * 0.58), (int) (x + w), (int) y);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Alerta de Triaje / Urgencias clínicas (pulso cardíaco).
+     */
+    public static Icon crearIconoAlertaTriaje(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.8, s * 0.09);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Línea de electrocardiograma / pulso vital
+        double midY = s * 0.50;
+        int[] px = {
+                (int) (s * 0.12), (int) (s * 0.30), (int) (s * 0.40),
+                (int) (s * 0.50), (int) (s * 0.60), (int) (s * 0.70), (int) (s * 0.88)
+        };
+        int[] py = {
+                (int) midY, (int) midY, (int) (s * 0.24),
+                (int) (s * 0.76), (int) (s * 0.34), (int) midY, (int) midY
+        };
+        g.drawPolyline(px, py, 7);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Check / Confirmación de asistencia.
+     */
+    public static Icon crearIconoCheck(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.8, s * 0.12);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        double x1 = s * 0.20;
+        double y1 = s * 0.52;
+        double x2 = s * 0.42;
+        double y2 = s * 0.74;
+        double x3 = s * 0.82;
+        double y3 = s * 0.26;
+
+        g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+        g.drawLine((int) x2, (int) y2, (int) x3, (int) y3);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }

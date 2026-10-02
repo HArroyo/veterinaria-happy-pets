@@ -58,8 +58,22 @@ public class VerificadorModulos {
             System.out.println("    * " + d.getTipo() + " | " + d.getDescripcion() + " | Actualizado: " + d.getFechaActualizacionFormateada() + " | Disp: " + d.getDisponibilidadTexto());
         }
 
-        // 5. Instanciar UI sin errores
-        System.out.println("\n[5] Instanciando frames visuales Swing y autenticación...");
+        // 5. Validar Citas, Recordatorios y Triaje del Módulo 2
+        System.out.println("\n[5] Validando Entidades del Módulo 2 (Agenda y Citas)...");
+        List<happypets.model.Cita> citas = repo.getCitas();
+        System.out.println(" -> Citas registradas en repositorio: " + citas.size() + " (Esperado >= 8)");
+        assert citas.size() >= 8 : "Deben existir citas de prueba.";
+
+        List<happypets.model.RecordatorioCita> recordatorios = repo.getRecordatorios();
+        System.out.println(" -> Recordatorios registrados: " + recordatorios.size() + " (Esperado >= 4)");
+        assert recordatorios.size() >= 4 : "Deben existir recordatorios de prueba.";
+
+        List<happypets.model.PacienteTriaje> pacientesTriaje = repo.getPacientesTriaje();
+        System.out.println(" -> Pacientes en sala de espera/triaje: " + pacientesTriaje.size() + " (Esperado >= 3)");
+        assert pacientesTriaje.size() >= 3 : "Deben existir pacientes en triaje.";
+
+        // 6. Instanciar UI sin errores
+        System.out.println("\n[6] Instanciando frames visuales Swing y autenticación...");
         happypets.auth.ServicioAutenticacion auth = happypets.auth.ServicioAutenticacion.getInstancia();
         assert auth.autenticar("admin", "admin").isPresent() : "Credenciales admin / admin deben ser válidas.";
         System.out.println(" -> Autenticación admin / admin validada correctamente.");
@@ -82,12 +96,16 @@ public class VerificadorModulos {
         ConstanciasCertificadosFrame frameDocs = new ConstanciasCertificadosFrame();
         System.out.println(" -> ConstanciasCertificadosFrame instanciada correctamente.");
 
+        happypets.modulos.modulo2.Modulo2AgendaCitasFrame frameMod2 = new happypets.modulos.modulo2.Modulo2AgendaCitasFrame();
+        System.out.println(" -> Modulo2AgendaCitasFrame instanciada correctamente.");
+
         frameLogin.dispose();
         framePrincipal.dispose();
         app.dispose();
         frameClientes.dispose();
         frameHistorial.dispose();
         frameDocs.dispose();
+        frameMod2.dispose();
 
         System.out.println("\n=== VALIDACIÓN COMPLETADA: TODOS LOS REQUERIMIENTOS CUMPLIDOS CON ÉXITO ===");
     }

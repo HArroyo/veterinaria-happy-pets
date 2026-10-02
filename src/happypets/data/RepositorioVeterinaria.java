@@ -1,20 +1,25 @@
 package happypets.data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import happypets.model.Certificado;
+import happypets.model.Cita;
 import happypets.model.Cliente;
 import happypets.model.ConsultaClinica;
 import happypets.model.DocumentoMascota;
 import happypets.model.Mascota;
+import happypets.model.PacienteTriaje;
+import happypets.model.RecordatorioCita;
 
 /**
- * Almacén en memoria centralizado para clientes, mascotas, consultas y documentos.
- * Inicializado con los datos exactamente representados en los wireframes del proyecto.
+ * Almacén en memoria centralizado para clientes, mascotas, consultas, documentos,
+ * citas, recordatorios y triaje de sala de espera.
  */
 public class RepositorioVeterinaria {
     private static RepositorioVeterinaria instancia;
@@ -22,6 +27,9 @@ public class RepositorioVeterinaria {
     private final List<Cliente> clientes = new ArrayList<>();
     private final List<ConsultaClinica> consultas = new ArrayList<>();
     private final List<DocumentoMascota> documentos = new ArrayList<>();
+    private final List<Cita> citas = new ArrayList<>();
+    private final List<RecordatorioCita> recordatorios = new ArrayList<>();
+    private final List<PacienteTriaje> pacientesTriaje = new ArrayList<>();
 
     private RepositorioVeterinaria() {
         inicializarDatos();
@@ -142,6 +150,124 @@ public class RepositorioVeterinaria {
                 "DOC-005", "VET-0144", "Tarjeta de vacunación",
                 "Vacunación felina triple y antirrábica", LocalDate.of(2024, 4, 18), true
         ));
+
+        // ==========================================
+        // MÓDULO 2: AGENDA Y CITAS (DATOS INICIALES)
+        // ==========================================
+        LocalDate hoy = LocalDate.now();
+
+        // 1. Citas del día y próximas
+        citas.add(new Cita(
+                "CIT-0101", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                hoy, LocalTime.of(9, 0), 30, "Dr. Roberto Mendoza",
+                "Consulta Médica", "En Sala de Espera", "Control y desparasitación trimestral",
+                "Normal", "Paciente puntual en sala", 75.00
+        ));
+        citas.add(new Cita(
+                "CIT-0102", "VET-0144", "Luna", "Felino · Siamés",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                hoy, LocalTime.of(10, 0), 30, "Dra. Laura Morales",
+                "Vacunación", "Confirmada", "Vacuna triple felina anual y revisión",
+                "Normal", "Confirmado por WhatsApp", 65.00
+        ));
+        citas.add(new Cita(
+                "CIT-0103", "VET-0305", "Max", "Canino · Schnauzer",
+                "72451980", "Ana María Rojas", "+51 971 223 344",
+                hoy, LocalTime.of(11, 30), 60, "Dr. Roberto Mendoza",
+                "Cirugía / Quirófano", "Programada", "Profilaxis dental y limpieza por ultrasonido",
+                "Urgente", "Ayuno de 8 horas indicado", 180.00
+        ));
+        citas.add(new Cita(
+                "CIT-0104", "VET-0238", "Toby", "Canino · Pug",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                hoy, LocalTime.of(14, 0), 45, "Dra. Laura Morales",
+                "Grooming / Peluquería", "Confirmada", "Baño medicado hipoalergénico y corte higiénico",
+                "Normal", "Piel sensible a champús aromáticos", 50.00
+        ));
+        citas.add(new Cita(
+                "CIT-0105", "VET-0412", "Thor", "Canino · Pastor Alemán",
+                "41290887", "Jorge Valdivia Ramos", "+51 945 882 113",
+                hoy, LocalTime.of(15, 30), 30, "Dr. Carlos Silva",
+                "Consulta Médica", "Programada", "Cojera en pata trasera derecha tras salto",
+                "Urgente", "Requiere evaluación traumatológica", 85.00
+        ));
+        citas.add(new Cita(
+                "CIT-0106", "VET-0520", "Bella", "Felino · Angora",
+                "10882341", "Patricia Benítez", "+51 993 441 022",
+                hoy, LocalTime.of(16, 30), 20, "Dr. Roberto Mendoza",
+                "Control y Seguimiento", "Confirmada", "Revisión de herida quirúrgica y retiro de puntos",
+                "Normal", "Evolución favorable", 40.00
+        ));
+        citas.add(new Cita(
+                "CIT-0107", "VET-0618", "Simón", "Canino · Beagle",
+                "46610992", "Elena Castro Peña", "+51 912 345 678",
+                hoy, LocalTime.of(17, 30), 40, "Dra. Laura Morales",
+                "Consulta Médica", "Programada", "Vómito recurrente y deshidratación leve",
+                "Emergencia", "Prioridad en triaje", 95.00
+        ));
+        citas.add(new Cita(
+                "CIT-0108", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                hoy.plusDays(1), LocalTime.of(10, 0), 30, "Dr. Roberto Mendoza",
+                "Control y Seguimiento", "Programada", "Evaluación de dieta y peso corporal",
+                "Normal", "Control rutinario", 45.00
+        ));
+        citas.add(new Cita(
+                "CIT-0109", "VET-0305", "Max", "Canino · Schnauzer",
+                "72451980", "Ana María Rojas", "+51 971 223 344",
+                hoy.plusDays(2), LocalTime.of(16, 0), 30, "Dra. Laura Morales",
+                "Vacunación", "Programada", "Refuerzo anual antirrábica",
+                "Normal", "Traer carné de vacunación", 55.00
+        ));
+
+        // 2. Recordatorios automáticos vinculados a citas
+        LocalDateTime ahora = LocalDateTime.now();
+        recordatorios.add(new RecordatorioCita(
+                "REC-001", "CIT-0101", "Rocky", "Carlos Eduardo Morales", "+51 984 552 110",
+                "WhatsApp", ahora.minusHours(2),
+                "Hola Carlos, te recordamos que Rocky tiene cita de Consulta Médica hoy a las 09:00 AM en Happy Pets con el Dr. Roberto Mendoza. Por favor confirma tu asistencia.",
+                "Confirmado"
+        ));
+        recordatorios.add(new RecordatorioCita(
+                "REC-002", "CIT-0102", "Luna", "Carlos Eduardo Morales", "+51 984 552 110",
+                "WhatsApp", ahora.minusHours(1),
+                "Hola Carlos, te recordamos que Luna tiene cita de Vacunación hoy a las 10:00 AM con la Dra. Laura Morales en Happy Pets.",
+                "Confirmado"
+        ));
+        recordatorios.add(new RecordatorioCita(
+                "REC-003", "CIT-0103", "Max", "Ana María Rojas", "+51 971 223 344",
+                "SMS", ahora.minusMinutes(45),
+                "HappyPets: Max tiene programada Cirugía hoy a las 11:30 AM. Recuerde que el paciente debe estar en ayuno estricto de 8 horas.",
+                "Enviado"
+        ));
+        recordatorios.add(new RecordatorioCita(
+                "REC-004", "CIT-0105", "Thor", "Jorge Valdivia Ramos", "jorge.valdivia@gmail.com",
+                "E-Mail", ahora.minusMinutes(20),
+                "Estimado Jorge, confirmamos la cita para Thor hoy a las 15:30 PM para Consulta Médica traumatológica en Happy Pets.",
+                "Pendiente"
+        ));
+
+        // 3. Sala de Espera y Triaje de Urgencias
+        LocalTime horaRef = LocalTime.now();
+        pacientesTriaje.add(new PacienteTriaje(
+                "TR-01", "CIT-0101", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110", horaRef.minusMinutes(18),
+                28.4, 38.6, 92, "VERDE (Normal)", "Control rutinario y desparasitación",
+                "Consultorio 1 - Dr. Mendoza", "En Espera"
+        ));
+        pacientesTriaje.add(new PacienteTriaje(
+                "TR-02", null, "VET-0740", "Bimba", "Felino · Persa",
+                "Maribel Soto Cruz", "+51 991 445 612", horaRef.minusMinutes(10),
+                3.9, 39.8, 140, "AMARILLO (Urgencia)", "Fiebre persistente, decaimiento e inapetencia",
+                "Consultorio 2 - Dra. Morales", "En Espera"
+        ));
+        pacientesTriaje.add(new PacienteTriaje(
+                "TR-03", null, "VET-0810", "Zeus", "Canino · Rottweiler",
+                "Daniel Paredes Ríos", "+51 988 331 209", horaRef.minusMinutes(4),
+                42.1, 37.2, 165, "ROJO (Emergencia crítica)", "Intoxicación por sospecha de ingesta accidental de veneno",
+                "Tópico de Emergencias", "En Consulta"
+        ));
     }
 
     public List<Cliente> getClientes() {
@@ -251,5 +377,118 @@ public class RepositorioVeterinaria {
         if (documento != null) {
             documentos.add(documento);
         }
+    }
+
+    // ==========================================
+    // MÉTODOS DE NEGOCIO: AGENDA Y CITAS
+    // ==========================================
+
+    public List<Cita> getCitas() {
+        return new ArrayList<>(citas);
+    }
+
+    public List<Cita> getCitasPorFecha(LocalDate fecha) {
+        if (fecha == null) return getCitas();
+        return citas.stream()
+                .filter(c -> c.getFecha().equals(fecha))
+                .sorted((a, b) -> a.getHora().compareTo(b.getHora()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Cita> getCitasHoy() {
+        return getCitasPorFecha(LocalDate.now());
+    }
+
+    public List<Cita> buscarCitas(String query) {
+        if (query == null || query.trim().isEmpty()) return getCitas();
+        String q = query.trim().toLowerCase();
+        return citas.stream().filter(c ->
+                c.getIdCita().toLowerCase().contains(q) ||
+                c.getNombreMascota().toLowerCase().contains(q) ||
+                c.getNombreCliente().toLowerCase().contains(q) ||
+                c.getDniCliente().toLowerCase().contains(q) ||
+                c.getVeterinario().toLowerCase().contains(q) ||
+                c.getTipoServicio().toLowerCase().contains(q) ||
+                c.getEstado().toLowerCase().contains(q)
+        ).sorted((a, b) -> a.getHora().compareTo(b.getHora())).collect(Collectors.toList());
+    }
+
+    public void guardarCita(Cita cita) {
+        if (cita == null) return;
+        boolean existe = false;
+        for (int i = 0; i < citas.size(); i++) {
+            if (citas.get(i).getIdCita().equalsIgnoreCase(cita.getIdCita())) {
+                citas.set(i, cita);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (cita.getIdCita() == null || cita.getIdCita().isEmpty()) {
+                cita.setIdCita("CIT-" + String.format("%04d", citas.size() + 101));
+            }
+            citas.add(cita);
+        }
+    }
+
+    public void actualizarEstadoCita(String idCita, String nuevoEstado) {
+        for (Cita c : citas) {
+            if (c.getIdCita().equalsIgnoreCase(idCita)) {
+                c.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    public void eliminarCita(String idCita) {
+        citas.removeIf(c -> c.getIdCita().equalsIgnoreCase(idCita));
+    }
+
+    public List<RecordatorioCita> getRecordatorios() {
+        return new ArrayList<>(recordatorios);
+    }
+
+    public void agregarRecordatorio(RecordatorioCita rec) {
+        if (rec != null) {
+            if (rec.getIdRecordatorio() == null || rec.getIdRecordatorio().isEmpty()) {
+                rec.setIdRecordatorio("REC-" + String.format("%03d", recordatorios.size() + 1));
+            }
+            recordatorios.add(0, rec);
+        }
+    }
+
+    public void actualizarEstadoRecordatorio(String idRecordatorio, String nuevoEstado) {
+        for (RecordatorioCita r : recordatorios) {
+            if (r.getIdRecordatorio().equalsIgnoreCase(idRecordatorio)) {
+                r.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    public List<PacienteTriaje> getPacientesTriaje() {
+        return new ArrayList<>(pacientesTriaje);
+    }
+
+    public void agregarPacienteTriaje(PacienteTriaje p) {
+        if (p != null) {
+            if (p.getIdTicket() == null || p.getIdTicket().isEmpty()) {
+                p.setIdTicket("TR-" + String.format("%02d", pacientesTriaje.size() + 1));
+            }
+            pacientesTriaje.add(p);
+        }
+    }
+
+    public void actualizarEstadoTriaje(String idTicket, String nuevoEstado) {
+        for (PacienteTriaje p : pacientesTriaje) {
+            if (p.getIdTicket().equalsIgnoreCase(idTicket)) {
+                p.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    public void eliminarPacienteTriaje(String idTicket) {
+        pacientesTriaje.removeIf(p -> p.getIdTicket().equalsIgnoreCase(idTicket));
     }
 }

@@ -44,6 +44,7 @@ import happypets.data.RepositorioVeterinaria;
 import happypets.model.Cliente;
 import happypets.model.Mascota;
 import happypets.model.Usuario;
+import happypets.model.Cita;
 import happypets.modulos.modulo1.ClientesMascotasFrame;
 import happypets.modulos.modulo1.ConstanciasCertificadosFrame;
 import happypets.modulos.modulo1.HistorialClinicoFrame;
@@ -51,6 +52,10 @@ import happypets.modulos.modulo1.VistaClientesMascotasPanel;
 import happypets.modulos.modulo1.VistaHistorialClinicoPanel;
 import happypets.modulos.modulo1.VistaConstanciasCertificadosPanel;
 import happypets.modulos.modulo2.Modulo2AgendaCitasFrame;
+import happypets.modulos.modulo2.VistaAgendamientoCitasPanel;
+import happypets.modulos.modulo2.VistaCalendarioGlobalPanel;
+import happypets.modulos.modulo2.VistaRecordatoriosPanel;
+import happypets.modulos.modulo2.VistaSalaEsperaTriajePanel;
 import happypets.modulos.modulo3.Modulo3ServiciosMedicosFrame;
 import happypets.modulos.modulo4.Modulo4EsteticosHospedajeFrame;
 import happypets.modulos.modulo5.Modulo5InventarioFarmaciaFrame;
@@ -89,6 +94,13 @@ public class PantallaPrincipalFrame extends JFrame {
     private VistaClientesMascotasPanel vistaClientesMascotas;
     private VistaHistorialClinicoPanel vistaHistorialClinico;
     private VistaConstanciasCertificadosPanel vistaConstanciasCertificados;
+
+    // Vistas integradas del Módulo 2 en CardLayout
+    private VistaAgendamientoCitasPanel vistaAgendamiento;
+    private VistaCalendarioGlobalPanel vistaCalendario;
+    private VistaRecordatoriosPanel vistaRecordatorios;
+    private VistaSalaEsperaTriajePanel vistaSalaEspera;
+
     private JScrollPane panelDashboard;
     private JButton btnDashboard;
 
@@ -441,10 +453,55 @@ public class PantallaPrincipalFrame extends JFrame {
             }
         });
 
+        // Vistas del Módulo 2
+        vistaAgendamiento = new VistaAgendamientoCitasPanel();
+        vistaCalendario = new VistaCalendarioGlobalPanel();
+        vistaRecordatorios = new VistaRecordatoriosPanel();
+        vistaSalaEspera = new VistaSalaEsperaTriajePanel();
+
+        vistaAgendamiento.setNavegacionListener(new VistaAgendamientoCitasPanel.AccionNavegacionAgendaListener() {
+            @Override
+            public void irASalaEspera(Cita cita) {
+                vistaSalaEspera.registrarLlegadaDesdeCita(cita);
+                mostrarVista("MODULO2_TRIAJE");
+                activarBotonSubmodulo(2, 3);
+                actualizarVistaPrincipal(
+                        "Sala de Espera y Triaje · " + cita.getNombreMascota(),
+                        "Módulo 2.4 · Monitor en vivo de turnos, signos vitales y escala de triaje de urgencias"
+                );
+            }
+
+            @Override
+            public void irACalendario(LocalDate fecha) {
+                mostrarVista("MODULO2_CALENDARIO");
+                activarBotonSubmodulo(2, 1);
+                actualizarVistaPrincipal(
+                        "Calendario Global de Recursos",
+                        "Módulo 2.2 · Visualización de disponibilidad de consultorios, quirófano y grooming"
+                );
+            }
+
+            @Override
+            public void irARecordatorios(Cita cita) {
+                vistaRecordatorios.prepararParaCita(cita);
+                mostrarVista("MODULO2_RECORDATORIOS");
+                activarBotonSubmodulo(2, 2);
+                actualizarVistaPrincipal(
+                        "Gestión de Recordatorios · " + cita.getNombreMascota(),
+                        "Módulo 2.3 · Notificaciones multicanal automatizadas por WhatsApp, SMS y correo electrónico"
+                );
+            }
+        });
+
         panelContenedorCards.add(panelDashboard, "DASHBOARD");
         panelContenedorCards.add(vistaClientesMascotas, "MODULO1_CLIENTES");
         panelContenedorCards.add(vistaHistorialClinico, "MODULO1_HISTORIAL");
         panelContenedorCards.add(vistaConstanciasCertificados, "MODULO1_CONSTANCIAS");
+
+        panelContenedorCards.add(vistaAgendamiento, "MODULO2_AGENDAMIENTO");
+        panelContenedorCards.add(vistaCalendario, "MODULO2_CALENDARIO");
+        panelContenedorCards.add(vistaRecordatorios, "MODULO2_RECORDATORIOS");
+        panelContenedorCards.add(vistaSalaEspera, "MODULO2_TRIAJE");
 
         return panelContenedorCards;
     }
@@ -1114,10 +1171,25 @@ public class PantallaPrincipalFrame extends JFrame {
                         new String[]{"Agendamiento de Citas", "Calendario Global", "Gestión de Recordatorios", "Sala de Espera y Triaje"},
                         Iconos.crearIconoCalendario(16, new Color(14, 165, 233)),
                         new Runnable[]{
-                                () -> new Modulo2AgendaCitasFrame().setVisible(true),
-                                () -> new Modulo2AgendaCitasFrame().setVisible(true),
-                                () -> new Modulo2AgendaCitasFrame().setVisible(true),
-                                () -> new Modulo2AgendaCitasFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO2_AGENDAMIENTO");
+                                    vistaAgendamiento.recargarDatos();
+                                    actualizarVistaPrincipal("Agendamiento de Citas Médicas", "Módulo 2.1 · Reserva, reprogramación y control de citas clínicas y servicios");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO2_CALENDARIO");
+                                    actualizarVistaPrincipal("Calendario Global de Recursos", "Módulo 2.2 · Visualización de disponibilidad de consultorios, quirófano y grooming");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO2_RECORDATORIOS");
+                                    vistaRecordatorios.recargarDatos();
+                                    actualizarVistaPrincipal("Gestión de Recordatorios Multicanal", "Módulo 2.3 · Notificaciones automatizadas por WhatsApp, SMS y correo electrónico");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO2_TRIAJE");
+                                    vistaSalaEspera.recargarDatos();
+                                    actualizarVistaPrincipal("Sala de Espera y Triaje Clínico", "Módulo 2.4 · Monitor de turnos, signos vitales y escala de triaje de urgencias");
+                                }
                         }
                 ),
                 new DefinicionModulo(
