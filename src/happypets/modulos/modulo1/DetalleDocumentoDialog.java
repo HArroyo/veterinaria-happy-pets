@@ -1,4 +1,6 @@
-package happypets.ui;
+package happypets.modulos.modulo1;
+
+import happypets.ui.Ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

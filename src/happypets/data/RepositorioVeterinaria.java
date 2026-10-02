@@ -246,4 +246,10 @@ public class RepositorioVeterinaria {
                 .filter(d -> d.getCodigoMascota().equalsIgnoreCase(codigoMascota))
                 .collect(Collectors.toList());
     }
+
+    public void agregarDocumento(DocumentoMascota documento) {
+        if (documento != null) {
+            documentos.add(documento);
+        }
+    }
 }

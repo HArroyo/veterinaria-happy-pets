@@ -8,9 +8,9 @@ import happypets.model.Cliente;
 import happypets.model.ConsultaClinica;
 import happypets.model.DocumentoMascota;
 import happypets.model.Mascota;
-import happypets.ui.ClientesMascotasFrame;
-import happypets.ui.ConstanciasCertificadosFrame;
-import happypets.ui.HistorialClinicoFrame;
+import happypets.modulos.modulo1.ClientesMascotasFrame;
+import happypets.modulos.modulo1.ConstanciasCertificadosFrame;
+import happypets.modulos.modulo1.HistorialClinicoFrame;
 
 /**
  * Clase de prueba y validación automatizada contra los requerimientos
@@ -59,7 +59,17 @@ public class VerificadorModulos {
         }
 
         // 5. Instanciar UI sin errores
-        System.out.println("\n[5] Instanciando frames visuales Swing...");
+        System.out.println("\n[5] Instanciando frames visuales Swing y autenticación...");
+        happypets.auth.ServicioAutenticacion auth = happypets.auth.ServicioAutenticacion.getInstancia();
+        assert auth.autenticar("admin", "admin").isPresent() : "Credenciales admin / admin deben ser válidas.";
+        System.out.println(" -> Autenticación admin / admin validada correctamente.");
+
+        happypets.ui.LoginFrame frameLogin = new happypets.ui.LoginFrame();
+        System.out.println(" -> LoginFrame instanciada correctamente.");
+
+        happypets.ui.PantallaPrincipalFrame framePrincipal = new happypets.ui.PantallaPrincipalFrame();
+        System.out.println(" -> PantallaPrincipalFrame (Dashboard) instanciada correctamente.");
+
         HappyPetsApp app = new HappyPetsApp();
         System.out.println(" -> HappyPetsApp instanciada correctamente.");
 
@@ -72,6 +82,8 @@ public class VerificadorModulos {
         ConstanciasCertificadosFrame frameDocs = new ConstanciasCertificadosFrame();
         System.out.println(" -> ConstanciasCertificadosFrame instanciada correctamente.");
 
+        frameLogin.dispose();
+        framePrincipal.dispose();
         app.dispose();
         frameClientes.dispose();
         frameHistorial.dispose();

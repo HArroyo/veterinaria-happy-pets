@@ -23,9 +23,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import happypets.data.RepositorioVeterinaria;
-import happypets.ui.ClientesMascotasFrame;
-import happypets.ui.ConstanciasCertificadosFrame;
-import happypets.ui.HistorialClinicoFrame;
+import happypets.modulos.modulo1.ClientesMascotasFrame;
+import happypets.modulos.modulo1.ConstanciasCertificadosFrame;
+import happypets.modulos.modulo1.HistorialClinicoFrame;
 import happypets.ui.Ui;
 
 /**
