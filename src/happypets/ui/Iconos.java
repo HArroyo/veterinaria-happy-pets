@@ -987,6 +987,132 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Caja de almacén / Control de Stock y Lotes.
+     */
+    public static Icon crearIconoCajaAlmacen(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cubo / Caja isométrica
+        int cx = (int) (s * 0.50);
+        int topY = (int) (s * 0.15);
+        int midY = (int) (s * 0.42);
+        int botY = (int) (s * 0.82);
+        int leftX = (int) (s * 0.15);
+        int rightX = (int) (s * 0.85);
+
+        // Tapa superior
+        g.drawLine(cx, topY, rightX, (int) (s * 0.28));
+        g.drawLine(rightX, (int) (s * 0.28), cx, midY);
+        g.drawLine(cx, midY, leftX, (int) (s * 0.28));
+        g.drawLine(leftX, (int) (s * 0.28), cx, topY);
+
+        // Aristas verticales
+        g.drawLine(leftX, (int) (s * 0.28), leftX, (int) (s * 0.68));
+        g.drawLine(cx, midY, cx, botY);
+        g.drawLine(rightX, (int) (s * 0.28), rightX, (int) (s * 0.68));
+
+        // Aristas inferiores
+        g.drawLine(leftX, (int) (s * 0.68), cx, botY);
+        g.drawLine(cx, botY, rightX, (int) (s * 0.68));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Camión de distribución / Proveedores y Órdenes de Compra.
+     */
+    public static Icon crearIconoCamionProveedor(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Furgón / Caja de carga
+        g.drawRoundRect((int) (s * 0.12), (int) (s * 0.25), (int) (s * 0.50), (int) (s * 0.45), 4, 4);
+
+        // Cabina
+        g.drawLine((int) (s * 0.62), (int) (s * 0.40), (int) (s * 0.78), (int) (s * 0.40));
+        g.drawLine((int) (s * 0.78), (int) (s * 0.40), (int) (s * 0.88), (int) (s * 0.54));
+        g.drawLine((int) (s * 0.88), (int) (s * 0.54), (int) (s * 0.88), (int) (s * 0.70));
+        g.drawLine((int) (s * 0.88), (int) (s * 0.70), (int) (s * 0.62), (int) (s * 0.70));
+
+        // Ventanilla cabina
+        g.drawRect((int) (s * 0.66), (int) (s * 0.44), (int) (s * 0.14), (int) (s * 0.12));
+
+        // Ruedas
+        g.drawOval((int) (s * 0.24), (int) (s * 0.64), (int) (s * 0.18), (int) (s * 0.18));
+        g.drawOval((int) (s * 0.70), (int) (s * 0.64), (int) (s * 0.18), (int) (s * 0.18));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Triángulo de advertencia / Mermas y Ajustes.
+     */
+    public static Icon crearIconoAlertaMerma(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Triángulo de advertencia
+        int[] x = {(int) (s * 0.50), (int) (s * 0.12), (int) (s * 0.88)};
+        int[] y = {(int) (s * 0.15), (int) (s * 0.82), (int) (s * 0.82)};
+        g.drawPolygon(x, y, 3);
+
+        // Signo de exclamación
+        g.drawLine((int) (s * 0.50), (int) (s * 0.36), (int) (s * 0.50), (int) (s * 0.58));
+        g.fillOval((int) (s * 0.46), (int) (s * 0.67), (int) (s * 0.08), (int) (s * 0.08));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Lápiz / Edición de registros.
+     */
+    public static Icon crearIconoLapiz(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Rotar 45 grados para orientar el lápiz
+        g.rotate(Math.toRadians(45), s * 0.5, s * 0.5);
+
+        // Cuerpo rectangular del lápiz
+        int w = (int) (s * 0.22);
+        int h = (int) (s * 0.50);
+        int x = (int) (s * 0.39);
+        int y = (int) (s * 0.20);
+        g.drawRect(x, y, w, h);
+
+        // Punta triangular
+        int[] tx = {x, x + w / 2, x + w};
+        int[] ty = {y, (int) (s * 0.06), y};
+        g.drawPolygon(tx, ty, 3);
+
+        // Borrador arriba/atrás
+        g.drawLine(x, y + h - (int) (s * 0.08), x + w, y + h - (int) (s * 0.08));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }

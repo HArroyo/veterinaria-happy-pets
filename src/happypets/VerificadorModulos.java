@@ -108,8 +108,30 @@ public class VerificadorModulos {
         System.out.println(" -> Catálogo de Adopciones y Rescatados: " + adopciones.size() + " (Esperado >= 3)");
         assert adopciones.size() >= 3 : "Deben existir rescatados en adopción.";
 
-        // 8. Instanciar UI sin errores
-        System.out.println("\n[8] Instanciando frames visuales Swing y autenticación...");
+        // 8. Validar Entidades del Módulo 5 (Inventario y Farmacia)
+        System.out.println("\n[8] Validando Entidades del Módulo 5 (Inventario y Farmacia)...");
+        List<happypets.model.ProductoFarmacia> prods = repo.getProductosFarmacia();
+        System.out.println(" -> Productos farmacéuticos registrados: " + prods.size() + " (Esperado >= 5)");
+        assert prods.size() >= 5 : "Deben existir productos farmacéuticos en catálogo.";
+
+        List<happypets.model.LoteMovimientoStock> movs = repo.getMovimientosStock();
+        System.out.println(" -> Movimientos de stock en Kardex: " + movs.size() + " (Esperado >= 3)");
+        assert movs.size() >= 3 : "Deben existir movimientos de Kardex.";
+
+        List<happypets.model.ProveedorFarmacia> provs = repo.getProveedoresFarmacia();
+        System.out.println(" -> Proveedores y laboratorios homologados: " + provs.size() + " (Esperado >= 3)");
+        assert provs.size() >= 3 : "Deben existir proveedores registrados.";
+
+        List<happypets.model.OrdenCompra> ordenes = repo.getOrdenesCompra();
+        System.out.println(" -> Órdenes de compra registradas: " + ordenes.size() + " (Esperado >= 3)");
+        assert ordenes.size() >= 3 : "Deben existir órdenes de compra.";
+
+        List<happypets.model.AjusteMerma> mermas = repo.getAjustesMermas();
+        System.out.println(" -> Ajustes y mermas registradas: " + mermas.size() + " (Esperado >= 3)");
+        assert mermas.size() >= 3 : "Deben existir ajustes y mermas.";
+
+        // 9. Instanciar UI sin errores
+        System.out.println("\n[9] Instanciando frames visuales Swing y autenticación...");
         happypets.auth.ServicioAutenticacion auth = happypets.auth.ServicioAutenticacion.getInstancia();
         assert auth.autenticar("admin", "admin").isPresent() : "Credenciales admin / admin deben ser válidas.";
         System.out.println(" -> Autenticación admin / admin validada correctamente.");
@@ -141,6 +163,9 @@ public class VerificadorModulos {
         happypets.modulos.modulo4.Modulo4EsteticosHospedajeFrame frameMod4 = new happypets.modulos.modulo4.Modulo4EsteticosHospedajeFrame();
         System.out.println(" -> Modulo4EsteticosHospedajeFrame instanciada correctamente.");
 
+        happypets.modulos.modulo5.Modulo5InventarioFarmaciaFrame frameMod5 = new happypets.modulos.modulo5.Modulo5InventarioFarmaciaFrame();
+        System.out.println(" -> Modulo5InventarioFarmaciaFrame instanciada correctamente.");
+
         frameLogin.dispose();
         framePrincipal.dispose();
         app.dispose();
@@ -150,6 +175,7 @@ public class VerificadorModulos {
         frameMod2.dispose();
         frameMod3.dispose();
         frameMod4.dispose();
+        frameMod5.dispose();
 
         System.out.println("\n=== VALIDACIÓN COMPLETADA: TODOS LOS REQUERIMIENTOS CUMPLIDOS CON ÉXITO ===");
     }

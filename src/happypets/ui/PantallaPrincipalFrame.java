@@ -67,6 +67,10 @@ import happypets.modulos.modulo4.VistaHospitalizacionPanel;
 import happypets.modulos.modulo4.VistaHotelGuarderiaPanel;
 import happypets.modulos.modulo4.VistaAdopcionesPanel;
 import happypets.modulos.modulo5.Modulo5InventarioFarmaciaFrame;
+import happypets.modulos.modulo5.VistaCatalogoProductosPanel;
+import happypets.modulos.modulo5.VistaControlStockLotesPanel;
+import happypets.modulos.modulo5.VistaProveedoresOrdenesPanel;
+import happypets.modulos.modulo5.VistaAjustesMermasPanel;
 import happypets.modulos.modulo6.Modulo6FinanzasVentasFrame;
 import happypets.modulos.modulo7.Modulo7PersonalRRHHFrame;
 import happypets.modulos.modulo8.Modulo8ReportesBIFrame;
@@ -120,6 +124,12 @@ public class PantallaPrincipalFrame extends JFrame {
     private VistaHospitalizacionPanel vistaHospitalizacion;
     private VistaHotelGuarderiaPanel vistaHotel;
     private VistaAdopcionesPanel vistaAdopciones;
+
+    // Vistas integradas del Módulo 5 en CardLayout
+    private VistaCatalogoProductosPanel vistaCatalogo;
+    private VistaControlStockLotesPanel vistaStockLotes;
+    private VistaProveedoresOrdenesPanel vistaProveedoresOrdenes;
+    private VistaAjustesMermasPanel vistaAjustesMermas;
 
     private JScrollPane panelDashboard;
     private JButton btnDashboard;
@@ -544,6 +554,17 @@ public class PantallaPrincipalFrame extends JFrame {
         panelContenedorCards.add(vistaHospitalizacion, "MODULO4_HOSPITALIZACION");
         panelContenedorCards.add(vistaHotel, "MODULO4_HOTEL");
         panelContenedorCards.add(vistaAdopciones, "MODULO4_ADOPCIONES");
+
+        // Vistas del Módulo 5
+        vistaCatalogo = new VistaCatalogoProductosPanel();
+        vistaStockLotes = new VistaControlStockLotesPanel();
+        vistaProveedoresOrdenes = new VistaProveedoresOrdenesPanel();
+        vistaAjustesMermas = new VistaAjustesMermasPanel();
+
+        panelContenedorCards.add(vistaCatalogo, "MODULO5_CATALOGO");
+        panelContenedorCards.add(vistaStockLotes, "MODULO5_STOCK_LOTES");
+        panelContenedorCards.add(vistaProveedoresOrdenes, "MODULO5_PROVEEDORES");
+        panelContenedorCards.add(vistaAjustesMermas, "MODULO5_AJUSTES");
 
         return panelContenedorCards;
     }
@@ -1293,10 +1314,26 @@ public class PantallaPrincipalFrame extends JFrame {
                         new String[]{"Catálogo de Productos y Fármacos", "Control de Stock y Lotes", "Proveedores y Órdenes de Compra", "Ajustes y Mermas"},
                         Iconos.crearIconoPildora(16, new Color(34, 197, 94)),
                         new Runnable[]{
-                                () -> new Modulo5InventarioFarmaciaFrame().setVisible(true),
-                                () -> new Modulo5InventarioFarmaciaFrame().setVisible(true),
-                                () -> new Modulo5InventarioFarmaciaFrame().setVisible(true),
-                                () -> new Modulo5InventarioFarmaciaFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO5_CATALOGO");
+                                    vistaCatalogo.recargarDatos();
+                                    actualizarVistaPrincipal("Catálogo de Productos y Fármacos", "Módulo 5.1 · Registro maestro de medicamentos, biológicos, alimentos clínicos, insumos y control de precios");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO5_STOCK_LOTES");
+                                    vistaStockLotes.recargarDatos();
+                                    actualizarVistaPrincipal("Control de Stock y Lotes (Kardex)", "Módulo 5.2 · Trazabilidad de lotes clínicos, control FEFO de caducidad, movimientos y reposición");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO5_PROVEEDORES");
+                                    vistaProveedoresOrdenes.recargarDatos();
+                                    actualizarVistaPrincipal("Proveedores y Órdenes de Compra", "Módulo 5.3 · Homologación de laboratorios, compras valorizadas, control de créditos y recepción de stock");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO5_AJUSTES");
+                                    vistaAjustesMermas.recargarDatos();
+                                    actualizarVistaPrincipal("Ajustes de Inventario y Mermas", "Módulo 5.4 · Registro de bajas por caducidad, roturas, descarte biológico y regularizaciones");
+                                }
                         }
                 ),
                 new DefinicionModulo(

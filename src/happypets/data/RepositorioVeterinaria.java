@@ -47,6 +47,13 @@ public class RepositorioVeterinaria {
     private final List<happypets.model.ReservaHospedaje> reservasHospedaje = new ArrayList<>();
     private final List<happypets.model.MascotaAdopcion> mascotasAdopcion = new ArrayList<>();
 
+    // Módulo 5: Inventario y Farmacia
+    private final List<happypets.model.ProductoFarmacia> productosFarmacia = new ArrayList<>();
+    private final List<happypets.model.LoteMovimientoStock> movimientosStock = new ArrayList<>();
+    private final List<happypets.model.ProveedorFarmacia> proveedoresFarmacia = new ArrayList<>();
+    private final List<happypets.model.OrdenCompra> ordenesCompra = new ArrayList<>();
+    private final List<happypets.model.AjusteMerma> ajustesMermas = new ArrayList<>();
+
     private RepositorioVeterinaria() {
         inicializarDatos();
     }
@@ -597,6 +604,142 @@ public class RepositorioVeterinaria {
                 true, true, true, "Andrea Corrales", "47281902", "+51 993 445 120",
                 "Calle Las Camelias 412, Surco", LocalDate.now().minusMonths(1), 50.0, "Adoptado con Éxito"
         ));
+
+        // 12. Módulo 5.1: Catálogo de Productos y Fármacos
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-001", "NexGard Spectra (7.5 a 15 kg)", "Antiparasitario",
+                "Afoxolaner 37.5 mg + Milbemicina 7.5 mg", "Caja x 3 comp. masticables",
+                "Canino", false, false, 52.0, 85.0, 24, 10,
+                "LOT-2024-88A", LocalDate.now().plusMonths(18),
+                "Boehringer Ingelheim Animal Health Perú", "Disponible"
+        ));
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-002", "Amoxicilina + Clavulánico Vet 500 mg", "Antibiótico",
+                "Amoxicilina 400 mg + Ác. Clavulánico 100 mg", "Caja x 20 comprimidos",
+                "Mixto Canino/Felino", true, false, 28.5, 45.0, 18, 8,
+                "LOT-2024-12C", LocalDate.now().plusMonths(14),
+                "Laboratorios Zoetis Perú S.A.C.", "Disponible"
+        ));
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-003", "Meloxicam Gotas 1.5 mg/ml", "Analgésico / AINE",
+                "Meloxicam 1.5 mg/ml", "Frasco gotero 10 ml",
+                "Mixto Canino/Felino", true, false, 22.0, 38.0, 6, 8,
+                "LOT-2023-99F", LocalDate.now().plusMonths(2),
+                "Laboratorios Drag Pharma", "Bajo Stock"
+        ));
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-004", "Vacuna Séxtuple Canina Nobivac DHPPi+L", "Vacuna / Biológico",
+                "Virus vivo modificado + Bacterina Leptospira", "Vial x 1 dosis + diluyente",
+                "Canino", true, true, 35.0, 60.0, 30, 15,
+                "LOT-2024-05V", LocalDate.now().plusMonths(10),
+                "MSD Salud Animal Perú", "Disponible"
+        ));
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-005", "Royal Canin Gastrointestinal Dog", "Alimento Clínico",
+                "Fórmula alta digestibilidad y electrolitos", "Bolsa 2 kg",
+                "Canino", false, false, 65.0, 98.0, 12, 5,
+                "RC-2024-41", LocalDate.now().plusMonths(11),
+                "Distribuidora Veterinaria Santa Anita S.A.C.", "Disponible"
+        ));
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-006", "Ketamina 10% Inyectable Vet", "Anestésico / Controlado",
+                "Ketamina Clorhidrato 100 mg/ml", "Frasco ampolla 50 ml",
+                "Mixto Canino/Felino", true, false, 75.0, 120.0, 4, 3,
+                "LOT-2024-K2", LocalDate.now().plusMonths(16),
+                "Laboratorios Agrovet Market", "Disponible"
+        ));
+        productosFarmacia.add(new happypets.model.ProductoFarmacia(
+                "PROD-007", "Cloruro de Sodio 0.9% 500 ml", "Material Quirúrgico / Insumo",
+                "Solución Salina Fisiológica Estéril", "Frasco infusión 500 ml",
+                "Mixto Canino/Felino", false, false, 6.5, 15.0, 40, 15,
+                "LOT-2024-CL", LocalDate.now().plusMonths(24),
+                "Laboratorios Medifarma", "Disponible"
+        ));
+
+        // 13. Módulo 5.2: Control de Stock y Lotes
+        movimientosStock.add(new happypets.model.LoteMovimientoStock(
+                "MOV-2024-01", "PROD-001", "NexGard Spectra (7.5 a 15 kg)", "LOT-2024-88A",
+                "Ingreso por Compra (OC-2024-01)", 20, 4, 24,
+                LocalDate.now().minusDays(3), LocalDate.now().plusMonths(18),
+                "Dra. Elena Ruiz (Regente Farmacéutico)", "Recepción de pedido Zoetis conforme a factura."
+        ));
+        movimientosStock.add(new happypets.model.LoteMovimientoStock(
+                "MOV-2024-02", "PROD-002", "Amoxicilina + Clavulánico Vet 500 mg", "LOT-2024-12C",
+                "Salida por Consulta (HC-002)", 2, 20, 18,
+                LocalDate.now().minusDays(1), LocalDate.now().plusMonths(14),
+                "Dr. Roberto Mendoza", "Dispensación para tratamiento de Rocky Morales."
+        ));
+        movimientosStock.add(new happypets.model.LoteMovimientoStock(
+                "MOV-2024-03", "PROD-003", "Meloxicam Gotas 1.5 mg/ml", "LOT-2023-99F",
+                "Salida por Cirugía (QX-2024-02)", 1, 7, 6,
+                LocalDate.now(), LocalDate.now().plusMonths(2),
+                "Dra. Ana Silva", "Analgesia postoperatoria para Toby Morales."
+        ));
+
+        // 14. Módulo 5.3: Proveedores y Órdenes de Compra
+        proveedoresFarmacia.add(new happypets.model.ProveedorFarmacia(
+                "20123456789", "Laboratorios Zoetis Perú S.A.C.", "Zoetis Animal Health",
+                "+51 01 614 7800", "pedidos.peru@zoetis.com",
+                "Av. República de Panamá 3591, San Isidro", "Ing. Roberto Calderón (+51 977 441 230)",
+                "Crédito 30 días", "Homologado / Activo"
+        ));
+        proveedoresFarmacia.add(new happypets.model.ProveedorFarmacia(
+                "20501234567", "Boehringer Ingelheim Animal Health Perú", "Boehringer Ingelheim",
+                "+51 01 411 5000", "veterinaria@boehringer.com",
+                "Av. Canaval y Moreyra 480, San Isidro", "Lic. Vanessa Prado (+51 998 120 445)",
+                "Crédito 30 días", "Homologado / Activo"
+        ));
+        proveedoresFarmacia.add(new happypets.model.ProveedorFarmacia(
+                "20345678901", "Distribuidora Veterinaria Santa Anita S.A.C.", "Disvet Santa Anita",
+                "+51 01 362 8900", "ventas@disvetsantaanita.com",
+                "Av. Nicolás Ayllón 2450, Ate", "Sr. Carlos Fuentes (+51 984 551 099)",
+                "Contado Factura", "Homologado / Activo"
+        ));
+        proveedoresFarmacia.add(new happypets.model.ProveedorFarmacia(
+                "20456789012", "MSD Salud Animal Perú", "MSD Animal Health",
+                "+51 01 411 9000", "contacto@msd-animal-health.pe",
+                "Av. El Derby 055, Surco", "Dr. Fernando Rivas (+51 991 332 556)",
+                "Crédito 15 días", "Homologado / Activo"
+        ));
+
+        ordenesCompra.add(new happypets.model.OrdenCompra(
+                "OC-2024-01", "20501234567", "Boehringer Ingelheim Animal Health Perú",
+                LocalDate.now().minusDays(5), LocalDate.now().minusDays(3),
+                "20x NexGard Spectra (7.5-15kg)", 1040.0, 187.2, 1227.2,
+                "Recibida en Almacén", "Dra. Elena Ruiz"
+        ));
+        ordenesCompra.add(new happypets.model.OrdenCompra(
+                "OC-2024-02", "20123456789", "Laboratorios Zoetis Perú S.A.C.",
+                LocalDate.now().minusDays(2), LocalDate.now().plusDays(3),
+                "30x Amoxicilina Vet, 15x Convenia 10ml", 1850.0, 333.0, 2183.0,
+                "Enviada a Proveedor", "Administración Happy Pets"
+        ));
+        ordenesCompra.add(new happypets.model.OrdenCompra(
+                "OC-2024-03", "20456789012", "MSD Salud Animal Perú",
+                LocalDate.now(), LocalDate.now().plusDays(4),
+                "50x Vacuna Séxtuple Nobivac, 30x Nobivac Rabies", 2150.0, 387.0, 2537.0,
+                "Borrador", "Dra. Elena Ruiz"
+        ));
+
+        // 15. Módulo 5.4: Ajustes y Mermas
+        ajustesMermas.add(new happypets.model.AjusteMerma(
+                "AJU-2024-01", LocalDate.now().minusDays(4), "PROD-003",
+                "Meloxicam Gotas 1.5 mg/ml", "LOT-2023-80A", "Vencimiento de Lote",
+                2, 22.0, 44.0, "Lote caducado retirado de estante de farmacia para disposición final.",
+                "Dr. Carlos Vargas (Director Médico)", "Aprobado y Descargado"
+        ));
+        ajustesMermas.add(new happypets.model.AjusteMerma(
+                "AJU-2024-02", LocalDate.now().minusDays(2), "PROD-007",
+                "Cloruro de Sodio 0.9% 500 ml", "LOT-2024-CL", "Merma por Rotura / Deterioro",
+                1, 6.5, 6.5, "Frasco fisurado por caída accidental durante recepción de almacén.",
+                "Dra. Elena Ruiz", "Aprobado y Descargado"
+        ));
+        ajustesMermas.add(new happypets.model.AjusteMerma(
+                "AJU-2024-03", LocalDate.now().minusDays(1), "PROD-001",
+                "NexGard Spectra (7.5 a 15 kg)", "LOT-2024-88A", "Ajuste Físico Positivo",
+                1, 52.0, 52.0, "Sobrante de conteo físico mensual verificado contra kardex.",
+                "Administración Happy Pets", "Aprobado y Descargado"
+        ));
     }
 
     public List<Cliente> getClientes() {
@@ -1071,5 +1214,136 @@ public class RepositorioVeterinaria {
                 break;
             }
         }
+    }
+
+    // ==========================================
+    // MÉTODOS DEL MÓDULO 5: INVENTARIO Y FARMACIA
+    // ==========================================
+
+    // 1. Catálogo de Productos y Fármacos
+    public List<happypets.model.ProductoFarmacia> getProductosFarmacia() {
+        return new ArrayList<>(productosFarmacia);
+    }
+
+    public void guardarProductoFarmacia(happypets.model.ProductoFarmacia p) {
+        if (p == null) return;
+        boolean existe = false;
+        for (int i = 0; i < productosFarmacia.size(); i++) {
+            if (productosFarmacia.get(i).getCodigo().equalsIgnoreCase(p.getCodigo())) {
+                productosFarmacia.set(i, p);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (p.getCodigo() == null || p.getCodigo().isEmpty()) {
+                p.setCodigo("PROD-" + String.format("%03d", productosFarmacia.size() + 1));
+            }
+            productosFarmacia.add(0, p);
+        }
+    }
+
+    public void eliminarProductoFarmacia(String codigo) {
+        productosFarmacia.removeIf(p -> p.getCodigo().equalsIgnoreCase(codigo));
+    }
+
+    public void actualizarStockProducto(String codigo, int deltaCantidad) {
+        for (happypets.model.ProductoFarmacia p : productosFarmacia) {
+            if (p.getCodigo().equalsIgnoreCase(codigo)) {
+                int nuevo = p.getStockActual() + deltaCantidad;
+                if (nuevo < 0) nuevo = 0;
+                p.setStockActual(nuevo);
+                break;
+            }
+        }
+    }
+
+    // 2. Control de Stock y Lotes (Movimientos)
+    public List<happypets.model.LoteMovimientoStock> getMovimientosStock() {
+        return new ArrayList<>(movimientosStock);
+    }
+
+    public void registrarMovimientoStock(happypets.model.LoteMovimientoStock m) {
+        if (m == null) return;
+        if (m.getIdMovimiento() == null || m.getIdMovimiento().isEmpty()) {
+            m.setIdMovimiento("MOV-2024-" + String.format("%02d", movimientosStock.size() + 1));
+        }
+        movimientosStock.add(0, m);
+
+        // Actualizar stock del producto vinculado
+        int delta = m.getTipoMovimiento().toLowerCase().contains("ingreso") ? m.getCantidad() : -m.getCantidad();
+        actualizarStockProducto(m.getCodigoProducto(), delta);
+    }
+
+    // 3. Proveedores y Órdenes de Compra
+    public List<happypets.model.ProveedorFarmacia> getProveedoresFarmacia() {
+        return new ArrayList<>(proveedoresFarmacia);
+    }
+
+    public void guardarProveedorFarmacia(happypets.model.ProveedorFarmacia pr) {
+        if (pr == null) return;
+        boolean existe = false;
+        for (int i = 0; i < proveedoresFarmacia.size(); i++) {
+            if (proveedoresFarmacia.get(i).getRuc().equalsIgnoreCase(pr.getRuc())) {
+                proveedoresFarmacia.set(i, pr);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            proveedoresFarmacia.add(0, pr);
+        }
+    }
+
+    public void eliminarProveedorFarmacia(String ruc) {
+        proveedoresFarmacia.removeIf(pr -> pr.getRuc().equalsIgnoreCase(ruc));
+    }
+
+    public List<happypets.model.OrdenCompra> getOrdenesCompra() {
+        return new ArrayList<>(ordenesCompra);
+    }
+
+    public void guardarOrdenCompra(happypets.model.OrdenCompra oc) {
+        if (oc == null) return;
+        boolean existe = false;
+        for (int i = 0; i < ordenesCompra.size(); i++) {
+            if (ordenesCompra.get(i).getIdOrden().equalsIgnoreCase(oc.getIdOrden())) {
+                ordenesCompra.set(i, oc);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (oc.getIdOrden() == null || oc.getIdOrden().isEmpty()) {
+                oc.setIdOrden("OC-2024-" + String.format("%02d", ordenesCompra.size() + 1));
+            }
+            ordenesCompra.add(0, oc);
+        }
+    }
+
+    public void actualizarEstadoOrdenCompra(String idOrden, String nuevoEstado) {
+        for (happypets.model.OrdenCompra oc : ordenesCompra) {
+            if (oc.getIdOrden().equalsIgnoreCase(idOrden)) {
+                oc.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    // 4. Ajustes y Mermas
+    public List<happypets.model.AjusteMerma> getAjustesMermas() {
+        return new ArrayList<>(ajustesMermas);
+    }
+
+    public void guardarAjusteMerma(happypets.model.AjusteMerma a) {
+        if (a == null) return;
+        if (a.getIdAjuste() == null || a.getIdAjuste().isEmpty()) {
+            a.setIdAjuste("AJU-2024-" + String.format("%02d", ajustesMermas.size() + 1));
+        }
+        ajustesMermas.add(0, a);
+
+        // Descontar o regularizar stock físico
+        int delta = a.getTipo().contains("Positivo") ? a.getCantidad() : -a.getCantidad();
+        actualizarStockProducto(a.getCodigoProducto(), delta);
     }
 }
