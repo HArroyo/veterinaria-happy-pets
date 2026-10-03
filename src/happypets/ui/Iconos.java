@@ -745,6 +745,110 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Jeringa médica para Vacunación y Desparasitación.
+     */
+    public static Icon crearIconoJeringa(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cuerpo cilíndrico diagonal de la jeringa
+        int[] px = {(int) (s * 0.35), (int) (s * 0.65), (int) (s * 0.50), (int) (s * 0.20)};
+        int[] py = {(int) (s * 0.20), (int) (s * 0.50), (int) (s * 0.65), (int) (s * 0.35)};
+        g.drawPolygon(px, py, 4);
+
+        // Aguja saliente abajo a la izquierda
+        g.drawLine((int) (s * 0.20), (int) (s * 0.65), (int) (s * 0.08), (int) (s * 0.88));
+
+        // Émbolo / pulsador arriba a la derecha
+        g.drawLine((int) (s * 0.65), (int) (s * 0.20), (int) (s * 0.82), (int) (s * 0.08));
+        g.drawLine((int) (s * 0.74), (int) (s * 0.05), (int) (s * 0.90), (int) (s * 0.21));
+
+        // Marcas de medición
+        g.drawLine((int) (s * 0.34), (int) (s * 0.36), (int) (s * 0.40), (int) (s * 0.42));
+        g.drawLine((int) (s * 0.42), (int) (s * 0.28), (int) (s * 0.48), (int) (s * 0.34));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Bisturí quirúrgico para Cirugías y Quirófano.
+     */
+    public static Icon crearIconoBisturi(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Mango estilizado
+        g.drawLine((int) (s * 0.75), (int) (s * 0.15), (int) (s * 0.40), (int) (s * 0.55));
+
+        // Hoja afilada curva del bisturí
+        int[] bx = {(int) (s * 0.40), (int) (s * 0.18), (int) (s * 0.25), (int) (s * 0.44)};
+        int[] by = {(int) (s * 0.55), (int) (s * 0.82), (int) (s * 0.86), (int) (s * 0.60)};
+        g.fillPolygon(bx, by, 4);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Microscopio / Tubo para Laboratorio Clínico.
+     */
+    public static Icon crearIconoMicroscopio(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Base plana
+        g.drawLine((int) (s * 0.20), (int) (s * 0.86), (int) (s * 0.80), (int) (s * 0.86));
+        // Brazo curvado
+        g.drawArc((int) (s * 0.35), (int) (s * 0.35), (int) (s * 0.45), (int) (s * 0.45), 270, 180);
+        // Tubo ocular inclinado
+        g.drawLine((int) (s * 0.42), (int) (s * 0.18), (int) (s * 0.30), (int) (s * 0.45));
+        // Platina portaobjetos
+        g.drawLine((int) (s * 0.22), (int) (s * 0.60), (int) (s * 0.50), (int) (s * 0.60));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Placa de Rayos X / Imagen Diagnóstica.
+     */
+    public static Icon crearIconoRx(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Marco de la placa radiográfica
+        g.drawRoundRect((int) (s * 0.15), (int) (s * 0.15), (int) (s * 0.70), (int) (s * 0.70), (int) (s * 0.15), (int) (s * 0.15));
+
+        // Letras 'R' y 'X' dentro de la placa
+        g.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, (int) (s * 0.38)));
+        java.awt.FontMetrics fm = g.getFontMetrics();
+        String txt = "RX";
+        int tx = (int) ((s - fm.stringWidth(txt)) / 2.0);
+        int ty = (int) ((s + fm.getAscent() - fm.getDescent()) / 2.0);
+        g.drawString(txt, tx, ty);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }

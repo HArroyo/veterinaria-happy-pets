@@ -57,6 +57,10 @@ import happypets.modulos.modulo2.VistaCalendarioGlobalPanel;
 import happypets.modulos.modulo2.VistaRecordatoriosPanel;
 import happypets.modulos.modulo2.VistaSalaEsperaTriajePanel;
 import happypets.modulos.modulo3.Modulo3ServiciosMedicosFrame;
+import happypets.modulos.modulo3.VistaConsultasMedicasPanel;
+import happypets.modulos.modulo3.VistaVacunacionDesparasitacionPanel;
+import happypets.modulos.modulo3.VistaCirugiasQuirofanoPanel;
+import happypets.modulos.modulo3.VistaLaboratorioImagenesPanel;
 import happypets.modulos.modulo4.Modulo4EsteticosHospedajeFrame;
 import happypets.modulos.modulo5.Modulo5InventarioFarmaciaFrame;
 import happypets.modulos.modulo6.Modulo6FinanzasVentasFrame;
@@ -100,6 +104,12 @@ public class PantallaPrincipalFrame extends JFrame {
     private VistaCalendarioGlobalPanel vistaCalendario;
     private VistaRecordatoriosPanel vistaRecordatorios;
     private VistaSalaEsperaTriajePanel vistaSalaEspera;
+
+    // Vistas integradas del Módulo 3 en CardLayout
+    private VistaConsultasMedicasPanel vistaConsultasMedicas;
+    private VistaVacunacionDesparasitacionPanel vistaVacunacion;
+    private VistaCirugiasQuirofanoPanel vistaCirugias;
+    private VistaLaboratorioImagenesPanel vistaLaboratorio;
 
     private JScrollPane panelDashboard;
     private JButton btnDashboard;
@@ -502,6 +512,17 @@ public class PantallaPrincipalFrame extends JFrame {
         panelContenedorCards.add(vistaCalendario, "MODULO2_CALENDARIO");
         panelContenedorCards.add(vistaRecordatorios, "MODULO2_RECORDATORIOS");
         panelContenedorCards.add(vistaSalaEspera, "MODULO2_TRIAJE");
+
+        // Vistas del Módulo 3
+        vistaConsultasMedicas = new VistaConsultasMedicasPanel();
+        vistaVacunacion = new VistaVacunacionDesparasitacionPanel();
+        vistaCirugias = new VistaCirugiasQuirofanoPanel();
+        vistaLaboratorio = new VistaLaboratorioImagenesPanel();
+
+        panelContenedorCards.add(vistaConsultasMedicas, "MODULO3_CONSULTAS");
+        panelContenedorCards.add(vistaVacunacion, "MODULO3_VACUNACION");
+        panelContenedorCards.add(vistaCirugias, "MODULO3_CIRUGIAS");
+        panelContenedorCards.add(vistaLaboratorio, "MODULO3_LABORATORIO");
 
         return panelContenedorCards;
     }
@@ -1197,10 +1218,26 @@ public class PantallaPrincipalFrame extends JFrame {
                         new String[]{"Consultas Médicas", "Vacunación y Desparasitación", "Cirugías y Quirófano", "Laboratorio e Imágenes"},
                         Iconos.crearIconoEstetoscopio(16, new Color(20, 184, 166)),
                         new Runnable[]{
-                                () -> new Modulo3ServiciosMedicosFrame().setVisible(true),
-                                () -> new Modulo3ServiciosMedicosFrame().setVisible(true),
-                                () -> new Modulo3ServiciosMedicosFrame().setVisible(true),
-                                () -> new Modulo3ServiciosMedicosFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO3_CONSULTAS");
+                                    vistaConsultasMedicas.recargarDatos();
+                                    actualizarVistaPrincipal("Consultas Médicas y Atenciones Veterinarias", "Módulo 3.1 · Registro clínico, exploración física, constantes, diagnóstico y prescripción");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO3_VACUNACION");
+                                    vistaVacunacion.recargarDatos();
+                                    actualizarVistaPrincipal("Vacunación y Desparasitación Preventiva", "Módulo 3.2 · Registro de biológicos, control de lotes, antiparasitarios y fechas de refuerzo");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO3_CIRUGIAS");
+                                    vistaCirugias.recargarDatos();
+                                    actualizarVistaPrincipal("Cirugías y Control de Quirófano", "Módulo 3.3 · Programación quirúrgica, protocolo intraoperatorio y seguimiento postoperatorio");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO3_LABORATORIO");
+                                    vistaLaboratorio.recargarDatos();
+                                    actualizarVistaPrincipal("Laboratorio Clínico e Imágenes Diagnósticas", "Módulo 3.4 · Órdenes diagnósticas, procesamiento de muestras, informes radiológicos y ecografías");
+                                }
                         }
                 ),
                 new DefinicionModulo(

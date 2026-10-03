@@ -72,8 +72,26 @@ public class VerificadorModulos {
         System.out.println(" -> Pacientes en sala de espera/triaje: " + pacientesTriaje.size() + " (Esperado >= 3)");
         assert pacientesTriaje.size() >= 3 : "Deben existir pacientes en triaje.";
 
-        // 6. Instanciar UI sin errores
-        System.out.println("\n[6] Instanciando frames visuales Swing y autenticación...");
+        // 6. Validar Entidades del Módulo 3 (Servicios Médicos y Quirúrgicos)
+        System.out.println("\n[6] Validando Entidades del Módulo 3 (Servicios Médicos)...");
+        List<happypets.model.AtencionMedica> atenciones = repo.getAtencionesMedicas();
+        System.out.println(" -> Consultas médicas registradas: " + atenciones.size() + " (Esperado >= 3)");
+        assert atenciones.size() >= 3 : "Deben existir consultas médicas.";
+
+        List<happypets.model.RegistroInmunizacion> inms = repo.getInmunizaciones();
+        System.out.println(" -> Vacunaciones y desparasitaciones registradas: " + inms.size() + " (Esperado >= 6)");
+        assert inms.size() >= 6 : "Deben existir inmunizaciones.";
+
+        List<happypets.model.RegistroCirugia> cirugias = repo.getCirugias();
+        System.out.println(" -> Cirugías en control quirúrgico: " + cirugias.size() + " (Esperado >= 3)");
+        assert cirugias.size() >= 3 : "Deben existir cirugías.";
+
+        List<happypets.model.OrdenLaboratorio> ordenesLab = repo.getOrdenesLaboratorio();
+        System.out.println(" -> Órdenes de laboratorio e imágenes: " + ordenesLab.size() + " (Esperado >= 4)");
+        assert ordenesLab.size() >= 4 : "Deben existir órdenes diagnósticas.";
+
+        // 7. Instanciar UI sin errores
+        System.out.println("\n[7] Instanciando frames visuales Swing y autenticación...");
         happypets.auth.ServicioAutenticacion auth = happypets.auth.ServicioAutenticacion.getInstancia();
         assert auth.autenticar("admin", "admin").isPresent() : "Credenciales admin / admin deben ser válidas.";
         System.out.println(" -> Autenticación admin / admin validada correctamente.");
@@ -99,6 +117,9 @@ public class VerificadorModulos {
         happypets.modulos.modulo2.Modulo2AgendaCitasFrame frameMod2 = new happypets.modulos.modulo2.Modulo2AgendaCitasFrame();
         System.out.println(" -> Modulo2AgendaCitasFrame instanciada correctamente.");
 
+        happypets.modulos.modulo3.Modulo3ServiciosMedicosFrame frameMod3 = new happypets.modulos.modulo3.Modulo3ServiciosMedicosFrame();
+        System.out.println(" -> Modulo3ServiciosMedicosFrame instanciada correctamente.");
+
         frameLogin.dispose();
         framePrincipal.dispose();
         app.dispose();
@@ -106,6 +127,7 @@ public class VerificadorModulos {
         frameHistorial.dispose();
         frameDocs.dispose();
         frameMod2.dispose();
+        frameMod3.dispose();
 
         System.out.println("\n=== VALIDACIÓN COMPLETADA: TODOS LOS REQUERIMIENTOS CUMPLIDOS CON ÉXITO ===");
     }

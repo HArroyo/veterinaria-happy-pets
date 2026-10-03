@@ -8,18 +8,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import happypets.model.AtencionMedica;
 import happypets.model.Certificado;
 import happypets.model.Cita;
 import happypets.model.Cliente;
 import happypets.model.ConsultaClinica;
 import happypets.model.DocumentoMascota;
 import happypets.model.Mascota;
+import happypets.model.OrdenLaboratorio;
 import happypets.model.PacienteTriaje;
 import happypets.model.RecordatorioCita;
+import happypets.model.RegistroCirugia;
+import happypets.model.RegistroInmunizacion;
 
 /**
  * Almacén en memoria centralizado para clientes, mascotas, consultas, documentos,
- * citas, recordatorios y triaje de sala de espera.
+ * citas, recordatorios, triaje, atenciones médicas, inmunizaciones, cirugías y laboratorio.
  */
 public class RepositorioVeterinaria {
     private static RepositorioVeterinaria instancia;
@@ -30,6 +34,12 @@ public class RepositorioVeterinaria {
     private final List<Cita> citas = new ArrayList<>();
     private final List<RecordatorioCita> recordatorios = new ArrayList<>();
     private final List<PacienteTriaje> pacientesTriaje = new ArrayList<>();
+
+    // Módulo 3: Servicios Médicos y Quirúrgicos
+    private final List<AtencionMedica> atencionesMedicas = new ArrayList<>();
+    private final List<RegistroInmunizacion> inmunizaciones = new ArrayList<>();
+    private final List<RegistroCirugia> cirugias = new ArrayList<>();
+    private final List<OrdenLaboratorio> ordenesLaboratorio = new ArrayList<>();
 
     private RepositorioVeterinaria() {
         inicializarDatos();
@@ -268,6 +278,198 @@ public class RepositorioVeterinaria {
                 42.1, 37.2, 165, "ROJO (Emergencia crítica)", "Intoxicación por sospecha de ingesta accidental de veneno",
                 "Tópico de Emergencias", "En Consulta"
         ));
+
+        // 4. Módulo 3.1: Consultas Médicas
+        atencionesMedicas.add(new AtencionMedica(
+                "CM-2024-001", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now(), LocalTime.of(10, 15), "Dra. Camila Morales",
+                "Decaimiento general, inapetencia y vómito recurrente desde hace 24 horas",
+                28.4, 39.2, 110,
+                "Paciente letárgico, mucosas ligeramente pálidas, dolor a la palpación abdominal media. Sonidos pulmonares limpios. Deshidratación estimada en 5%.",
+                "Gastroenteritis aguda / Sospecha de cuerpo extraño",
+                "Gastroenteritis aguda de origen dietario",
+                "Fluidoterapia con Ringer Lactato IV 500ml, Maropitant 1mg/kg SC, Ranitidina 2mg/kg IV lento.",
+                "1. Cerenia (Maropitant) 24mg comp: 1/2 comp c/24h x 3 días\n2. Sucralfato susp. 1g/5ml: 3ml c/8h antes de alimento x 5 días\n3. Probiótico Canino: 1 sobre c/24h x 7 días",
+                "Ayuno estricto de sólidos por 12 horas. Ofrecer agua en pequeños sorbos. Dieta blanda (pollo hervido y arroz blanco en 4 tomas al día). Reposo en ambiente templado.",
+                "Control presencial obligatorio en 48 horas (revisión de hidratación y evolución).",
+                "Completada", 120.0
+        ));
+        atencionesMedicas.add(new AtencionMedica(
+                "CM-2024-002", "VET-0144", "Luna", "Felino · Siamés",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now().minusDays(3), LocalTime.of(16, 30), "Dr. Roberto Mendoza",
+                "Revisión médica y control previo a vacunación anual",
+                4.2, 38.5, 145,
+                "Paciente activa, atenta al entorno. Mucosas rosadas normocoloreadas. Ganglios linfáticos normales. Frecuencia respiratoria adecuada.",
+                "Paciente clínicamente sano",
+                "Paciente clínicamente sano / Apto para inmunización",
+                "Examen físico completo sin hallazgos patológicos.",
+                "No requiere farmacoterapia en este momento.",
+                "Mantener esquema de nutrición felina balanceada y agua fresca disponible.",
+                "Cita programada para refuerzo de desparasitación en 3 meses.",
+                "Completada", 75.0
+        ));
+        atencionesMedicas.add(new AtencionMedica(
+                "CM-2024-003", "VET-0238", "Toby", "Canino · Pug",
+                "45892134", "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now().minusDays(1), LocalTime.of(11, 0), "Dra. Ana Silva",
+                "Halitosis severa, dificultad para masticar alimento seco",
+                8.5, 38.7, 120,
+                "Presencia de sarro dental moderado a severo en premolares y molares superiores. Gingivitis marginal grado II con sangrado leve al tacto.",
+                "Enfermedad periodontal grado II",
+                "Periodontitis canina / Indicación de destartraje",
+                "Profilaxis dental por ultrasonido bajo sedación y extracción de piezas comprometidas.",
+                "1. Clindamicina 75mg: 1 cápsula c/12h x 7 días iniciando previo a cirugía\n2. Meloxicam 0.5mg: 1 dosis diaria x 3 días postoperatorio",
+                "Alimentación exclusivamente húmeda por 4 días postquirúrgicos. Higiene bucal con enjuague de clorhexidina al 0.12%.",
+                "Procedimiento quirúrgico programado en Quirófano 2.",
+                "Derivada a Quirófano", 90.0
+        ));
+
+        // 5. Módulo 3.2: Vacunación y Desparasitación
+        inmunizaciones.add(new RegistroInmunizacion(
+                "VAC-2024-081", "Vacunación", "VET-0144", "Luna", "Felino · Siamés",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Triple Felina (Panleucopenia, Rinotraqueítis, Calicivirus)",
+                "Zoetis · Lote TF-2024-881", "1.0 ml Subcutánea",
+                LocalDate.now().minusDays(3), LocalDate.now().plusMonths(11),
+                LocalDate.now().plusYears(1), "Dr. Roberto Mendoza", 4.2,
+                "Buena tolerancia al biológico. Sin signos de anafilaxia o fiebre.", "Aplicada"
+        ));
+        inmunizaciones.add(new RegistroInmunizacion(
+                "VAC-2024-082", "Vacunación", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Séxtuple Canina DHPP+L (Distemper, Hepatitis, Parvovirus, Parainfluenza, Leptospirosis)",
+                "Boehringer Ingelheim · Lote SX-9012", "1.0 ml Subcutánea",
+                LocalDate.now().minusMonths(6), LocalDate.now().plusMonths(8),
+                LocalDate.now().plusMonths(6), "Dra. Camila Morales", 28.0,
+                "Refuerzo anual administrado conforme al calendario preventivo.", "Aplicada"
+        ));
+        inmunizaciones.add(new RegistroInmunizacion(
+                "VAC-2024-083", "Vacunación", "VET-0238", "Toby", "Canino · Pug",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Vacuna Antirrábica Rabisin", "Merial · Lote RB-4410", "1.0 ml Subcutánea",
+                LocalDate.now().minusMonths(11), LocalDate.now().plusMonths(5),
+                LocalDate.now().plusDays(15), "Dra. Ana Silva", 8.4,
+                "Próximo refuerzo obligatorio programado para este mes.", "Próxima"
+        ));
+        inmunizaciones.add(new RegistroInmunizacion(
+                "DES-2024-041", "Desparasitación Interna", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Total F Total Plus / Drontal Plus", "Bayer · Lote DP-119",
+                "3 tabletas orales (según 28.4 kg)",
+                LocalDate.now().minusMonths(2), LocalDate.now().plusMonths(18),
+                LocalDate.now().plusDays(25), "Dra. Camila Morales", 28.4,
+                "Control trimestral de nematodos y cestodos.", "Aplicada"
+        ));
+        inmunizaciones.add(new RegistroInmunizacion(
+                "DES-2024-042", "Desparasitación Externa", "VET-0144", "Luna", "Felino · Siamés",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Bravecto Plus Spot-on Felino (2.8 - 6.25 kg)", "MSD Salud Animal · Lote BV-774",
+                "1 pipeta tópica dorsal",
+                LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(14),
+                LocalDate.now().plusMonths(2), "Dr. Roberto Mendoza", 4.2,
+                "Protección extendida contra pulgas, garrapatas y ácaros por 12 semanas.", "Aplicada"
+        ));
+        inmunizaciones.add(new RegistroInmunizacion(
+                "DES-2024-043", "Desparasitación Externa", "VET-0238", "Toby", "Canino · Pug",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Simparica Trio 10-20kg", "Zoetis · Lote ST-303", "1 tableta masticable",
+                LocalDate.now().minusMonths(3), LocalDate.now().plusMonths(12),
+                LocalDate.now().plusDays(4), "Dra. Ana Silva", 8.5,
+                "Dosis vencida. Requiere renovación inmediata de protección.", "Pendiente"
+        ));
+
+        // 6. Módulo 3.3: Cirugías y Quirófano
+        cirugias.add(new RegistroCirugia(
+                "QX-2024-01", "VET-0238", "Toby", "Canino · Pug",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Profilaxis Dental por Ultrasonido + Extracción de 2 piezas (208 y 209)",
+                "Quirófano 2 (Procedimientos)", "Dra. Ana Silva", "Lic. Marta Ferrer (Anestesista)",
+                LocalDate.now(), LocalTime.of(10, 0), LocalTime.of(10, 15), LocalTime.of(11, 40),
+                "Inhalatoria Isoflurano + Inducción Propofol",
+                "Propofol 2mg/kg IV, Isoflurano 1.5%, Meloxicam 0.2mg/kg SC, Sutura absorbable 3-0",
+                "Procedimiento sin complicaciones. Extracción atraumática de premolares con periodontitis avanzada. Constantes estables durante todo el acto quirúrgico.",
+                2, "En recuperación anestésica",
+                "Reposo absoluto por 3 días. Limpieza de herida con clorhexidina diluida. Uso obligatorio de collar isabelino. Dieta húmeda blanda.",
+                LocalDate.now().plusDays(10), "En Recuperación"
+        ));
+        cirugias.add(new RegistroCirugia(
+                "QX-2024-02", "VET-0144", "Luna", "Felino · Siamés",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Ovariohisterectomía preventiva (Esterilización)",
+                "Quirófano 1 (Cirugía Mayor)", "Dr. Carlos Méndez", "Dra. Camila Morales",
+                LocalDate.now().minusDays(5), LocalTime.of(8, 30), LocalTime.of(8, 45), LocalTime.of(9, 50),
+                "Inhalatoria Isoflurano + Sedación Midazolam/Ketamina",
+                "Midazolam 0.2mg/kg, Ketamina 5mg/kg, Cefalexina 20mg/kg, Meloxicam 0.1mg/kg",
+                "Cirugía exitosa por línea media. Ligaduras hemostáticas seguras con PDS 3-0. Cierre dérmico intradérmico estético.",
+                1, "Alerta y estable",
+                "Collar isabelino permanente por 10 días. Curación con solución antiséptica 2 veces al día. Cefalexina 100mg c/12h x 7 días.",
+                LocalDate.now().plusDays(5), "Alta Quirúrgica"
+        ));
+        cirugias.add(new RegistroCirugia(
+                "QX-2024-03", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Excisión de Nódulo Cutáneo / Tumor subcutáneo en flanco izquierdo",
+                "Quirófano 1 (Cirugía Mayor)", "Dr. Carlos Méndez", "Lic. Marta Ferrer (Anestesista)",
+                LocalDate.now().plusDays(2), LocalTime.of(9, 0), null, null,
+                "Inhalatoria Isoflurano con intubación endotraqueal",
+                "Protocolo preanestésico con Acepromacina y Morfina. Biopsia programada para patología.",
+                "Programación electiva. Paciente con exámenes prequirúrgicos completos y aptos.",
+                0, "Pendiente de ingreso",
+                "Ayuno estricto de 12 horas previo al horario quirúrgico. Baño medicado el día anterior.",
+                LocalDate.now().plusDays(14), "Programada"
+        ));
+
+        // 7. Módulo 3.4: Laboratorio e Imágenes
+        ordenesLaboratorio.add(new OrdenLaboratorio(
+                "LAB-2024-01", "Laboratorio Clínico", "Hemograma Completo Automatizado",
+                "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now(), "Urgente", "Dra. Camila Morales",
+                "Decaimiento, vómitos recurrentes y fiebre. Descartar proceso infeccioso activo o pancreatitis.",
+                LocalDate.now(), "Lab. Veterinario Central - Lic. P. Torres",
+                "Leucocitos: 18.2 mil/uL (Ref: 6.0-17.0) [ELEVADO]\nHematocrito: 42% (Ref: 37-55%)\nPlaquetas: 245 mil/uL (Ref: 200-500 mil)\nNeutrófilos en banda: 4% (Ref: 0-3%)",
+                "Leucocitosis leve con desviación a la izquierda compatible con foco inflamatorio/infeccioso agudo gastrointestinal. Serie roja y plaquetaria dentro de los rangos fisiológicos.",
+                "Correlacionar con ecografía abdominal y bioquímica sanguínea (amilasa/lipasa). Iniciar antibioticoterapia y protector gástrico.",
+                "Completado"
+        ));
+        ordenesLaboratorio.add(new OrdenLaboratorio(
+                "IMG-2024-02", "Diagnóstico por Imágenes", "Radiografía de Tórax (Proyecciones LL y VD)",
+                "VET-0144", "Luna", "Felino · Siamés",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now().minusDays(2), "Normal", "Dr. Andrés Restrepo",
+                "Tos esporádica nocturna, descartar asma felina o bronquitis crónica.",
+                LocalDate.now().minusDays(2), "Dr. Andrés Restrepo (Especialista en Imagenología)",
+                "Silueta cardíaca conservada de tamaño normal (VHS: 7.4v). Patrón bronquial leve difuso en campos caudales. Sin evidencia de consolidación alveolar, neumotórax ni derrame pleural.",
+                "Estudio radiográfico torácico que evidencia bronquiopatía inflamatoria leve compatible con bronquitis alérgica felina incipiente.",
+                "Se sugiere prueba terapéutica broncodilatadora/antiinflamatoria y control radiológico evolutivo en 30 días si persisten síntomas.",
+                "Completado"
+        ));
+        ordenesLaboratorio.add(new OrdenLaboratorio(
+                "IMG-2024-03", "Diagnóstico por Imágenes", "Ecografía Abdominal Completa",
+                "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now(), "Urgente", "Dra. Camila Morales",
+                "Dolor a la palpación epigástrica y vómitos. Descartar cuerpo extraño en estómago o duodeno.",
+                LocalDate.now(), "Dr. Andrés Restrepo (Imagenología)",
+                "Estómago con moderado contenido líquido y gas; pared gástrica engrosada (4.8mm) con conservación de capas. Duodeno y yeyuno con peristaltismo activo sin evidencia de efecto masa intraluminal ni dilatación anómala. Hígado, bazo y riñones ecográficamente normales.",
+                "Gastroduodenitis aguda reactiva. Se descarta obstrucción mecánica por cuerpo extraño radiodenso o radiotransparente en el tracto superior.",
+                "Continuar con tratamiento médico conservador para gastroenteritis y monitorear tolerancia oral.",
+                "Completado"
+        ));
+        ordenesLaboratorio.add(new OrdenLaboratorio(
+                "LAB-2024-04", "Laboratorio Clínico", "Perfil Bioquímico Hepato-Renal + Glucosa",
+                "VET-0238", "Toby", "Canino · Pug",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now().minusDays(1), "Normal", "Dra. Ana Silva",
+                "Evaluación prequirúrgica obligatoria para profilaxis dental bajo anestesia general.",
+                LocalDate.now().minusDays(1), "Lab. Central Veterinario",
+                "ALT/GPT: 38 U/L (Ref: 10-100)\nFosfatasa Alcalina: 65 U/L (Ref: 23-212)\nCreatinina: 0.9 mg/dL (Ref: 0.5-1.5)\nUrea: 32 mg/dL (Ref: 15-40)\nGlucosa: 94 mg/dL (Ref: 70-115)",
+                "Función renal y hepática en rangos óptimos. Glucemia normal. Sin contraindicaciones metabólicas para sedación.",
+                "Apto para procedimiento quirúrgico odontológico con protocolo anestésico estándar.",
+                "Completado"
+        ));
     }
 
     public List<Cliente> getClientes() {
@@ -490,5 +692,121 @@ public class RepositorioVeterinaria {
 
     public void eliminarPacienteTriaje(String idTicket) {
         pacientesTriaje.removeIf(p -> p.getIdTicket().equalsIgnoreCase(idTicket));
+    }
+
+    // ==========================================
+    // MÉTODOS DEL MÓDULO 3: SERVICIOS MÉDICOS
+    // ==========================================
+
+    // 1. Consultas Médicas
+    public List<AtencionMedica> getAtencionesMedicas() {
+        return new ArrayList<>(atencionesMedicas);
+    }
+
+    public void guardarAtencionMedica(AtencionMedica am) {
+        if (am == null) return;
+        boolean existe = false;
+        for (int i = 0; i < atencionesMedicas.size(); i++) {
+            if (atencionesMedicas.get(i).getIdConsulta().equalsIgnoreCase(am.getIdConsulta())) {
+                atencionesMedicas.set(i, am);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (am.getIdConsulta() == null || am.getIdConsulta().isEmpty()) {
+                am.setIdConsulta("CM-2024-" + String.format("%03d", atencionesMedicas.size() + 1));
+            }
+            atencionesMedicas.add(0, am);
+        }
+    }
+
+    // 2. Inmunizaciones (Vacunas y Desparasitaciones)
+    public List<RegistroInmunizacion> getInmunizaciones() {
+        return new ArrayList<>(inmunizaciones);
+    }
+
+    public void guardarInmunizacion(RegistroInmunizacion reg) {
+        if (reg == null) return;
+        boolean existe = false;
+        for (int i = 0; i < inmunizaciones.size(); i++) {
+            if (inmunizaciones.get(i).getIdRegistro().equalsIgnoreCase(reg.getIdRegistro())) {
+                inmunizaciones.set(i, reg);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (reg.getIdRegistro() == null || reg.getIdRegistro().isEmpty()) {
+                String prefix = reg.getTipoControl().startsWith("Vacun") ? "VAC-" : "DES-";
+                reg.setIdRegistro(prefix + "2024-" + String.format("%03d", inmunizaciones.size() + 50));
+            }
+            inmunizaciones.add(0, reg);
+        }
+    }
+
+    // 3. Cirugías y Quirófano
+    public List<RegistroCirugia> getCirugias() {
+        return new ArrayList<>(cirugias);
+    }
+
+    public void guardarCirugia(RegistroCirugia cirugia) {
+        if (cirugia == null) return;
+        boolean existe = false;
+        for (int i = 0; i < cirugias.size(); i++) {
+            if (cirugias.get(i).getIdCirugia().equalsIgnoreCase(cirugia.getIdCirugia())) {
+                cirugias.set(i, cirugia);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (cirugia.getIdCirugia() == null || cirugia.getIdCirugia().isEmpty()) {
+                cirugia.setIdCirugia("QX-2024-" + String.format("%02d", cirugias.size() + 1));
+            }
+            cirugias.add(0, cirugia);
+        }
+    }
+
+    public void actualizarEstadoCirugia(String idCirugia, String nuevoEstado) {
+        for (RegistroCirugia c : cirugias) {
+            if (c.getIdCirugia().equalsIgnoreCase(idCirugia)) {
+                c.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    // 4. Laboratorio e Imágenes
+    public List<OrdenLaboratorio> getOrdenesLaboratorio() {
+        return new ArrayList<>(ordenesLaboratorio);
+    }
+
+    public void guardarOrdenLaboratorio(OrdenLaboratorio orden) {
+        if (orden == null) return;
+        boolean existe = false;
+        for (int i = 0; i < ordenesLaboratorio.size(); i++) {
+            if (ordenesLaboratorio.get(i).getIdOrden().equalsIgnoreCase(orden.getIdOrden())) {
+                ordenesLaboratorio.set(i, orden);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (orden.getIdOrden() == null || orden.getIdOrden().isEmpty()) {
+                String prefix = orden.getCategoria().contains("Imágenes") ? "IMG-" : "LAB-";
+                orden.setIdOrden(prefix + "2024-" + String.format("%02d", ordenesLaboratorio.size() + 1));
+            }
+            ordenesLaboratorio.add(0, orden);
+        }
+    }
+
+    public void actualizarEstadoOrden(String idOrden, String nuevoEstado) {
+        for (OrdenLaboratorio o : ordenesLaboratorio) {
+            if (o.getIdOrden().equalsIgnoreCase(idOrden)) {
+                o.setEstado(nuevoEstado);
+                break;
+            }
+        }
     }
 }
