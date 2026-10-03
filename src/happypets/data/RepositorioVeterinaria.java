@@ -41,6 +41,12 @@ public class RepositorioVeterinaria {
     private final List<RegistroCirugia> cirugias = new ArrayList<>();
     private final List<OrdenLaboratorio> ordenesLaboratorio = new ArrayList<>();
 
+    // Módulo 4: Servicios Estéticos y Hospedaje
+    private final List<happypets.model.ServicioGrooming> serviciosGrooming = new ArrayList<>();
+    private final List<happypets.model.InternamientoHospitalario> internamientos = new ArrayList<>();
+    private final List<happypets.model.ReservaHospedaje> reservasHospedaje = new ArrayList<>();
+    private final List<happypets.model.MascotaAdopcion> mascotasAdopcion = new ArrayList<>();
+
     private RepositorioVeterinaria() {
         inicializarDatos();
     }
@@ -470,6 +476,127 @@ public class RepositorioVeterinaria {
                 "Apto para procedimiento quirúrgico odontológico con protocolo anestésico estándar.",
                 "Completado"
         ));
+
+        // 8. Módulo 4.1: Grooming y Peluquería
+        serviciosGrooming.add(new happypets.model.ServicioGrooming(
+                "GR-2024-01", "VET-0144", "Luna", "Felino · Siamés",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now(), LocalTime.of(10, 30), "Ana Martínez (Groomer)",
+                "Spa Completo Felino (Baño cosmético + desenredado + corte de uñas)",
+                "Libre de ectoparásitos", "Piel sana y pelaje sedoso",
+                "Champú Avena Suave, Acondicionador Desenredante, Colonia Baby Cat",
+                "Paciente muy dócil y tranquila durante el cepillado.", 65.0, "En Corte y Secado"
+        ));
+        serviciosGrooming.add(new happypets.model.ServicioGrooming(
+                "GR-2024-02", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now(), LocalTime.of(11, 45), "Carlos Mendoza (Estilista Canino)",
+                "Baño Medicado Dermatológico + Deslanado Profundo",
+                "Sin ectoparásitos visibles", "Dermatitis alérgica leve en flanco",
+                "Champú Clorhexidina 3% con Ketoconazol, Acondicionador Hidratante",
+                "Disfruta del agua tibia. Requiere secado con turbina de bajo ruido.", 95.0, "En Baño"
+        ));
+        serviciosGrooming.add(new happypets.model.ServicioGrooming(
+                "GR-2024-03", "VET-0238", "Toby", "Canino · Pug",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                LocalDate.now(), LocalTime.of(9, 15), "Luis Peña (Groomer)",
+                "Baño Hipoalergénico + Limpieza de Pliegues Faciales + Vaciado de Glándulas",
+                "Libre de pulgas", "Pliegues nasales limpios sin eritema",
+                "Champú Hipoalergénico hipoalergénico, Solución antiséptica para pliegues",
+                "Excelente comportamiento. Pliegues faciales secados minuciosamente.", 55.0, "Listo para Entrega"
+        ));
+
+        // 9. Módulo 4.2: Hospitalización
+        internamientos.add(new happypets.model.InternamientoHospitalario(
+                "HOSP-2024-01", "Box 01", "UCI / Cuidados Intensivos",
+                "VET-0810", "Zeus", "Canino · Rottweiler",
+                "Daniel Paredes Ríos", "+51 988 331 209",
+                "Intoxicación severa por sospecha de ingesta de rodenticida anticoagulante",
+                "Dr. Roberto Mendoza", LocalDate.now().minusDays(1), LocalTime.of(14, 0),
+                LocalDate.now().plusDays(3), 42.1, 37.8, 130,
+                "Ringer Lactato IV a 85 ml/h continuo + Bomba de infusión",
+                "Fitomenadiona (Vitamina K1) 2.5mg/kg SC c/12h, Omeprazol 1mg/kg IV, Carbón activado",
+                "Paciente en monitoreo continuo. Mucosas normocoloreadas. Reflejos presentes. Diuresis positiva.",
+                "CRÍTICO", 150.0, "Internado / En Tratamiento"
+        ));
+        internamientos.add(new happypets.model.InternamientoHospitalario(
+                "HOSP-2024-02", "Box 02", "Hospitalización General",
+                "VET-0238", "Toby", "Canino · Pug",
+                "Carlos Eduardo Morales", "+51 984 552 110",
+                "Postoperatorio inmediato por destartraje periodontal y exodoncia",
+                "Dra. Ana Silva", LocalDate.now(), LocalTime.of(11, 45),
+                LocalDate.now().plusDays(1), 8.5, 38.4, 115,
+                "Cloruro de Sodio 0.9% IV a 20 ml/h",
+                "Clindamicina 11mg/kg IV c/12h, Meloxicam 0.1mg/kg SC c/24h",
+                "Recuperación anestésica satisfactoria. Alerta y respondiendo a estímulos sonoros.",
+                "ESTABLE", 85.0, "Internado / En Tratamiento"
+        ));
+        internamientos.add(new happypets.model.InternamientoHospitalario(
+                "HOSP-2024-03", "Box 05", "Aislamiento Infeccioso",
+                "VET-0740", "Bimba", "Felino · Persa",
+                "Maribel Soto Cruz", "+51 991 445 612",
+                "Gastroenteritis aguda con deshidratación moderada (7%)",
+                "Dra. Camila Morales", LocalDate.now().minusDays(2), LocalTime.of(16, 20),
+                LocalDate.now().plusDays(1), 3.9, 38.9, 150,
+                "Normosol-R IV con suplementación de KCl a 15 ml/h",
+                "Maropitant 1mg/kg SC c/24h, Ranitidina 2mg/kg IV c/12h",
+                "Sin episodios eméticos en las últimas 18 horas. Inicio de dieta líquida recovery tolerada.",
+                "OBSERVACIÓN", 110.0, "Internado / En Tratamiento"
+        ));
+
+        // 10. Módulo 4.3: Hotel y Guardería
+        reservasHospedaje.add(new happypets.model.ReservaHospedaje(
+                "HOT-2024-01", "Suite 01 Canina (Jardín)", "VET-0091", "Rocky",
+                "Canino · Golden Retriever", "Carlos Eduardo Morales", "+51 984 552 110",
+                "+51 01 432 9980", LocalDate.now().minusDays(1), LocalDate.now().plusDays(2),
+                3, "Pro Plan Adulto provisto por el dueño (2 raciones de 250g diarias)",
+                "3 paseos diarios en zona de césped con pelota. Muy sociable.",
+                true, "Glucosamina 1 tableta diaria en desayuno", 70.0, 210.0, "En Estadía / Hospedado"
+        ));
+        reservasHospedaje.add(new happypets.model.ReservaHospedaje(
+                "HOT-2024-02", "Suite 03 Felina (Rascador)", "VET-0144", "Luna",
+                "Felino · Siamés", "Carlos Eduardo Morales", "+51 984 552 110",
+                "+51 01 432 9980", LocalDate.now().minusDays(4), LocalDate.now().minusDays(1),
+                3, "Royal Canin Fit 32 + pouch húmedo matutino",
+                "Juego interactivo con plumas en área cerrada de enriquecimiento ambiental",
+                false, "Ninguna", 55.0, 165.0, "Finalizada / Check-out"
+        ));
+        reservasHospedaje.add(new happypets.model.ReservaHospedaje(
+                "HOT-2024-03", "Suite 02 Canina", "VET-0180", "Max",
+                "Canino · Pastor Alemán", "Roberto Solano Vega", "+51 982 110 445",
+                "+51 982 110 440", LocalDate.now().plusDays(2), LocalDate.now().plusDays(6),
+                4, "Hills Science Diet Large Breed (300g c/12h)",
+                "Paseos individuales exclusivos con correa. Nivel alto de energía.",
+                true, "Omega 3 en cápsula nocturna", 75.0, 300.0, "Confirmada"
+        ));
+
+        // 11. Módulo 4.4: Adopciones y Rescates
+        mascotasAdopcion.add(new happypets.model.MascotaAdopcion(
+                "ADOP-01", "Pelusa", "Felino", "Mestizo Europeo",
+                "8 meses", "Hembra", "Pequeño", "Extremadamente cariñosa, ronronea y convive con perros",
+                "Rescatada en San Borja en estado de vulnerabilidad. Completamente sana, esterilizada y desparasitada.",
+                true, true, true, null, null, null, null, null, 50.0, "Disponible"
+        ));
+        mascotasAdopcion.add(new happypets.model.MascotaAdopcion(
+                "ADOP-02", "Duque", "Canino", "Cruza Golden / Mestizo",
+                "1 año 2 m.", "Macho", "Mediano", "Muy sociable, obediente, enérgico y juguetón con niños",
+                "Rescatado de la vía pública con herida cicatrizada. Rehabilitado en Happy Pets. Sabe pasear con correa.",
+                true, true, true, "Familia Huamán Pérez", "44102938", "+51 987 334 112",
+                "Av. Aviación 2840, San Borja", LocalDate.now().minusDays(2), 80.0, "En Evaluación"
+        ));
+        mascotasAdopcion.add(new happypets.model.MascotaAdopcion(
+                "ADOP-03", "Chispita", "Canino", "Mestizo Poodle",
+                "2 años", "Hembra", "Pequeño", "Tranquila, faldera, ideal para departamento o adultos mayores",
+                "Entregada por tutores de la tercera edad que no podían atenderla. Muy educada para hacer sus necesidades afuera.",
+                true, true, true, null, null, null, null, null, 60.0, "Disponible"
+        ));
+        mascotasAdopcion.add(new happypets.model.MascotaAdopcion(
+                "ADOP-04", "Milo", "Felino", "Criollo Atigrado",
+                "1 año", "Macho", "Mediano", "Curioso, independiente y juguetón",
+                "Rescatado de una obra en construcción. Vacunado con triple felina y antirrábica.",
+                true, true, true, "Andrea Corrales", "47281902", "+51 993 445 120",
+                "Calle Las Camelias 412, Surco", LocalDate.now().minusMonths(1), 50.0, "Adoptado con Éxito"
+        ));
     }
 
     public List<Cliente> getClientes() {
@@ -805,6 +932,142 @@ public class RepositorioVeterinaria {
         for (OrdenLaboratorio o : ordenesLaboratorio) {
             if (o.getIdOrden().equalsIgnoreCase(idOrden)) {
                 o.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS DEL MÓDULO 4: ESTÉTICA Y HOSPEDAJE
+    // ==========================================
+
+    // 1. Grooming y Peluquería
+    public List<happypets.model.ServicioGrooming> getServiciosGrooming() {
+        return new ArrayList<>(serviciosGrooming);
+    }
+
+    public void guardarServicioGrooming(happypets.model.ServicioGrooming g) {
+        if (g == null) return;
+        boolean existe = false;
+        for (int i = 0; i < serviciosGrooming.size(); i++) {
+            if (serviciosGrooming.get(i).getIdGrooming().equalsIgnoreCase(g.getIdGrooming())) {
+                serviciosGrooming.set(i, g);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (g.getIdGrooming() == null || g.getIdGrooming().isEmpty()) {
+                g.setIdGrooming("GR-2024-" + String.format("%02d", serviciosGrooming.size() + 1));
+            }
+            serviciosGrooming.add(0, g);
+        }
+    }
+
+    public void actualizarEstadoGrooming(String idGrooming, String nuevoEstado) {
+        for (happypets.model.ServicioGrooming g : serviciosGrooming) {
+            if (g.getIdGrooming().equalsIgnoreCase(idGrooming)) {
+                g.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    // 2. Hospitalización
+    public List<happypets.model.InternamientoHospitalario> getInternamientos() {
+        return new ArrayList<>(internamientos);
+    }
+
+    public void guardarInternamiento(happypets.model.InternamientoHospitalario h) {
+        if (h == null) return;
+        boolean existe = false;
+        for (int i = 0; i < internamientos.size(); i++) {
+            if (internamientos.get(i).getIdInternamiento().equalsIgnoreCase(h.getIdInternamiento())) {
+                internamientos.set(i, h);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (h.getIdInternamiento() == null || h.getIdInternamiento().isEmpty()) {
+                h.setIdInternamiento("HOSP-2024-" + String.format("%02d", internamientos.size() + 1));
+            }
+            internamientos.add(0, h);
+        }
+    }
+
+    public void actualizarEstadoInternamiento(String idInternamiento, String nuevoEstado) {
+        for (happypets.model.InternamientoHospitalario h : internamientos) {
+            if (h.getIdInternamiento().equalsIgnoreCase(idInternamiento)) {
+                h.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    // 3. Hotel y Guardería
+    public List<happypets.model.ReservaHospedaje> getReservasHospedaje() {
+        return new ArrayList<>(reservasHospedaje);
+    }
+
+    public void guardarReservaHospedaje(happypets.model.ReservaHospedaje r) {
+        if (r == null) return;
+        boolean existe = false;
+        for (int i = 0; i < reservasHospedaje.size(); i++) {
+            if (reservasHospedaje.get(i).getIdReserva().equalsIgnoreCase(r.getIdReserva())) {
+                reservasHospedaje.set(i, r);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (r.getIdReserva() == null || r.getIdReserva().isEmpty()) {
+                r.setIdReserva("HOT-2024-" + String.format("%02d", reservasHospedaje.size() + 1));
+            }
+            reservasHospedaje.add(0, r);
+        }
+    }
+
+    public void actualizarEstadoHospedaje(String idReserva, String nuevoEstado) {
+        for (happypets.model.ReservaHospedaje r : reservasHospedaje) {
+            if (r.getIdReserva().equalsIgnoreCase(idReserva)) {
+                r.setEstado(nuevoEstado);
+                break;
+            }
+        }
+    }
+
+    // 4. Adopciones y Rescates
+    public List<happypets.model.MascotaAdopcion> getMascotasAdopcion() {
+        return new ArrayList<>(mascotasAdopcion);
+    }
+
+    public void guardarMascotaAdopcion(happypets.model.MascotaAdopcion ma) {
+        if (ma == null) return;
+        boolean existe = false;
+        for (int i = 0; i < mascotasAdopcion.size(); i++) {
+            if (mascotasAdopcion.get(i).getIdMascotaAdopcion().equalsIgnoreCase(ma.getIdMascotaAdopcion())) {
+                mascotasAdopcion.set(i, ma);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            if (ma.getIdMascotaAdopcion() == null || ma.getIdMascotaAdopcion().isEmpty()) {
+                ma.setIdMascotaAdopcion("ADOP-" + String.format("%02d", mascotasAdopcion.size() + 1));
+            }
+            mascotasAdopcion.add(0, ma);
+        }
+    }
+
+    public void actualizarEstadoAdopcion(String idMascotaAdopcion, String nuevoEstado, String adoptante, String dni, String tel, String dir) {
+        for (happypets.model.MascotaAdopcion ma : mascotasAdopcion) {
+            if (ma.getIdMascotaAdopcion().equalsIgnoreCase(idMascotaAdopcion)) {
+                ma.setEstado(nuevoEstado);
+                if (adoptante != null) ma.setAdoptanteNombre(adoptante);
+                if (dni != null) ma.setAdoptanteDni(dni);
+                if (tel != null) ma.setAdoptanteTelefono(tel);
+                if (dir != null) ma.setAdoptanteDireccion(dir);
                 break;
             }
         }

@@ -62,6 +62,10 @@ import happypets.modulos.modulo3.VistaVacunacionDesparasitacionPanel;
 import happypets.modulos.modulo3.VistaCirugiasQuirofanoPanel;
 import happypets.modulos.modulo3.VistaLaboratorioImagenesPanel;
 import happypets.modulos.modulo4.Modulo4EsteticosHospedajeFrame;
+import happypets.modulos.modulo4.VistaGroomingPeluqueriaPanel;
+import happypets.modulos.modulo4.VistaHospitalizacionPanel;
+import happypets.modulos.modulo4.VistaHotelGuarderiaPanel;
+import happypets.modulos.modulo4.VistaAdopcionesPanel;
 import happypets.modulos.modulo5.Modulo5InventarioFarmaciaFrame;
 import happypets.modulos.modulo6.Modulo6FinanzasVentasFrame;
 import happypets.modulos.modulo7.Modulo7PersonalRRHHFrame;
@@ -110,6 +114,12 @@ public class PantallaPrincipalFrame extends JFrame {
     private VistaVacunacionDesparasitacionPanel vistaVacunacion;
     private VistaCirugiasQuirofanoPanel vistaCirugias;
     private VistaLaboratorioImagenesPanel vistaLaboratorio;
+
+    // Vistas integradas del Módulo 4 en CardLayout
+    private VistaGroomingPeluqueriaPanel vistaGrooming;
+    private VistaHospitalizacionPanel vistaHospitalizacion;
+    private VistaHotelGuarderiaPanel vistaHotel;
+    private VistaAdopcionesPanel vistaAdopciones;
 
     private JScrollPane panelDashboard;
     private JButton btnDashboard;
@@ -523,6 +533,17 @@ public class PantallaPrincipalFrame extends JFrame {
         panelContenedorCards.add(vistaVacunacion, "MODULO3_VACUNACION");
         panelContenedorCards.add(vistaCirugias, "MODULO3_CIRUGIAS");
         panelContenedorCards.add(vistaLaboratorio, "MODULO3_LABORATORIO");
+
+        // Vistas del Módulo 4
+        vistaGrooming = new VistaGroomingPeluqueriaPanel();
+        vistaHospitalizacion = new VistaHospitalizacionPanel();
+        vistaHotel = new VistaHotelGuarderiaPanel();
+        vistaAdopciones = new VistaAdopcionesPanel();
+
+        panelContenedorCards.add(vistaGrooming, "MODULO4_GROOMING");
+        panelContenedorCards.add(vistaHospitalizacion, "MODULO4_HOSPITALIZACION");
+        panelContenedorCards.add(vistaHotel, "MODULO4_HOTEL");
+        panelContenedorCards.add(vistaAdopciones, "MODULO4_ADOPCIONES");
 
         return panelContenedorCards;
     }
@@ -1245,10 +1266,26 @@ public class PantallaPrincipalFrame extends JFrame {
                         new String[]{"Grooming y Peluquería", "Hospitalización", "Hotel / Guardería", "Adopciones"},
                         Iconos.crearIconoHuella(16, new Color(244, 63, 94)),
                         new Runnable[]{
-                                () -> new Modulo4EsteticosHospedajeFrame().setVisible(true),
-                                () -> new Modulo4EsteticosHospedajeFrame().setVisible(true),
-                                () -> new Modulo4EsteticosHospedajeFrame().setVisible(true),
-                                () -> new Modulo4EsteticosHospedajeFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO4_GROOMING");
+                                    vistaGrooming.recargarDatos();
+                                    actualizarVistaPrincipal("Grooming y Peluquería Canina / Felina", "Módulo 4.1 · Spa estético, baños medicados, corte de raza, checklist dermatológico y entrega");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO4_HOSPITALIZACION");
+                                    vistaHospitalizacion.recargarDatos();
+                                    actualizarVistaPrincipal("Hospitalización y Cuidados Intensivos", "Módulo 4.2 · Monitor de boxes clínicos, alertas de gravedad, fluidoterapia, evolución y alta");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO4_HOTEL");
+                                    vistaHotel.recargarDatos();
+                                    actualizarVistaPrincipal("Hotel & Guardería Canina / Felina", "Módulo 4.3 · Suites climatizadas, estancias prolongadas, nutrición personalizada, paseos y check-out");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO4_ADOPCIONES");
+                                    vistaAdopciones.recargarDatos();
+                                    actualizarVistaPrincipal("Adopciones y Rescates Responsables", "Módulo 4.4 · Catálogo de rescatados, perfil sanitario, evaluación de postulantes y actas de compromiso");
+                                }
                         }
                 ),
                 new DefinicionModulo(

@@ -849,6 +849,144 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Tijeras de peluquería y estética / Grooming.
+     */
+    public static Icon crearIconoTijeras(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Dos anillas de mango abajo
+        g.drawOval((int) (s * 0.15), (int) (s * 0.65), (int) (s * 0.28), (int) (s * 0.28));
+        g.drawOval((int) (s * 0.57), (int) (s * 0.65), (int) (s * 0.28), (int) (s * 0.28));
+
+        // Hojas cruzadas hacia arriba
+        g.drawLine((int) (s * 0.35), (int) (s * 0.68), (int) (s * 0.75), (int) (s * 0.12));
+        g.drawLine((int) (s * 0.65), (int) (s * 0.68), (int) (s * 0.25), (int) (s * 0.12));
+
+        // Remache central
+        g.fillOval((int) (s * 0.45), (int) (s * 0.43), (int) (s * 0.10), (int) (s * 0.10));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Cama de hospitalización / Canil de internamiento clínico.
+     */
+    public static Icon crearIconoCamaHospital(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cabecera y pies
+        g.drawLine((int) (s * 0.15), (int) (s * 0.35), (int) (s * 0.15), (int) (s * 0.85));
+        g.drawLine((int) (s * 0.85), (int) (s * 0.45), (int) (s * 0.85), (int) (s * 0.85));
+
+        // Colchón horizontal
+        g.drawLine((int) (s * 0.15), (int) (s * 0.65), (int) (s * 0.85), (int) (s * 0.65));
+
+        // Almohada
+        g.fillRoundRect((int) (s * 0.18), (int) (s * 0.54), (int) (s * 0.22), (int) (s * 0.10), 4, 4);
+
+        // Cruz de internamiento médico arriba a la derecha
+        g.drawLine((int) (s * 0.65), (int) (s * 0.20), (int) (s * 0.65), (int) (s * 0.38));
+        g.drawLine((int) (s * 0.56), (int) (s * 0.29), (int) (s * 0.74), (int) (s * 0.29));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Casita / Hotel y Guardería de mascotas.
+     */
+    public static Icon crearIconoCasaMascota(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Techo en triángulo
+        int[] tx = {(int) (s * 0.10), (int) (s * 0.50), (int) (s * 0.90)};
+        int[] ty = {(int) (s * 0.45), (int) (s * 0.15), (int) (s * 0.45)};
+        g.drawPolygon(tx, ty, 3);
+
+        // Paredes cuadradas
+        g.drawRect((int) (s * 0.20), (int) (s * 0.45), (int) (s * 0.60), (int) (s * 0.42));
+
+        // Puerta en arco
+        g.drawArc((int) (s * 0.38), (int) (s * 0.58), (int) (s * 0.24), (int) (s * 0.28), 0, 180);
+        g.drawLine((int) (s * 0.38), (int) (s * 0.72), (int) (s * 0.38), (int) (s * 0.87));
+        g.drawLine((int) (s * 0.62), (int) (s * 0.72), (int) (s * 0.62), (int) (s * 0.87));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Corazón con huella / Adopciones y Rescates.
+     */
+    public static Icon crearIconoCorazonMascota(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+
+        // Corazón contorno
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Trazado de dos arcos de corazón
+        g.drawArc((int) (s * 0.15), (int) (s * 0.15), (int) (s * 0.36), (int) (s * 0.36), 0, 180);
+        g.drawArc((int) (s * 0.49), (int) (s * 0.15), (int) (s * 0.36), (int) (s * 0.36), 0, 180);
+        g.drawLine((int) (s * 0.15), (int) (s * 0.33), (int) (s * 0.50), (int) (s * 0.85));
+        g.drawLine((int) (s * 0.85), (int) (s * 0.33), (int) (s * 0.50), (int) (s * 0.85));
+
+        // Almohadilla interna en el centro
+        g.fillOval((int) (s * 0.44), (int) (s * 0.42), (int) (s * 0.12), (int) (s * 0.12));
+        g.fillOval((int) (s * 0.36), (int) (s * 0.34), (int) (s * 0.07), (int) (s * 0.07));
+        g.fillOval((int) (s * 0.45), (int) (s * 0.28), (int) (s * 0.07), (int) (s * 0.07));
+        g.fillOval((int) (s * 0.55), (int) (s * 0.34), (int) (s * 0.07), (int) (s * 0.07));
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Documento / Contrato / Ficha clínica.
+     */
+    public static Icon crearIconoDocumento(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.6, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Hoja rectangular con esquina redondeada
+        int x = (int) (s * 0.20);
+        int y = (int) (s * 0.12);
+        int w = (int) (s * 0.60);
+        int h = (int) (s * 0.76);
+        g.drawRoundRect(x, y, w, h, 4, 4);
+
+        // Líneas horizontales de texto
+        g.drawLine((int) (s * 0.32), (int) (s * 0.32), (int) (s * 0.68), (int) (s * 0.32));
+        g.drawLine((int) (s * 0.32), (int) (s * 0.50), (int) (s * 0.68), (int) (s * 0.50));
+        g.drawLine((int) (s * 0.32), (int) (s * 0.68), (int) (s * 0.55), (int) (s * 0.68));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }
