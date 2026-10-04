@@ -393,6 +393,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         JLabel tit = new JLabel("Expediente Clínico de Hospitalización");
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
@@ -410,6 +411,8 @@ public class VistaHospitalizacionPanel extends JPanel {
 
         JPanel filaBox = new JPanel(new GridLayout(1, 2, 8, 0));
         filaBox.setOpaque(false);
+        filaBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         cbBoxAsignado = new JComboBox<>(nombresBoxes);
         cbBoxAsignado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbBoxAsignado.setBackground(Color.WHITE);
@@ -434,6 +437,8 @@ public class VistaHospitalizacionPanel extends JPanel {
 
         JPanel filaConst = new JPanel(new GridLayout(1, 3, 6, 0));
         filaConst.setOpaque(false);
+        filaConst.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaConst.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtPeso = crearCampoTexto(true);
         txtPeso.setText("28.4");
         txtTemperatura = crearCampoTexto(true);
@@ -489,6 +494,8 @@ public class VistaHospitalizacionPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnIngresar = crearBotonWeb("🏥 Registrar Ingreso", true, () -> ingresarPacienteHospitalario());
         btnRow.add(btnIngresar);
         form.add(btnRow);
@@ -574,9 +581,15 @@ public class VistaHospitalizacionPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;
@@ -585,9 +598,14 @@ public class VistaHospitalizacionPanel extends JPanel {
     private JPanel crearFilaArea(String etiqueta, JTextArea area, int altura) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(area);

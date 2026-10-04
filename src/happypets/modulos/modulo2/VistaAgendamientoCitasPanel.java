@@ -445,6 +445,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
 
         JPanel fila1 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila1.setOpaque(false);
+        fila1.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila1.add(crearFilaCampo("Propietario Responsable *", cbCliente));
         fila1.add(crearFilaCampo("Paciente (Mascota) *", cbMascota));
@@ -465,6 +466,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
 
         JPanel fila2 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila2.setOpaque(false);
+        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila2.add(crearFilaCampo("Fecha de la Cita (dd/MM/yyyy) *", txtFecha));
         fila2.add(crearFilaCampo("Horario de Turno *", cbHora));
@@ -492,6 +494,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
 
         JPanel fila3 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila3.setOpaque(false);
+        fila3.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila3.add(crearFilaCampo("Veterinario Tratante *", cbDoctor));
         fila3.add(crearFilaCampo("Tipo de Servicio *", cbServicio));
@@ -508,6 +511,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
 
         JPanel fila4 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila4.setOpaque(false);
+        fila4.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila4.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila4.add(crearFilaCampo("Nivel de Prioridad *", cbPrioridad));
         fila4.add(crearFilaCampo("Costo Estimado (S/.)", txtCosto));
@@ -636,12 +640,14 @@ public class VistaAgendamientoCitasPanel extends JPanel {
     private JPanel crearFilaCampo(String label, Component componente) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 
-        JLabel lbl = new JLabel(label);
+        JLabel lbl = new JLabel(label, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(100, 116, 139));
         lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         p.add(lbl, BorderLayout.NORTH);
         p.add(componente, BorderLayout.CENTER);

@@ -264,9 +264,11 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         form.setOpaque(false);
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
 
-        JLabel tit = new JLabel("1) Nueva Solicitud (Orden Diagnóstica)");
+        JLabel tit = new JLabel("1) Nueva Solicitud (Orden Diagnóstica)", SwingConstants.LEFT);
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setHorizontalAlignment(SwingConstants.LEFT);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
@@ -284,6 +286,8 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
 
         JPanel filaTipo = new JPanel(new GridLayout(1, 2, 8, 0));
         filaTipo.setOpaque(false);
+        filaTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaTipo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         cbCategoriaSol = new JComboBox<>(new String[]{"Laboratorio Clínico", "Diagnóstico por Imágenes"});
         cbCategoriaSol.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbCategoriaSol.setBackground(Color.WHITE);
@@ -308,6 +312,8 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
 
         JPanel filaPrio = new JPanel(new GridLayout(1, 2, 8, 0));
         filaPrio.setOpaque(false);
+        filaPrio.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaPrio.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         cbPrioridadSol = new JComboBox<>(new String[]{"Normal", "Urgente", "Emergencia"});
         cbPrioridadSol.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbPrioridadSol.setBackground(Color.WHITE);
@@ -327,6 +333,8 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnSol = crearBotonWeb("🔬 Generar Solicitud", true, () -> generarNuevaSolicitud());
         btnRow.add(btnSol);
         form.add(btnRow);
@@ -357,14 +365,18 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         form.setOpaque(false);
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
 
-        JLabel tit = new JLabel("2) Registrar Resultado y Procesamiento");
+        JLabel tit = new JLabel("2) Registrar Resultado y Procesamiento", SwingConstants.LEFT);
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setHorizontalAlignment(SwingConstants.LEFT);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
         JPanel fila1 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila1.setOpaque(false);
+        fila1.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fila1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         txtPacienteRes = crearCampoTexto(false);
         txtPacienteRes.setText("Rocky (Golden Retriever)");
         txtEstudioRes = crearCampoTexto(false);
@@ -376,6 +388,8 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
 
         JPanel fila2 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila2.setOpaque(false);
+        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         txtResponsableRes = crearCampoTexto(true);
         txtResponsableRes.setText("Lab. Central - Lic. P. Torres");
         cbEstadoRes = new JComboBox<>(new String[]{"Completado", "En Proceso", "Muestra insuficiente"});
@@ -413,6 +427,8 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnGuardar = crearBotonWeb("💾 Guardar Resultado", true, () -> guardarResultadoActual());
         btnRow.add(btnGuardar);
         form.add(btnRow);
@@ -605,9 +621,13 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;
@@ -616,9 +636,13 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
     private JPanel crearFilaArea(String etiqueta, JTextArea area, int altura) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, altura + 22));
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(lbl, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(area);

@@ -2,6 +2,7 @@ package happypets.modulos.modulo1;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -317,6 +318,7 @@ public class VistaClientesMascotasPanel extends JPanel {
 
         JPanel fila2 = new JPanel(new GridLayout(1, 2, 10, 0));
         fila2.setOpaque(false);
+        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila2.add(crearFilaCampo("Doc. Identidad (DNI) *", txtDocumento));
         fila2.add(crearFilaCampo("Distrito / Ciudad", txtCiudad));
@@ -325,6 +327,7 @@ public class VistaClientesMascotasPanel extends JPanel {
 
         JPanel fila3 = new JPanel(new GridLayout(1, 2, 10, 0));
         fila3.setOpaque(false);
+        fila3.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila3.add(crearFilaCampo("Teléfono Principal *", txtTelefono));
         fila3.add(crearFilaCampo("Teléfono Secundario", txtTelefonoSecundario));
@@ -374,12 +377,14 @@ public class VistaClientesMascotasPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, java.awt.Component componente) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 
-        JLabel lbl = new JLabel(etiqueta);
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(100, 116, 139));
         lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         p.add(lbl, BorderLayout.NORTH);
         p.add(componente, BorderLayout.CENTER);

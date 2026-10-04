@@ -268,6 +268,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         JLabel tit = new JLabel("1) Ficha de Admisión y Checklist de Entrada");
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
@@ -285,6 +286,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
         JPanel filaEst = new JPanel(new GridLayout(1, 2, 8, 0));
         filaEst.setOpaque(false);
+        filaEst.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaEst.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         String[] groomers = {"Ana Martínez (Groomer)", "Carlos Mendoza (Estilista Canino)", "Luis Peña (Groomer)"};
         cbGroomer = new JComboBox<>(groomers);
         cbGroomer.setFont(new Font("Segoe UI", Font.PLAIN, 11));
@@ -307,14 +310,18 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         form.add(Box.createVerticalStrut(6));
 
         // Checklist de Entrada (Wireframe Página 3)
-        JLabel lblCheck = new JLabel("Checklist Sanitario de Admisión:");
+        JLabel lblCheck = new JLabel("Checklist Sanitario de Admisión:", SwingConstants.LEFT);
         lblCheck.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblCheck.setForeground(COLOR_TEXTO_TITULO);
+        lblCheck.setHorizontalAlignment(SwingConstants.LEFT);
+        lblCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblCheck);
         form.add(Box.createVerticalStrut(3));
 
         JPanel panelChecks = new JPanel(new GridLayout(2, 3, 4, 4));
         panelChecks.setOpaque(false);
+        panelChecks.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelChecks.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         chkPulgas = new JCheckBox("Control ectoparásitos");
         chkPulgas.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         chkPulgas.setOpaque(false);
@@ -367,6 +374,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
         JPanel filaCierre = new JPanel(new GridLayout(1, 2, 8, 0));
         filaCierre.setOpaque(false);
+        filaCierre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaCierre.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtHoraTurno = crearCampoTexto(true);
         txtHoraTurno.setText("11:30");
         txtCosto = crearCampoTexto(true);
@@ -378,6 +387,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnRegistrar = crearBotonWeb("✂ Registrar Turno de Spa", true, () -> agendarNuevoTurno());
         btnRow.add(btnRegistrar);
         form.add(btnRow);
@@ -459,9 +470,15 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;
@@ -470,9 +487,14 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
     private JPanel crearFilaArea(String etiqueta, JTextArea area, int altura) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(area);

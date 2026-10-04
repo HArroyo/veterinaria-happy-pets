@@ -262,6 +262,7 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
         JLabel tit = new JLabel("1) Registrar Vacuna Biológica");
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
@@ -295,6 +296,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
 
         JPanel filaDet = new JPanel(new GridLayout(1, 2, 8, 0));
         filaDet.setOpaque(false);
+        filaDet.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaDet.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtDosisVacuna = crearCampoTexto(true);
         txtDosisVacuna.setText("1.0 ml Subcutánea");
         txtLoteVacuna = crearCampoTexto(true);
@@ -306,6 +309,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
 
         JPanel filaVet = new JPanel(new GridLayout(1, 2, 8, 0));
         filaVet.setOpaque(false);
+        filaVet.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaVet.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtVetVacuna = crearCampoTexto(true);
         txtVetVacuna.setText("Dra. Camila Morales");
         txtProxVacuna = crearCampoTexto(true);
@@ -322,6 +327,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnGuardar = crearBotonWeb("💉 Guardar Vacuna", true, () -> guardarVacuna());
         btnRow.add(btnGuardar);
         form.add(btnRow);
@@ -355,6 +362,7 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
         JLabel tit = new JLabel("2) Registrar Desparasitación");
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
@@ -374,6 +382,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
         // Producto y Tipo
         JPanel filaProd = new JPanel(new GridLayout(1, 2, 8, 0));
         filaProd.setOpaque(false);
+        filaProd.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaProd.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         String[] prods = {
                 "Simparica Trio (Oral Masticable)",
                 "Total F Total Plus (Tableta Oral)",
@@ -396,6 +406,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
 
         JPanel filaPeso = new JPanel(new GridLayout(1, 2, 8, 0));
         filaPeso.setOpaque(false);
+        filaPeso.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaPeso.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtPesoDesp = crearCampoTexto(true);
         txtPesoDesp.setText("28.4");
         txtDosisDesp = crearCampoTexto(true);
@@ -407,6 +419,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
 
         JPanel filaProx = new JPanel(new GridLayout(1, 2, 8, 0));
         filaProx.setOpaque(false);
+        filaProx.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaProx.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtVetDesp = crearCampoTexto(true);
         txtVetDesp.setText("Dr. Roberto Mendoza");
         txtProxDesp = crearCampoTexto(true);
@@ -418,6 +432,8 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnGuardar = crearBotonWeb("💊 Guardar Desparasitación", true, () -> guardarDesparasitacion());
         btnRow.add(btnGuardar);
         form.add(btnRow);
@@ -518,9 +534,15 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;

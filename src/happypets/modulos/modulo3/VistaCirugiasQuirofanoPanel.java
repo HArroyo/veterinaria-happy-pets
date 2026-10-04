@@ -343,9 +343,11 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
         form.setOpaque(false);
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
 
-        JLabel tit = new JLabel("1) Programar Intervención Quirúrgica");
+        JLabel tit = new JLabel("1) Programar Intervención Quirúrgica", SwingConstants.LEFT);
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setHorizontalAlignment(SwingConstants.LEFT);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
@@ -378,6 +380,8 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
 
         JPanel filaQuiro = new JPanel(new GridLayout(1, 2, 8, 0));
         filaQuiro.setOpaque(false);
+        filaQuiro.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaQuiro.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         cbQuirofanoProg = new JComboBox<>(new String[]{"Quirófano 1 (Cirugía Mayor)", "Quirófano 2 (Procedimientos)"});
         cbQuirofanoProg.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbQuirofanoProg.setBackground(Color.WHITE);
@@ -396,6 +400,8 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         JButton btnProg = crearBotonWeb("📅 Programar Cirugía", true, () -> programarNuevaCirugia());
         btnRow.add(btnProg);
         form.add(btnRow);
@@ -426,14 +432,18 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
         form.setOpaque(false);
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
 
-        JLabel tit = new JLabel("2) Registro Operatorio y Protocolo Postquirúrgico");
+        JLabel tit = new JLabel("2) Registro Operatorio y Protocolo Postquirúrgico", SwingConstants.LEFT);
         tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setHorizontalAlignment(SwingConstants.LEFT);
+        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(tit);
         form.add(Box.createVerticalStrut(8));
 
         JPanel fila1 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila1.setOpaque(false);
+        fila1.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fila1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         txtPacienteActa = crearCampoTexto(false);
         txtPacienteActa.setText("Toby (Canino · Pug)");
         txtProcedimientoActa = crearCampoTexto(false);
@@ -445,6 +455,8 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
 
         JPanel fila2 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila2.setOpaque(false);
+        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         txtCirujanoActa = crearCampoTexto(true);
         txtCirujanoActa.setText("Dra. Ana Silva");
         txtAnestesistaActa = crearCampoTexto(true);
@@ -456,6 +468,8 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
 
         JPanel fila3 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila3.setOpaque(false);
+        fila3.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fila3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         cbAnestesiaActa = new JComboBox<>(new String[]{"Inhalatoria Isoflurano", "Intravenosa TIVA (Propofol)", "Sedación Profunda"});
         cbAnestesiaActa.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbAnestesiaActa.setBackground(Color.WHITE);
@@ -480,6 +494,8 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
 
         JPanel filaPost = new JPanel(new GridLayout(1, 3, 6, 0));
         filaPost.setOpaque(false);
+        filaPost.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaPost.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         cbEstadoAlta = new JComboBox<>(new String[]{"Alerta y estable", "En recuperación anestésica", "Hospitalizado en observación"});
         cbEstadoAlta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbEstadoAlta.setBackground(Color.WHITE);
@@ -511,6 +527,8 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         btnRow.setOpaque(false);
+        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnImprimir = crearBotonWeb("🖨 Protocolo Quirúrgico", false, () -> imprimirProtocoloQuirurgico());
         JButton btnGuardarActa = crearBotonWeb("💾 Guardar y Finalizar", true, () -> guardarProtocoloActual());
@@ -526,9 +544,13 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;
@@ -537,9 +559,13 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
     private JPanel crearFilaArea(String etiqueta, JTextArea area, int altura) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, altura + 22));
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(lbl, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(area);

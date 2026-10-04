@@ -262,11 +262,13 @@ public class VistaControlStockLotesPanel extends JPanel {
         JLabel lblTitulo = new JLabel("Registro de Movimientos de Stock");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblTitulo);
 
         JLabel lblSub = new JLabel("Entrada por compras o salida clínica con actualización automática de Kardex");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblSub);
         form.add(Box.createVerticalStrut(10));
 
@@ -294,9 +296,12 @@ public class VistaControlStockLotesPanel extends JPanel {
         // Lote y Cantidad en Grid
         JPanel gridLoteCant = new JPanel(new GridLayout(1, 2, 8, 0));
         gridLoteCant.setOpaque(false);
+        gridLoteCant.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridLoteCant.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pLote = new JPanel();
         pLote.setOpaque(false);
+        pLote.setAlignmentX(Component.LEFT_ALIGNMENT);
         pLote.setLayout(new BoxLayout(pLote, BoxLayout.Y_AXIS));
         pLote.add(crearEtiquetaCampo("Número de Lote:"));
         txtLote = new JTextField("LOT-2024-90B");
@@ -306,6 +311,7 @@ public class VistaControlStockLotesPanel extends JPanel {
 
         JPanel pCant = new JPanel();
         pCant.setOpaque(false);
+        pCant.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCant.setLayout(new BoxLayout(pCant, BoxLayout.Y_AXIS));
         pCant.add(crearEtiquetaCampo("Cantidad (Unidades):"));
         txtCantidad = new JTextField("10");
@@ -319,9 +325,12 @@ public class VistaControlStockLotesPanel extends JPanel {
         // Fechas de Movimiento y Vencimiento del Lote
         JPanel gridFechas = new JPanel(new GridLayout(1, 2, 8, 0));
         gridFechas.setOpaque(false);
+        gridFechas.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridFechas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pMov = new JPanel();
         pMov.setOpaque(false);
+        pMov.setAlignmentX(Component.LEFT_ALIGNMENT);
         pMov.setLayout(new BoxLayout(pMov, BoxLayout.Y_AXIS));
         pMov.add(crearEtiquetaCampo("Fecha de Operación:"));
         txtFechaMovimiento = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -331,6 +340,7 @@ public class VistaControlStockLotesPanel extends JPanel {
 
         JPanel pVenc = new JPanel();
         pVenc.setOpaque(false);
+        pVenc.setAlignmentX(Component.LEFT_ALIGNMENT);
         pVenc.setLayout(new BoxLayout(pVenc, BoxLayout.Y_AXIS));
         pVenc.add(crearEtiquetaCampo("Vencimiento del Lote:"));
         txtFechaVencimiento = new JTextField(LocalDate.now().plusMonths(12).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -358,6 +368,8 @@ public class VistaControlStockLotesPanel extends JPanel {
         // Botones de acción
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnLimpiar = crearBoton("Limpiar", false, this::limpiarFormulario);
         JButton btnGuardar = crearBoton("Registrar Movimiento", true, this::guardarMovimiento);
@@ -499,10 +511,13 @@ public class VistaControlStockLotesPanel extends JPanel {
     }
 
     private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto);
+        JLabel l = new JLabel(texto, SwingConstants.LEFT);
         l.setFont(new Font("Segoe UI", Font.BOLD, 10));
         l.setForeground(new Color(71, 85, 105));
         l.setBorder(new EmptyBorder(0, 0, 2, 0));
+        l.setHorizontalAlignment(SwingConstants.LEFT);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         return l;
     }
 
@@ -510,6 +525,9 @@ public class VistaControlStockLotesPanel extends JPanel {
         c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
+        if (c instanceof javax.swing.JComponent jc) {
+            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         if (c instanceof JTextField) {
             ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_BORDE, 1, true),

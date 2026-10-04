@@ -267,11 +267,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         JLabel lblTitulo = new JLabel("Registrar Check-in / Nueva Reserva");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblTitulo);
 
         JLabel lblSub = new JLabel("Asignación de suite individual, dieta y plan de cuidados");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblSub);
         form.add(Box.createVerticalStrut(10));
 
@@ -286,9 +288,12 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         // 2. Tutor & Teléfono Emergencia (en grid)
         JPanel gridTutor = new JPanel(new GridLayout(1, 2, 8, 0));
         gridTutor.setOpaque(false);
+        gridTutor.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridTutor.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pTutor = new JPanel();
         pTutor.setOpaque(false);
+        pTutor.setAlignmentX(Component.LEFT_ALIGNMENT);
         pTutor.setLayout(new BoxLayout(pTutor, BoxLayout.Y_AXIS));
         pTutor.add(crearEtiquetaCampo("Tutor Responsable:"));
         txtTutor = new JTextField();
@@ -299,6 +304,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         JPanel pEmerg = new JPanel();
         pEmerg.setOpaque(false);
+        pEmerg.setAlignmentX(Component.LEFT_ALIGNMENT);
         pEmerg.setLayout(new BoxLayout(pEmerg, BoxLayout.Y_AXIS));
         pEmerg.add(crearEtiquetaCampo("Tel. Emergencia:"));
         txtEmergencia = new JTextField("+51 984 552 110");
@@ -328,9 +334,12 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         // 4. Fechas Ingreso / Salida y Costo por Noche
         JPanel gridFechas = new JPanel(new GridLayout(1, 3, 6, 0));
         gridFechas.setOpaque(false);
+        gridFechas.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridFechas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pIn = new JPanel();
         pIn.setOpaque(false);
+        pIn.setAlignmentX(Component.LEFT_ALIGNMENT);
         pIn.setLayout(new BoxLayout(pIn, BoxLayout.Y_AXIS));
         pIn.add(crearEtiquetaCampo("Check-In:"));
         txtFechaIngreso = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -340,6 +349,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         JPanel pOut = new JPanel();
         pOut.setOpaque(false);
+        pOut.setAlignmentX(Component.LEFT_ALIGNMENT);
         pOut.setLayout(new BoxLayout(pOut, BoxLayout.Y_AXIS));
         pOut.add(crearEtiquetaCampo("Check-Out:"));
         txtFechaSalida = new JTextField(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -349,6 +359,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         JPanel pCosto = new JPanel();
         pCosto.setOpaque(false);
+        pCosto.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCosto.setLayout(new BoxLayout(pCosto, BoxLayout.Y_AXIS));
         pCosto.add(crearEtiquetaCampo("Tarifa Noche S/.:"));
         txtCostoNoche = new JTextField("55.00");
@@ -389,12 +400,15 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         chkBanoSalida.setForeground(new Color(3, 105, 161));
         chkBanoSalida.setOpaque(false);
         chkBanoSalida.setSelected(true);
+        chkBanoSalida.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(chkBanoSalida);
         form.add(Box.createVerticalStrut(12));
 
         // Botones de acción
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnLimpiar = crearBoton("Limpiar", false, this::limpiarFormulario);
         JButton btnRegistrar = crearBoton("Registrar Estadía", true, this::registrarEstadia);
@@ -540,10 +554,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
     }
 
     private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto);
+        JLabel l = new JLabel(texto, SwingConstants.LEFT);
         l.setFont(new Font("Segoe UI", Font.BOLD, 10));
         l.setForeground(new Color(71, 85, 105));
         l.setBorder(new EmptyBorder(0, 0, 2, 0));
+        l.setHorizontalAlignment(SwingConstants.LEFT);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         return l;
     }
 
@@ -551,6 +568,9 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
+        if (c instanceof javax.swing.JComponent jc) {
+            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         if (c instanceof JTextField) {
             ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_BORDE, 1, true),

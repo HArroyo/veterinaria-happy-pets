@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import happypets.model.Certificado;
@@ -80,9 +81,10 @@ public class DetalleDocumentoDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = row++;
         gbc.weightx = 0.0;
-        JLabel lblDesc = new JLabel("Descripción Detallada:");
+        JLabel lblDesc = new JLabel("Descripción Detallada:", SwingConstants.LEFT);
         lblDesc.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblDesc.setForeground(new Color(60, 60, 60));
+        lblDesc.setHorizontalAlignment(SwingConstants.LEFT);
         body.add(lblDesc, gbc);
 
         gbc.gridx = 1;
@@ -121,9 +123,10 @@ public class DetalleDocumentoDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0.0;
-        JLabel lbl = new JLabel(etiqueta);
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lbl.setForeground(new Color(60, 60, 60));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
         panel.add(lbl, gbc);
 
         gbc.gridx = 1;

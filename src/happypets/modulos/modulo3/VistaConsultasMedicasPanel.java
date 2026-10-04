@@ -324,6 +324,7 @@ public class VistaConsultasMedicasPanel extends JPanel {
         JLabel titSec = new JLabel("1. Registro de Atención Clínica y Examen");
         titSec.setFont(new Font("Segoe UI", Font.BOLD, 13));
         titSec.setForeground(COLOR_TEXTO_TITULO);
+        titSec.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(titSec);
         form.add(Box.createVerticalStrut(8));
 
@@ -339,6 +340,8 @@ public class VistaConsultasMedicasPanel extends JPanel {
         // Tutor y teléfono
         JPanel filaTutor = new JPanel(new GridLayout(1, 2, 8, 0));
         filaTutor.setOpaque(false);
+        filaTutor.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaTutor.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtTutor = crearCampoTexto(false);
         txtTelefono = crearCampoTexto(false);
         filaTutor.add(crearFilaCampo("Propietario / Tutor", txtTutor));
@@ -359,6 +362,8 @@ public class VistaConsultasMedicasPanel extends JPanel {
         // Constantes Vitales (Triada clínica: Peso, Temp, FC)
         JPanel filaConstantes = new JPanel(new GridLayout(1, 3, 6, 0));
         filaConstantes.setOpaque(false);
+        filaConstantes.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaConstantes.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtPeso = crearCampoTexto(true);
         txtPeso.setText("28.4");
         txtTemperatura = crearCampoTexto(true);
@@ -394,6 +399,7 @@ public class VistaConsultasMedicasPanel extends JPanel {
         JLabel titSec2 = new JLabel("2. Diagnóstico y Plan Terapéutico");
         titSec2.setFont(new Font("Segoe UI", Font.BOLD, 13));
         titSec2.setForeground(COLOR_TEXTO_TITULO);
+        titSec2.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(titSec2);
         form.add(Box.createVerticalStrut(6));
 
@@ -435,6 +441,8 @@ public class VistaConsultasMedicasPanel extends JPanel {
 
         JPanel filaFinal = new JPanel(new GridLayout(1, 3, 6, 0));
         filaFinal.setOpaque(false);
+        filaFinal.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaFinal.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         txtSeguimiento = crearCampoTexto(true);
         txtSeguimiento.setText("Control en 48 horas");
         txtCosto = crearCampoTexto(true);
@@ -452,6 +460,8 @@ public class VistaConsultasMedicasPanel extends JPanel {
         // Botones de acción
         JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         filaBotones.setOpaque(false);
+        filaBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filaBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnImprimir = crearBotonWeb("🖨 Imprimir Receta", false, () -> imprimirRecetaActual());
         JButton btnGuardar = crearBotonWeb("💾 Guardar Consulta", true, () -> guardarConsultaActual());
@@ -565,9 +575,15 @@ public class VistaConsultasMedicasPanel extends JPanel {
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;
@@ -576,9 +592,14 @@ public class VistaConsultasMedicasPanel extends JPanel {
     private JPanel crearFilaArea(String etiqueta, JTextArea area, int altura) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        JLabel lbl = new JLabel(etiqueta);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(71, 85, 105));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         p.add(lbl, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(area);

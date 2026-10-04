@@ -271,11 +271,13 @@ public class VistaAdopcionesPanel extends JPanel {
         JLabel lblTitulo = new JLabel("Postulación de Adoptante / Rescatado");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblTitulo);
 
         JLabel lblSub = new JLabel("Vincule un postulante evaluado o agregue un nuevo rescatado");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblSub);
         form.add(Box.createVerticalStrut(8));
 
@@ -290,9 +292,12 @@ public class VistaAdopcionesPanel extends JPanel {
         // 2. Ficha del Rescatado (Grid)
         JPanel gridDatos = new JPanel(new GridLayout(1, 2, 8, 0));
         gridDatos.setOpaque(false);
+        gridDatos.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridDatos.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pNom = new JPanel();
         pNom.setOpaque(false);
+        pNom.setAlignmentX(Component.LEFT_ALIGNMENT);
         pNom.setLayout(new BoxLayout(pNom, BoxLayout.Y_AXIS));
         pNom.add(crearEtiquetaCampo("Nombre Rescatado:"));
         txtNombreRescatado = new JTextField();
@@ -302,6 +307,7 @@ public class VistaAdopcionesPanel extends JPanel {
 
         JPanel pEsp = new JPanel();
         pEsp.setOpaque(false);
+        pEsp.setAlignmentX(Component.LEFT_ALIGNMENT);
         pEsp.setLayout(new BoxLayout(pEsp, BoxLayout.Y_AXIS));
         pEsp.add(crearEtiquetaCampo("Especie:"));
         cbEspecie = new JComboBox<>(new String[]{"Canino", "Felino"});
@@ -315,9 +321,12 @@ public class VistaAdopcionesPanel extends JPanel {
         // Raza, Edad y Sexo
         JPanel gridDetalles = new JPanel(new GridLayout(1, 3, 6, 0));
         gridDetalles.setOpaque(false);
+        gridDetalles.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridDetalles.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pRaza = new JPanel();
         pRaza.setOpaque(false);
+        pRaza.setAlignmentX(Component.LEFT_ALIGNMENT);
         pRaza.setLayout(new BoxLayout(pRaza, BoxLayout.Y_AXIS));
         pRaza.add(crearEtiquetaCampo("Raza / Tipo:"));
         txtRaza = new JTextField();
@@ -327,6 +336,7 @@ public class VistaAdopcionesPanel extends JPanel {
 
         JPanel pEdad = new JPanel();
         pEdad.setOpaque(false);
+        pEdad.setAlignmentX(Component.LEFT_ALIGNMENT);
         pEdad.setLayout(new BoxLayout(pEdad, BoxLayout.Y_AXIS));
         pEdad.add(crearEtiquetaCampo("Edad Estim.:"));
         txtEdad = new JTextField();
@@ -336,6 +346,7 @@ public class VistaAdopcionesPanel extends JPanel {
 
         JPanel pSexo = new JPanel();
         pSexo.setOpaque(false);
+        pSexo.setAlignmentX(Component.LEFT_ALIGNMENT);
         pSexo.setLayout(new BoxLayout(pSexo, BoxLayout.Y_AXIS));
         pSexo.add(crearEtiquetaCampo("Sexo:"));
         cbSexo = new JComboBox<>(new String[]{"Macho", "Hembra"});
@@ -350,6 +361,8 @@ public class VistaAdopcionesPanel extends JPanel {
         form.add(crearEtiquetaCampo("Estado Sanitario Obligatorio:"));
         JPanel pChecklist = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         pChecklist.setOpaque(false);
+        pChecklist.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pChecklist.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
 
         chkEsterilizado = new JCheckBox("Esterilizado/a");
         chkEsterilizado.setFont(new Font("Segoe UI", Font.BOLD, 10));
@@ -386,15 +399,19 @@ public class VistaAdopcionesPanel extends JPanel {
         JLabel lblSeccAdoptante = new JLabel("Datos del Postulante / Adoptante");
         lblSeccAdoptante.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblSeccAdoptante.setForeground(COLOR_AZUL_PRIMARIO);
+        lblSeccAdoptante.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblSeccAdoptante);
         form.add(Box.createVerticalStrut(4));
 
         // Nombre y DNI
         JPanel gridPostulante = new JPanel(new GridLayout(1, 2, 8, 0));
         gridPostulante.setOpaque(false);
+        gridPostulante.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridPostulante.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pAdNom = new JPanel();
         pAdNom.setOpaque(false);
+        pAdNom.setAlignmentX(Component.LEFT_ALIGNMENT);
         pAdNom.setLayout(new BoxLayout(pAdNom, BoxLayout.Y_AXIS));
         pAdNom.add(crearEtiquetaCampo("Nombre Postulante:"));
         txtAdoptanteNombre = new JTextField();
@@ -404,6 +421,7 @@ public class VistaAdopcionesPanel extends JPanel {
 
         JPanel pAdDni = new JPanel();
         pAdDni.setOpaque(false);
+        pAdDni.setAlignmentX(Component.LEFT_ALIGNMENT);
         pAdDni.setLayout(new BoxLayout(pAdDni, BoxLayout.Y_AXIS));
         pAdDni.add(crearEtiquetaCampo("DNI:"));
         txtAdoptanteDni = new JTextField();
@@ -417,6 +435,8 @@ public class VistaAdopcionesPanel extends JPanel {
         // Teléfono y Dirección
         JPanel gridContacto = new JPanel(new GridLayout(1, 2, 8, 0));
         gridContacto.setOpaque(false);
+        gridContacto.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridContacto.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pAdTel = new JPanel();
         pAdTel.setOpaque(false);
@@ -448,6 +468,8 @@ public class VistaAdopcionesPanel extends JPanel {
         // Botones de acción
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnNuevoRescatado = crearBoton("+ Nuevo Rescatado", false, this::guardarNuevoRescatado);
         JButton btnRegistrarPost = crearBoton("Registrar Postulación", true, this::registrarPostulacion);
@@ -595,10 +617,13 @@ public class VistaAdopcionesPanel extends JPanel {
     }
 
     private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto);
+        JLabel l = new JLabel(texto, SwingConstants.LEFT);
         l.setFont(new Font("Segoe UI", Font.BOLD, 10));
         l.setForeground(new Color(71, 85, 105));
         l.setBorder(new EmptyBorder(0, 0, 2, 0));
+        l.setHorizontalAlignment(SwingConstants.LEFT);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         return l;
     }
 
@@ -606,6 +631,9 @@ public class VistaAdopcionesPanel extends JPanel {
         c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
+        if (c instanceof javax.swing.JComponent jc) {
+            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         if (c instanceof JTextField) {
             ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_BORDE, 1, true),

@@ -284,9 +284,12 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         // RUC y Razón Social
         JPanel gridRucNom = new JPanel(new GridLayout(1, 2, 8, 0));
         gridRucNom.setOpaque(false);
+        gridRucNom.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridRucNom.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pRuc = new JPanel();
         pRuc.setOpaque(false);
+        pRuc.setAlignmentX(Component.LEFT_ALIGNMENT);
         pRuc.setLayout(new BoxLayout(pRuc, BoxLayout.Y_AXIS));
         pRuc.add(crearEtiquetaCampo("RUC Proveedor:"));
         txtRuc = new JTextField();
@@ -296,6 +299,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
 
         JPanel pTel = new JPanel();
         pTel.setOpaque(false);
+        pTel.setAlignmentX(Component.LEFT_ALIGNMENT);
         pTel.setLayout(new BoxLayout(pTel, BoxLayout.Y_AXIS));
         pTel.add(crearEtiquetaCampo("Teléfono:"));
         txtTelefono = new JTextField();
@@ -338,6 +342,8 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
 
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnLimpiar = crearBoton("Limpiar", false, this::limpiarFormProveedor);
         JButton btnGuardar = crearBoton("Guardar Proveedor", true, this::guardarProveedor);
@@ -370,9 +376,12 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         // Subtotal, IGV y Total
         JPanel gridValores = new JPanel(new GridLayout(1, 3, 6, 0));
         gridValores.setOpaque(false);
+        gridValores.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridValores.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pSub = new JPanel();
         pSub.setOpaque(false);
+        pSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         pSub.setLayout(new BoxLayout(pSub, BoxLayout.Y_AXIS));
         pSub.add(crearEtiquetaCampo("Subtotal S/.:"));
         txtSubtotalOrden = new JTextField("1200.00");
@@ -385,6 +394,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
 
         JPanel pIgv = new JPanel();
         pIgv.setOpaque(false);
+        pIgv.setAlignmentX(Component.LEFT_ALIGNMENT);
         pIgv.setLayout(new BoxLayout(pIgv, BoxLayout.Y_AXIS));
         pIgv.add(crearEtiquetaCampo("IGV (18%):"));
         txtIgvOrden = new JTextField("216.00");
@@ -395,6 +405,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
 
         JPanel pTot = new JPanel();
         pTot.setOpaque(false);
+        pTot.setAlignmentX(Component.LEFT_ALIGNMENT);
         pTot.setLayout(new BoxLayout(pTot, BoxLayout.Y_AXIS));
         pTot.add(crearEtiquetaCampo("Total S/.:"));
         txtTotalOrden = new JTextField("1416.00");
@@ -420,6 +431,8 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
 
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnEmitir = crearBoton("Emitir Orden de Compra", true, this::guardarOrdenCompra);
         pBotones.add(btnEmitir);
@@ -576,10 +589,13 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
     }
 
     private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto);
+        JLabel l = new JLabel(texto, SwingConstants.LEFT);
         l.setFont(new Font("Segoe UI", Font.BOLD, 10));
         l.setForeground(new Color(71, 85, 105));
         l.setBorder(new EmptyBorder(0, 0, 2, 0));
+        l.setHorizontalAlignment(SwingConstants.LEFT);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         return l;
     }
 
@@ -587,6 +603,9 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
+        if (c instanceof javax.swing.JComponent jc) {
+            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         if (c instanceof JTextField) {
             ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_BORDE, 1, true),

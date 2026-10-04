@@ -260,11 +260,13 @@ public class VistaAjustesMermasPanel extends JPanel {
         JLabel lblTitulo = new JLabel("Registro de Ajuste / Merma");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblTitulo);
 
         JLabel lblSub = new JLabel("Baja formal de medicamentos con afectación de stock y cálculo de pérdida");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblSub);
         form.add(Box.createVerticalStrut(10));
 
@@ -279,9 +281,12 @@ public class VistaAjustesMermasPanel extends JPanel {
         // Lote y Tipo en Grid
         JPanel gridLoteTipo = new JPanel(new GridLayout(1, 2, 8, 0));
         gridLoteTipo.setOpaque(false);
+        gridLoteTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridLoteTipo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pLote = new JPanel();
         pLote.setOpaque(false);
+        pLote.setAlignmentX(Component.LEFT_ALIGNMENT);
         pLote.setLayout(new BoxLayout(pLote, BoxLayout.Y_AXIS));
         pLote.add(crearEtiquetaCampo("Número de Lote:"));
         txtLote = new JTextField("LOT-2024-88A");
@@ -291,6 +296,7 @@ public class VistaAjustesMermasPanel extends JPanel {
 
         JPanel pTipo = new JPanel();
         pTipo.setOpaque(false);
+        pTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
         pTipo.setLayout(new BoxLayout(pTipo, BoxLayout.Y_AXIS));
         pTipo.add(crearEtiquetaCampo("Tipo de Ajuste:"));
         cbTipo = new JComboBox<>(new String[]{
@@ -310,9 +316,12 @@ public class VistaAjustesMermasPanel extends JPanel {
         // Cantidad, Costo Unitario y Pérdida
         JPanel gridValores = new JPanel(new GridLayout(1, 3, 6, 0));
         gridValores.setOpaque(false);
+        gridValores.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridValores.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pCant = new JPanel();
         pCant.setOpaque(false);
+        pCant.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCant.setLayout(new BoxLayout(pCant, BoxLayout.Y_AXIS));
         pCant.add(crearEtiquetaCampo("Cantidad:"));
         txtCantidad = new JTextField("2");
@@ -325,6 +334,7 @@ public class VistaAjustesMermasPanel extends JPanel {
 
         JPanel pCosto = new JPanel();
         pCosto.setOpaque(false);
+        pCosto.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCosto.setLayout(new BoxLayout(pCosto, BoxLayout.Y_AXIS));
         pCosto.add(crearEtiquetaCampo("Costo Unit. S/.:"));
         txtCostoUnitario = new JTextField("25.00");
@@ -337,6 +347,7 @@ public class VistaAjustesMermasPanel extends JPanel {
 
         JPanel pPerd = new JPanel();
         pPerd.setOpaque(false);
+        pPerd.setAlignmentX(Component.LEFT_ALIGNMENT);
         pPerd.setLayout(new BoxLayout(pPerd, BoxLayout.Y_AXIS));
         pPerd.add(crearEtiquetaCampo("Pérdida S/.:"));
         txtPerdidaCalculada = new JTextField("50.00");
@@ -358,6 +369,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         JScrollPane spMotivo = new JScrollPane(txtMotivo);
         spMotivo.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
         spMotivo.setPreferredSize(new Dimension(spMotivo.getPreferredSize().width, 60));
+        spMotivo.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(spMotivo);
         form.add(Box.createVerticalStrut(6));
 
@@ -371,6 +383,8 @@ public class VistaAjustesMermasPanel extends JPanel {
         // Botones de acción
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnLimpiar = crearBoton("Limpiar", false, this::limpiarFormulario);
         JButton btnGuardar = crearBoton("Registrar Ajuste / Baja", true, this::guardarAjuste);
@@ -498,10 +512,13 @@ public class VistaAjustesMermasPanel extends JPanel {
     }
 
     private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto);
+        JLabel l = new JLabel(texto, SwingConstants.LEFT);
         l.setFont(new Font("Segoe UI", Font.BOLD, 10));
         l.setForeground(new Color(71, 85, 105));
         l.setBorder(new EmptyBorder(0, 0, 2, 0));
+        l.setHorizontalAlignment(SwingConstants.LEFT);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         return l;
     }
 
@@ -509,6 +526,9 @@ public class VistaAjustesMermasPanel extends JPanel {
         c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
+        if (c instanceof javax.swing.JComponent jc) {
+            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         if (c instanceof JTextField) {
             ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_BORDE, 1, true),

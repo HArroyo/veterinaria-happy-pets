@@ -264,20 +264,25 @@ public class VistaCatalogoProductosPanel extends JPanel {
         JLabel lblTitulo = new JLabel("Formulario de Producto / Fármaco");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblTitulo);
 
         JLabel lblSub = new JLabel("Definición de atributos clínicos, presentación y valores comerciales");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(lblSub);
         form.add(Box.createVerticalStrut(10));
 
         // Código y Categoría en Grid
         JPanel gridCodCat = new JPanel(new GridLayout(1, 2, 8, 0));
         gridCodCat.setOpaque(false);
+        gridCodCat.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridCodCat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pCod = new JPanel();
         pCod.setOpaque(false);
+        pCod.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCod.setLayout(new BoxLayout(pCod, BoxLayout.Y_AXIS));
         pCod.add(crearEtiquetaCampo("Código Producto:"));
         txtCodigo = new JTextField();
@@ -287,6 +292,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JPanel pCat = new JPanel();
         pCat.setOpaque(false);
+        pCat.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCat.setLayout(new BoxLayout(pCat, BoxLayout.Y_AXIS));
         pCat.add(crearEtiquetaCampo("Categoría:"));
         cbCategoria = new JComboBox<>(new String[]{
@@ -315,9 +321,12 @@ public class VistaCatalogoProductosPanel extends JPanel {
         // Principio Activo y Presentación
         JPanel gridPrincPres = new JPanel(new GridLayout(1, 2, 8, 0));
         gridPrincPres.setOpaque(false);
+        gridPrincPres.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridPrincPres.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pPrinc = new JPanel();
         pPrinc.setOpaque(false);
+        pPrinc.setAlignmentX(Component.LEFT_ALIGNMENT);
         pPrinc.setLayout(new BoxLayout(pPrinc, BoxLayout.Y_AXIS));
         pPrinc.add(crearEtiquetaCampo("Principio Activo:"));
         txtPrincipioActivo = new JTextField();
@@ -327,6 +336,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JPanel pPres = new JPanel();
         pPres.setOpaque(false);
+        pPres.setAlignmentX(Component.LEFT_ALIGNMENT);
         pPres.setLayout(new BoxLayout(pPres, BoxLayout.Y_AXIS));
         pPres.add(crearEtiquetaCampo("Presentación / Envase:"));
         txtPresentacion = new JTextField();
@@ -340,9 +350,12 @@ public class VistaCatalogoProductosPanel extends JPanel {
         // Especie Destino y Proveedor
         JPanel gridEspProv = new JPanel(new GridLayout(1, 2, 8, 0));
         gridEspProv.setOpaque(false);
+        gridEspProv.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridEspProv.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pEsp = new JPanel();
         pEsp.setOpaque(false);
+        pEsp.setAlignmentX(Component.LEFT_ALIGNMENT);
         pEsp.setLayout(new BoxLayout(pEsp, BoxLayout.Y_AXIS));
         pEsp.add(crearEtiquetaCampo("Especie Destino:"));
         cbEspecie = new JComboBox<>(new String[]{"Canino", "Felino", "Mixto Canino/Felino"});
@@ -352,6 +365,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JPanel pProv = new JPanel();
         pProv.setOpaque(false);
+        pProv.setAlignmentX(Component.LEFT_ALIGNMENT);
         pProv.setLayout(new BoxLayout(pProv, BoxLayout.Y_AXIS));
         pProv.add(crearEtiquetaCampo("Laboratorio / Proveedor:"));
         txtProveedor = new JTextField("Laboratorios Zoetis Perú S.A.C.");
@@ -365,9 +379,12 @@ public class VistaCatalogoProductosPanel extends JPanel {
         // Precios y Stock (Grid 4 columnas)
         JPanel gridPrecios = new JPanel(new GridLayout(1, 4, 6, 0));
         gridPrecios.setOpaque(false);
+        gridPrecios.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridPrecios.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 
         JPanel pCosto = new JPanel();
         pCosto.setOpaque(false);
+        pCosto.setAlignmentX(Component.LEFT_ALIGNMENT);
         pCosto.setLayout(new BoxLayout(pCosto, BoxLayout.Y_AXIS));
         pCosto.add(crearEtiquetaCampo("Costo S/.:"));
         txtPrecioCosto = new JTextField("30.00");
@@ -377,6 +394,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JPanel pVenta = new JPanel();
         pVenta.setOpaque(false);
+        pVenta.setAlignmentX(Component.LEFT_ALIGNMENT);
         pVenta.setLayout(new BoxLayout(pVenta, BoxLayout.Y_AXIS));
         pVenta.add(crearEtiquetaCampo("Venta S/.:"));
         txtPrecioVenta = new JTextField("50.00");
@@ -386,6 +404,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JPanel pStock = new JPanel();
         pStock.setOpaque(false);
+        pStock.setAlignmentX(Component.LEFT_ALIGNMENT);
         pStock.setLayout(new BoxLayout(pStock, BoxLayout.Y_AXIS));
         pStock.add(crearEtiquetaCampo("Stock Actual:"));
         txtStockActual = new JTextField("20");
@@ -395,6 +414,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JPanel pMin = new JPanel();
         pMin.setOpaque(false);
+        pMin.setAlignmentX(Component.LEFT_ALIGNMENT);
         pMin.setLayout(new BoxLayout(pMin, BoxLayout.Y_AXIS));
         pMin.add(crearEtiquetaCampo("Stock Mín.:"));
         txtStockMinimo = new JTextField("5");
@@ -408,6 +428,8 @@ public class VistaCatalogoProductosPanel extends JPanel {
         // Checkboxes Regulatorios
         JPanel pCheckboxes = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         pCheckboxes.setOpaque(false);
+        pCheckboxes.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pCheckboxes.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
 
         chkReceta = new JCheckBox("Venta Bajo Receta Retenida");
         chkReceta.setFont(new Font("Segoe UI", Font.BOLD, 10));
@@ -427,6 +449,8 @@ public class VistaCatalogoProductosPanel extends JPanel {
         // Botones de acción del formulario
         JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pBotones.setOpaque(false);
+        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         JButton btnLimpiar = crearBoton("Nuevo / Limpiar", false, this::limpiarFormulario);
         JButton btnGuardar = crearBoton("Guardar Producto", true, this::guardarProducto);
@@ -591,10 +615,13 @@ public class VistaCatalogoProductosPanel extends JPanel {
     }
 
     private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto);
+        JLabel l = new JLabel(texto, SwingConstants.LEFT);
         l.setFont(new Font("Segoe UI", Font.BOLD, 10));
         l.setForeground(new Color(71, 85, 105));
         l.setBorder(new EmptyBorder(0, 0, 2, 0));
+        l.setHorizontalAlignment(SwingConstants.LEFT);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         return l;
     }
 
@@ -602,6 +629,9 @@ public class VistaCatalogoProductosPanel extends JPanel {
         c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
+        if (c instanceof javax.swing.JComponent jc) {
+            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         if (c instanceof JTextField) {
             ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(COLOR_BORDE, 1, true),

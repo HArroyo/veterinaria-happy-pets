@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import happypets.model.Mascota;
@@ -164,13 +165,16 @@ public class FormularioMascotaDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0.35;
-        JLabel lbl = new JLabel(etiqueta);
+        gbc.anchor = GridBagConstraints.WEST;
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
         panel.add(lbl, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = row;
         gbc.weightx = 0.65;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(comp, gbc);
     }
 

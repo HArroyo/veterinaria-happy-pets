@@ -391,6 +391,7 @@ public class VistaRecordatoriosPanel extends JPanel {
 
         JPanel fila2 = new JPanel(new GridLayout(1, 2, 8, 0));
         fila2.setOpaque(false);
+        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
         fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fila2.add(crearFilaCampo("Teléfono / Correo Destino *", txtContactoDestino));
         fila2.add(crearFilaCampo("Canal de Transmisión *", pCanales));
@@ -529,12 +530,15 @@ public class VistaRecordatoriosPanel extends JPanel {
     private JPanel crearFilaCampo(String label, Component componente) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        int altura = (componente instanceof JScrollPane) ? 104 : 44;
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, altura));
 
-        JLabel lbl = new JLabel(label);
+        JLabel lbl = new JLabel(label, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(100, 116, 139));
         lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         p.add(lbl, BorderLayout.NORTH);
         p.add(componente, BorderLayout.CENTER);
