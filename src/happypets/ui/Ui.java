@@ -102,65 +102,100 @@ public final class Ui {
 	 * Pets'.
 	 */
 	public static JPanel crearCabeceraModulo(String tituloModulo, String subtituloModulo) {
+
 		JPanel panel = new JPanel(new BorderLayout(16, 0));
+
 		panel.setBackground(TURQUESA);
+
 		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(TURQUESA_OSCURO, 1),
 				new EmptyBorder(14, 18, 14, 18)));
 
-		// Insignia HP
-		JLabel badge = new JLabel("HP", SwingConstants.CENTER) {
-			private static final long serialVersionUID = 1L;
+		// =====================================================
+		// LOGO / IDENTIDAD
+		// =====================================================
 
-			@Override
-			protected void paintComponent(Graphics g) {
-				Graphics2D g2 = (Graphics2D) g.create();
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.setColor(Color.WHITE);
-				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-				super.paintComponent(g2);
-				g2.dispose();
-			}
-		};
-		badge.setPreferredSize(new Dimension(48, 48));
-		badge.setForeground(TURQUESA);
-		badge.setFont(new Font("Segoe UI", Font.BOLD, 20));
-		panel.add(badge, BorderLayout.WEST);
+		ImageIcon logo = logoHorizontal(170, 54);
 
-		// Textos del Módulo
+		JLabel lblLogo = new JLabel();
+
+		if (logo != null) {
+
+			lblLogo.setIcon(logo);
+
+		} else {
+
+			lblLogo.setText("Happy Pets");
+
+			lblLogo.setForeground(Color.WHITE);
+
+			lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+		}
+
+		lblLogo.setPreferredSize(new Dimension(180, 56));
+
+		panel.add(lblLogo, BorderLayout.WEST);
+
+		// =====================================================
+		// TEXTOS
+		// =====================================================
+
 		JPanel centro = new JPanel();
+
 		centro.setOpaque(false);
+
 		centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 
 		JLabel lblTitulo = new JLabel(tituloModulo);
+
 		lblTitulo.setForeground(Color.WHITE);
+
 		lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
 
 		JLabel lblSub = new JLabel(subtituloModulo);
+
 		lblSub.setForeground(new Color(240, 255, 255));
+
 		lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 
 		centro.add(lblTitulo);
+
 		centro.add(Box.createVerticalStrut(3));
+
 		centro.add(lblSub);
+
 		panel.add(centro, BorderLayout.CENTER);
 
-		// Badge lateral Happy Pets
-		JLabel pill = new JLabel("Happy Pets", SwingConstants.CENTER) {
+		// =====================================================
+		// BADGE LATERAL
+		// =====================================================
+
+		JLabel pill = new JLabel("Clínica Veterinaria", SwingConstants.CENTER) {
+
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void paintComponent(Graphics g) {
+
 				Graphics2D g2 = (Graphics2D) g.create();
+
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 				g2.setColor(Color.WHITE);
-				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-				super.paintComponent(g2);
+
+				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+
 				g2.dispose();
+
+				super.paintComponent(g);
 			}
 		};
-		pill.setPreferredSize(new Dimension(170, 30));
+
+		pill.setPreferredSize(new Dimension(160, 30));
+
 		pill.setForeground(new Color(60, 60, 60));
+
 		pill.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
 		panel.add(pill, BorderLayout.EAST);
 
 		return panel;
@@ -319,11 +354,17 @@ public final class Ui {
 	}
 
 	public static void configurarVentana(JFrame frame, String titulo) {
-		frame.setTitle("Happy Pets - " + titulo);
+
+		frame.setTitle("Happy Pets Clínica Veterinaria · " + titulo);
+
 		frame.setIconImage(icono());
+
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
 		frame.setSize(1440, 860);
+
 		frame.setMinimumSize(new Dimension(1200, 750));
+
 		frame.setLocationRelativeTo(null);
 	}
 
@@ -380,58 +421,35 @@ public final class Ui {
 		}
 	}
 
-	public static ImageIcon logoHorizontal(
-	        int anchoMaximo,
-	        int altoMaximo) {
+	public static ImageIcon logoHorizontal(int anchoMaximo, int altoMaximo) {
 
-	    URL url = Ui.class.getResource(
-	            "/happypets/assets/images/logo-happypets.png"
-	    );
+		URL url = Ui.class.getResource("/happypets/assets/images/logo-happypets.png");
 
-	    if (url == null) {
-	        return null;
-	    }
+		if (url == null) {
+			return null;
+		}
 
-	    ImageIcon original =
-	            new ImageIcon(url);
+		ImageIcon original = new ImageIcon(url);
 
-	    int anchoOriginal =
-	            original.getIconWidth();
+		int anchoOriginal = original.getIconWidth();
 
-	    int altoOriginal =
-	            original.getIconHeight();
+		int altoOriginal = original.getIconHeight();
 
-	    if (anchoOriginal <= 0 || altoOriginal <= 0) {
-	        return null;
-	    }
+		if (anchoOriginal <= 0 || altoOriginal <= 0) {
+			return null;
+		}
 
-	    double escala =
-	            Math.min(
-	                    (double) anchoMaximo / anchoOriginal,
-	                    (double) altoMaximo / altoOriginal
-	            );
+		double escala = Math.min((double) anchoMaximo / anchoOriginal, (double) altoMaximo / altoOriginal);
 
-	    int nuevoAncho =
-	            (int) Math.round(
-	                    anchoOriginal * escala
-	            );
+		int nuevoAncho = (int) Math.round(anchoOriginal * escala);
 
-	    int nuevoAlto =
-	            (int) Math.round(
-	                    altoOriginal * escala
-	            );
+		int nuevoAlto = (int) Math.round(altoOriginal * escala);
 
-	    Image escalada =
-	            original.getImage()
-	                    .getScaledInstance(
-	                            nuevoAncho,
-	                            nuevoAlto,
-	                            Image.SCALE_SMOOTH
-	                    );
+		Image escalada = original.getImage().getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
 
-	    return new ImageIcon(escalada);
+		return new ImageIcon(escalada);
 	}
-	
+
 	/**
 	 * Renderer y Editor para columna con dos botones: [Ver] y [Descargar PDF]
 	 */
