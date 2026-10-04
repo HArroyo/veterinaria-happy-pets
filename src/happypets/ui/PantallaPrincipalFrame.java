@@ -15,6 +15,8 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -129,34 +131,81 @@ public class PantallaPrincipalFrame extends JFrame {
 	private JLabel lblContadorFiltro;
 
 	public PantallaPrincipalFrame() {
-		setTitle("Happy Pets - Panel de Gestión Veterinaria");
+
+		setTitle("Happy Pets Clínica Veterinaria · Panel de Gestión");
 		setIconImage(Ui.icono());
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 		setSize(1380, 880);
-		setMinimumSize(new Dimension(1180, 740));
+
+		// Seguimos siendo una aplicación desktop.
+		// No necesitamos soportar tamaños tipo móvil.
+		setMinimumSize(new Dimension(1050, 680));
+
 		setLocationRelativeTo(null);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+
 		setLayout(new BorderLayout());
 
-		// 1. Menú Lateral Izquierdo (Sidebar moderno)
-		add(crearBarraLateralIzquierda(), BorderLayout.WEST);
+		// =====================================================
+		// SIDEBAR
+		// =====================================================
 
-		// 2. Panel Principal con fondo
+		JPanel sidebar = crearBarraLateralIzquierda();
+
+		add(sidebar, BorderLayout.WEST);
+
+		// =====================================================
+		// PANEL PRINCIPAL
+		// =====================================================
+
 		BackgroundPanel panelCentro = new BackgroundPanel("/happypets/assets/images/bg-happypets.png");
+
 		panelCentro.setLayout(new BorderLayout());
 
-		// Barra superior con búsqueda y usuario
 		panelCentro.add(crearBarraTopHeader(), BorderLayout.NORTH);
 
-		// Contenedor dinámico de vistas en CardLayout
 		JPanel contenedorCards = crearContenedorCards();
+
 		contenedorCards.setOpaque(false);
 
 		panelCentro.add(contenedorCards, BorderLayout.CENTER);
 
 		add(panelCentro, BorderLayout.CENTER);
 
-		// Iniciar en la vista de Clientes y Mascotas vinculadas del Módulo 1
+		// =====================================================
+		// RESPONSIVE DEL SIDEBAR
+		// =====================================================
+
+		addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+
+				int anchoVentana = getContentPane().getWidth();
+
+				int anchoSidebar;
+
+				if (anchoVentana < 1200) {
+
+					anchoSidebar = 220;
+
+				} else if (anchoVentana < 1500) {
+
+					anchoSidebar = 240;
+
+				} else {
+
+					anchoSidebar = 270;
+				}
+
+				sidebar.setPreferredSize(new Dimension(anchoSidebar, 0));
+
+				sidebar.revalidate();
+			}
+		});
+
 		mostrarVista("MODULO1_CLIENTES");
 	}
 
@@ -184,7 +233,7 @@ public class PantallaPrincipalFrame extends JFrame {
 
 			Image logoEscalado = logoOriginal.getImage().getScaledInstance(205, 78, Image.SCALE_SMOOTH);
 
-			JLabel lblLogo = new JLabel(new ImageIcon(logoEscalado), SwingConstants.LEFT);
+			JLabel lblLogo = crearLogoResponsive("/happypets/assets/images/logo-happypets.png");
 
 			headerLogo.add(lblLogo, BorderLayout.CENTER);
 
@@ -293,143 +342,256 @@ public class PantallaPrincipalFrame extends JFrame {
 		return sidebar;
 	}
 
+	private JLabel crearLogoResponsive(String ruta) {
+
+		java.net.URL url = getClass().getResource(ruta);
+
+		if (url == null) {
+
+			JLabel fallback = new JLabel("Happy Pets");
+
+			fallback.setFont(new Font("Segoe UI", Font.BOLD, 18));
+
+			return fallback;
+		}
+
+		Image imagen = new ImageIcon(url).getImage();
+
+		JLabel label = new JLabel() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void paintComponent(Graphics g) {
+
+				super.paintComponent(g);
+
+				int imgW = imagen.getWidth(this);
+
+				int imgH = imagen.getHeight(this);
+
+				if (imgW <= 0 || imgH <= 0) {
+					return;
+				}
+
+				int disponibleW = getWidth();
+
+				int disponibleH = getHeight();
+
+				double escala = Math.min((double) disponibleW / imgW, (double) disponibleH / imgH);
+
+				int ancho = (int) (imgW * escala);
+
+				int alto = (int) (imgH * escala);
+
+				int x = (disponibleW - ancho) / 2;
+
+				int y = (disponibleH - alto) / 2;
+
+				Graphics2D g2 = (Graphics2D) g.create();
+
+				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+				g2.drawImage(imagen, x, y, ancho, alto, this);
+
+				g2.dispose();
+			}
+		};
+
+		label.setPreferredSize(new Dimension(0, 72));
+
+		return label;
+	}
+
 	/**
 	 * Barra superior (Top Bar) con buscador, botón toggle, campana de
 	 * notificaciones y bloque de usuario.
 	 */
 	private JPanel crearBarraTopHeader() {
-		JPanel top = new JPanel(new BorderLayout());
-		top.setPreferredSize(new Dimension(0, 64));
+
+		JPanel top = new JPanel();
+
+		top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
+
 		top.setBackground(Color.WHITE);
-		top.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
+
 		top.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE),
 				new EmptyBorder(10, 20, 10, 24)));
 
-		// Izquierda: Solo Buscador redondeado (sin botón hamburguesa)
-		JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 2));
-		izq.setOpaque(false);
+		// =====================================================
+		// BUSCADOR
+		// =====================================================
 
-		// Barra de búsqueda redondeada con icono
 		JPanel searchBox = new JPanel(new BorderLayout(8, 0)) {
+
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void paintComponent(Graphics g) {
+
 				Graphics2D g2 = (Graphics2D) g.create();
+
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 				g2.setColor(new Color(241, 245, 249));
+
 				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
-				g2.setColor(new Color(226, 232, 240));
+
+				g2.setColor(COLOR_BORDE);
+
 				g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
-				super.paintComponent(g2);
+
 				g2.dispose();
+
+				super.paintComponent(g);
 			}
 		};
+
 		searchBox.setOpaque(false);
-		searchBox.setPreferredSize(new Dimension(320, 36));
+
+		searchBox.setMinimumSize(new Dimension(180, 36));
+
+		searchBox.setPreferredSize(new Dimension(280, 36));
+
+		searchBox.setMaximumSize(new Dimension(380, 36));
+
 		searchBox.setBorder(new EmptyBorder(4, 12, 4, 12));
 
 		JLabel icoBuscar = new JLabel(Iconos.crearIconoBuscar(16, new Color(148, 163, 184)));
+
 		searchBox.add(icoBuscar, BorderLayout.WEST);
 
 		JTextField txtBuscar = new JTextField();
+
 		txtBuscar.setBorder(null);
 		txtBuscar.setOpaque(false);
+
 		txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
 		txtBuscar.setForeground(new Color(51, 65, 85));
+
 		txtBuscar.setText("Buscar cliente, paciente, historia...");
 
 		txtBuscar.addFocusListener(new java.awt.event.FocusAdapter() {
+
 			@Override
 			public void focusGained(java.awt.event.FocusEvent e) {
+
 				if ("Buscar cliente, paciente, historia...".equals(txtBuscar.getText())) {
+
 					txtBuscar.setText("");
 				}
 			}
 
 			@Override
 			public void focusLost(java.awt.event.FocusEvent e) {
+
 				if (txtBuscar.getText().trim().isEmpty()) {
+
 					txtBuscar.setText("Buscar cliente, paciente, historia...");
 				}
 			}
 		});
 
 		txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
+
 			@Override
 			public void keyReleased(java.awt.event.KeyEvent e) {
+
 				filtrarTabla(txtBuscar.getText());
 			}
 		});
 
 		searchBox.add(txtBuscar, BorderLayout.CENTER);
-		izq.add(searchBox);
 
-		top.add(izq, BorderLayout.WEST);
+		top.add(searchBox);
 
-		// Derecha: Notificaciones + Perfil de Usuario con avatar circular (igual a la
-		// captura)
-		JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 2));
+		// Empuja usuario al extremo derecho
+		top.add(Box.createHorizontalGlue());
+
+		// =====================================================
+		// PARTE DERECHA
+		// =====================================================
+
+		JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 2));
+
 		der.setOpaque(false);
 
-		// Campana de notificaciones
-		JButton btnNotif = new JButton(Iconos.crearIconoCampana(18, new Color(100, 116, 139)));
+		JButton btnNotif = new JButton(Iconos.crearIconoCampana(18, COLOR_TEXTO_MUTED));
+
 		btnNotif.setPreferredSize(new Dimension(36, 36));
+
 		btnNotif.setFocusPainted(false);
 		btnNotif.setContentAreaFilled(false);
-		btnNotif.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnNotif.setBorder(null);
-		btnNotif.setToolTipText("Notificaciones del sistema");
+
 		der.add(btnNotif);
 
-		// Separador vertical sutil
 		JLabel sep = new JLabel("│");
-		sep.setForeground(new Color(226, 232, 240));
+
+		sep.setForeground(COLOR_BORDE);
+
 		der.add(sep);
 
-		// Bloque de Usuario (Harry Martin Arroyo Preciado - Administrador)
 		Usuario user = auth.getSesionActual();
-		String nombreMostrar = "Harry Martin Arroyo Preciado"; // Representando al usuario en sesión según captura
+
+		String nombreMostrar = "Harry Martin Arroyo Preciado";
+
 		String rolMostrar = user != null ? user.getRol() : "Administrador";
 
 		JPanel userText = new JPanel();
+
 		userText.setOpaque(false);
+
 		userText.setLayout(new BoxLayout(userText, BoxLayout.Y_AXIS));
 
 		JLabel lblNombreUser = new JLabel(nombreMostrar);
+
 		lblNombreUser.setFont(new Font("Segoe UI", Font.BOLD, 13));
-		lblNombreUser.setForeground(new Color(30, 41, 59));
-		lblNombreUser.setHorizontalAlignment(SwingConstants.RIGHT);
 
 		JLabel lblRolUser = new JLabel(rolMostrar);
+
 		lblRolUser.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+
 		lblRolUser.setForeground(COLOR_TEXTO_MUTED);
-		lblRolUser.setHorizontalAlignment(SwingConstants.RIGHT);
 
 		userText.add(lblNombreUser);
+
 		userText.add(lblRolUser);
+
 		der.add(userText);
 
-		// Avatar circular con iniciales "HM"
 		JLabel avatar = new JLabel("HM", SwingConstants.CENTER) {
+
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void paintComponent(Graphics g) {
+
 				Graphics2D g2 = (Graphics2D) g.create();
+
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 				g2.setColor(COLOR_AZUL_PRIMARIO);
+
 				g2.fillOval(0, 0, getWidth(), getHeight());
-				super.paintComponent(g2);
+
 				g2.dispose();
+
+				super.paintComponent(g);
 			}
 		};
+
 		avatar.setPreferredSize(new Dimension(38, 38));
+
 		avatar.setForeground(Color.WHITE);
+
 		avatar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+
 		der.add(avatar);
 
-		top.add(der, BorderLayout.EAST);
+		top.add(der);
+
 		return top;
 	}
 
@@ -437,7 +599,6 @@ public class PantallaPrincipalFrame extends JFrame {
 	 * Contenedor central que gestiona las vistas del sistema mediante CardLayout.
 	 */
 	private JPanel crearContenedorCards() {
-		panelContenedorCards.setBackground(COLOR_FONDO_APP);
 
 		panelDashboard = crearContenedorDashboard();
 		vistaClientesMascotas = new VistaClientesMascotasPanel();
@@ -527,33 +688,73 @@ public class PantallaPrincipalFrame extends JFrame {
 	 * Construye el contenido del Dashboard (Título, KPIs, Filtros y Tabla).
 	 */
 	private JScrollPane crearContenedorDashboard() {
-		// Background
+
 		BackgroundPanel contenido = new BackgroundPanel("/happypets/assets/images/bg-dashboard-happypets.png");
 
 		contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-		contenido.setBorder(new EmptyBorder(22, 28, 26, 28));
 
-		// 1. Título
-		contenido.add(crearCabeceraContenido());
-		contenido.add(Box.createVerticalStrut(20));
+		// Padding inicial
+		contenido.setBorder(new EmptyBorder(20, 24, 24, 24));
 
-		// 2. KPIs
-		contenido.add(crearFilaKpiWeb());
-		contenido.add(Box.createVerticalStrut(20));
+		JPanel cabecera = crearCabeceraContenido();
 
-		// 3. Filtros
-		contenido.add(crearBarraFiltros());
+		JPanel kpis = crearFilaKpiWeb();
+
+		JPanel filtros = crearBarraFiltros();
+
+		JPanel tabla = crearTarjetaTablaPacientes();
+
+		// Permitir crecimiento horizontal
+		cabecera.setMaximumSize(new Dimension(Integer.MAX_VALUE, cabecera.getPreferredSize().height));
+
+		filtros.setMaximumSize(new Dimension(Integer.MAX_VALUE, 64));
+
+		tabla.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+
+		contenido.add(cabecera);
+		contenido.add(Box.createVerticalStrut(18));
+
+		contenido.add(kpis);
+		contenido.add(Box.createVerticalStrut(18));
+
+		contenido.add(filtros);
 		contenido.add(Box.createVerticalStrut(10));
 
-		// 4. Tabla
-		contenido.add(crearTarjetaTablaPacientes());
+		contenido.add(tabla);
+
+		// Padding dinámico
+		contenido.addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+
+				int ancho = contenido.getWidth();
+
+				int padding;
+
+				if (ancho < 900) {
+
+					padding = 12;
+
+				} else if (ancho < 1200) {
+
+					padding = 18;
+
+				} else {
+
+					padding = 24;
+				}
+
+				contenido.setBorder(new EmptyBorder(20, padding, 24, padding));
+			}
+		});
 
 		JScrollPane scroll = new JScrollPane(contenido);
 
 		scroll.setBorder(null);
 
-		// Importante para dejar ver el background
 		scroll.setOpaque(false);
+
 		scroll.getViewport().setOpaque(false);
 
 		scroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -562,116 +763,159 @@ public class PantallaPrincipalFrame extends JFrame {
 	}
 
 	private JPanel crearCabeceraContenido() {
-		JPanel cab = new JPanel(new BorderLayout());
+
+		JPanel cab = new JPanel(new BorderLayout(20, 0));
+
 		cab.setOpaque(false);
 
 		JPanel izq = new JPanel();
+
 		izq.setOpaque(false);
+
 		izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
 		lblTituloVista = new JLabel("Planilla y Directorio Clínico (Módulo 1: Pacientes y Clientes)");
+
 		lblTituloVista.setFont(new Font("Segoe UI", Font.BOLD, 22));
+
 		lblTituloVista.setForeground(COLOR_TEXTO_TITULO);
 
 		lblSubtituloVista = new JLabel(
 				"Gestión centralizada de propietarios, fichas de mascotas vinculadas e historiales médicos");
+
 		lblSubtituloVista.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
 		lblSubtituloVista.setForeground(COLOR_TEXTO_MUTED);
 
 		izq.add(lblTituloVista);
+
 		izq.add(Box.createVerticalStrut(4));
+
 		izq.add(lblSubtituloVista);
+
 		cab.add(izq, BorderLayout.CENTER);
 
 		java.net.URL urlBoton = getClass().getResource("/happypets/assets/images/bg-btn-new-regist.png");
 
-		Image imagenBoton = null;
+		final Image fondoBoton = urlBoton != null ? new ImageIcon(urlBoton).getImage() : null;
 
-		if (urlBoton != null) {
-			imagenBoton = new ImageIcon(urlBoton).getImage();
-		}
+		JButton btnAccion = new JButton(
+				"<html><div style='text-align:center;'>" + "+ Nuevo Registro<br>/ Paciente" + "</div></html>") {
 
-		final Image fondoBoton = imagenBoton;
-
-		// Botón azul estilo "+ Generar Planilla por Empresa" de la captura
-		JButton btnAccion = new JButton("+ Nuevo Registro / Paciente") {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void paintComponent(Graphics g) {
+
 				Graphics2D g2 = (Graphics2D) g.create();
+
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 				if (fondoBoton != null) {
 
-					g2.setClip(new java.awt.geom.RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 8, 8));
-
 					int imgW = fondoBoton.getWidth(this);
+
 					int imgH = fondoBoton.getHeight(this);
 
-					double escalaX = (double) getWidth() / imgW;
-					double escalaY = (double) getHeight() / imgH;
-					double escala = Math.max(escalaX, escalaY);
+					double escala = Math.max((double) getWidth() / imgW, (double) getHeight() / imgH);
 
-					int ancho = (int) (imgW * escala);
-					int alto = (int) (imgH * escala);
+					int ancho = (int) Math.ceil(imgW * escala);
+
+					int alto = (int) Math.ceil(imgH * escala);
 
 					int x = (getWidth() - ancho) / 2;
+
 					int y = (getHeight() - alto) / 2;
 
-					g2.drawImage(fondoBoton, 0, 0, getWidth(), getHeight(), this);
+					g2.setClip(new java.awt.geom.RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 10, 10));
+
+					g2.drawImage(fondoBoton, x, y, ancho, alto, this);
 
 					if (getModel().isRollover()) {
-						g2.setColor(new Color(0, 0, 0, 35));
+
+						g2.setColor(new Color(0, 0, 0, 25));
+
 						g2.fillRect(0, 0, getWidth(), getHeight());
 					}
 
 				} else {
 
 					g2.setColor(COLOR_AZUL_PRIMARIO);
-					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 				}
-				super.paintComponent(g2);
+
 				g2.dispose();
+
+				super.paintComponent(g);
 			}
 		};
-		btnAccion.setText(
-				"<html><div style='text-align:center;'>" + "+ Nuevo Registro<br/>/ Paciente" + "</div></html>");
 
 		btnAccion.setFont(new Font("Segoe UI", Font.BOLD, 13));
+
 		btnAccion.setForeground(Color.WHITE);
+
 		btnAccion.setFocusPainted(false);
 		btnAccion.setContentAreaFilled(false);
 		btnAccion.setOpaque(false);
+
 		btnAccion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-		btnAccion.setHorizontalAlignment(SwingConstants.CENTER);
-		btnAccion.setVerticalAlignment(SwingConstants.CENTER);
-		btnAccion.setHorizontalTextPosition(SwingConstants.CENTER);
-		btnAccion.setVerticalTextPosition(SwingConstants.CENTER);
+		btnAccion.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-		// Tamaño cuadrado
-		Dimension sizeBoton = new Dimension(190, 190);
-		btnAccion.setPreferredSize(sizeBoton);
-		btnAccion.setMinimumSize(sizeBoton);
-		btnAccion.setMaximumSize(sizeBoton);
+		JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
-		// Menos padding interno para que no empuje el tamaño
-		btnAccion.setBorder(new EmptyBorder(12, 12, 12, 12));
+		panelBoton.setOpaque(false);
+
+		panelBoton.add(btnAccion);
+
+		cab.add(panelBoton, BorderLayout.EAST);
+
+		// Responsive y SIEMPRE cuadrado
+		cab.addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+
+				int ancho = cab.getWidth();
+
+				int size;
+
+				if (ancho < 900) {
+
+					size = 130;
+
+				} else if (ancho < 1200) {
+
+					size = 150;
+
+				} else {
+
+					size = 170;
+				}
+
+				Dimension d = new Dimension(size, size);
+
+				btnAccion.setPreferredSize(d);
+				btnAccion.setMinimumSize(d);
+				btnAccion.setMaximumSize(d);
+
+				panelBoton.revalidate();
+			}
+		});
 
 		btnAccion.addActionListener(e -> {
+
 			mostrarVista("MODULO1_CLIENTES");
+
 			vistaClientesMascotas.nuevoCliente();
+
 			activarBotonSubmodulo(1, 0);
+
 			actualizarVistaPrincipal("Mantenimiento de Clientes y Mascotas",
 					"Módulo 1.1 · Registro y administración de propietarios responsables y pacientes asociados");
 		});
 
-		// Contenedor para que no se estire por el BorderLayout
-		JPanel panelBotonDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-		panelBotonDerecha.setOpaque(false);
-		panelBotonDerecha.add(btnAccion);
-
-		cab.add(panelBotonDerecha, BorderLayout.EAST);
 		return cab;
 	}
 
@@ -681,11 +925,15 @@ public class PantallaPrincipalFrame extends JFrame {
 	 * debajo.
 	 */
 	private JPanel crearFilaKpiWeb() {
-		JPanel fila = new JPanel(new GridLayout(1, 4, 16, 0));
+
+		JPanel fila = new JPanel();
+
 		fila.setOpaque(false);
 
 		int totalClientes = repo.getClientes().size();
+
 		List<Mascota> totalMascotas = repo.todasLasMascotas();
+
 		int totalConsultas = 4;
 		int totalDocs = 5;
 
@@ -701,7 +949,60 @@ public class PantallaPrincipalFrame extends JFrame {
 		fila.add(crearCardKpi(String.valueOf(totalDocs), "CONSTANCIAS EMITIDAS", new Color(243, 232, 255),
 				new Color(147, 51, 234), Iconos.crearIconoCertificado(22, new Color(147, 51, 234))));
 
+		aplicarLayoutKpi(fila, 1400);
+
+		fila.addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+
+				aplicarLayoutKpi(fila, fila.getWidth());
+			}
+		});
+
 		return fila;
+	}
+
+	private void aplicarLayoutKpi(JPanel fila, int ancho) {
+
+		GridLayout actual;
+
+		if (fila.getLayout() instanceof GridLayout) {
+
+			actual = (GridLayout) fila.getLayout();
+
+		} else {
+
+			actual = null;
+		}
+
+		int filasDeseadas;
+		int columnasDeseadas;
+
+		if (ancho < 850) {
+
+			filasDeseadas = 4;
+			columnasDeseadas = 1;
+
+		} else if (ancho < 1100) {
+
+			filasDeseadas = 2;
+			columnasDeseadas = 2;
+
+		} else {
+
+			filasDeseadas = 1;
+			columnasDeseadas = 4;
+		}
+
+		if (actual == null || actual.getRows() != filasDeseadas || actual.getColumns() != columnasDeseadas) {
+
+			fila.setLayout(new GridLayout(filasDeseadas, columnasDeseadas, 16, 12));
+
+			fila.revalidate();
+		}
+
+		fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, fila.getPreferredSize().height));
 	}
 
 	private JPanel crearCardKpi(String valor, String etiqueta, Color colorFondoIco, Color colorIcono, Icon icono) {

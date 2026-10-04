@@ -36,7 +36,7 @@ public class HappyPetsApp extends JFrame {
     private static final long serialVersionUID = 1L;
 
     public HappyPetsApp() {
-        setTitle("Sistema de Gestión Veterinaria - Happy Pets");
+        setTitle("Happy Pets Clínica Veterinaria · Gestión Veterinaria");
         setIconImage(Ui.icono());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(780, 520);

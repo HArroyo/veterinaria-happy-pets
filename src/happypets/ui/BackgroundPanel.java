@@ -9,48 +9,75 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 public class BackgroundPanel extends JPanel {
-	 private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-	    private final Image backgroundImage;
+	private final Image backgroundImage;
 
-	    public BackgroundPanel(String resourcePath) {
-	        java.net.URL url = getClass().getResource(resourcePath);
-	        if (url != null) {
-	            backgroundImage = new ImageIcon(url).getImage();
-	        } else {
-	            throw new IllegalArgumentException("No se encontró el recurso: " + resourcePath);
-	        }
-	        setOpaque(false);
-	    }
+	public BackgroundPanel(String resourcePath) {
 
-	    @Override
-	    protected void paintComponent(Graphics g) {
-	        super.paintComponent(g);
+		java.net.URL url = getClass().getResource(resourcePath);
 
-	        if (backgroundImage != null) {
-	            Graphics2D g2 = (Graphics2D) g.create();
-	            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-	            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-	            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		if (url == null) {
+			throw new IllegalArgumentException("No se encontró el recurso: " + resourcePath);
+		}
 
-	            int panelWidth = getWidth();
-	            int panelHeight = getHeight();
+		backgroundImage = new ImageIcon(url).getImage();
 
-	            int imgWidth = backgroundImage.getWidth(this);
-	            int imgHeight = backgroundImage.getHeight(this);
+		setOpaque(false);
+	}
 
-	            double scaleX = (double) panelWidth / imgWidth;
-	            double scaleY = (double) panelHeight / imgHeight;
-	            double scale = Math.max(scaleX, scaleY);
+	@Override
+	protected void paintComponent(Graphics g) {
 
-	            int drawWidth = (int) (imgWidth * scale);
-	            int drawHeight = (int) (imgHeight * scale);
+		super.paintComponent(g);
 
-	            int x = (panelWidth - drawWidth) / 2;
-	            int y = (panelHeight - drawHeight) / 2;
+		if (backgroundImage == null) {
+			return;
+		}
 
-	            g2.drawImage(backgroundImage, x, y, drawWidth, drawHeight, this);
-	            g2.dispose();
-	        }
-	    }
+		int panelWidth = getWidth();
+		int panelHeight = getHeight();
+
+		int imageWidth = backgroundImage.getWidth(this);
+
+		int imageHeight = backgroundImage.getHeight(this);
+
+		if (imageWidth <= 0 || imageHeight <= 0) {
+			return;
+		}
+
+		/*
+		 * Escala tipo CSS background-size: cover.
+		 *
+		 * Mantiene la proporción original de la imagen y llena completamente el panel.
+		 */
+		double scaleX = (double) panelWidth / imageWidth;
+
+		double scaleY = (double) panelHeight / imageHeight;
+
+		double scale = Math.max(scaleX, scaleY);
+
+		int scaledWidth = (int) Math.ceil(imageWidth * scale);
+
+		int scaledHeight = (int) Math.ceil(imageHeight * scale);
+
+		/*
+		 * Centrar la imagen.
+		 */
+		int x = (panelWidth - scaledWidth) / 2;
+
+		int y = (panelHeight - scaledHeight) / 2;
+
+		Graphics2D g2 = (Graphics2D) g.create();
+
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		g2.drawImage(backgroundImage, x, y, scaledWidth, scaledHeight, this);
+
+		g2.dispose();
+	}
 }
