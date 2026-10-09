@@ -72,10 +72,31 @@ import happypets.modulos.modulo5.VistaControlStockLotesPanel;
 import happypets.modulos.modulo5.VistaProveedoresOrdenesPanel;
 import happypets.modulos.modulo5.VistaAjustesMermasPanel;
 import happypets.modulos.modulo6.Modulo6FinanzasVentasFrame;
+import happypets.modulos.modulo6.VistaPuntoVentaPOSPanel;
+import happypets.modulos.modulo6.VistaCuentasCobrarPagarPanel;
+import happypets.modulos.modulo6.VistaControlCajaChicaPanel;
+import happypets.modulos.modulo6.VistaEgresosOperativosPanel;
 import happypets.modulos.modulo7.Modulo7PersonalRRHHFrame;
+import happypets.modulos.modulo7.VistaVeterinariosPanel;
+import happypets.modulos.modulo7.VistaPersonalApoyoPanel;
+import happypets.modulos.modulo7.VistaHorariosTurnosPanel;
+import happypets.modulos.modulo7.VistaAsistenciasPermisosPanel;
 import happypets.modulos.modulo8.Modulo8ReportesBIFrame;
+import happypets.modulos.modulo8.VistaTablerosMandoPanel;
+import happypets.modulos.modulo8.VistaReportesClinicosPanel;
+import happypets.modulos.modulo8.VistaReportesFinancierosPanel;
+import happypets.modulos.modulo8.VistaExportadorDatosPanel;
 import happypets.modulos.modulo9.Modulo9NotificacionesAuditoriaFrame;
+import happypets.modulos.modulo9.VistaCentroNotificacionesPanel;
+import happypets.modulos.modulo9.VistaConfiguracionCanalesPanel;
+import happypets.modulos.modulo9.VistaRepositorioDocumentalPanel;
+import happypets.modulos.modulo9.VistaLogsTrazabilidadPanel;
 import happypets.modulos.modulo10.Modulo10ConfiguracionSoporteFrame;
+import happypets.modulos.modulo10.VistaDashboardAdministracionPanel;
+import happypets.modulos.modulo10.VistaParametrosGeneralesPanel;
+import happypets.modulos.modulo10.VistaUsuariosRolesPanel;
+import happypets.modulos.modulo10.VistaIntegracionesExternasPanel;
+import happypets.modulos.modulo10.VistaModuloIASoportePanel;
 
 /**
  * Pantalla Principal (Dashboard Moderno Veterinario con Menú Lateral Izquierdo).
@@ -130,6 +151,37 @@ public class PantallaPrincipalFrame extends JFrame {
     private VistaControlStockLotesPanel vistaStockLotes;
     private VistaProveedoresOrdenesPanel vistaProveedoresOrdenes;
     private VistaAjustesMermasPanel vistaAjustesMermas;
+
+    // Vistas integradas del Módulo 6 en CardLayout
+    private VistaPuntoVentaPOSPanel vistaPOS;
+    private VistaCuentasCobrarPagarPanel vistaCuentas;
+    private VistaControlCajaChicaPanel vistaCajaChica;
+    private VistaEgresosOperativosPanel vistaEgresos;
+
+    // Vistas integradas del Módulo 7 en CardLayout
+    private VistaVeterinariosPanel vistaVeterinarios;
+    private VistaPersonalApoyoPanel vistaPersonalApoyo;
+    private VistaHorariosTurnosPanel vistaHorariosTurnos;
+    private VistaAsistenciasPermisosPanel vistaAsistenciasPermisos;
+
+    // Vistas integradas del Módulo 8 en CardLayout
+    private VistaTablerosMandoPanel vistaTablerosMando;
+    private VistaReportesClinicosPanel vistaReportesClinicos;
+    private VistaReportesFinancierosPanel vistaReportesFinancieros;
+    private VistaExportadorDatosPanel vistaExportadorDatos;
+
+    // Vistas integradas del Módulo 9 en CardLayout
+    private VistaCentroNotificacionesPanel vistaCentroNotificaciones;
+    private VistaConfiguracionCanalesPanel vistaConfiguracionCanales;
+    private VistaRepositorioDocumentalPanel vistaRepositorioDocumental;
+    private VistaLogsTrazabilidadPanel vistaLogsTrazabilidad;
+
+    // Vistas integradas del Módulo 10 en CardLayout
+    private VistaDashboardAdministracionPanel vistaDashboardAdmin;
+    private VistaParametrosGeneralesPanel vistaParametrosGenerales;
+    private VistaUsuariosRolesPanel vistaUsuariosRoles;
+    private VistaIntegracionesExternasPanel vistaIntegracionesExternas;
+    private VistaModuloIASoportePanel vistaModuloIASoporte;
 
     private JScrollPane panelDashboard;
     private JButton btnDashboard;
@@ -565,6 +617,67 @@ public class PantallaPrincipalFrame extends JFrame {
         panelContenedorCards.add(vistaStockLotes, "MODULO5_STOCK_LOTES");
         panelContenedorCards.add(vistaProveedoresOrdenes, "MODULO5_PROVEEDORES");
         panelContenedorCards.add(vistaAjustesMermas, "MODULO5_AJUSTES");
+
+        // Vistas del Módulo 6: Finanzas y Ventas
+        vistaPOS = new VistaPuntoVentaPOSPanel();
+        vistaCuentas = new VistaCuentasCobrarPagarPanel();
+        vistaCajaChica = new VistaControlCajaChicaPanel();
+        vistaEgresos = new VistaEgresosOperativosPanel();
+
+        panelContenedorCards.add(vistaPOS, "MODULO6_POS");
+        panelContenedorCards.add(vistaCuentas, "MODULO6_CUENTAS");
+        panelContenedorCards.add(vistaCajaChica, "MODULO6_CAJA_CHICA");
+        panelContenedorCards.add(vistaEgresos, "MODULO6_EGRESOS");
+
+        // Vistas del Módulo 7: Personal y Recursos Humanos
+        vistaVeterinarios = new VistaVeterinariosPanel();
+        vistaPersonalApoyo = new VistaPersonalApoyoPanel();
+        vistaHorariosTurnos = new VistaHorariosTurnosPanel();
+        vistaAsistenciasPermisos = new VistaAsistenciasPermisosPanel();
+
+        panelContenedorCards.add(vistaVeterinarios, "MODULO7_VETERINARIOS");
+        panelContenedorCards.add(vistaPersonalApoyo, "MODULO7_APOYO");
+        panelContenedorCards.add(vistaHorariosTurnos, "MODULO7_TURNOS");
+        panelContenedorCards.add(vistaAsistenciasPermisos, "MODULO7_ASISTENCIAS");
+
+        // Vistas del Módulo 8: Inteligencia de Negocios y Reportes
+        vistaTablerosMando = new VistaTablerosMandoPanel();
+        vistaReportesClinicos = new VistaReportesClinicosPanel();
+        vistaReportesFinancieros = new VistaReportesFinancierosPanel(() -> {
+            mostrarVista("MODULO8_EXPORTADOR");
+            activarBotonSubmodulo(8, 3);
+            actualizarVistaPrincipal("Exportador de Datos", "Módulo 8.4 · Extracción masiva y modular de conjuntos de datos clínicos, financieros e inventario");
+        });
+        vistaExportadorDatos = new VistaExportadorDatosPanel();
+
+        panelContenedorCards.add(vistaTablerosMando, "MODULO8_DASHBOARD");
+        panelContenedorCards.add(vistaReportesClinicos, "MODULO8_CLINICOS");
+        panelContenedorCards.add(vistaReportesFinancieros, "MODULO8_FINANCIEROS");
+        panelContenedorCards.add(vistaExportadorDatos, "MODULO8_EXPORTADOR");
+
+        // Vistas del Módulo 9: Notificaciones, Documentos y Auditoría
+        vistaCentroNotificaciones = new VistaCentroNotificacionesPanel();
+        vistaConfiguracionCanales = new VistaConfiguracionCanalesPanel();
+        vistaRepositorioDocumental = new VistaRepositorioDocumentalPanel();
+        vistaLogsTrazabilidad = new VistaLogsTrazabilidadPanel();
+
+        panelContenedorCards.add(vistaCentroNotificaciones, "MODULO9_NOTIFICACIONES");
+        panelContenedorCards.add(vistaConfiguracionCanales, "MODULO9_CANALES");
+        panelContenedorCards.add(vistaRepositorioDocumental, "MODULO9_DOCUMENTOS");
+        panelContenedorCards.add(vistaLogsTrazabilidad, "MODULO9_LOGS");
+
+        // Vistas del Módulo 10: Configuración, Integraciones y Soporte
+        vistaDashboardAdmin = new VistaDashboardAdministracionPanel();
+        vistaParametrosGenerales = new VistaParametrosGeneralesPanel();
+        vistaUsuariosRoles = new VistaUsuariosRolesPanel();
+        vistaIntegracionesExternas = new VistaIntegracionesExternasPanel();
+        vistaModuloIASoporte = new VistaModuloIASoportePanel();
+
+        panelContenedorCards.add(vistaDashboardAdmin, "MODULO10_DASHBOARD");
+        panelContenedorCards.add(vistaParametrosGenerales, "MODULO10_PARAMETROS");
+        panelContenedorCards.add(vistaUsuariosRoles, "MODULO10_USUARIOS");
+        panelContenedorCards.add(vistaIntegracionesExternas, "MODULO10_INTEGRACIONES");
+        panelContenedorCards.add(vistaModuloIASoporte, "MODULO10_IA_SOPORTE");
 
         return panelContenedorCards;
     }
@@ -1341,10 +1454,26 @@ public class PantallaPrincipalFrame extends JFrame {
                         new String[]{"Punto de Venta (POS)", "Cuentas por Cobrar y Pagar", "Control de Caja Chica", "Gestión de Egresos Operativos"},
                         Iconos.crearIconoFactura(16, new Color(249, 115, 22)),
                         new Runnable[]{
-                                () -> new Modulo6FinanzasVentasFrame().setVisible(true),
-                                () -> new Modulo6FinanzasVentasFrame().setVisible(true),
-                                () -> new Modulo6FinanzasVentasFrame().setVisible(true),
-                                () -> new Modulo6FinanzasVentasFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO6_POS");
+                                    vistaPOS.recargarDatos();
+                                    actualizarVistaPrincipal("Punto de Venta (POS)", "Módulo 6.1 · Facturación electrónica rápida, catálogo interactivo, múltiples medios de pago y emisión de comprobantes");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO6_CUENTAS");
+                                    vistaCuentas.recargarDatos();
+                                    actualizarVistaPrincipal("Cuentas por Cobrar y Pagar", "Módulo 6.2 · Control de créditos otorgados a clientes, amortizaciones y obligaciones con proveedores");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO6_CAJA_CHICA");
+                                    vistaCajaChica.recargarDatos();
+                                    actualizarVistaPrincipal("Control de Caja Chica", "Módulo 6.3 · Fondo fijo, ingresos, egresos de urgencia, saldo físico y arqueo de efectivo");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO6_EGRESOS");
+                                    vistaEgresos.recargarDatos();
+                                    actualizarVistaPrincipal("Gestión de Egresos Operativos", "Módulo 6.4 · Control presupuestal de alquiler, servicios básicos, planillas y mantenimiento");
+                                }
                         }
                 ),
                 new DefinicionModulo(
@@ -1352,43 +1481,95 @@ public class PantallaPrincipalFrame extends JFrame {
                         new String[]{"Veterinarios", "Personal de Apoyo", "Horarios y Turnos", "Asistencias y Permisos"},
                         Iconos.crearIconoUsuario(16, new Color(168, 85, 247)),
                         new Runnable[]{
-                                () -> new Modulo7PersonalRRHHFrame().setVisible(true),
-                                () -> new Modulo7PersonalRRHHFrame().setVisible(true),
-                                () -> new Modulo7PersonalRRHHFrame().setVisible(true),
-                                () -> new Modulo7PersonalRRHHFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO7_VETERINARIOS");
+                                    vistaVeterinarios.recargarDatos();
+                                    actualizarVistaPrincipal("Nuestros Veterinarios", "Módulo 7.1 · Directorio de especialistas clínicos colegiados, especialidades y disponibilidad en tiempo real");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO7_APOYO");
+                                    vistaPersonalApoyo.recargarDatos();
+                                    actualizarVistaPrincipal("Personal de Apoyo", "Módulo 7.2 · Directorio de auxiliares veterinarios ATV, recepción, estética y administración");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO7_TURNOS");
+                                    vistaHorariosTurnos.recargarDatos();
+                                    actualizarVistaPrincipal("Horarios y Turnos Médicos", "Módulo 7.3 · Cuadrante semanal de guardias, roles médicos y asignación de salas");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO7_ASISTENCIAS");
+                                    vistaAsistenciasPermisos.recargarDatos();
+                                    actualizarVistaPrincipal("Asistencias y Permisos", "Módulo 7.4 · Pase de lista diario por turnos, control de retardos y solicitudes de permisos");
+                                }
                         }
                 ),
                 new DefinicionModulo(
                         8, "Inteligencia y Reportes", "Arroyo Preciado, Harry Martin",
                         new String[]{"Tableros de Mando (Dashboards)", "Reportes Clínicos", "Reportes Financieros", "Exportador de Datos"},
-                        Iconos.crearIconoReportes(16, new Color(13, 148, 136)),
+                        Iconos.crearIconoReportes(16, new Color(0, 115, 125)),
                         new Runnable[]{
-                                () -> new Modulo8ReportesBIFrame().setVisible(true),
-                                () -> new Modulo8ReportesBIFrame().setVisible(true),
-                                () -> new Modulo8ReportesBIFrame().setVisible(true),
-                                () -> new Modulo8ReportesBIFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO8_DASHBOARD");
+                                    actualizarVistaPrincipal("Tableros de Mando (Dashboards)", "Módulo 8.1 · Monitoreo ejecutivo de indicadores de rendimiento, citas e ingresos en tiempo real");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO8_CLINICOS");
+                                    actualizarVistaPrincipal("Reportes Clínicos", "Módulo 8.2 · Historial integral de consultas médicas, prevalencia patológica y carga asistencial");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO8_FINANCIEROS");
+                                    actualizarVistaPrincipal("Reportes Financieros", "Módulo 8.3 · Balance consolidado de ingresos, costes asistenciales y rentabilidad por centro de coste");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO8_EXPORTADOR");
+                                    actualizarVistaPrincipal("Exportador de Datos", "Módulo 8.4 · Extracción masiva y modular de conjuntos de datos clínicos, financieros e inventario");
+                                }
                         }
                 ),
                 new DefinicionModulo(
                         9, "Notificaciones y Auditoría", "Vera Aguilar, Carlos Edgardo",
                         new String[]{"Centro de Notificaciones", "Configuración de Canales", "Repositorio Documental", "Logs y Trazabilidad"},
-                        Iconos.crearIconoHistorial(16, new Color(100, 116, 139)),
+                        Iconos.crearIconoCampana(16, new Color(100, 116, 139)),
                         new Runnable[]{
-                                () -> new Modulo9NotificacionesAuditoriaFrame().setVisible(true),
-                                () -> new Modulo9NotificacionesAuditoriaFrame().setVisible(true),
-                                () -> new Modulo9NotificacionesAuditoriaFrame().setVisible(true),
-                                () -> new Modulo9NotificacionesAuditoriaFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO9_NOTIFICACIONES");
+                                    actualizarVistaPrincipal("Centro de Notificaciones", "Módulo 9.1 · Bandeja unificada de alertas críticas, incidentes de seguridad y avisos en vivo");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO9_CANALES");
+                                    actualizarVistaPrincipal("Configuración de Canales", "Módulo 9.2 · Parametrización de pasarelas de entrega (Email, SMS y Push) y políticas de envío");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO9_DOCUMENTOS");
+                                    actualizarVistaPrincipal("Repositorio Documental", "Módulo 9.3 · Almacenamiento institucional, custodia digital y expediente de contratos y facturas");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO9_LOGS");
+                                    actualizarVistaPrincipal("Logs y Trazabilidad (Auditoría)", "Módulo 9.4 · Pistas de auditoría inmutables, registro de transacciones, descargas y accesos");
+                                }
                         }
                 ),
                 new DefinicionModulo(
                         10, "Configuración y Soporte", "Minaya Bravo, Almendra Lili",
                         new String[]{"Parámetros Generales", "Usuarios, Roles y Permisos", "Integraciones externas", "Módulo de IA y Soporte Técnico"},
-                        Iconos.crearIconoCandado(16, new Color(217, 119, 6)),
+                        Iconos.crearIconoConfiguracion(16, new Color(217, 119, 6)),
                         new Runnable[]{
-                                () -> new Modulo10ConfiguracionSoporteFrame().setVisible(true),
-                                () -> new Modulo10ConfiguracionSoporteFrame().setVisible(true),
-                                () -> new Modulo10ConfiguracionSoporteFrame().setVisible(true),
-                                () -> new Modulo10ConfiguracionSoporteFrame().setVisible(true)
+                                () -> {
+                                    mostrarVista("MODULO10_PARAMETROS");
+                                    actualizarVistaPrincipal("Parámetros Generales", "Módulo 10.1 · Datos institucionales, logotipo oficial, moneda principal y zonas horarias");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO10_USUARIOS");
+                                    actualizarVistaPrincipal("Usuarios, Roles y Permisos", "Módulo 10.2 · Nómina activa de colaboradores, asignación de áreas y matriz de privilegios");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO10_INTEGRACIONES");
+                                    actualizarVistaPrincipal("Integraciones Externas", "Módulo 10.3 · Conexión con DIAN/SUNAT, WhatsApp Cloud, pasarelas de pago y laboratorio");
+                                },
+                                () -> {
+                                    mostrarVista("MODULO10_IA_SOPORTE");
+                                    actualizarVistaPrincipal("Módulo de IA y Soporte Técnico", "Módulo 10.4 · Asistentes de triaje inteligente, consola diagnóstica y telemetría");
+                                }
                         }
                 )
         );

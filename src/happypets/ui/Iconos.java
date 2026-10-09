@@ -1113,6 +1113,680 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Icono para Punto de Venta (Terminal POS / Caja registradora).
+     */
+    public static Icon crearIconoPOS(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Pantalla superior
+        int px = (int) (s * 0.18);
+        int py = (int) (s * 0.14);
+        int pw = (int) (s * 0.64);
+        int ph = (int) (s * 0.44);
+        g.drawRoundRect(px, py, pw, ph, 4, 4);
+        // Base / pedestal
+        g.drawLine((int) (s * 0.38), (int) (s * 0.58), (int) (s * 0.34), (int) (s * 0.82));
+        g.drawLine((int) (s * 0.62), (int) (s * 0.58), (int) (s * 0.66), (int) (s * 0.82));
+        g.drawLine((int) (s * 0.22), (int) (s * 0.82), (int) (s * 0.78), (int) (s * 0.82));
+        // Teclado sutil o ranura
+        g.fillRect((int) (s * 0.28), (int) (s * 0.24), (int) (s * 0.44), (int) (s * 0.16));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Cuentas por Cobrar y Pagar (Balancín / Intercambio contable).
+     */
+    public static Icon crearIconoCuentas(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Dos flechas opuestas circulares o libro mayor
+        int rx = (int) (s * 0.18);
+        int ry = (int) (s * 0.16);
+        int rw = (int) (s * 0.64);
+        int rh = (int) (s * 0.68);
+        g.drawRoundRect(rx, ry, rw, rh, 6, 6);
+        // Marcador / símbolo S/
+        g.drawString("S/", (int) (s * 0.32), (int) (s * 0.60));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Caja Chica (Billetera / Caja de caudales).
+     */
+    public static Icon crearIconoCajaChica(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Caja / cofre
+        int bx = (int) (s * 0.15);
+        int by = (int) (s * 0.24);
+        int bw = (int) (s * 0.70);
+        int bh = (int) (s * 0.52);
+        g.drawRoundRect(bx, by, bw, bh, 6, 6);
+        // Asa superior
+        g.drawArc((int) (s * 0.34), (int) (s * 0.12), (int) (s * 0.32), (int) (s * 0.24), 0, 180);
+        // Cerradura central
+        g.fillOval((int) (s * 0.44), (int) (s * 0.46), (int) (s * 0.12), (int) (s * 0.12));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Egresos Operativos (Gasto / Salida monetaria).
+     */
+    public static Icon crearIconoEgresos(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Hoja o recibo
+        int x = (int) (s * 0.20);
+        int y = (int) (s * 0.15);
+        int w = (int) (s * 0.60);
+        int h = (int) (s * 0.70);
+        g.drawRoundRect(x, y, w, h, 4, 4);
+        // Flecha descendente de egreso
+        g.drawLine((int) (s * 0.35), (int) (s * 0.40), (int) (s * 0.65), (int) (s * 0.65));
+        g.drawLine((int) (s * 0.45), (int) (s * 0.65), (int) (s * 0.65), (int) (s * 0.65));
+        g.drawLine((int) (s * 0.65), (int) (s * 0.45), (int) (s * 0.65), (int) (s * 0.65));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Monedas / Efectivo.
+     */
+    public static Icon crearIconoMonedas(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Moneda frontal
+        int r = (int) (s * 0.52);
+        g.drawOval((int) (s * 0.14), (int) (s * 0.24), r, r);
+        // Moneda trasera
+        g.drawArc((int) (s * 0.38), (int) (s * 0.16), r, r, -60, 200);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Tarjeta de crédito / débito.
+     */
+    public static Icon crearIconoTarjeta(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.12);
+        int y = (int) (s * 0.24);
+        int w = (int) (s * 0.76);
+        int h = (int) (s * 0.52);
+        g.drawRoundRect(x, y, w, h, 6, 6);
+        g.fillRect(x, (int) (y + h * 0.25), w, (int) (h * 0.20));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Yape / Plin / QR.
+     */
+    public static Icon crearIconoQr(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int qx = (int) (s * 0.18);
+        int qy = (int) (s * 0.18);
+        int qw = (int) (s * 0.64);
+        int qh = (int) (s * 0.64);
+        g.drawRect(qx, qy, qw, qh);
+        g.fillRect(qx + 2, qy + 2, (int) (qw * 0.35), (int) (qh * 0.35));
+        g.fillRect((int) (qx + qw * 0.65) - 2, qy + 2, (int) (qw * 0.35), (int) (qh * 0.35));
+        g.fillRect(qx + 2, (int) (qy + qh * 0.65) - 2, (int) (qw * 0.35), (int) (qh * 0.35));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Veterinario / Médico con Cruz.
+     */
+    public static Icon crearIconoDoctor(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cabeza
+        int cr = (int) (s * 0.30);
+        g.drawOval((int) (s * 0.35), (int) (s * 0.10), cr, cr);
+        // Cuerpo / hombros
+        g.drawArc((int) (s * 0.16), (int) (s * 0.44), (int) (s * 0.68), (int) (s * 0.50), 0, 180);
+        // Cruz en el pecho
+        int cx = (int) (s * 0.50);
+        int cy = (int) (s * 0.62);
+        int len = (int) (s * 0.12);
+        g.drawLine(cx - len, cy, cx + len, cy);
+        g.drawLine(cx, cy - len, cx, cy + len);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Horarios y Turnos (Reloj con cuadrante).
+     */
+    public static Icon crearIconoTurno(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.12);
+        int y = (int) (s * 0.12);
+        int d = (int) (s * 0.76);
+        g.drawOval(x, y, d, d);
+        // Manecillas del reloj
+        int cx = (int) (s * 0.50);
+        int cy = (int) (s * 0.50);
+        g.drawLine(cx, cy, cx, (int) (s * 0.26));
+        g.drawLine(cx, cy, (int) (s * 0.70), cy);
+        // Pequeño sol/rayo indicador de turno
+        g.fillOval(cx - 2, cy - 2, 4, 4);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Asistencias y Pase de Lista (Check en portapapeles).
+     */
+    public static Icon crearIconoAsistencia(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int docX = (int) (s * 0.18);
+        int docY = (int) (s * 0.15);
+        int docW = (int) (s * 0.64);
+        int docH = (int) (s * 0.72);
+        g.drawRoundRect(docX, docY, docW, docH, 4, 4);
+        // Clip superior
+        g.drawRect((int) (s * 0.36), (int) (s * 0.08), (int) (s * 0.28), (int) (s * 0.12));
+
+        // Checkmark grande
+        g.drawLine((int) (s * 0.32), (int) (s * 0.50), (int) (s * 0.44), (int) (s * 0.62));
+        g.drawLine((int) (s * 0.44), (int) (s * 0.62), (int) (s * 0.68), (int) (s * 0.38));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Solicitudes y Permisos.
+     */
+    public static Icon crearIconoPermiso(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Hoja doblada
+        int hx = (int) (s * 0.20);
+        int hy = (int) (s * 0.14);
+        int hw = (int) (s * 0.60);
+        int hh = (int) (s * 0.72);
+        g.drawRoundRect(hx, hy, hw, hh, 4, 4);
+        // Líneas de texto del permiso
+        g.drawLine((int) (s * 0.30), (int) (s * 0.34), (int) (s * 0.70), (int) (s * 0.34));
+        g.drawLine((int) (s * 0.30), (int) (s * 0.48), (int) (s * 0.60), (int) (s * 0.48));
+        // Sello circular abajo a la derecha
+        g.drawOval((int) (s * 0.50), (int) (s * 0.58), (int) (s * 0.24), (int) (s * 0.24));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Teléfono / Extensión.
+     */
+    public static Icon crearIconoTelefono(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Auricular
+        g.drawArc((int) (s * 0.25), (int) (s * 0.25), (int) (s * 0.50), (int) (s * 0.50), 30, 210);
+        g.fillOval((int) (s * 0.22), (int) (s * 0.52), (int) (s * 0.18), (int) (s * 0.22));
+        g.fillOval((int) (s * 0.58), (int) (s * 0.22), (int) (s * 0.22), (int) (s * 0.18));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Filtro / Embudo.
+     */
+    public static Icon crearIconoFiltro(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int[] xPoints = { (int) (s * 0.16), (int) (s * 0.84), (int) (s * 0.58), (int) (s * 0.58), (int) (s * 0.42), (int) (s * 0.42) };
+        int[] yPoints = { (int) (s * 0.20), (int) (s * 0.20), (int) (s * 0.52), (int) (s * 0.82), (int) (s * 0.74), (int) (s * 0.52) };
+        g.drawPolygon(xPoints, yPoints, 6);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Exportar Datos (Bandeja con flecha hacia afuera).
+     */
+    public static Icon crearIconoExportar(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Bandeja inferior
+        int bx = (int) (s * 0.18);
+        int by = (int) (s * 0.45);
+        int bw = (int) (s * 0.64);
+        int bh = (int) (s * 0.40);
+        g.drawRoundRect(bx, by, bw, bh, 4, 4);
+
+        // Flecha hacia arriba
+        int cx = (int) (s * 0.50);
+        g.drawLine(cx, (int) (s * 0.60), cx, (int) (s * 0.15));
+        g.drawLine(cx, (int) (s * 0.15), (int) (s * 0.32), (int) (s * 0.30));
+        g.drawLine(cx, (int) (s * 0.15), (int) (s * 0.68), (int) (s * 0.30));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Gráfico de Barras / Analytics.
+     */
+    public static Icon crearIconoGraficoBarras(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Ejes X e Y
+        g.drawLine((int) (s * 0.15), (int) (s * 0.85), (int) (s * 0.85), (int) (s * 0.85));
+        g.drawLine((int) (s * 0.15), (int) (s * 0.85), (int) (s * 0.15), (int) (s * 0.15));
+
+        // 3 Barras ascendentes
+        g.fillRect((int) (s * 0.25), (int) (s * 0.55), (int) (s * 0.14), (int) (s * 0.30));
+        g.fillRect((int) (s * 0.45), (int) (s * 0.35), (int) (s * 0.14), (int) (s * 0.50));
+        g.fillRect((int) (s * 0.65), (int) (s * 0.20), (int) (s * 0.14), (int) (s * 0.65));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Gráfico de Torta / Donut.
+     */
+    public static Icon crearIconoGraficoTorta(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.15);
+        int y = (int) (s * 0.15);
+        int d = (int) (s * 0.70);
+        g.drawOval(x, y, d, d);
+
+        // Líneas divisorias de sectores
+        int cx = (int) (s * 0.50);
+        int cy = (int) (s * 0.50);
+        g.drawLine(cx, cy, cx, (int) (s * 0.15));
+        g.drawLine(cx, cy, (int) (s * 0.80), (int) (s * 0.65));
+        g.drawLine(cx, cy, (int) (s * 0.20), (int) (s * 0.65));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Hoja de Cálculo / Excel (.xlsx).
+     */
+    public static Icon crearIconoExcel(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.18);
+        int y = (int) (s * 0.14);
+        int w = (int) (s * 0.64);
+        int h = (int) (s * 0.72);
+        g.drawRoundRect(x, y, w, h, 4, 4);
+
+        // Letra X o cuadrícula
+        int gx1 = (int) (x + w * 0.25);
+        int gx2 = (int) (x + w * 0.75);
+        int gy1 = (int) (y + h * 0.30);
+        int gy2 = (int) (y + h * 0.70);
+        g.drawLine(gx1, gy1, gx2, gy2);
+        g.drawLine(gx2, gy1, gx1, gy2);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Refrescar / Sincronizar (flecha circular).
+     */
+    public static Icon crearIconoRefrescar(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.09);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.16);
+        int y = (int) (s * 0.16);
+        int d = (int) (s * 0.68);
+        g.drawArc(x, y, d, d, 45, 270);
+
+        // Flecha en la punta
+        int ax = (int) (s * 0.65);
+        int ay = (int) (s * 0.16);
+        g.drawLine(ax, ay, ax + (int)(s * 0.18), ay);
+        g.drawLine(ax + (int)(s * 0.18), ay, ax + (int)(s * 0.18), ay + (int)(s * 0.18));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Alias para Icono de Mascota (huella).
+     */
+    public static Icon crearIconoMascota(int size, Color color) {
+        return crearIconoHuella(size, color);
+    }
+
+    /**
+     * Alias para Icono de Búsqueda (lupa).
+     */
+    public static Icon crearIconoLupa(int size, Color color) {
+        return crearIconoBuscar(size, color);
+    }
+
+    /**
+     * Icono para Egresos / Gastos Financieros (flecha diagonal saliente con círculo).
+     */
+    public static Icon crearIconoEgreso(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.09);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.14);
+        int y = (int) (s * 0.14);
+        int d = (int) (s * 0.72);
+        g.drawOval(x, y, d, d);
+
+        // Flecha saliente abajo izquierda
+        int x1 = (int) (s * 0.60);
+        int y1 = (int) (s * 0.40);
+        int x2 = (int) (s * 0.40);
+        int y2 = (int) (s * 0.60);
+        g.drawLine(x1, y1, x2, y2);
+        g.drawLine(x2, y2, x2 + (int)(s * 0.15), y2);
+        g.drawLine(x2, y2, x2, y2 - (int)(s * 0.15));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono para Stock / Inventario (caja isométrica).
+     */
+    public static Icon crearIconoStock(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int x = (int) (s * 0.16);
+        int y = (int) (s * 0.22);
+        int w = (int) (s * 0.68);
+        int h = (int) (s * 0.60);
+        g.drawRoundRect(x, y, w, h, 4, 4);
+
+        // Tapa de caja
+        g.drawLine(x, (int) (y + h * 0.35), x + w, (int) (y + h * 0.35));
+        g.drawLine((int) (x + w * 0.50), (int) (y + h * 0.35), (int) (x + w * 0.50), y + h);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+
+    /**
+     * Icono de Canales / Transmisión / Megáfono.
+     */
+    public static Icon crearIconoCanales(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cono de megáfono
+        int[] xPts = { (int)(s * 0.20), (int)(s * 0.60), (int)(s * 0.60), (int)(s * 0.20) };
+        int[] yPts = { (int)(s * 0.40), (int)(s * 0.22), (int)(s * 0.72), (int)(s * 0.54) };
+        g.drawPolygon(xPts, yPts, 4);
+
+        // Mango
+        g.drawLine((int)(s * 0.32), (int)(s * 0.50), (int)(s * 0.32), (int)(s * 0.80));
+
+        // Ondas sonoras a la derecha
+        g.drawArc((int)(s * 0.56), (int)(s * 0.28), (int)(s * 0.24), (int)(s * 0.38), -45, 90);
+        g.drawArc((int)(s * 0.62), (int)(s * 0.20), (int)(s * 0.30), (int)(s * 0.54), -45, 90);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono de Tuerca / Engranaje / Configuración General.
+     */
+    public static Icon crearIconoConfiguracion(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int cx = (int)(s * 0.5);
+        int cy = (int)(s * 0.5);
+        int rExt = (int)(s * 0.36);
+        int rInt = (int)(s * 0.16);
+
+        // Círculo central
+        g.drawOval(cx - rInt, cy - rInt, rInt * 2, rInt * 2);
+
+        // Dientes del engranaje (8 dientes)
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0;
+            int x1 = (int)(cx + Math.cos(angle) * (rExt * 0.7));
+            int y1 = (int)(cy + Math.sin(angle) * (rExt * 0.7));
+            int x2 = (int)(cx + Math.cos(angle) * rExt);
+            int y2 = (int)(cy + Math.sin(angle) * rExt);
+            g.drawLine(x1, y1, x2, y2);
+        }
+        g.drawOval(cx - (int)(rExt * 0.7), cy - (int)(rExt * 0.7), (int)(rExt * 1.4), (int)(rExt * 1.4));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono de Robot / Inteligencia Artificial (IA).
+     */
+    public static Icon crearIconoRobot(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cabeza cuadrada redondeada
+        int x = (int)(s * 0.22);
+        int y = (int)(s * 0.28);
+        int w = (int)(s * 0.56);
+        int h = (int)(s * 0.48);
+        g.drawRoundRect(x, y, w, h, 6, 6);
+
+        // Antena
+        g.drawLine((int)(s * 0.50), y, (int)(s * 0.50), (int)(s * 0.14));
+        g.fillOval((int)(s * 0.44), (int)(s * 0.10), (int)(s * 0.12), (int)(s * 0.12));
+
+        // Ojos
+        int eyeR = (int)(s * 0.08);
+        g.fillOval((int)(s * 0.35 - eyeR/2), (int)(s * 0.46 - eyeR/2), eyeR, eyeR);
+        g.fillOval((int)(s * 0.65 - eyeR/2), (int)(s * 0.46 - eyeR/2), eyeR, eyeR);
+
+        // Boca
+        g.drawLine((int)(s * 0.36), (int)(s * 0.62), (int)(s * 0.64), (int)(s * 0.62));
+
+        // Orejas / conectores laterales
+        g.drawLine((int)(s * 0.16), (int)(s * 0.50), x, (int)(s * 0.50));
+        g.drawLine(x + w, (int)(s * 0.50), (int)(s * 0.84), (int)(s * 0.50));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono de Enchufe / Conexión / Integraciones Externas.
+     */
+    public static Icon crearIconoEnchufe(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Clavijas
+        g.drawLine((int)(s * 0.36), (int)(s * 0.16), (int)(s * 0.36), (int)(s * 0.32));
+        g.drawLine((int)(s * 0.64), (int)(s * 0.16), (int)(s * 0.64), (int)(s * 0.32));
+
+        // Cuerpo del enchufe
+        g.drawRoundRect((int)(s * 0.24), (int)(s * 0.32), (int)(s * 0.52), (int)(s * 0.36), 6, 6);
+
+        // Cable
+        g.drawLine((int)(s * 0.50), (int)(s * 0.68), (int)(s * 0.50), (int)(s * 0.86));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono de Auriculares / Soporte Técnico / Helpdesk.
+     */
+    public static Icon crearIconoAuriculares(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Diadema
+        int x = (int)(s * 0.20);
+        int y = (int)(s * 0.18);
+        int d = (int)(s * 0.60);
+        g.drawArc(x, y, d, d, 0, 180);
+
+        // Almohadillas
+        g.fillRoundRect((int)(s * 0.16), (int)(s * 0.44), (int)(s * 0.14), (int)(s * 0.30), 4, 4);
+        g.fillRoundRect((int)(s * 0.70), (int)(s * 0.44), (int)(s * 0.14), (int)(s * 0.30), 4, 4);
+
+        // Micrófono
+        g.drawLine((int)(s * 0.76), (int)(s * 0.66), (int)(s * 0.60), (int)(s * 0.82));
+        g.fillOval((int)(s * 0.54), (int)(s * 0.78), (int)(s * 0.10), (int)(s * 0.10));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }

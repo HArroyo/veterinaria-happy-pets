@@ -199,6 +199,24 @@ public final class Ui {
         return boton;
     }
 
+    public static JButton botonPrimario(String texto, javax.swing.Icon icono) {
+        JButton b = boton(texto, true);
+        if (icono != null) {
+            b.setIcon(icono);
+            b.setIconTextGap(6);
+        }
+        return b;
+    }
+
+    public static JButton botonSecundario(String texto, javax.swing.Icon icono) {
+        JButton b = boton(texto, false);
+        if (icono != null) {
+            b.setIcon(icono);
+            b.setIconTextGap(6);
+        }
+        return b;
+    }
+
     /**
      * Campo de texto con borde elegante y tamaño uniforme.
      */
