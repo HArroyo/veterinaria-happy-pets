@@ -2,6 +2,7 @@ module VeterinariaHappyPets {
     requires java.desktop;
 
     exports happypets;
+    exports happypets.auth;
     exports happypets.model;
     exports happypets.data;
     exports happypets.ui;

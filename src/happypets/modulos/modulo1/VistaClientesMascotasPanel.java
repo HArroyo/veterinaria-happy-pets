@@ -230,8 +230,9 @@ public class VistaClientesMascotasPanel extends JPanel {
         der.add(txtBusqueda);
 
         JButton btnBuscar = crearBotonAccion("Buscar", false);
-        btnBuscar.setIcon(Iconos.crearIconoBuscar(12, COLOR_AZUL_PRIMARIO));
-        btnBuscar.setIconTextGap(4);
+        btnBuscar.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
+        btnBuscar.setIconTextGap(6);
+        btnBuscar.setPreferredSize(new Dimension(92, 28));
 
         java.awt.event.ActionListener accionBuscar = e -> buscarCliente();
         btnBuscar.addActionListener(accionBuscar);
@@ -398,29 +399,35 @@ public class VistaClientesMascotasPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (primario) {
+                boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
+                if (esPrimario) {
                     g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                if (!primario) {
+                if (!esPrimario) {
                     g2.setColor(COLOR_BORDE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
                 super.paintComponent(g2);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, 28);
+            }
         };
+        btn.putClientProperty("primario", primario);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
-        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 28));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        btn.setBorder(new EmptyBorder(4, 12, 4, 12));
         return btn;
     }
 

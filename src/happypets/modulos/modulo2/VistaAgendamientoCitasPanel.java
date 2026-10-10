@@ -309,8 +309,9 @@ public class VistaAgendamientoCitasPanel extends JPanel {
         der.add(txtBusqueda);
 
         JButton btnBuscar = crearBotonAccion("Buscar", false);
-        btnBuscar.setIcon(Iconos.crearIconoBuscar(12, COLOR_AZUL_PRIMARIO));
-        btnBuscar.setIconTextGap(4);
+        btnBuscar.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
+        btnBuscar.setIconTextGap(6);
+        btnBuscar.setPreferredSize(new Dimension(92, 28));
         java.awt.event.ActionListener accionBuscar = e -> recargarDatos();
         btnBuscar.addActionListener(accionBuscar);
         txtBusqueda.addActionListener(accionBuscar);
@@ -705,6 +706,12 @@ public class VistaAgendamientoCitasPanel extends JPanel {
                 super.paintComponent(g2);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, 28);
+            }
         };
         btn.putClientProperty("primario", primario);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -713,9 +720,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
-        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 28));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        btn.setBorder(new EmptyBorder(4, 12, 4, 12));
         return btn;
     }
 

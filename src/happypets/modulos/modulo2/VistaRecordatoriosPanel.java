@@ -231,8 +231,9 @@ public class VistaRecordatoriosPanel extends JPanel {
         der.add(txtBuscar);
 
         JButton btnB = crearBotonAccion("Buscar", false);
-        btnB.setIcon(Iconos.crearIconoBuscar(12, COLOR_AZUL_PRIMARIO));
-        btnB.setIconTextGap(4);
+        btnB.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
+        btnB.setIconTextGap(6);
+        btnB.setPreferredSize(new Dimension(92, 28));
         btnB.addActionListener(accionB);
         der.add(btnB);
 
@@ -576,6 +577,12 @@ public class VistaRecordatoriosPanel extends JPanel {
                 super.paintComponent(g2);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, 28);
+            }
         };
         btn.putClientProperty("primario", primario);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -584,9 +591,7 @@ public class VistaRecordatoriosPanel extends JPanel {
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
-        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 28));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        btn.setBorder(new EmptyBorder(4, 12, 4, 12));
         return btn;
     }
 
