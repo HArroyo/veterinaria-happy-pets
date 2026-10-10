@@ -643,16 +643,21 @@ public class VistaControlStockLotesPanel extends happypets.ui.AssetsModulo {
         int cant = 1;
         try {
             cant = Integer.parseInt(txtCantidad.getText().trim());
-            if (cant <= 0) cant = 1;
+            if (cant <= 0) throw new IllegalArgumentException();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Ingrese una cantidad válida mayor a 0.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         LocalDate fechaVenc = LocalDate.now().plusMonths(12);
+        LocalDate fechaMovimiento;
         try {
-            fechaVenc = LocalDate.parse(txtFechaVencimiento.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception ignored) {}
+            fechaMovimiento = LocalDate.parse(txtFechaMovimiento.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT));
+            fechaVenc = LocalDate.parse(txtFechaVencimiento.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ingrese una fecha de vencimiento válida (dd/MM/yyyy).", "Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         String tipo = (String) cbTipoMovimiento.getSelectedItem();
         int stockPrev = item.producto.getStockActual();
@@ -671,7 +676,7 @@ public class VistaControlStockLotesPanel extends happypets.ui.AssetsModulo {
                 cant,
                 stockPrev,
                 stockPost,
-                LocalDate.now(),
+                fechaMovimiento,
                 fechaVenc,
                 txtResponsable.getText().trim(),
                 txtObservacion.getText().trim()

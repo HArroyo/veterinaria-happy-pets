@@ -49,7 +49,7 @@ public class VentaPOS {
         this.clienteNombre = clienteNombre != null ? clienteNombre : "Cliente Varios";
         this.clienteDocumento = clienteDocumento != null ? clienteDocumento : "-";
         this.mascotaNombre = mascotaNombre != null ? mascotaNombre : "-";
-        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+        this.items = copiarItems(items);
         this.porcentajeDescuento = porcentajeDescuento;
         this.metodoPago = metodoPago != null ? metodoPago : "Efectivo";
         this.montoRecibido = montoRecibido;
@@ -66,7 +66,7 @@ public class VentaPOS {
         this.subtotal = sub;
         this.montoDescuento = this.subtotal * (this.porcentajeDescuento / 100.0);
         double baseImponible = Math.max(0.0, this.subtotal - this.montoDescuento);
-        this.igv = baseImponible * 0.18; // 18% IGV oficial Perú
+        this.igv = baseImponible * 18.0 / 118.0; // Porción del IGV incluida en el PVP
         this.total = baseImponible; // En comercio retail con IGV ya incluido en PVP
         if (this.montoRecibido >= this.total) {
             this.vuelto = this.montoRecibido - this.total;
@@ -140,11 +140,11 @@ public class VentaPOS {
     }
 
     public List<ItemVentaPOS> getItems() {
-        return items;
+        return copiarItems(items);
     }
 
     public void setItems(List<ItemVentaPOS> items) {
-        this.items = items;
+        this.items = copiarItems(items);
         recalcularTotales();
     }
 
@@ -157,7 +157,7 @@ public class VentaPOS {
                 return;
             }
         }
-        items.add(item);
+        items.add(new ItemVentaPOS(item.getCodigo(), item.getDescripcion(), item.getCategoria(), item.getCantidad(), item.getPrecioUnitario()));
         recalcularTotales();
     }
 
@@ -241,5 +241,12 @@ public class VentaPOS {
             c += item.getCantidad();
         }
         return c;
+    }
+
+    private static List<ItemVentaPOS> copiarItems(List<ItemVentaPOS> origen) {
+        List<ItemVentaPOS> copia = new ArrayList<>();
+        if (origen != null) for (ItemVentaPOS item : origen)
+            copia.add(new ItemVentaPOS(item.getCodigo(), item.getDescripcion(), item.getCategoria(), item.getCantidad(), item.getPrecioUnitario()));
+        return copia;
     }
 }

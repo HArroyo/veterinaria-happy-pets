@@ -797,7 +797,7 @@ public class VistaAgendamientoCitasPanel extends happypets.ui.AssetsModulo {
 
         LocalDate fechaCita;
         try {
-            fechaCita = LocalDate.parse(strFecha, Cita.FECHA_FORMATTER);
+            fechaCita = LocalDate.parse(strFecha, java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT));
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "Formato de fecha inválido. Ingrese la fecha en formato dd/MM/yyyy (ej: 02/10/2026).",
@@ -813,7 +813,11 @@ public class VistaAgendamientoCitasPanel extends happypets.ui.AssetsModulo {
         double costo = 75.0;
         try {
             costo = Double.parseDouble(txtCosto.getText().trim());
-        } catch (Exception ignored) { }
+            if (!Double.isFinite(costo) || costo < 0) throw new IllegalArgumentException();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ingrese un costo válido mayor o igual a cero.", "Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         Cita nueva = new Cita(
                 null,
@@ -835,7 +839,12 @@ public class VistaAgendamientoCitasPanel extends happypets.ui.AssetsModulo {
                 costo
         );
 
-        repo.guardarCita(nueva);
+        try {
+            repo.guardarCita(nueva);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         JOptionPane.showMessageDialog(this,
                 "Cita " + nueva.getIdCita() + " agendada exitosamente para " + nueva.getNombreMascota() + "\nFecha: " + nueva.getFechaFormateada() + " a las " + nueva.getHoraFormateada() + " hrs.",
                 "Cita Agendada", JOptionPane.INFORMATION_MESSAGE);

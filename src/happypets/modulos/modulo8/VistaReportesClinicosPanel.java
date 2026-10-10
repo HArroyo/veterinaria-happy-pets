@@ -65,6 +65,7 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
     private JTable tablaReportes;
     private DefaultTableModel modeloReportes;
     private JLabel lblContadorRegistros;
+    private JPanel panelKPIsActual;
     private List<ReporteClinicoDetalle> reportesActuales;
 
     private GraficoTopDiagnosticosPanel graficoDiagnosticos;
@@ -82,7 +83,8 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         panelCuerpo.setBackground(Color.WHITE);
         panelCuerpo.setOpaque(false);
 
-        panelCuerpo.add(crearPanelKPIs());
+        panelKPIsActual = crearPanelKPIs();
+        panelCuerpo.add(panelKPIsActual);
         panelCuerpo.add(Box.createVerticalStrut(16));
         panelCuerpo.add(crearBarraFiltros());
         panelCuerpo.add(Box.createVerticalStrut(16));
@@ -167,10 +169,10 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         // KPI 1: Total Consultas
         panelKPIs.add(crearTarjetaKPI(
                 "Total Consultas Registradas",
-                "1,482",
-                "+12.4% vs mes anterior",
+                String.valueOf(repo.getReportesClinicos().size()),
+                "Datos en memoria",
                 new Color(16, 185, 129),
-                "894 pacientes únicos atendidos",
+                "Registros clínicos disponibles",
                 new Color(238, 242, 255),
                 Iconos.crearIconoDoctor(22, new Color(79, 70, 229))
         ));
@@ -178,10 +180,10 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         // KPI 2: Pacientes Únicos
         panelKPIs.add(crearTarjetaKPI(
                 "Pacientes Únicos Atendidos",
-                "894",
-                "68% Caninos / 32% Felinos",
+                String.valueOf(repo.getReportesClinicos().stream().map(ReporteClinicoDetalle::getNombrePaciente).distinct().count()),
+                "Datos en memoria",
                 new Color(2, 132, 199),
-                "Ratio 1.6 consultas / paciente",
+                "Registros clínicos disponibles",
                 new Color(240, 249, 255),
                 Iconos.crearIconoMascota(22, new Color(2, 132, 199))
         ));
@@ -189,8 +191,8 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         // KPI 3: Casos con Seguimiento
         panelKPIs.add(crearTarjetaKPI(
                 "Casos con Seguimiento Activo",
-                "156",
-                "42 citas programadas hoy",
+                String.valueOf(repo.getReportesClinicos().stream().filter(ReporteClinicoDetalle::isSeguimientoActivo).count()),
+                "Datos en memoria",
                 new Color(217, 119, 6),
                 "Controles postoperatorios y crónicos",
                 new Color(254, 243, 199),
@@ -200,10 +202,10 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         // KPI 4: Tiempo Medio
         panelKPIs.add(crearTarjetaKPI(
                 "Tiempo Medio por Consulta",
-                "32 min",
-                "Objetivo: 30 min",
+                String.format("%.0f min", repo.getReportesClinicos().stream().mapToInt(ReporteClinicoDetalle::getDuracionMinutos).average().orElse(0)),
+                "Datos en memoria",
                 new Color(100, 116, 139),
-                "Tiempo medio de triaje: 6.2 min",
+                "Registros clínicos disponibles",
                 new Color(241, 245, 249),
                 Iconos.crearIconoTurno(22, new Color(15, 118, 110))
         ));
@@ -417,7 +419,7 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         lblT2.setForeground(new Color(15, 23, 42));
         titVet.add(lblT2, BorderLayout.WEST);
 
-        JLabel lblTotalVet = new JLabel("Total: 1,482 atenciones");
+        JLabel lblTotalVet = new JLabel("Registros clínicos en memoria");
         lblTotalVet.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblTotalVet.setForeground(new Color(2, 132, 199));
         titVet.add(lblTotalVet, BorderLayout.EAST);
@@ -563,6 +565,13 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
     }
 
     private void cargarDatosReportes() {
+        if (panelKPIsActual != null) {
+            JPanel nuevos = crearPanelKPIs();
+            panelKPIsActual.removeAll();
+            for (java.awt.Component componente : nuevos.getComponents()) panelKPIsActual.add(componente);
+            panelKPIsActual.revalidate();
+            panelKPIsActual.repaint();
+        }
         String termino = txtBuscarTabla != null ? txtBuscarTabla.getText().trim() : "";
         String vet = comboVeterinario != null ? (String) comboVeterinario.getSelectedItem() : "";
         String diag = comboDiagnostico != null ? (String) comboDiagnostico.getSelectedItem() : "";
@@ -731,16 +740,13 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-            String[] diagNombres = {
-                    "Gastroenteritis Aguda",
-                    "Dermatitis Alérgica",
-                    "Otitis Externa",
-                    "Profilaxis Dental",
-                    "Traumatismo / Heridas"
-            };
-            int[] valores = {330, 290, 200, 170, 110};
-            int maxVal = 350;
-
+            var registros = RepositorioVeterinaria.getInstancia().getReportesClinicos();
+            var grupos = registros.stream().collect(java.util.stream.Collectors.groupingBy(ReporteClinicoDetalle::getDiagnosticoConfirmado, java.util.stream.Collectors.counting()));
+            var principales = grupos.entrySet().stream().sorted(java.util.Map.Entry.<String, Long>comparingByValue().reversed().thenComparing(java.util.Map.Entry.comparingByKey())).limit(5).toList();
+            if (principales.isEmpty()) { g2.dispose(); return; }
+            String[] diagNombres = principales.stream().map(java.util.Map.Entry::getKey).toArray(String[]::new);
+            int[] valores = principales.stream().mapToInt(e -> e.getValue().intValue()).toArray();
+            int maxVal = Math.max(1, java.util.Arrays.stream(valores).max().orElse(1));
             int w = getWidth();
             int h = getHeight();
             int topPad = 15;
@@ -776,7 +782,7 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
                 // Valor numérico y porcentaje
                 g2.setFont(new Font("Segoe UI", Font.BOLD, 10));
                 g2.setColor(new Color(15, 23, 42));
-                String cantStr = valores[i] + " (" + String.format("%.1f%%", (valores[i] * 100.0 / 1100.0)) + ")";
+                String cantStr = valores[i] + " (" + String.format("%.1f%%", (valores[i] * 100.0 / registros.size())) + ")";
                 g2.drawString(cantStr, labelW + barMaxW + 8, y + rowH / 2 + 4);
             }
 
@@ -801,15 +807,13 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-            String[] vets = {
-                    "Dra. Elena Ruiz",
-                    "Dr. Marcos León",
-                    "Dra. Clara Vega",
-                    "Dr. Andrés Pardo",
-                    "Dra. Sofía Mora"
-            };
-            int[] valores = {410, 380, 310, 220, 150};
-            int maxVal = 450;
+            var registros = RepositorioVeterinaria.getInstancia().getReportesClinicos();
+            var grupos = registros.stream().collect(java.util.stream.Collectors.groupingBy(ReporteClinicoDetalle::getVeterinarioTratante, java.util.stream.Collectors.counting()));
+            var principales = grupos.entrySet().stream().sorted(java.util.Map.Entry.<String, Long>comparingByValue().reversed().thenComparing(java.util.Map.Entry.comparingByKey())).limit(5).toList();
+            if (principales.isEmpty()) { g2.dispose(); return; }
+            String[] vets = principales.stream().map(java.util.Map.Entry::getKey).toArray(String[]::new);
+            int[] valores = principales.stream().mapToInt(e -> e.getValue().intValue()).toArray();
+            int maxVal = Math.max(1, java.util.Arrays.stream(valores).max().orElse(1));
             Color[] colores = {
                     new Color(15, 76, 129),
                     new Color(13, 148, 136),

@@ -878,11 +878,13 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
             cliente = "Cliente Varios";
         }
 
-        double total = Double.parseDouble(lblTotal.getText().replace("S/", "").replace(",", "").trim());
+        double total = itemsVenta.stream().mapToDouble(ItemVentaPOS::getSubtotal).sum()
+                * (1.0 - ((Number) spinDescuento.getValue()).doubleValue() / 100.0);
         double recibido = total;
-        if ("Efectivo".equalsIgnoreCase(metodoPagoSeleccionado)) {
+        if (!esCotizacion && "Efectivo".equalsIgnoreCase(metodoPagoSeleccionado)) {
             try {
                 recibido = Double.parseDouble(txtMontoRecibido.getText().trim());
+                if (!Double.isFinite(recibido) || recibido < 0) throw new IllegalArgumentException();
                 if (!esCotizacion && recibido < total) {
                     JOptionPane.showMessageDialog(this,
                             "El monto recibido (S/ " + String.format("%.2f", recibido) + ") es menor al total a pagar (S/ " + String.format("%.2f", total) + ").",
@@ -890,7 +892,8 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
                     return;
                 }
             } catch (Exception e) {
-                recibido = total;
+                JOptionPane.showMessageDialog(this, "Ingrese un monto recibido válido.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return;
             }
         }
 
@@ -905,7 +908,12 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
         );
 
         if (!esCotizacion) {
-            repo.guardarVentaPOS(venta);
+            try {
+                repo.guardarVentaPOS(venta);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Venta no registrada", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             // Si el pago es en efectivo, ofrecer alimentar la caja chica de inmediato
             if ("Efectivo".equalsIgnoreCase(metodoPagoSeleccionado)) {
                 repo.guardarMovimientoCajaChica(new happypets.model.MovimientoCajaChica(

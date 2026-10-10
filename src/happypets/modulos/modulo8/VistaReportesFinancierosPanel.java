@@ -60,6 +60,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
     private DefaultTableModel modeloDesglose;
     private Runnable alSolicitarExportador;
 
+    private JPanel panelKPIsActual;
     private GraficoDonutCanalesPanel graficoDonut;
     private GraficoIngresosGastosPanel graficoBarrasFinancieras;
 
@@ -80,7 +81,8 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         panelCuerpo.setBackground(Color.WHITE);
         panelCuerpo.setOpaque(false);
 
-        panelCuerpo.add(crearPanelKPIs());
+        panelKPIsActual = crearPanelKPIs();
+        panelCuerpo.add(panelKPIsActual);
         panelCuerpo.add(Box.createVerticalStrut(16));
         panelCuerpo.add(crearBarraFiltros());
         panelCuerpo.add(Box.createVerticalStrut(16));
@@ -174,10 +176,10 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 1: Ingresos Brutos Totales
         panelKPIs.add(crearTarjetaKPI(
                 "Ingresos Brutos Totales",
-                "S/ 348,650.00",
-                "+14.2% vs periodo anterior",
+                String.format("S/ %.2f", repo.getMetricasOperativas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getTotalIngresos).sum()),
+                "Datos en memoria",
                 new Color(16, 185, 129),
-                "Meta período: S/ 330,000 (105% cumplido)",
+                "Registros actuales de la sesión",
                 new Color(236, 253, 245),
                 Iconos.crearIconoPOS(22, new Color(13, 148, 136))
         ));
@@ -185,21 +187,21 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 2: Costes Operativos
         panelKPIs.add(crearTarjetaKPI(
                 "Costes y Gastos Operativos",
-                "S/ 162,420.00",
-                "-2.8% eficiencia",
+                String.format("S/ %.2f", repo.getMetricasOperativas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getCostesOperativos).sum()),
+                "Datos en memoria",
                 new Color(16, 185, 129),
-                "Representa el 46.5% de la facturación",
+                "Registros actuales de la sesión",
                 new Color(254, 243, 199),
                 Iconos.crearIconoEgreso(22, new Color(217, 119, 6))
         ));
 
         // KPI 3: Margen Operativo Neto (EBITDA)
         panelKPIs.add(crearTarjetaKPI(
-                "Margen Operativo Neto (EBITDA)",
-                "S/ 186,230.00",
-                "53.4% Rendimiento Neto",
+                "Ingresos POS menos egresos",
+                String.format("S/ %.2f", repo.getMetricasOperativas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getMargenNeto).sum()),
+                "Datos en memoria",
                 new Color(2, 132, 199),
-                "+4.1 pts porcentuales vs ejercicio 2023",
+                "Registros actuales de la sesión",
                 new Color(240, 249, 255),
                 Iconos.crearIconoReportes(22, new Color(2, 132, 199))
         ));
@@ -207,10 +209,10 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 4: Ticket Medio
         panelKPIs.add(crearTarjetaKPI(
                 "Ticket Medio por Paciente",
-                "S/ 76.40",
-                "4,563 Visitas totales",
+                String.format("S/ %.2f", repo.getVentasPOS().stream().filter(v -> "Pagada".equalsIgnoreCase(v.getEstado())).mapToDouble(happypets.model.VentaPOS::getTotal).average().orElse(0)),
+                "Datos en memoria",
                 new Color(100, 116, 139),
-                "+S/ 5.80 vs media base histórica",
+                "Registros actuales de la sesión",
                 new Color(241, 245, 249),
                 Iconos.crearIconoFactura(22, new Color(79, 70, 229))
         ));
@@ -329,6 +331,13 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         JButton btnAplicar = Ui.botonPrimario("Aplicar Filtro", Iconos.crearIconoRefrescar(12, Color.WHITE));
         btnAplicar.setPreferredSize(new Dimension(125, 32));
         btnAplicar.addActionListener(e -> {
+            if (panelKPIsActual != null) {
+                JPanel nuevos = crearPanelKPIs();
+                panelKPIsActual.removeAll();
+                for (java.awt.Component componente : nuevos.getComponents()) panelKPIsActual.add(componente);
+                panelKPIsActual.revalidate();
+                panelKPIsActual.repaint();
+            }
             if (graficoDonut != null) graficoDonut.repaint();
             if (graficoBarrasFinancieras != null) graficoBarrasFinancieras.repaint();
             JOptionPane.showMessageDialog(this, "Balance financiero consolidado recalculado con éxito.", "Filtros Financieros", JOptionPane.INFORMATION_MESSAGE);
@@ -339,6 +348,13 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         btnRestablecer.addActionListener(e -> {
             comboSede.setSelectedIndex(0);
             comboMetodoPago.setSelectedIndex(0);
+            if (panelKPIsActual != null) {
+                JPanel nuevos = crearPanelKPIs();
+                panelKPIsActual.removeAll();
+                for (java.awt.Component componente : nuevos.getComponents()) panelKPIsActual.add(componente);
+                panelKPIsActual.revalidate();
+                panelKPIsActual.repaint();
+            }
             if (graficoDonut != null) graficoDonut.repaint();
             if (graficoBarrasFinancieras != null) graficoBarrasFinancieras.repaint();
         });
@@ -396,12 +412,12 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
 
-        JLabel lblServ = new JLabel("● Servicios Clínicos: S/ 226,622 (65%)");
+        JLabel lblServ = new JLabel("Servicios: importes del POS en memoria");
         lblServ.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblServ.setForeground(new Color(15, 76, 129));
         pnlResumenDonut.add(lblServ);
 
-        JLabel lblProd = new JLabel("● Productos & Farmacia: S/ 122,028 (35%)");
+        JLabel lblProd = new JLabel("Productos: importes del POS en memoria");
         lblProd.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblProd.setForeground(new Color(13, 148, 136));
         pnlResumenDonut.add(lblProd);
@@ -452,7 +468,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
 
-        JLabel lblCosteMedio = new JLabel("• Coste operativo medio: S/ 27,070 / mes");
+        JLabel lblCosteMedio = new JLabel("Egresos operativos registrados en memoria");
         lblCosteMedio.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblCosteMedio.setForeground(new Color(71, 85, 105));
         pnlResumenBarras.add(lblCosteMedio);
@@ -480,7 +496,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
-        JLabel lblTit = new JLabel("Resumen Financiero por Departamento y Prestación");
+        JLabel lblTit = new JLabel("Desglose histórico por departamento (datos de ejemplo)");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblTit.setForeground(new Color(15, 23, 42));
         top.add(lblTit, BorderLayout.WEST);
@@ -671,24 +687,13 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
             int cx = 20 + size / 2;
             int cy = h / 2;
 
-            double[] porcs = {0.246, 0.225, 0.196, 0.179, 0.100, 0.054};
-            Color[] colores = {
-                    new Color(15, 76, 129),   // Consultas (Azul oscuro)
-                    new Color(2, 132, 199),   // Cirugías (Azul cielo)
-                    new Color(13, 148, 136),  // Farmacia (Teal)
-                    new Color(99, 102, 241),  // Diagnóstico (Índigo)
-                    new Color(217, 119, 6),   // Pet Shop (Ámbar)
-                    new Color(168, 85, 247)   // Grooming (Púrpura)
-            };
-            String[] nombres = {
-                    "Consultas (24.6%)",
-                    "Cirugías (22.5%)",
-                    "Farmacia (19.6%)",
-                    "Diagnóstico (17.9%)",
-                    "Pet Shop (10.0%)",
-                    "Grooming (5.4%)"
-            };
-
+            var metricas = RepositorioVeterinaria.getInstancia().getMetricasOperativas();
+            double clinica = metricas.stream().mapToDouble(happypets.model.MetricaMensualIngreso::getServiciosClinicos).sum();
+            double farmacia = metricas.stream().mapToDouble(happypets.model.MetricaMensualIngreso::getFarmaciaAlimentos).sum();
+            double total = clinica + farmacia;
+            double[] porcs = total > 0 ? new double[]{clinica / total, farmacia / total} : new double[]{0, 0};
+            Color[] colores = {new Color(2, 132, 199), new Color(13, 148, 136)};
+            String[] nombres = {String.format("Servicios (%.1f%%)", porcs[0] * 100), String.format("Farmacia (%.1f%%)", porcs[1] * 100)};
             double anguloInicio = 90.0;
             for (int i = 0; i < porcs.length; i++) {
                 double anguloExt = porcs[i] * 360.0;
@@ -705,7 +710,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
             // Texto central
             g2.setColor(new Color(15, 23, 42));
             g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
-            String totalTxt = "S/ 348.6K";
+            String totalTxt = String.format("S/ %.2f", total);
             int tw = g2.getFontMetrics().stringWidth(totalTxt);
             g2.drawString(totalTxt, cx - tw / 2, cy);
 
@@ -767,25 +772,26 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
                 return;
             }
 
-            double maxVal = 70000.0;
+            var metricas = RepositorioVeterinaria.getInstancia().getMetricasOperativas();
+            if (metricas.isEmpty()) { g2.dispose(); return; }
+            double maxVal = Math.max(1, metricas.stream().mapToDouble(m -> Math.max(m.getTotalIngresos(), m.getCostesOperativos())).max().orElse(1)) * 1.1;
             g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));
 
             for (int i = 0; i <= 3; i++) {
-                double val = i * 20000.0;
+                double val = i * maxVal / 3.0;
                 int y = padTop + graphH - (int) ((val / maxVal) * graphH);
 
                 g2.setColor(new Color(241, 245, 249));
                 g2.drawLine(padLeft, y, w - padRight, y);
 
                 g2.setColor(new Color(148, 163, 184));
-                String tag = String.format("S/%dK", (int)(val / 1000));
+                String tag = String.format("S/%.0f", val);
                 g2.drawString(tag, 8, y + 4);
             }
 
-            String[] meses = {"Ene", "Feb", "Mar", "Abr", "May", "Jun"};
-            double[] ingresos = {52400, 54800, 58100, 60350, 63800, 59200};
-            double[] gastos =   {26100, 26800, 27200, 27450, 27700, 27170};
-
+            String[] meses = metricas.stream().map(happypets.model.MetricaMensualIngreso::getMesEtiqueta).toArray(String[]::new);
+            double[] ingresos = metricas.stream().mapToDouble(happypets.model.MetricaMensualIngreso::getTotalIngresos).toArray();
+            double[] gastos = metricas.stream().mapToDouble(happypets.model.MetricaMensualIngreso::getCostesOperativos).toArray();
             int n = meses.length;
             int slotW = graphW / n;
             int barW = Math.max(10, (slotW - 16) / 2);

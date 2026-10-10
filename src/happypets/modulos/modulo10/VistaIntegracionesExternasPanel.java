@@ -181,8 +181,8 @@ public class VistaIntegracionesExternasPanel extends happypets.ui.AssetsModulo {
     private void conectarServicio(IntegracionExterna inte) {
         int resp = JOptionPane.showConfirmDialog(
                 this,
-                "¿Desea inicializar la conexión con el servicio: " + inte.getNombre() + "?\n"
-                        + "Se verificará la disponibilidad del endpoint y autenticación segura.",
+                "¿Desea activar la configuración local de: " + inte.getNombre() + "?\n"
+                        + "El estado se guarda en memoria; no se contactará al servicio externo.",
                 "Conectar " + inte.getNombre(),
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
@@ -193,9 +193,9 @@ public class VistaIntegracionesExternasPanel extends happypets.ui.AssetsModulo {
             recargarIntegraciones();
             JOptionPane.showMessageDialog(
                     this,
-                    "✓ Conexión establecida exitosamente con " + inte.getNombre() + ".\n"
-                            + "El servicio se encuentra ahora activo y sincronizando.",
-                    "Integración Conectada",
+                    "Configuración local activada para " + inte.getNombre() + ".\n"
+                            + "No se ha realizado una conexión ni sincronización externa.",
+                    "Configuración Activada",
                     JOptionPane.INFORMATION_MESSAGE
             );
         }
@@ -245,10 +245,18 @@ public class VistaIntegracionesExternasPanel extends happypets.ui.AssetsModulo {
 
         // Botón de prueba de conexión
         g.gridx = 0; g.gridy = 4; g.gridwidth = 2;
-        JButton btnTest = new happypets.ui.BotonAsset("⚡ Probar Conexión en Vivo");
+        JButton btnTest = new happypets.ui.BotonAsset("Validar configuración");
         btnTest.setBackground(new Color(241, 245, 249));
         btnTest.addActionListener(e -> {
-            JOptionPane.showMessageDialog(dlg, "✓ Conexión exitosa con " + inte.getNombre() + " (Respuesta: HTTP 200 OK en 48ms).", "Ping Exitoso", JOptionPane.INFORMATION_MESSAGE);
+            try {
+                java.net.URI uri = java.net.URI.create(txtUrl.getText().trim());
+                if (uri.getHost() == null || !java.util.Set.of("https", "http", "tcp", "s3").contains(java.util.Objects.toString(uri.getScheme(), "").toLowerCase(java.util.Locale.ROOT))
+                        || txtKey.getText().isBlank()) throw new IllegalArgumentException();
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(dlg, "Ingrese un endpoint válido (HTTP, HTTPS, TCP o S3) y una clave o token.", "Configuración inválida", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            JOptionPane.showMessageDialog(dlg, "Formato de configuración válido para " + inte.getNombre() + ".\nNo se ha realizado ninguna conexión externa.", "Validación local", JOptionPane.INFORMATION_MESSAGE);
         });
         pnl.add(btnTest, g);
 

@@ -541,8 +541,12 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
             String user = txtUser.getText().trim();
             String mail = txtMail.getText().trim();
             String pass = txtPass.getText().trim();
-            if (nom.isEmpty() || user.isEmpty() || mail.isEmpty()) {
+            if (nom.isEmpty() || user.isEmpty() || mail.isEmpty() || pass.isEmpty()) {
                 JOptionPane.showMessageDialog(dlg, "Por favor complete los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (uExistente == null && repo.getUsuariosSistema().stream().anyMatch(u -> u.getUsername().equalsIgnoreCase(user))) {
+                JOptionPane.showMessageDialog(dlg, "Ese nombre de usuario ya existe.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             Usuario nuevo = new Usuario(user, pass, nom, (String) cbRol.getSelectedItem(), mail, txtArea.getText().trim(), (String) cbEst.getSelectedItem());
@@ -583,13 +587,8 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
         lblTit.setForeground(new Color(15, 23, 42));
         pnl.add(lblTit, BorderLayout.NORTH);
 
-        JComboBox<String> cbRoles = new JComboBox<>(new String[]{
-                "Administrador (Nivel Total)",
-                "Veterinario Titular (Nivel Médico)",
-                "Recepcionista (Nivel Operativo)",
-                "Auxiliar Veterinario (Nivel Asistencial)",
-                "Contador / Auditor (Nivel Financiero)"
-        });
+        java.util.List<happypets.model.RolPermiso> roles = repo.getRolesPermisos();
+        JComboBox<String> cbRoles = new JComboBox<>(roles.stream().map(happypets.model.RolPermiso::getNombreRol).toArray(String[]::new));
         cbRoles.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 
         JPanel pnlSel = new JPanel(new BorderLayout(10, 0));
@@ -602,18 +601,7 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
         matriz.setBackground(Color.WHITE);
         matriz.setBorder(BorderFactory.createTitledBorder("Módulos y Privilegios Permitidos"));
 
-        String[] modulos = {
-                "Pacientes e Historias Clínicas",
-                "Agenda y Citas",
-                "Servicios Médicos y Quirófanos",
-                "Estética y Hospedaje Canino/Felino",
-                "Farmacia e Inventario",
-                "Finanzas, Ventas POS y Caja",
-                "Personal y Cuadrante RRHH",
-                "Reportes y Métricas BI",
-                "Notificaciones, Repositorio y Auditoría",
-                "Configuración, Integraciones e IA"
-        };
+        String[] modulos = happypets.auth.ServicioAutenticacion.MODULOS;
 
         JCheckBox[] checks = new JCheckBox[modulos.length];
         for (int i = 0; i < modulos.length; i++) {
@@ -623,16 +611,12 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
             matriz.add(checks[i]);
         }
 
-        cbRoles.addActionListener(e -> {
-            int sel = cbRoles.getSelectedIndex();
-            for (int i = 0; i < checks.length; i++) {
-                if (sel == 0) checks[i].setSelected(true); // Admin tiene todo
-                else if (sel == 1) checks[i].setSelected(i <= 4 || i == 7); // Vet
-                else if (sel == 2) checks[i].setSelected(i == 0 || i == 1 || i == 5); // Recep
-                else if (sel == 3) checks[i].setSelected(i == 0 || i == 3 || i == 4); // Aux
-                else if (sel == 4) checks[i].setSelected(i == 5 || i == 7 || i == 8); // Contador
-            }
-        });
+        Runnable cargarPermisos = () -> {
+            happypets.model.RolPermiso rol = roles.get(cbRoles.getSelectedIndex());
+            for (int i = 0; i < checks.length; i++) checks[i].setSelected(rol.tienePermiso(modulos[i]));
+        };
+        cbRoles.addActionListener(e -> cargarPermisos.run());
+        cargarPermisos.run();
 
         JPanel centro = new JPanel(new BorderLayout(0, 14));
         centro.setBackground(Color.WHITE);
@@ -647,6 +631,9 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
         btnGuardar.setBackground(new Color(15, 23, 42));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.addActionListener(e -> {
+            happypets.model.RolPermiso rol = roles.get(cbRoles.getSelectedIndex());
+            for (int i = 0; i < checks.length; i++) rol.asignarPermiso(modulos[i], checks[i].isSelected());
+            repo.guardarRolPermiso(rol);
             JOptionPane.showMessageDialog(dlg, "✓ Matriz de privilegios para '" + cbRoles.getSelectedItem() + "' actualizada correctamente.", "Roles Guardados", JOptionPane.INFORMATION_MESSAGE);
             dlg.dispose();
         });

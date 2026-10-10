@@ -147,17 +147,17 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setOpaque(false);
 
-        JLabel badgeSync = new JLabel("● Última sinc.: Hoy, 09:30 AM");
+        JLabel badgeSync = new JLabel("Datos disponibles en memoria");
         badgeSync.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         badgeSync.setForeground(new Color(100, 116, 139));
         der.add(badgeSync);
 
-        JButton btnActualizarTodo = Ui.botonSecundario("Sincronizar Fuentes", Iconos.crearIconoRefrescar(13, new Color(15, 23, 42)));
+        JButton btnActualizarTodo = Ui.botonSecundario("Actualizar datos", Iconos.crearIconoRefrescar(13, new Color(15, 23, 42)));
         btnActualizarTodo.setPreferredSize(new Dimension(175, 34));
         btnActualizarTodo.addActionListener(e -> {
             cargarHistorial();
             JOptionPane.showMessageDialog(this,
-                    "Todas las fuentes de datos (clínica, finanzas, inventario) se encuentran sincronizadas.",
+                    "Se ha actualizado la vista de los registros en memoria.",
                     "Sincronización Exitosa", JOptionPane.INFORMATION_MESSAGE);
         });
         der.add(btnActualizarTodo);
@@ -180,15 +180,15 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
 
         cardOrigen1 = crearTarjetaOrigen(
                 "Pacientes y Fichas Clínicas",
-                "3,892 registros",
-                "Datos demográficos, especies, triaje, anamnesis, tratamientos y diagnósticos confirmados.",
+                repo.todasLasMascotas().size() + " registros",
+                "Fichas de pacientes, especies e información de sus tutores.",
                 Iconos.crearIconoMascota(22, new Color(2, 132, 199)),
                 true
         );
 
         cardOrigen2 = crearTarjetaOrigen(
                 "Finanzas y Facturación",
-                "14,210 tickets",
+                repo.getVentasPOS().size() + " tickets",
                 "Transacciones POS, boletas, facturas, cuentas por cobrar/pagar, márgenes y caja chica.",
                 Iconos.crearIconoPOS(22, new Color(13, 148, 136)),
                 false
@@ -196,7 +196,7 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
 
         cardOrigen3 = crearTarjetaOrigen(
                 "Inventario y Farmacia",
-                "842 productos",
+                repo.getProductosFarmacia().size() + " productos",
                 "Catálogo de medicamentos, lotes activos, stocks mínimos, compras y mermas.",
                 Iconos.crearIconoStock(22, new Color(217, 119, 6)),
                 false
@@ -308,13 +308,15 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         filaSelectores.setOpaque(false);
 
         comboRango = new JComboBox<>(new String[]{
-                "Último mes (Mayo 2024)",
+                "Todos los registros en memoria",
                 "Primer Semestre (Q1 - Q2 2024)",
                 "Año en curso 2024",
                 "Histórico Completo (Todo)"
         });
         comboRango.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboRango.setBackground(Color.WHITE);
+        comboRango.setEnabled(false);
+        comboRango.setToolTipText("Se exportan todos los registros disponibles en memoria.");
         comboRango.addActionListener(e -> actualizarEstimacion());
         filaSelectores.add(crearCajaSelector("Rango Temporal", comboRango));
 
@@ -337,6 +339,8 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         });
         comboCliente.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboCliente.setBackground(Color.WHITE);
+        comboCliente.setEnabled(false);
+        comboCliente.setToolTipText("El modelo actual no clasifica clientes para este filtro.");
         comboCliente.addActionListener(e -> actualizarEstimacion());
         filaSelectores.add(crearCajaSelector("Tipo de Cliente / Tutor", comboCliente));
 
@@ -347,6 +351,8 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         });
         comboSede.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboSede.setBackground(Color.WHITE);
+        comboSede.setEnabled(false);
+        comboSede.setToolTipText("Los registros actuales no tienen una sede asignada.");
         comboSede.addActionListener(e -> actualizarEstimacion());
         filaSelectores.add(crearCajaSelector("Sede de Origen", comboSede));
 
@@ -371,6 +377,11 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         checkCampos.add(new JCheckBox("Incluir Observaciones de Triaje y Anamnesis", true));
         checkCampos.add(new JCheckBox("Incluir Código CIE-10 / Diagnóstico Patológico", false));
 
+        for (int i : new int[]{2, 3, 4, 5}) {
+            checkCampos.get(i).setSelected(false);
+            checkCampos.get(i).setEnabled(false);
+            checkCampos.get(i).setToolTipText("Este metadato no está disponible en la tabla exportada.");
+        }
         for (JCheckBox cb : checkCampos) {
             cb.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             cb.setBackground(Color.WHITE);
@@ -482,48 +493,49 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         }
     }
 
-    private void actualizarEstimacion() {
-        int filas;
-        double mb;
-        if ("Inventario y Farmacia".equals(origenSeleccionado)) {
-            filas = 842;
-            mb = "CSV".equals(formatoSeleccionado) ? 0.3 : ("PDF".equals(formatoSeleccionado) ? 1.2 : 0.6);
-        } else if ("Finanzas y Facturación".equals(origenSeleccionado)) {
-            filas = 14210;
-            mb = "CSV".equals(formatoSeleccionado) ? 4.5 : ("PDF".equals(formatoSeleccionado) ? 9.8 : 8.7);
-        } else {
-            filas = 3120;
-            mb = "CSV".equals(formatoSeleccionado) ? 1.1 : ("PDF".equals(formatoSeleccionado) ? 4.6 : 2.4);
-        }
+    private List<String> camposSeleccionados() {
+        List<String> campos = new ArrayList<>();
+        for (JCheckBox cb : checkCampos) if (cb.isSelected()) campos.add(cb.getText());
+        return campos;
+    }
 
-        if (lblEstimacion != null) {
-            lblEstimacion.setText(String.format("%,d filas estimadas · Aprox. %.1f MB", filas, mb));
+    private void actualizarEstimacion() {
+        if (lblEstimacion != null && comboEspecie != null) {
+            int filas = repo.datosParaExportar(origenSeleccionado, (String) comboEspecie.getSelectedItem(), camposSeleccionados()).size() - 1;
+            lblEstimacion.setText(filas + " registros disponibles en memoria");
         }
     }
 
     private void ejecutarExportacion() {
-        List<String> campos = new ArrayList<>();
-        for (JCheckBox cb : checkCampos) {
-            if (cb.isSelected()) campos.add(cb.getText());
+        try {
+            HistorialExportacion exp = repo.generarExportacion(origenSeleccionado, formatoSeleccionado,
+                    (String) comboEspecie.getSelectedItem(), camposSeleccionados());
+            cargarHistorial();
+            guardarArchivo(exp);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Exportación no completada", JOptionPane.ERROR_MESSAGE);
         }
-
-        String filtros = (String) comboEspecie.getSelectedItem() + " · " + comboSede.getSelectedItem();
-
-        HistorialExportacion exp = repo.generarExportacion(origenSeleccionado, formatoSeleccionado, filtros, campos);
-        cargarHistorial();
-
-        String msg = "¡EXPORTACIÓN COMPLETADA CON ÉXITO!\n\n"
-                + "• Identificador: " + exp.getIdExportacion() + "\n"
-                + "• Origen: " + exp.getOrigenDatos() + "\n"
-                + "• Formato: " + exp.getFormato() + "\n"
-                + "• Filas procesadas: " + String.format("%,d", exp.getTotalFilas()) + "\n"
-                + "• Tamaño generado: " + exp.getTamanoLegible() + "\n"
-                + "• Archivo: " + exp.getRutaArchivo() + "\n\n"
-                + "El archivo se ha indexado en el historial de exportaciones recientes.";
-
-        JOptionPane.showMessageDialog(this, msg, "Descarga Finalizada", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    private void guardarArchivo(HistorialExportacion exp) {
+        byte[] contenido = repo.obtenerContenidoExportacion(exp.getIdExportacion());
+        if (contenido == null) {
+            JOptionPane.showMessageDialog(this, "Este registro es un ejemplo precargado y no tiene archivo. Genere una nueva exportación de los datos actuales.", "Archivo no disponible", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        javax.swing.JFileChooser selector = new javax.swing.JFileChooser();
+        selector.setSelectedFile(new java.io.File(exp.getRutaArchivo()));
+        if (selector.showSaveDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION) return;
+        java.nio.file.Path destino = selector.getSelectedFile().toPath();
+        if (java.nio.file.Files.exists(destino) && JOptionPane.showConfirmDialog(this,
+                "El archivo ya existe. ¿Desea reemplazarlo?", "Guardar exportación", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
+        try {
+            java.nio.file.Files.write(destino, contenido);
+            JOptionPane.showMessageDialog(this, "Archivo guardado: " + destino.toAbsolutePath(), "Exportación guardada", JOptionPane.INFORMATION_MESSAGE);
+        } catch (java.io.IOException ex) {
+            JOptionPane.showMessageDialog(this, "No se pudo guardar el archivo: " + ex.getMessage(), "Error al guardar", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     private JPanel crearPanelHistorialYAlmacenamiento() {
         JPanel card = new JPanel(new BorderLayout(0, 10));
         card.setBackground(Color.WHITE);
@@ -666,19 +678,19 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
 
-        JLabel lblCap = new JLabel("Cuota de Almacenamiento para Exportaciones: 6.4 GB / 10 GB (64% utilizado)");
+        JLabel lblCap = new JLabel("Exportaciones disponibles durante esta sesión en memoria");
         lblCap.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblCap.setForeground(new Color(30, 41, 59));
         topBar.add(lblCap, BorderLayout.WEST);
 
-        JLabel lblLibre = new JLabel("Espacio libre disponible: 3.6 GB");
+        JLabel lblLibre = new JLabel("Guardar archivo es opcional");
         lblLibre.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblLibre.setForeground(new Color(100, 116, 139));
         topBar.add(lblLibre, BorderLayout.EAST);
         pnlAlmacenamiento.add(topBar, BorderLayout.NORTH);
 
         JProgressBar bar = new JProgressBar(0, 100);
-        bar.setValue(64);
+        bar.setValue(0);
         bar.setPreferredSize(new Dimension(100, 7));
         bar.setForeground(new Color(2, 132, 199));
         bar.setBackground(new Color(226, 232, 240));
@@ -724,10 +736,6 @@ public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
         if (fila < 0 || fila >= historialActual.size()) return;
         HistorialExportacion h = historialActual.get(fila);
 
-        JOptionPane.showMessageDialog(this,
-                "Descargando archivo: " + h.getIdExportacion() + " (" + h.getFormato() + ")\n"
-                        + "Ubicación en disco: " + h.getRutaArchivo() + "\n"
-                        + "Tamaño: " + h.getTamanoLegible(),
-                "Descarga de Archivo", JOptionPane.INFORMATION_MESSAGE);
+        guardarArchivo(h);
     }
 }

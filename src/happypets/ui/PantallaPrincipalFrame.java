@@ -203,6 +203,7 @@ public class PantallaPrincipalFrame extends JFrame {
 	private JLabel lblContadorFiltro;
 
 	public PantallaPrincipalFrame() {
+        if (auth.getSesionActual() == null) throw new IllegalStateException("Inicie sesión antes de abrir el dashboard.");
 
 		setTitle("Happy Pets Clínica Veterinaria · Panel de Gestión");
 		setIconImage(Ui.icono());
@@ -278,7 +279,11 @@ public class PantallaPrincipalFrame extends JFrame {
 			}
 		});
 
-		mostrarVista("MODULO1_CLIENTES");
+        for (String destino : new String[]{"MODULO1_CLIENTES", "MODULO2_AGENDAMIENTO", "MODULO3_CONSULTAS", "MODULO4_GROOMING",
+                "MODULO5_CATALOGO", "MODULO6_POS", "MODULO7_VETERINARIOS", "MODULO8_DASHBOARD", "MODULO9_NOTIFICACIONES", "MODULO10_PARAMETROS"}) {
+            int numero = Integer.parseInt(destino.substring(6, destino.indexOf('_')));
+            if (auth.puedeAccederModulo(numero)) { mostrarVista(destino); break; }
+        }
 	}
 
 	/**
@@ -607,9 +612,9 @@ public class PantallaPrincipalFrame extends JFrame {
 
 		Usuario user = auth.getSesionActual();
 
-		String nombreMostrar = "Harry Martin Arroyo Preciado";
+		String nombreMostrar = user != null ? user.getNombreCompleto() : "Sin sesión";
 
-		String rolMostrar = user != null ? user.getRol() : "Administrador";
+		String rolMostrar = user != null ? user.getRol() : "Sin acceso";
 
 		JPanel userText = new JPanel();
 
@@ -1762,6 +1767,14 @@ public class PantallaPrincipalFrame extends JFrame {
 	}
 
 	public void mostrarVista(String nombreCard) {
+        int modulo = "DASHBOARD".equals(nombreCard) ? 1 : 0;
+        if (nombreCard.startsWith("MODULO")) {
+            modulo = Integer.parseInt(nombreCard.substring(6, nombreCard.indexOf('_')));
+        }
+        if (modulo > 0 && !auth.puedeAccederModulo(modulo)) {
+            JOptionPane.showMessageDialog(this, "Su rol no tiene acceso a este módulo.", "Acceso restringido", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 		layoutCards.show(panelContenedorCards, nombreCard);
 		panelContenedorCards.revalidate();
 		panelContenedorCards.repaint();
@@ -1867,6 +1880,10 @@ public class PantallaPrincipalFrame extends JFrame {
 				String nomSub = def.submodulos[i];
 				final int idx = i;
 				JButton btnSub = crearBotonSubmodulo(nomSub, () -> {
+                    if (!auth.puedeAccederModulo(def.numero)) {
+                        JOptionPane.showMessageDialog(PantallaPrincipalFrame.this, "Su rol no tiene acceso a este módulo.", "Acceso restringido", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
 					def.accionesSubmodulos[idx].run();
 					actualizarVistaPrincipal(def.nombre + " · " + nomSub, "Responsable Asignado: " + def.responsable
 							+ "  |  Paquete: src/happypets/modulos/modulo" + def.numero + "/");
@@ -2253,7 +2270,7 @@ public class PantallaPrincipalFrame extends JFrame {
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
 			Ui.instalarApariencia();
-			new PantallaPrincipalFrame().setVisible(true);
+			new LoginFrame().setVisible(true);
 		});
 	}
 }

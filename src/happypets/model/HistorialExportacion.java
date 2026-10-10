@@ -99,6 +99,7 @@ public class HistorialExportacion implements Serializable {
     }
 
     public String getTamanoLegible() {
+        if (tamanoMB < 1) return String.format("%.1f KB", tamanoMB * 1024);
         return String.format("%.1f MB", tamanoMB);
     }
 

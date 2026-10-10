@@ -59,6 +59,7 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
     private JTextField txtBuscarCita;
 
     // Componentes de datos
+    private JPanel panelKPIsActual;
     private JTable tablaCitas;
     private DefaultTableModel modeloCitas;
     private JLabel lblTotalCitasHoy;
@@ -106,7 +107,8 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         panelCuerpo.setBackground(Color.WHITE);
         panelCuerpo.setOpaque(false);
 
-        panelCuerpo.add(crearPanelKPIs());
+        panelKPIsActual = crearPanelKPIs();
+        panelCuerpo.add(panelKPIsActual);
         panelCuerpo.add(Box.createVerticalStrut(18));
         panelCuerpo.add(crearPanelGraficoYEficiencia());
         panelCuerpo.add(Box.createVerticalStrut(18));
@@ -125,20 +127,12 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
 
     private void inicializarDatosCitas() {
         listaCitasHoy.clear();
-        listaCitasHoy.add(new FilaCitaHoy("08:30 AM", "Max", "Canino · Golden Retriever", "Carlos Mendoza Soto", "Dra. Elena Ruiz", "Revisión Post-Cirugía Traumatológica", "En Espera"));
-        listaCitasHoy.add(new FilaCitaHoy("09:15 AM", "Misi", "Felino · Siamés", "Lucía Torres Alva", "Dr. Marcos León", "Vacunación Anual Triple Felina", "En Atención"));
-        listaCitasHoy.add(new FilaCitaHoy("10:00 AM", "Thor", "Canino · Pastor Alemán", "Fernando Castillo", "Dra. Clara Vega", "Otitis Externa Bilateral Crónica", "Confirmada"));
-        listaCitasHoy.add(new FilaCitaHoy("10:45 AM", "Kira", "Canino · Pug", "Ana María Rojas", "Dr. Andrés Pardo", "Control Dermatológico y Alergia", "Confirmada"));
-        listaCitasHoy.add(new FilaCitaHoy("11:30 AM", "Simba", "Felino · Persa", "Jorge Valdivia", "Dra. Sofía Mora", "Profilaxis Dental y Halitosis", "Confirmada"));
-        listaCitasHoy.add(new FilaCitaHoy("12:15 PM", "Luna", "Felino · Común Europeo", "Mariana Paredes", "Dra. Elena Ruiz", "Chequeo Preventivo Geriátrico", "Confirmada"));
-        listaCitasHoy.add(new FilaCitaHoy("02:00 PM", "Rocky", "Canino · Bulldog Francés", "Roberto Dávila", "Dr. Marcos León", "Dificultad Respiratoria / Braquicéfalo", "Programada"));
-        listaCitasHoy.add(new FilaCitaHoy("02:45 PM", "Bella", "Canino · Beagle", "Carmen Morales", "Dra. Clara Vega", "Desparasitación y Pipeta Antipulgas", "Programada"));
-        listaCitasHoy.add(new FilaCitaHoy("03:30 PM", "Coco", "Canino · Poodle", "Sofía Alarcón", "Dr. Andrés Pardo", "Corte de Uñas y Limpieza de Oídos", "Programada"));
-        listaCitasHoy.add(new FilaCitaHoy("04:15 PM", "Nala", "Felino · Angora", "Diego Navarro", "Dra. Sofía Mora", "Control de Peso y Nutrición Renal", "Programada"));
-        listaCitasHoy.add(new FilaCitaHoy("05:00 PM", "Toby", "Canino · Pug", "Carlos Eduardo Morales", "Dra. Clara Vega", "Ecografía Abdominal Preventiva", "Programada"));
-        listaCitasHoy.add(new FilaCitaHoy("05:45 PM", "Bruno", "Canino · Rottweiler", "Héctor Palacios", "Dr. Andrés Pardo", "Vacuna Antirrábica Obligatoria", "Programada"));
+        for (happypets.model.Cita cita : repo.getCitas()) {
+            if (!cita.getFecha().equals(java.time.LocalDate.now())) continue;
+            listaCitasHoy.add(new FilaCitaHoy(cita.getHoraFormateada(), cita.getNombreMascota(), cita.getEspecieRaza(),
+                    cita.getNombreCliente(), cita.getVeterinario(), cita.getMotivo(), cita.getEstado()));
+        }
     }
-
     private JPanel crearCabeceraSuperior() {
         JPanel cabecera = new JPanel(new BorderLayout(16, 8));
         cabecera.setOpaque(false);
@@ -201,6 +195,12 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         JButton btnActualizar = Ui.botonPrimario("Actualizar Indicadores", Iconos.crearIconoRefrescar(14, Color.WHITE));
         btnActualizar.setPreferredSize(new Dimension(175, 34));
         btnActualizar.addActionListener(e -> {
+            inicializarDatosCitas();
+            JPanel nuevos = crearPanelKPIs();
+            panelKPIsActual.removeAll();
+            for (java.awt.Component componente : nuevos.getComponents()) panelKPIsActual.add(componente);
+            panelKPIsActual.revalidate();
+            panelKPIsActual.repaint();
             graficoMensual.repaint();
             filtrarCitas();
             JOptionPane.showMessageDialog(this,
@@ -224,10 +224,10 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         // KPI 1: Ingresos Totales
         panelKPIs.add(crearTarjetaKPI(
                 "Ingresos Totales (Total Revenue)",
-                "S/ 148,250.00",
-                "+12.4% vs abril",
+                String.format("S/ %.2f", repo.getVentasPOS().stream().filter(v -> "Pagada".equalsIgnoreCase(v.getEstado())).mapToDouble(happypets.model.VentaPOS::getTotal).sum()),
+                "Datos en memoria",
                 new Color(16, 185, 129),
-                "Meta mensual alcanzada: 94.2%",
+                "Registros actuales de la sesión",
                 new Color(236, 253, 245),
                 Iconos.crearIconoPOS(22, new Color(13, 148, 136))
         ));
@@ -235,10 +235,10 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         // KPI 2: Citas Totales
         panelKPIs.add(crearTarjetaKPI(
                 "Citas Totales (Appointments)",
-                "1,420",
-                "+5.8% mensual",
+                String.valueOf(repo.getCitas().size()),
+                "Datos en memoria",
                 new Color(16, 185, 129),
-                "Promedio diario: 47.3 consultas",
+                "Registros actuales de la sesión",
                 new Color(238, 242, 255),
                 Iconos.crearIconoCalendario(22, new Color(79, 70, 229))
         ));
@@ -246,10 +246,10 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         // KPI 3: Pacientes Activos
         panelKPIs.add(crearTarjetaKPI(
                 "Pacientes Activos (Active Patients)",
-                "3,892",
-                "+184 nuevos",
+                String.valueOf(repo.todasLasMascotas().stream().filter(happypets.model.Mascota::isActivo).count()),
+                "Datos en memoria",
                 new Color(2, 132, 199),
-                "Tasa de retención clínica: 88.7%",
+                "Registros actuales de la sesión",
                 new Color(240, 249, 255),
                 Iconos.crearIconoMascota(22, new Color(2, 132, 199))
         ));
@@ -257,10 +257,10 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         // KPI 4: Ticket Promedio
         panelKPIs.add(crearTarjetaKPI(
                 "Ticket Promedio por Paciente",
-                "S/ 104.40",
-                "+3.1% medio",
+                String.format("S/ %.2f", repo.getVentasPOS().stream().filter(v -> "Pagada".equalsIgnoreCase(v.getEstado())).mapToDouble(happypets.model.VentaPOS::getTotal).average().orElse(0)),
+                "Datos en memoria",
                 new Color(16, 185, 129),
-                "Combinados con farmacia: 64%",
+                "Registros actuales de la sesión",
                 new Color(254, 243, 199),
                 Iconos.crearIconoReportes(22, new Color(217, 119, 6))
         ));
@@ -354,7 +354,7 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         lblTitG.setForeground(new Color(15, 23, 42));
         titGrafico.add(lblTitG);
 
-        JLabel lblSubG = new JLabel("Comparativo de los últimos 12 meses (Jun 23 - May 24) en miles de Soles (PEN)");
+        JLabel lblSubG = new JLabel("Ingresos mensuales registrados en memoria (PEN)");
         lblSubG.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblSubG.setForeground(new Color(100, 116, 139));
         titGrafico.add(lblSubG);
@@ -377,7 +377,7 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         cabGrafico.add(leyenda, BorderLayout.EAST);
         panelGraficoCard.add(cabGrafico, BorderLayout.NORTH);
 
-        graficoMensual = new GraficoBarrasMensualPanel(repo.getMetricasMensuales());
+        graficoMensual = new GraficoBarrasMensualPanel(repo.getMetricasOperativas());
         graficoMensual.setPreferredSize(new Dimension(600, 240));
         panelGraficoCard.add(graficoMensual, BorderLayout.CENTER);
 
@@ -760,6 +760,7 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
                 null, new String[]{"Atender Paciente", "Cerrar"}, "Atender Paciente");
 
         if (opt == 0) {
+            repo.getCitas().stream().filter(cita -> cita.getFecha().equals(java.time.LocalDate.now()) && cita.getNombreMascota().equals(c.paciente) && cita.getHoraFormateada().equals(c.hora)).findFirst().ifPresent(cita -> repo.actualizarEstadoCita(cita.getIdCita(), "En Atención"));
             c.estado = "En Atención";
             actualizarTablaPaginada();
             JOptionPane.showMessageDialog(this,
@@ -774,7 +775,7 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
      */
     private static class GraficoBarrasMensualPanel extends JPanel {
         private static final long serialVersionUID = 1L;
-        private final List<MetricaMensualIngreso> metricas;
+        private List<MetricaMensualIngreso> metricas;
 
         GraficoBarrasMensualPanel(List<MetricaMensualIngreso> metricas) {
             this.metricas = metricas;
@@ -784,6 +785,7 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            metricas = RepositorioVeterinaria.getInstancia().getMetricasOperativas();
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -805,18 +807,18 @@ public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
             }
 
             // Líneas de guía y valores Y (0, 50k, 100k, 150k)
-            double maxValor = 160000.0;
+            double maxValor = Math.max(1, metricas.stream().mapToDouble(m -> Math.max(m.getServiciosClinicos(), m.getFarmaciaAlimentos())).max().orElse(1)) * 1.1;
             g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));
 
             for (int i = 0; i <= 4; i++) {
-                double val = i * 40000.0;
+                double val = i * maxValor / 4.0;
                 int y = padTop + graphH - (int) ((val / maxValor) * graphH);
 
                 g2.setColor(new Color(241, 245, 249));
                 g2.drawLine(padLeft, y, w - padRight, y);
 
                 g2.setColor(new Color(148, 163, 184));
-                String tag = String.format("S/%dK", (int)(val / 1000));
+                String tag = String.format("S/%.0f", val);
                 g2.drawString(tag, 10, y + 4);
             }
 

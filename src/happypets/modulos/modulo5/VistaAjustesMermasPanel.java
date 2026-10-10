@@ -649,8 +649,14 @@ public class VistaAjustesMermasPanel extends happypets.ui.AssetsModulo {
 
         int cant = 1;
         double costo = 20.0;
-        try { cant = Integer.parseInt(txtCantidad.getText().trim()); } catch (Exception ignored) {}
-        try { costo = Double.parseDouble(txtCostoUnitario.getText().trim()); } catch (Exception ignored) {}
+        try {
+            cant = Integer.parseInt(txtCantidad.getText().trim());
+            costo = Double.parseDouble(txtCostoUnitario.getText().trim());
+            if (cant <= 0 || !Double.isFinite(costo) || costo < 0) throw new IllegalArgumentException();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ingrese una cantidad positiva y un costo válido.", "Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         String tipo = (String) cbTipo.getSelectedItem();
         if (!tipo.contains("Positivo") && pi.producto.getStockActual() < cant) {

@@ -1133,6 +1133,20 @@ public class RepositorioVeterinaria {
 
     public void guardarCita(Cita cita) {
         if (cita == null) return;
+        if (cita.getFecha() == null || cita.getHora() == null || cita.getDuracionMinutos() <= 0
+                || !Double.isFinite(cita.getCostoEstimado()) || cita.getCostoEstimado() < 0)
+            throw new IllegalArgumentException("Fecha, duración o costo de cita inválido.");
+        if (!"Cancelada".equalsIgnoreCase(cita.getEstado())) {
+            LocalDateTime inicio = cita.getFecha().atTime(cita.getHora());
+            LocalDateTime fin = inicio.plusMinutes(cita.getDuracionMinutos());
+            for (Cita otra : citas) {
+                if (java.util.Objects.equals(otra.getIdCita(), cita.getIdCita()) || "Cancelada".equalsIgnoreCase(otra.getEstado())) continue;
+                if (!java.util.Objects.equals(otra.getVeterinario(), cita.getVeterinario())) continue;
+                LocalDateTime otroInicio = otra.getFecha().atTime(otra.getHora());
+                if (inicio.isBefore(otroInicio.plusMinutes(otra.getDuracionMinutos())) && otroInicio.isBefore(fin))
+                    throw new IllegalArgumentException("El veterinario ya tiene una cita en ese horario.");
+            }
+        }
         boolean existe = false;
         for (int i = 0; i < citas.size(); i++) {
             if (citas.get(i).getIdCita().equalsIgnoreCase(cita.getIdCita())) {
@@ -1496,8 +1510,8 @@ public class RepositorioVeterinaria {
     public void actualizarStockProducto(String codigo, int deltaCantidad) {
         for (happypets.model.ProductoFarmacia p : productosFarmacia) {
             if (p.getCodigo().equalsIgnoreCase(codigo)) {
-                int nuevo = p.getStockActual() + deltaCantidad;
-                if (nuevo < 0) nuevo = 0;
+                int nuevo = Math.addExact(p.getStockActual(), deltaCantidad);
+                if (nuevo < 0) throw new IllegalArgumentException("Stock insuficiente para " + codigo);
                 p.setStockActual(nuevo);
                 break;
             }
@@ -1514,11 +1528,12 @@ public class RepositorioVeterinaria {
         if (m.getIdMovimiento() == null || m.getIdMovimiento().isEmpty()) {
             m.setIdMovimiento("MOV-2024-" + String.format("%02d", movimientosStock.size() + 1));
         }
-        movimientosStock.add(0, m);
+        if (m.getCantidad() <= 0) throw new IllegalArgumentException("La cantidad debe ser positiva.");
 
         // Actualizar stock del producto vinculado
-        int delta = m.getTipoMovimiento().toLowerCase().contains("ingreso") ? m.getCantidad() : -m.getCantidad();
+        int delta = m.getTipoMovimiento().toLowerCase().contains("ingreso") || m.getTipoMovimiento().contains("+") ? m.getCantidad() : -m.getCantidad();
         actualizarStockProducto(m.getCodigoProducto(), delta);
+        movimientosStock.add(0, m);
     }
 
     // 3. Proveedores y Órdenes de Compra
@@ -1586,11 +1601,12 @@ public class RepositorioVeterinaria {
         if (a.getIdAjuste() == null || a.getIdAjuste().isEmpty()) {
             a.setIdAjuste("AJU-2024-" + String.format("%02d", ajustesMermas.size() + 1));
         }
-        ajustesMermas.add(0, a);
+        if (a.getCantidad() <= 0 || !Double.isFinite(a.getCostoUnitario()) || a.getCostoUnitario() < 0) throw new IllegalArgumentException("Cantidad o costo de ajuste inválido.");
 
         // Descontar o regularizar stock físico
         int delta = a.getTipo().contains("Positivo") ? a.getCantidad() : -a.getCantidad();
         actualizarStockProducto(a.getCodigoProducto(), delta);
+        ajustesMermas.add(0, a);
     }
 
     // ==========================================
@@ -1604,6 +1620,31 @@ public class RepositorioVeterinaria {
 
     public void guardarVentaPOS(VentaPOS venta) {
         if (venta == null) return;
+        venta.recalcularTotales();
+        if (venta.getItems().isEmpty() || !Double.isFinite(venta.getTotal())
+                || !Double.isFinite(venta.getPorcentajeDescuento()) || venta.getPorcentajeDescuento() < 0
+                || venta.getPorcentajeDescuento() > 100 || !Double.isFinite(venta.getMontoRecibido())
+                || venta.getMontoRecibido() < 0) {
+            throw new IllegalArgumentException("Revise los importes y el detalle de la venta.");
+        }
+        if (!"Pagada".equalsIgnoreCase(venta.getEstado()) && !"Cotización".equalsIgnoreCase(venta.getEstado()))
+            throw new IllegalArgumentException("Estado de venta inválido.");
+        if (venta.getIdVenta() != null && ventasPOS.stream().anyMatch(v -> venta.getIdVenta().equalsIgnoreCase(v.getIdVenta())))
+            throw new IllegalArgumentException("La venta ya fue registrada.");
+        java.util.Map<String, Integer> cantidades = new java.util.HashMap<>();
+        for (ItemVentaPOS item : venta.getItems()) {
+            if (item.getCodigo() == null || item.getCantidad() <= 0 || !Double.isFinite(item.getPrecioUnitario())
+                    || item.getPrecioUnitario() < 0) throw new IllegalArgumentException("Cantidad o precio inválido.");
+            cantidades.merge(item.getCodigo().toLowerCase(java.util.Locale.ROOT), item.getCantidad(), Math::addExact);
+        }
+        if ("Pagada".equalsIgnoreCase(venta.getEstado())) {
+            if ("Efectivo".equalsIgnoreCase(venta.getMetodoPago()) && venta.getMontoRecibido() < venta.getTotal())
+                throw new IllegalArgumentException("El monto recibido es menor al total.");
+            for (happypets.model.ProductoFarmacia p : productosFarmacia) {
+                int cantidad = cantidades.getOrDefault(p.getCodigo().toLowerCase(java.util.Locale.ROOT), 0);
+                if (cantidad > p.getStockActual()) throw new IllegalArgumentException("Stock insuficiente para " + p.getNombre());
+            }
+        }
         if (venta.getIdVenta() == null || venta.getIdVenta().isEmpty()) {
             venta.setIdVenta("VTA-2024-" + String.format("%03d", ventasPOS.size() + 1));
         }
@@ -1625,11 +1666,17 @@ public class RepositorioVeterinaria {
     public void anularVentaPOS(String idVenta) {
         for (VentaPOS v : ventasPOS) {
             if (v.getIdVenta().equalsIgnoreCase(idVenta)) {
+                if ("Anulada".equalsIgnoreCase(v.getEstado())) return;
+                boolean reintegrar = "Pagada".equalsIgnoreCase(v.getEstado());
                 v.setEstado("Anulada");
                 // Reintegrar stock si no era cotización
-                for (ItemVentaPOS item : v.getItems()) {
+                for (ItemVentaPOS item : reintegrar ? v.getItems() : java.util.List.<ItemVentaPOS>of()) {
                     actualizarStockProducto(item.getCodigo(), item.getCantidad());
                 }
+                boolean cobroEnCaja = movimientosCajaChica.stream().anyMatch(m -> m.esIngreso()
+                        && v.getNumeroComprobante().equals(m.getComprobante()) && m.getConcepto().startsWith("Cobro POS "));
+                if (reintegrar && cobroEnCaja) guardarMovimientoCajaChica(new MovimientoCajaChica(null, LocalDate.now(),
+                        "Egreso", "Anulación POS " + v.getNumeroComprobante(), v.getTotal(), v.getCajero(), v.getNumeroComprobante()));
                 break;
             }
         }
@@ -2541,6 +2588,27 @@ public class RepositorioVeterinaria {
         return new ArrayList<>(metricasMensuales);
     }
 
+    public List<MetricaMensualIngreso> getMetricasOperativas() {
+        java.util.Map<java.time.YearMonth, MetricaMensualIngreso> resultado = new java.util.TreeMap<>();
+        for (VentaPOS venta : ventasPOS) {
+            if (!"Pagada".equalsIgnoreCase(venta.getEstado())) continue;
+            java.time.YearMonth mes = java.time.YearMonth.from(venta.getFechaHora());
+            MetricaMensualIngreso metrica = resultado.computeIfAbsent(mes, k -> new MetricaMensualIngreso(k.toString(), k.getYear(), k.getMonthValue(), 0, 0, 0));
+            for (ItemVentaPOS item : venta.getItems()) {
+                double importe = item.getSubtotal() * (1.0 - venta.getPorcentajeDescuento() / 100.0);
+                boolean farmacia = productosFarmacia.stream().anyMatch(p -> p.getCodigo().equalsIgnoreCase(item.getCodigo()));
+                if (farmacia) metrica.setFarmaciaAlimentos(metrica.getFarmaciaAlimentos() + importe);
+                else metrica.setServiciosClinicos(metrica.getServiciosClinicos() + importe);
+            }
+        }
+        for (EgresoOperativo egreso : egresosOperativos) {
+            java.time.YearMonth mes = java.time.YearMonth.from(egreso.getFecha());
+            MetricaMensualIngreso metrica = resultado.computeIfAbsent(mes, k -> new MetricaMensualIngreso(k.toString(), k.getYear(), k.getMonthValue(), 0, 0, 0));
+            metrica.setCostesOperativos(metrica.getCostesOperativos() + egreso.getMonto());
+        }
+        return new ArrayList<>(resultado.values());
+    }
+
     public List<ReporteClinicoDetalle> getReportesClinicos() {
         return new ArrayList<>(reportesClinicos);
     }
@@ -2602,37 +2670,57 @@ public class RepositorioVeterinaria {
         }
     }
 
+    private final java.util.Map<String, byte[]> archivosExportados = new java.util.HashMap<>();
+
+    public List<List<String>> datosParaExportar(String origen, String filtros, List<String> campos) {
+        List<List<String>> tabla = new ArrayList<>();
+        if ("Inventario y Farmacia".equals(origen)) {
+            tabla.add(List.of("Código", "Producto", "Categoría", "Stock", "Precio de venta"));
+            for (happypets.model.ProductoFarmacia p : productosFarmacia)
+                tabla.add(List.of(p.getCodigo(), p.getNombre(), p.getCategoria(), String.valueOf(p.getStockActual()), String.valueOf(p.getPrecioVenta())));
+        } else if ("Finanzas y Facturación".equals(origen)) {
+            tabla.add(List.of("Comprobante", "Fecha", "Cliente", "Estado", "Método de pago", "Total", "IGV incluido"));
+            for (VentaPOS v : ventasPOS)
+                tabla.add(List.of(v.getNumeroComprobante(), v.getFechaHoraTexto(), v.getClienteNombre(), v.getEstado(), v.getMetodoPago(), String.valueOf(v.getTotal()), String.valueOf(v.getIgv())));
+        } else if ("Pacientes y Fichas Clínicas".equals(origen)) {
+            boolean chip = campos != null && campos.stream().anyMatch(c -> c.toLowerCase().contains("chip"));
+            boolean tutor = campos != null && campos.stream().anyMatch(c -> c.toLowerCase().contains("tutor"));
+            List<String> cabecera = new ArrayList<>(List.of("Código", "Paciente", "Especie", "Raza", "Estado"));
+            if (chip) cabecera.add("Microchip");
+            if (tutor) cabecera.addAll(List.of("Tutor", "Documento", "Teléfono", "Correo"));
+            tabla.add(cabecera);
+            for (Cliente c : clientes) for (Mascota m : c.getMascotas()) {
+                String especie = m.getEspecie().toLowerCase(java.util.Locale.ROOT);
+                if (filtros != null && ((filtros.contains("Sólo Caninos") && !especie.contains("can") && !especie.contains("perro"))
+                        || (filtros.contains("Sólo Felinos") && !especie.contains("fel") && !especie.contains("gato"))
+                        || (filtros.contains("Animales Exóticos") && (especie.contains("can") || especie.contains("fel") || especie.contains("perro") || especie.contains("gato"))))) continue;
+                List<String> fila = new ArrayList<>(List.of(m.getCodigo(), m.getNombre(), m.getEspecie(), m.getRaza(), m.getEstadoTexto()));
+                if (chip) fila.add(java.util.Objects.toString(m.getMicrochip(), ""));
+                if (tutor) fila.addAll(List.of(c.getNombreCompleto(), c.getNumeroDocumento(), java.util.Objects.toString(c.getTelefonoPrincipal(), ""), java.util.Objects.toString(c.getCorreo(), "")));
+                tabla.add(fila);
+            }
+        } else throw new IllegalArgumentException("Origen de exportación no admitido.");
+        return tabla;
+    }
+
     public HistorialExportacion generarExportacion(String origen, String formato, String filtros, List<String> camposAdicionales) {
-        int filas;
-        double tamano;
-        String extension;
-        String fmt = formato != null ? formato.toUpperCase() : "XLSX";
-
-        if ("Inventario y Farmacia".equalsIgnoreCase(origen)) {
-            filas = 842;
-            tamano = fmt.contains("CSV") ? 0.3 : (fmt.contains("PDF") ? 1.2 : 0.6);
-            extension = fmt.contains("CSV") ? ".csv" : (fmt.contains("PDF") ? ".pdf" : ".xlsx");
-        } else if ("Finanzas y Facturación".equalsIgnoreCase(origen)) {
-            filas = 14210;
-            tamano = fmt.contains("CSV") ? 4.5 : (fmt.contains("PDF") ? 9.8 : 8.7);
-            extension = fmt.contains("CSV") ? ".csv" : (fmt.contains("PDF") ? ".pdf" : ".xlsx");
-        } else {
-            filas = 3120;
-            tamano = fmt.contains("CSV") ? 1.1 : (fmt.contains("PDF") ? 4.6 : 2.4);
-            extension = fmt.contains("CSV") ? ".csv" : (fmt.contains("PDF") ? ".pdf" : ".xlsx");
-        }
-
-        String id = "EXP-" + LocalDate.now().getYear() + "-" + String.format("%04d", 520 + historialExportaciones.size());
-        String ruta = "exports/export_" + id.toLowerCase().replace('-', '_') + extension;
-
-        HistorialExportacion exp = new HistorialExportacion(
-                id, origen, LocalDateTime.now(), filtros != null && !filtros.isEmpty() ? filtros : "Filtros predeterminados",
-                fmt, filas, tamano, "Completado", ruta
-        );
+        String fmt = formato == null ? "XLSX" : formato.toUpperCase(java.util.Locale.ROOT);
+        List<List<String>> tabla = datosParaExportar(origen, filtros, camposAdicionales);
+        byte[] contenido = ExportadorTabla.generar(tabla, fmt);
+        String id = "EXP-" + java.util.UUID.randomUUID();
+        String nombre = "export_" + id.toLowerCase(java.util.Locale.ROOT) + "." + fmt.toLowerCase(java.util.Locale.ROOT);
+        HistorialExportacion exp = new HistorialExportacion(id, origen, LocalDateTime.now(),
+                filtros == null ? "Datos en memoria" : filtros, fmt, tabla.size() - 1,
+                contenido.length / (1024.0 * 1024.0), "Completado", nombre);
+        archivosExportados.put(id, contenido);
         historialExportaciones.add(0, exp);
         return exp;
     }
 
+    public byte[] obtenerContenidoExportacion(String id) {
+        byte[] contenido = archivosExportados.get(id);
+        return contenido == null ? null : contenido.clone();
+    }
     // =========================================================================
     // MÓDULO 9: NOTIFICACIONES, DOCUMENTOS Y AUDITORÍA (Vera Aguilar, Carlos Edgardo)
     // =========================================================================
@@ -3139,7 +3227,7 @@ public class RepositorioVeterinaria {
         for (IntegracionExterna inte : integracionesExternas) {
             if (inte.getId().equalsIgnoreCase(idIntegracion)) {
                 inte.setActiva(!inte.isActiva());
-                inte.setUltimaSincronizacion(inte.isActiva() ? "Hoy, recién sincronizado" : "Desconectado");
+                inte.setUltimaSincronizacion(inte.isActiva() ? "Configuración local; sin sincronizar" : "Desactivada");
                 registrarLogAuditoria(new LogAuditoria(
                         "#EV-" + (1043 + logsAuditoria.size()), "Cambio de Estado de Integración",
                         "admin_user", LocalDateTime.now(), "127.0.0.1", "ÉXITO",
