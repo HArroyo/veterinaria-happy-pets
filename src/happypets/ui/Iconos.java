@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -777,26 +778,63 @@ public final class Iconos {
     }
 
     /**
-     * Bisturí quirúrgico para Cirugías y Quirófano.
+     * Bisturí quirúrgico profesional para Quirófano y Cirugías.
+     * Representación sólida y vectorizada con mango estriado, hoja de incisión curva y cruz médica.
      */
     public static Icon crearIconoBisturi(int size, Color color) {
         BufferedImage img = crearImagenBase(size);
         Graphics2D g = configG2(img);
         g.setColor(color);
         double s = size;
-        float stroke = (float) Math.max(1.6, s * 0.08);
-        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-        // Mango estilizado
-        g.drawLine((int) (s * 0.75), (int) (s * 0.15), (int) (s * 0.40), (int) (s * 0.55));
+        // 1. Bisturí inclinado en ángulo diagonal (de abajo izquierda a arriba derecha)
+        Graphics2D gBisturi = (Graphics2D) g.create();
+        gBisturi.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gBisturi.rotate(Math.toRadians(45), s * 0.5, s * 0.5);
 
-        // Hoja afilada curva del bisturí
-        int[] bx = {(int) (s * 0.40), (int) (s * 0.18), (int) (s * 0.25), (int) (s * 0.44)};
-        int[] by = {(int) (s * 0.55), (int) (s * 0.82), (int) (s * 0.86), (int) (s * 0.60)};
-        g.fillPolygon(bx, by, 4);
+        // Mango de acero (sólido y proporcional)
+        double mW = s * 0.16;
+        double mH = s * 0.50;
+        double mX = (s - mW) / 2.0;
+        double mY = s * 0.42;
+        gBisturi.fill(new RoundRectangle2D.Double(mX, mY, mW, mH, 3, 3));
+
+        // Estrías antideslizantes de sujeción
+        gBisturi.setColor(Color.WHITE);
+        float stroke = (float) Math.max(1.0, s * 0.05);
+        gBisturi.setStroke(new BasicStroke(stroke));
+        gBisturi.drawLine((int)(mX + 1), (int)(mY + mH * 0.30), (int)(mX + mW - 1), (int)(mY + mH * 0.30));
+        gBisturi.drawLine((int)(mX + 1), (int)(mY + mH * 0.52), (int)(mX + mW - 1), (int)(mY + mH * 0.52));
+        gBisturi.drawLine((int)(mX + 1), (int)(mY + mH * 0.74), (int)(mX + mW - 1), (int)(mY + mH * 0.74));
+
+        // Hoja quirúrgica (#10/15 de cirugía con curvatura de corte y punta)
+        gBisturi.setColor(color);
+        Path2D hoja = new Path2D.Double();
+        hoja.moveTo(mX + 1, mY + 1);
+        hoja.lineTo(mX + 1, s * 0.18);
+        hoja.lineTo(mX + mW * 0.5, s * 0.09); // Punta fina
+        hoja.quadTo(mX + mW + s * 0.10, s * 0.24, mX + mW - 1, mY + 1); // Vientre curvo de corte
+        hoja.closePath();
+        gBisturi.fill(hoja);
+        gBisturi.dispose();
+
+        // 2. Cruz médica en la esquina superior izquierda
+        double crW = s * 0.26;
+        double crX = s * 0.10;
+        double crY = s * 0.12;
+        double crThick = crW * 0.38;
+        g.fill(new RoundRectangle2D.Double(crX + (crW - crThick) / 2.0, crY, crThick, crW, 1.5, 1.5));
+        g.fill(new RoundRectangle2D.Double(crX, crY + (crW - crThick) / 2.0, crW, crThick, 1.5, 1.5));
 
         g.dispose();
         return new ImageIcon(img);
+    }
+
+    /**
+     * Alias oficial para Cirugías y Quirófano.
+     */
+    public static Icon crearIconoCirugia(int size, Color color) {
+        return crearIconoBisturi(size, color);
     }
 
     /**

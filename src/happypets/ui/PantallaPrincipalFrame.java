@@ -459,7 +459,7 @@ public class PantallaPrincipalFrame extends JFrame {
         der.add(btnNotif);
 
         // Separador vertical sutil
-        JLabel sep = new JLabel("│");
+        JLabel sep = new JLabel("|");
         sep.setForeground(new Color(226, 232, 240));
         der.add(sep);
 
@@ -721,6 +721,7 @@ public class PantallaPrincipalFrame extends JFrame {
         scroll.setBackground(COLOR_FONDO_APP);
         scroll.getViewport().setBackground(COLOR_FONDO_APP);
         scroll.getVerticalScrollBar().setUnitIncrement(18);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         return scroll;
     }
 
@@ -743,61 +744,71 @@ public class PantallaPrincipalFrame extends JFrame {
         hero.setOpaque(false);
         hero.setBorder(new EmptyBorder(16, 22, 16, 22));
 
-        // Lado Izquierdo: Insignia + Título + Subtítulo
+        // Lado Izquierdo: Insignia + Título + Subtítulo con alineación estricta a la izquierda
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
+        izq.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel badgePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         badgePanel.setOpaque(false);
-        JLabel badgeHosp = new JLabel("  🏥 HOSPITAL VETERINARIO 24H · HAPPY PETS CLINICAL ERP  ");
+        badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel badgeHosp = new JLabel(" HOSPITAL VETERINARIO 24H · HAPPY PETS CLINICAL ERP ");
+        badgeHosp.setIcon(Iconos.crearIconoCruzMedica(12, Ui.TURQUESA_PROFUNDO));
+        badgeHosp.setIconTextGap(6);
         badgeHosp.setFont(new Font("Segoe UI", Font.BOLD, 10));
         badgeHosp.setOpaque(true);
         badgeHosp.setBackground(new Color(224, 247, 250));
         badgeHosp.setForeground(Ui.TURQUESA_PROFUNDO);
-        badgeHosp.setBorder(new EmptyBorder(3, 8, 3, 8));
+        badgeHosp.setBorder(new EmptyBorder(4, 8, 4, 10));
+        badgeHosp.setAlignmentX(Component.LEFT_ALIGNMENT);
         badgePanel.add(badgeHosp);
-        izq.add(badgePanel);
-        izq.add(Box.createVerticalStrut(6));
 
-        lblTituloVista = new JLabel("Panel de Control Clínico y Operativo");
+        lblTituloVista = new JLabel("Panel Principal (Dashboard)");
         lblTituloVista.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTituloVista.setForeground(COLOR_TEXTO_TITULO);
+        lblTituloVista.setHorizontalAlignment(SwingConstants.LEFT);
+        lblTituloVista.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        lblSubtituloVista = new JLabel("Bienvenido, Dr. Harry Martin Arroyo Preciado | Estado: 🟢 Operativo 24 Horas · Sede Principal");
+        lblSubtituloVista = new JLabel("Vista general de pacientes, indicadores y estado clínico del sistema");
         lblSubtituloVista.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblSubtituloVista.setForeground(COLOR_TEXTO_MUTED);
+        lblSubtituloVista.setHorizontalAlignment(SwingConstants.LEFT);
+        lblSubtituloVista.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        izq.add(badgePanel);
+        izq.add(Box.createVerticalStrut(6));
         izq.add(lblTituloVista);
         izq.add(Box.createVerticalStrut(3));
         izq.add(lblSubtituloVista);
-        hero.add(izq, BorderLayout.CENTER);
+        hero.add(izq, BorderLayout.WEST);
 
-        // Lado Derecho: Botones de Acción Rápida
-        JPanel derAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+        // Lado Derecho: Botones de Acción Rápida con iconos vectoriales nítidos y sin emojis
+        JPanel derAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         derAcciones.setOpaque(false);
 
-        JButton btnAgendar = Ui.botonPrimario("+ Agendar Cita", Iconos.crearIconoCalendario(13, Color.WHITE));
+        JButton btnAgendar = Ui.botonPrimario("Agendar Cita", Iconos.crearIconoCalendario(15, Color.WHITE));
         btnAgendar.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnAgendar.setPreferredSize(new Dimension(135, 32));
+        btnAgendar.setPreferredSize(new Dimension(122, 32));
         btnAgendar.addActionListener(e -> {
             mostrarVista("MODULO2_AGENDA");
             activarBotonSubmodulo(2, 0);
             actualizarVistaPrincipal("Agendamiento de Citas Médicas", "Módulo 2.1 · Reserva, reprogramación y control de citas");
         });
 
-        JButton btnNuevaConsulta = Ui.botonPrimario("+ Nueva Consulta", Iconos.crearIconoEstetoscopio(13, Color.WHITE));
+        JButton btnNuevaConsulta = Ui.botonPrimario("Nueva Consulta", Iconos.crearIconoCruzMedica(15, Color.WHITE));
         btnNuevaConsulta.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnNuevaConsulta.setPreferredSize(new Dimension(145, 32));
+        btnNuevaConsulta.setPreferredSize(new Dimension(132, 32));
         btnNuevaConsulta.addActionListener(e -> {
             mostrarVista("MODULO3_CONSULTAS");
             activarBotonSubmodulo(3, 0);
             actualizarVistaPrincipal("Consultas Médicas y Atenciones", "Módulo 3.1 · Registro clínico y diagnósticos");
         });
 
-        JButton btnNuevoPaciente = Ui.botonSecundario("+ Nuevo Paciente", Iconos.crearIconoHuella(13, COLOR_TEXTO_TITULO));
+        JButton btnNuevoPaciente = Ui.botonSecundario("Nuevo Paciente", Iconos.crearIconoHuella(15, COLOR_TEXTO_TITULO));
         btnNuevoPaciente.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnNuevoPaciente.setPreferredSize(new Dimension(140, 32));
+        btnNuevoPaciente.setPreferredSize(new Dimension(128, 32));
         btnNuevoPaciente.addActionListener(e -> {
             mostrarVista("MODULO1_CLIENTES");
             vistaClientesMascotas.nuevoCliente();
@@ -805,16 +816,16 @@ public class PantallaPrincipalFrame extends JFrame {
             actualizarVistaPrincipal("Mantenimiento de Clientes y Mascotas", "Módulo 1.1 · Registro y administración de pacientes");
         });
 
-        JButton btnCobroPos = Ui.botonSecundario("💳 Cobro POS", Iconos.crearIconoPOS(13, COLOR_TEXTO_TITULO));
+        JButton btnCobroPos = Ui.botonSecundario("Cobro POS", Iconos.crearIconoPOS(15, COLOR_TEXTO_TITULO));
         btnCobroPos.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnCobroPos.setPreferredSize(new Dimension(120, 32));
+        btnCobroPos.setPreferredSize(new Dimension(108, 32));
         btnCobroPos.addActionListener(e -> {
             mostrarVista("MODULO6_POS");
             activarBotonSubmodulo(6, 0);
             actualizarVistaPrincipal("Punto de Venta (POS)", "Módulo 6.1 · Facturación electrónica y cobros rápidos");
         });
 
-        JButton btnRefreshDash = new JButton("↻") {
+        JButton btnRefreshDash = new JButton() {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -828,7 +839,7 @@ public class PantallaPrincipalFrame extends JFrame {
                 g2.dispose();
             }
         };
-        btnRefreshDash.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnRefreshDash.setIcon(Iconos.crearIconoRefrescar(15, COLOR_TEXTO_TITULO));
         btnRefreshDash.setPreferredSize(new Dimension(34, 32));
         btnRefreshDash.setFocusPainted(false);
         btnRefreshDash.setContentAreaFilled(false);
@@ -861,7 +872,7 @@ public class PantallaPrincipalFrame extends JFrame {
                 "3 en consulta · 5 en espera",
                 new Color(224, 242, 254),
                 new Color(2, 132, 199),
-                Iconos.crearIconoCalendario(22, new Color(2, 132, 199))
+                Iconos.crearIconoCalendario(24, new Color(2, 132, 199))
         ));
 
         fila.add(crearCardKpi(
@@ -870,7 +881,7 @@ public class PantallaPrincipalFrame extends JFrame {
                 "14 caninos · 10 felinos",
                 new Color(254, 243, 199),
                 new Color(217, 119, 6),
-                Iconos.crearIconoHuella(22, new Color(217, 119, 6))
+                Iconos.crearIconoHuella(24, new Color(217, 119, 6))
         ));
 
         fila.add(crearCardKpi(
@@ -879,7 +890,7 @@ public class PantallaPrincipalFrame extends JFrame {
                 "Capacidad 67% (4/6 camas)",
                 new Color(220, 252, 231),
                 new Color(16, 185, 129),
-                Iconos.crearIconoCamaHospital(22, new Color(16, 185, 129))
+                Iconos.crearIconoCamaHospital(24, new Color(16, 185, 129))
         ));
 
         fila.add(crearCardKpi(
@@ -888,16 +899,16 @@ public class PantallaPrincipalFrame extends JFrame {
                 "1 en proceso · 2 post-op",
                 new Color(243, 232, 255),
                 new Color(147, 51, 234),
-                Iconos.crearIconoBisturi(22, new Color(147, 51, 234))
+                Iconos.crearIconoCirugia(24, new Color(147, 51, 234))
         ));
 
         fila.add(crearCardKpi(
                 "S/. 4,850.00",
                 "VENTAS DEL DÍA (POS)",
-                "▲ +14.2% vs promedio",
+                "+14.2% vs promedio",
                 new Color(224, 247, 250),
                 Ui.TURQUESA_PROFUNDO,
-                Iconos.crearIconoMonedas(22, Ui.TURQUESA_PROFUNDO)
+                Iconos.crearIconoMonedas(24, Ui.TURQUESA_PROFUNDO)
         ));
 
         return fila;
@@ -985,7 +996,7 @@ public class PantallaPrincipalFrame extends JFrame {
         JPanel colDerecha = new JPanel();
         colDerecha.setOpaque(false);
         colDerecha.setLayout(new BoxLayout(colDerecha, BoxLayout.Y_AXIS));
-        colDerecha.setPreferredSize(new Dimension(360, 0));
+        colDerecha.setPreferredSize(new Dimension(340, 0));
 
         colDerecha.add(crearTarjetaAlertasDashboard());
         colDerecha.add(Box.createVerticalStrut(16));
@@ -1031,7 +1042,7 @@ public class PantallaPrincipalFrame extends JFrame {
         lblTit.setForeground(COLOR_TEXTO_TITULO);
         titIzq.add(lblTit);
 
-        JLabel badgeEnVivo = new JLabel(" ● EN VIVO ", SwingConstants.CENTER) {
+        JLabel badgeEnVivo = new JLabel("  EN VIVO ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -1039,6 +1050,8 @@ public class PantallaPrincipalFrame extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(new Color(220, 252, 231));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(new Color(22, 163, 74));
+                g2.fillOval(7, (getHeight() - 6) / 2, 6, 6);
                 super.paintComponent(g2);
                 g2.dispose();
             }
@@ -1046,7 +1059,7 @@ public class PantallaPrincipalFrame extends JFrame {
         badgeEnVivo.setFont(new Font("Segoe UI", Font.BOLD, 10));
         badgeEnVivo.setForeground(new Color(22, 163, 74));
         badgeEnVivo.setOpaque(false);
-        badgeEnVivo.setBorder(new EmptyBorder(2, 6, 2, 6));
+        badgeEnVivo.setBorder(new EmptyBorder(2, 10, 2, 6));
         titIzq.add(badgeEnVivo);
 
         lblContadorCitasHoy = new JLabel("  8 citas  ");
@@ -1078,9 +1091,9 @@ public class PantallaPrincipalFrame extends JFrame {
         cmbFiltroCitas.addActionListener(e -> recargarCitasDashboard());
         derFiltros.add(cmbFiltroCitas);
 
-        JButton btnVerAgenda = Ui.botonSecundario("Ver Agenda Completa ➔", Iconos.crearIconoCalendario(12, COLOR_TEXTO_TITULO));
+        JButton btnVerAgenda = Ui.botonSecundario("Ver Agenda Completa", Iconos.crearIconoCalendario(14, COLOR_TEXTO_TITULO));
         btnVerAgenda.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnVerAgenda.setPreferredSize(new Dimension(165, 28));
+        btnVerAgenda.setPreferredSize(new Dimension(155, 28));
         btnVerAgenda.addActionListener(e -> {
             mostrarVista("MODULO2_AGENDA");
             activarBotonSubmodulo(2, 0);
@@ -1135,7 +1148,7 @@ public class PantallaPrincipalFrame extends JFrame {
 
         JScrollPane spCitas = new JScrollPane(tablaCitasDashboard);
         spCitas.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        spCitas.setPreferredSize(new Dimension(800, 195));
+        spCitas.setPreferredSize(new Dimension(400, 195));
         card.add(spCitas, BorderLayout.CENTER);
 
         recargarCitasDashboard();
@@ -1325,7 +1338,7 @@ public class PantallaPrincipalFrame extends JFrame {
         });
         der.add(btnNuevoP);
 
-        JButton btnRef = new JButton("↻") {
+        JButton btnRef = new JButton() {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -1339,7 +1352,7 @@ public class PantallaPrincipalFrame extends JFrame {
                 g2.dispose();
             }
         };
-        btnRef.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnRef.setIcon(Iconos.crearIconoRefrescar(14, COLOR_TEXTO_TITULO));
         btnRef.setPreferredSize(new Dimension(32, 28));
         btnRef.setFocusPainted(false);
         btnRef.setContentAreaFilled(false);
@@ -1388,7 +1401,7 @@ public class PantallaPrincipalFrame extends JFrame {
 
         JScrollPane sp = new JScrollPane(tablaPacientes);
         sp.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        sp.setPreferredSize(new Dimension(800, 200));
+        sp.setPreferredSize(new Dimension(400, 200));
         card.add(sp, BorderLayout.CENTER);
 
         return card;
@@ -1878,7 +1891,9 @@ public class PantallaPrincipalFrame extends JFrame {
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
-        JLabel lblTit = new JLabel("🤖 Asistente Clínico IA & Servidor");
+        JLabel lblTit = new JLabel("Asistente Clínico IA & Servidor");
+        lblTit.setIcon(Iconos.crearIconoRobot(18, Ui.TURQUESA_PROFUNDO));
+        lblTit.setIconTextGap(6);
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTit.setForeground(COLOR_TEXTO_TITULO);
 
@@ -1911,7 +1926,7 @@ public class PantallaPrincipalFrame extends JFrame {
         lblMotor.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblMotor.setForeground(new Color(51, 65, 85));
 
-        JLabel lblLat = new JLabel("• Estado: 🟢 En Línea (Latencia: 0.12 ms)");
+        JLabel lblLat = new JLabel("• Estado: En Línea (Latencia: 0.12 ms)");
         lblLat.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblLat.setForeground(new Color(51, 65, 85));
 
@@ -1926,7 +1941,7 @@ public class PantallaPrincipalFrame extends JFrame {
         filas.add(lblResp);
         filas.add(Box.createVerticalStrut(10));
 
-        JButton btnAbrirIA = Ui.botonPrimario("Abrir Asistente IA ➔");
+        JButton btnAbrirIA = Ui.botonPrimario("Abrir Asistente IA");
         btnAbrirIA.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnAbrirIA.setPreferredSize(new Dimension(280, 30));
         btnAbrirIA.addActionListener(e -> {
