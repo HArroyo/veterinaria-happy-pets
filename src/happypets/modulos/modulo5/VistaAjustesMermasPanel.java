@@ -47,7 +47,7 @@ import happypets.ui.Iconos;
  * - Valorización financiera de pérdidas por mermas en farmacia.
  * - Generación de Acta Oficial de Destrucción Sanitaria y Baja de Fármacos.
  */
-public class VistaAjustesMermasPanel extends JPanel {
+public class VistaAjustesMermasPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -105,6 +105,8 @@ public class VistaAjustesMermasPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -463,7 +465,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         tablaAjustes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         tablaAjustes.setRowHeight(26);
         tablaAjustes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaAjustes.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaAjustes.getTableHeader().setBackground(Color.WHITE);
         tablaAjustes.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaAjustes.setSelectionBackground(new Color(224, 242, 254));
         tablaAjustes.setSelectionForeground(new Color(3, 105, 161));
@@ -540,7 +542,7 @@ public class VistaAjustesMermasPanel extends JPanel {
     }
 
     private JButton crearBoton(String texto, boolean primario, Runnable accion) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

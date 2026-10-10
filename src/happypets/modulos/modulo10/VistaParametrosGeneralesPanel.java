@@ -33,7 +33,7 @@ import happypets.ui.Iconos;
  * Submódulo 10.1: Parámetros Generales de la Clínica Veterinaria.
  * Basado fielmente en el wireframe institucional 'PÁGINA COMPLETA.pdf'.
  */
-public class VistaParametrosGeneralesPanel extends JPanel {
+public class VistaParametrosGeneralesPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -51,7 +51,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
 
     public VistaParametrosGeneralesPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252)); // Slate-50 suave
+        setBackground(Color.WHITE); // Slate-50 suave
         inicializarUI();
         cargarDatos();
     }
@@ -59,7 +59,8 @@ public class VistaParametrosGeneralesPanel extends JPanel {
     private void inicializarUI() {
         JPanel contenedor = new JPanel();
         contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setBackground(new Color(248, 250, 252));
+        contenedor.setBackground(Color.WHITE);
+        contenedor.setOpaque(false);
         contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
 
         // 1. Barra de Encabezado Institucional (Breadcrumb + Título + Acciones)
@@ -75,20 +76,22 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         contenedor.add(Box.createVerticalGlue());
 
         JScrollPane scroll = new JScrollPane(contenedor);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(14);
-        scroll.getViewport().setBackground(new Color(248, 250, 252));
+        scroll.getViewport().setBackground(Color.WHITE);
         add(scroll, BorderLayout.CENTER);
     }
 
     private JPanel crearBarraEncabezado() {
         JPanel header = new JPanel(new BorderLayout(15, 8));
-        header.setBackground(new Color(248, 250, 252));
+        header.setBackground(Color.WHITE);
 
         // Lado Izquierdo: Breadcrumb y Títulos
         JPanel izq = new JPanel();
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
-        izq.setBackground(new Color(248, 250, 252));
+        izq.setBackground(Color.WHITE);
 
         JLabel lblBreadcrumb = new JLabel("Ajustes > Configuración Empresarial > Parámetros Generales");
         lblBreadcrumb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -111,9 +114,9 @@ public class VistaParametrosGeneralesPanel extends JPanel {
 
         // Lado Derecho: Botones [Restablecer Valores] y [Guardar Todos los Cambios]
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        der.setBackground(new Color(248, 250, 252));
+        der.setBackground(Color.WHITE);
 
-        JButton btnRestablecer = new JButton("Restablecer Valores");
+        JButton btnRestablecer = new happypets.ui.BotonAsset("Restablecer Valores");
         btnRestablecer.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnRestablecer.setForeground(new Color(51, 65, 85));
         btnRestablecer.setBackground(Color.WHITE);
@@ -126,7 +129,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         btnRestablecer.addActionListener(e -> cargarDatos());
         der.add(btnRestablecer);
 
-        JButton btnGuardar = new JButton("💾  Guardar Todos los Cambios");
+        JButton btnGuardar = new happypets.ui.BotonAsset("💾  Guardar Todos los Cambios");
         btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.setBackground(new Color(15, 23, 42)); // Slate-900 oscuro elegante
@@ -296,7 +299,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 20));
         pnlDer.setBackground(Color.WHITE);
 
-        JButton btnActualizarLogo = new JButton("Actualizar Imagen");
+        JButton btnActualizarLogo = new happypets.ui.BotonAsset("Actualizar Imagen");
         btnActualizarLogo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnActualizarLogo.setForeground(new Color(30, 41, 59));
         btnActualizarLogo.setBackground(new Color(241, 245, 249));

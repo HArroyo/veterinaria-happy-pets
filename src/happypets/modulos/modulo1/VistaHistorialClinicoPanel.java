@@ -47,7 +47,7 @@ import happypets.ui.Ui;
  * - 4 Tarjetas KPI de resumen del paciente activo (Paciente, Propietario, Última Atención y Total Consultas).
  * - Tabla del historial con consultas clínicas y botón de apertura de detalle.
  */
-public class VistaHistorialClinicoPanel extends JPanel {
+public class VistaHistorialClinicoPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -109,6 +109,8 @@ public class VistaHistorialClinicoPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);

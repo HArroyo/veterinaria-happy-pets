@@ -43,7 +43,7 @@ import happypets.ui.Ui;
  * Almacén digital centralizado de contratos, informes, facturas electrónicas y balances
  * con filtrado por extensión, carga de archivos, visor interactivo y trazabilidad.
  */
-public class VistaRepositorioDocumentalPanel extends JPanel {
+public class VistaRepositorioDocumentalPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -57,7 +57,7 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
 
     public VistaRepositorioDocumentalPanel() {
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
@@ -99,7 +99,7 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
 
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
+        JLabel lblUsr = new happypets.ui.EtiquetaAsset("Usuario: Admin 👤");
         lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblUsr.setForeground(new Color(226, 232, 240));
         pnlUsr.add(lblUsr);
@@ -177,7 +177,7 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
         tablaDocumentos.setRowHeight(38);
         tablaDocumentos.setGridColor(new Color(241, 245, 249));
         tablaDocumentos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaDocumentos.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaDocumentos.getTableHeader().setBackground(Color.WHITE);
         tablaDocumentos.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaDocumentos.setSelectionBackground(new Color(240, 249, 255));
         tablaDocumentos.setSelectionForeground(new Color(15, 23, 42));
@@ -364,7 +364,7 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
         dlg.add(pnl, BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        bot.setBackground(new Color(248, 250, 252));
+        bot.setBackground(Color.WHITE);
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
 
         JButton btnCancelar = Ui.botonSecundario("Cancelar", null);

@@ -45,7 +45,7 @@ import happypets.ui.Ui;
  * gráfico Donut de canales (Servicios vs Productos), barras comparativas semestrales y
  * la tabla departamental con rentabilidad y estados financieros.
  */
-public class VistaReportesFinancierosPanel extends JPanel {
+public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -70,14 +70,15 @@ public class VistaReportesFinancierosPanel extends JPanel {
     public VistaReportesFinancierosPanel(Runnable alSolicitarExportador) {
         this.alSolicitarExportador = alSolicitarExportador;
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
 
         JPanel panelCuerpo = new JPanel();
         panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
-        panelCuerpo.setBackground(new Color(248, 250, 252));
+        panelCuerpo.setBackground(Color.WHITE);
+        panelCuerpo.setOpaque(false);
 
         panelCuerpo.add(crearPanelKPIs());
         panelCuerpo.add(Box.createVerticalStrut(16));
@@ -90,9 +91,11 @@ public class VistaReportesFinancierosPanel extends JPanel {
         panelCuerpo.add(crearBannerAccesoExportador());
 
         JScrollPane scrollGeneral = new JScrollPane(panelCuerpo);
+        scrollGeneral.setOpaque(false);
+        scrollGeneral.getViewport().setOpaque(false);
         scrollGeneral.setBorder(null);
         scrollGeneral.getVerticalScrollBar().setUnitIncrement(16);
-        scrollGeneral.setBackground(new Color(248, 250, 252));
+        scrollGeneral.setBackground(Color.WHITE);
         add(scrollGeneral, BorderLayout.CENTER);
 
         cargarDatosTabla();
@@ -387,7 +390,7 @@ public class VistaReportesFinancierosPanel extends JPanel {
 
         // Barra inferior del donut: 65% Servicios vs 35% Productos
         JPanel pnlResumenDonut = new JPanel(new GridLayout(1, 2, 8, 0));
-        pnlResumenDonut.setBackground(new Color(248, 250, 252));
+        pnlResumenDonut.setBackground(Color.WHITE);
         pnlResumenDonut.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(241, 245, 249), 1),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
@@ -428,7 +431,7 @@ public class VistaReportesFinancierosPanel extends JPanel {
 
         JPanel pnlBadgeMayor = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pnlBadgeMayor.setOpaque(false);
-        JLabel badgeMayo = new JLabel("  ★ Mayo: Mayor Margen (S/ 36,100)  ");
+        JLabel badgeMayo = new happypets.ui.EtiquetaAsset("  ★ Mayo: Mayor Margen (S/ 36,100)  ");
         badgeMayo.setFont(new Font("Segoe UI", Font.BOLD, 10));
         badgeMayo.setOpaque(true);
         badgeMayo.setBackground(new Color(236, 253, 245));
@@ -443,7 +446,7 @@ public class VistaReportesFinancierosPanel extends JPanel {
 
         // Barra inferior: Ratio cobro/gasto y costo medio
         JPanel pnlResumenBarras = new JPanel(new GridLayout(1, 2, 8, 0));
-        pnlResumenBarras.setBackground(new Color(248, 250, 252));
+        pnlResumenBarras.setBackground(Color.WHITE);
         pnlResumenBarras.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(241, 245, 249), 1),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
@@ -502,7 +505,7 @@ public class VistaReportesFinancierosPanel extends JPanel {
         tablaDesglose.setRowHeight(36);
         tablaDesglose.setGridColor(new Color(241, 245, 249));
         tablaDesglose.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaDesglose.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaDesglose.getTableHeader().setBackground(Color.WHITE);
         tablaDesglose.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaDesglose.setSelectionBackground(new Color(240, 249, 255));
         tablaDesglose.setSelectionForeground(new Color(15, 23, 42));

@@ -31,7 +31,7 @@ import happypets.ui.Iconos;
  * Submódulo 10.3: Integraciones Externas.
  * Basado fielmente en el wireframe 'Integraciones externas.pdf'.
  */
-public class VistaIntegracionesExternasPanel extends JPanel {
+public class VistaIntegracionesExternasPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -41,14 +41,15 @@ public class VistaIntegracionesExternasPanel extends JPanel {
 
     public VistaIntegracionesExternasPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         inicializarUI();
         recargarIntegraciones();
     }
 
     private void inicializarUI() {
         JPanel contenedor = new JPanel(new BorderLayout(0, 16));
-        contenedor.setBackground(new Color(248, 250, 252));
+        contenedor.setBackground(Color.WHITE);
+        contenedor.setOpaque(false);
         contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
 
         // Tarjeta Principal (idéntica al wireframe Integraciones externas.pdf)
@@ -152,7 +153,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         der.setBackground(Color.WHITE);
 
-        JButton btnAccion = new JButton(inte.isActiva() ? "Configurar" : "Conectar");
+        JButton btnAccion = new happypets.ui.BotonAsset(inte.isActiva() ? "Configurar" : "Conectar");
         btnAccion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnAccion.setForeground(new Color(51, 65, 85));
         btnAccion.setBackground(new Color(241, 245, 249));
@@ -244,7 +245,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
 
         // Botón de prueba de conexión
         g.gridx = 0; g.gridy = 4; g.gridwidth = 2;
-        JButton btnTest = new JButton("⚡ Probar Conexión en Vivo");
+        JButton btnTest = new happypets.ui.BotonAsset("⚡ Probar Conexión en Vivo");
         btnTest.setBackground(new Color(241, 245, 249));
         btnTest.addActionListener(e -> {
             JOptionPane.showMessageDialog(dlg, "✓ Conexión exitosa con " + inte.getNombre() + " (Respuesta: HTTP 200 OK en 48ms).", "Ping Exitoso", JOptionPane.INFORMATION_MESSAGE);
@@ -253,9 +254,9 @@ public class VistaIntegracionesExternasPanel extends JPanel {
 
         // Botones inferiores
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        bot.setBackground(new Color(248, 250, 252));
+        bot.setBackground(Color.WHITE);
 
-        JButton btnDesconectar = new JButton("Desconectar Servicio");
+        JButton btnDesconectar = new happypets.ui.BotonAsset("Desconectar Servicio");
         btnDesconectar.setForeground(new Color(239, 68, 68));
         btnDesconectar.addActionListener(e -> {
             repo.conmutarEstadoIntegracion(inte.getId());
@@ -264,7 +265,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         });
         bot.add(btnDesconectar);
 
-        JButton btnGuardar = new JButton("Guardar Cambios");
+        JButton btnGuardar = new happypets.ui.BotonAsset("Guardar Cambios");
         btnGuardar.setBackground(new Color(15, 23, 42));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.addActionListener(e -> {

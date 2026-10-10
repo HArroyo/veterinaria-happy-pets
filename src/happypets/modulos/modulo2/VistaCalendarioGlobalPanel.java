@@ -37,7 +37,7 @@ import happypets.ui.Iconos;
 /**
  * Submódulo 2.2: Calendario Global de Citas y Turnos de la Clínica.
  */
-public class VistaCalendarioGlobalPanel extends JPanel {
+public class VistaCalendarioGlobalPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -97,6 +97,8 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -709,7 +711,7 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     }
 
     private JButton crearBotonAccion(String texto, boolean primario) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

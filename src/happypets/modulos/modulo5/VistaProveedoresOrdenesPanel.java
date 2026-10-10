@@ -48,7 +48,7 @@ import happypets.ui.Iconos;
  * - Pipeline de estados (Borrador -> Enviada a Proveedor -> Recibida en Almacén).
  * - Recepción de mercadería con incremento directo en inventario.
  */
-public class VistaProveedoresOrdenesPanel extends JPanel {
+public class VistaProveedoresOrdenesPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -115,6 +115,8 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -485,7 +487,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         tablaProveedores.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         tablaProveedores.setRowHeight(26);
         tablaProveedores.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaProveedores.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaProveedores.getTableHeader().setBackground(Color.WHITE);
         tablaProveedores.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaProveedores.setSelectionBackground(new Color(224, 242, 254));
         tablaProveedores.setSelectionForeground(new Color(3, 105, 161));
@@ -529,7 +531,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         tablaOrdenes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         tablaOrdenes.setRowHeight(26);
         tablaOrdenes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaOrdenes.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaOrdenes.getTableHeader().setBackground(Color.WHITE);
         tablaOrdenes.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaOrdenes.setSelectionBackground(new Color(224, 242, 254));
         tablaOrdenes.setSelectionForeground(new Color(3, 105, 161));
@@ -617,7 +619,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
     }
 
     private JButton crearBoton(String texto, boolean primario, Runnable accion) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

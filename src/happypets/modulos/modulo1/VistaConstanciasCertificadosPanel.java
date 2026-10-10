@@ -47,7 +47,7 @@ import happypets.ui.Ui;
  * - 4 Tarjetas KPI de resumen documental del paciente activo.
  * - Tabla con los certificados y constancias oficiales con vista previa e impresión.
  */
-public class VistaConstanciasCertificadosPanel extends JPanel {
+public class VistaConstanciasCertificadosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -109,6 +109,8 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);

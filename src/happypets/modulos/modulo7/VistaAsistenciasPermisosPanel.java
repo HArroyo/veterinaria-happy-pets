@@ -50,7 +50,7 @@ import happypets.ui.Ui;
  * Submódulo 7.4: Asistencias y Permisos - Pase de lista diario por turnos.
  * Diseñado según wireframe oficial (modulos/modulo-7/WhatsApp Image 2026-09-24 at 10.39-pdfa-3u.pdf).
  */
-public class VistaAsistenciasPermisosPanel extends JPanel {
+public class VistaAsistenciasPermisosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_FONDO = new Color(248, 250, 252);
@@ -312,7 +312,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
 
     private JButton crearBotonPildoraTurno(String turnoClave, String texto) {
         boolean activo = turnoFiltroPildora.equalsIgnoreCase(turnoClave);
-        JButton btn = new JButton(texto);
+        JButton btn = new happypets.ui.BotonAsset(texto);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -370,7 +370,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
 
         JTableHeader th = tablaAsistencias.getTableHeader();
         th.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        th.setBackground(new Color(248, 250, 252));
+        th.setBackground(Color.WHITE);
         th.setForeground(COLOR_TEXTO_TITULO);
         th.setPreferredSize(new Dimension(0, 36));
 
@@ -475,7 +475,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
                 p.setOpaque(true);
                 p.setBackground(sel ? table.getSelectionBackground() : Color.WHITE);
-                JButton btn = new JButton("Marcar");
+                JButton btn = new happypets.ui.BotonAsset("Marcar");
                 btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 btn.setBackground(Color.WHITE);
                 btn.setForeground(COLOR_MORADO);
@@ -561,18 +561,18 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
                 new LineBorder(new Color(241, 245, 249), 1, true),
                 new EmptyBorder(8, 10, 8, 10)
         ));
-        panelCampos.setBackground(new Color(248, 250, 252));
+        panelCampos.setBackground(Color.WHITE);
 
         lblSelTurno = new JLabel("⏰ Turno: Mañana (08:00 - 15:00)");
         lblSelTurno.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 
-        lblSelEntrada = new JLabel("📥 Entrada: 07:55  (Esperada: 08:00)");
+        lblSelEntrada = new happypets.ui.EtiquetaAsset("📥 Entrada: 07:55  (Esperada: 08:00)");
         lblSelEntrada.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 
-        lblSelSalida = new JLabel("📤 Salida: --:--  (Esperada: 15:00)");
+        lblSelSalida = new happypets.ui.EtiquetaAsset("📤 Salida: --:--  (Esperada: 15:00)");
         lblSelSalida.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 
-        lblSelNotaAlerta = new JLabel("Nota: Puntual · En consulta felina");
+        lblSelNotaAlerta = new happypets.ui.EtiquetaAsset("Nota: Puntual · En consulta felina");
         lblSelNotaAlerta.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblSelNotaAlerta.setForeground(COLOR_VERDE);
 
@@ -615,7 +615,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
                 new EmptyBorder(14, 16, 14, 16)
         ));
 
-        JLabel lblTitPermisos = new JLabel("📋 Permisos de Hoy");
+        JLabel lblTitPermisos = new happypets.ui.EtiquetaAsset("📋 Permisos de Hoy");
         lblTitPermisos.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitPermisos.setForeground(COLOR_TEXTO_TITULO);
 
@@ -625,13 +625,13 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
 
         // Widget Cobertura noche abajo
         JPanel boxNoche = new JPanel(new BorderLayout(6, 6));
-        boxNoche.setBackground(new Color(248, 250, 252));
+        boxNoche.setBackground(Color.WHITE);
         boxNoche.setBorder(new CompoundBorder(
                 new LineBorder(COLOR_BORDE, 1, true),
                 new EmptyBorder(8, 10, 8, 10)
         ));
 
-        JLabel lblTitNoche = new JLabel("🌙 Cobertura Noche (Hoy 22:00)");
+        JLabel lblTitNoche = new happypets.ui.EtiquetaAsset("🌙 Cobertura Noche (Hoy 22:00)");
         lblTitNoche.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblTitNoche.setForeground(COLOR_TEXTO_TITULO);
 
@@ -639,7 +639,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
         lblNocheDoc.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblNocheDoc.setForeground(COLOR_TEXTO_MUTED);
 
-        JButton btnReasignarGuardia = new JButton("Reasignar Guardia");
+        JButton btnReasignarGuardia = new happypets.ui.BotonAsset("Reasignar Guardia");
         btnReasignarGuardia.setFont(new Font("Segoe UI", Font.BOLD, 10));
         btnReasignarGuardia.setBackground(Color.WHITE);
         btnReasignarGuardia.setForeground(COLOR_AZUL);
@@ -665,7 +665,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
 
         for (SolicitudPermiso sp : permisos) {
             JPanel item = new JPanel(new BorderLayout(6, 4));
-            item.setBackground(new Color(248, 250, 252));
+            item.setBackground(Color.WHITE);
             item.setBorder(new CompoundBorder(
                     new LineBorder(COLOR_BORDE, 1, true),
                     new EmptyBorder(6, 8, 6, 8)
@@ -679,7 +679,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
             botItem.setOpaque(false);
 
             if ("Pendiente".equalsIgnoreCase(sp.getEstado())) {
-                JButton btnOk = new JButton("Aprobar");
+                JButton btnOk = new happypets.ui.BotonAsset("Aprobar");
                 btnOk.setFont(new Font("Segoe UI", Font.BOLD, 10));
                 btnOk.setBackground(COLOR_VERDE);
                 btnOk.setForeground(Color.WHITE);
@@ -690,7 +690,7 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
                     recargarDatos();
                 });
 
-                JButton btnNo = new JButton("Rechazar");
+                JButton btnNo = new happypets.ui.BotonAsset("Rechazar");
                 btnNo.setFont(new Font("Segoe UI", Font.PLAIN, 10));
                 btnNo.setBackground(Color.WHITE);
                 btnNo.setForeground(COLOR_ROJO);

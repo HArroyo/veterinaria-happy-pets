@@ -44,7 +44,7 @@ import happypets.ui.Iconos;
  *  - Columna Izquierda: Parámetros Generales + Tabla de Usuarios Activos
  *  - Columna Derecha: Módulo de IA + Integraciones Externas + Soporte Técnico
  */
-public class VistaDashboardAdministracionPanel extends JPanel {
+public class VistaDashboardAdministracionPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -81,7 +81,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
     public VistaDashboardAdministracionPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         inicializarUI();
         cargarDatos();
     }
@@ -89,7 +89,8 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     private void inicializarUI() {
         JPanel contenedor = new JPanel();
         contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setBackground(new Color(248, 250, 252));
+        contenedor.setBackground(Color.WHITE);
+        contenedor.setOpaque(false);
         contenedor.setBorder(BorderFactory.createEmptyBorder(16, 24, 24, 24));
 
         // 1. Barra Superior con Buscador, Selector de Sede y Perfil de Usuario
@@ -108,9 +109,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         contenedor.add(crearGridDosColumnas());
 
         JScrollPane scroll = new JScrollPane(contenedor);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.getViewport().setBackground(new Color(248, 250, 252));
+        scroll.getViewport().setBackground(Color.WHITE);
         add(scroll, BorderLayout.CENTER);
     }
 
@@ -130,7 +133,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         txtBuscarTop.setForeground(new Color(100, 116, 139));
         txtBuscarTop.setPreferredSize(new Dimension(300, 32));
         izq.add(txtBuscarTop);
-        izq.add(new JLabel("🔍"));
+        izq.add(new happypets.ui.EtiquetaAsset("🔍"));
         top.add(izq, BorderLayout.WEST);
 
         // Selector de Sede y Usuario Administrador
@@ -175,11 +178,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
     private JPanel crearBarraEncabezado() {
         JPanel header = new JPanel(new BorderLayout(15, 6));
-        header.setBackground(new Color(248, 250, 252));
+        header.setBackground(Color.WHITE);
 
         JPanel izq = new JPanel();
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
-        izq.setBackground(new Color(248, 250, 252));
+        izq.setBackground(Color.WHITE);
 
         JLabel lblBreadcrumb = new JLabel("Ajustes > Configuración Empresarial");
         lblBreadcrumb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -201,9 +204,9 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         header.add(izq, BorderLayout.CENTER);
 
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        der.setBackground(new Color(248, 250, 252));
+        der.setBackground(Color.WHITE);
 
-        JButton btnRestablecer = new JButton("Restablecer Valores");
+        JButton btnRestablecer = new happypets.ui.BotonAsset("Restablecer Valores");
         btnRestablecer.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnRestablecer.setForeground(new Color(51, 65, 85));
         btnRestablecer.setBackground(Color.WHITE);
@@ -216,7 +219,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         btnRestablecer.addActionListener(e -> cargarDatos());
         der.add(btnRestablecer);
 
-        JButton btnGuardar = new JButton("💾  Guardar Todos los Cambios");
+        JButton btnGuardar = new happypets.ui.BotonAsset("💾  Guardar Todos los Cambios");
         btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.setBackground(new Color(15, 23, 42));
@@ -232,7 +235,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
     private JPanel crearBarraPestañasPildoras() {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        p.setBackground(new Color(248, 250, 252));
+        p.setBackground(Color.WHITE);
 
         p.add(crearPildora("Parámetros Generales", true, null));
         p.add(crearPildora("Usuarios (14)", false, null));
@@ -246,7 +249,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
     private JButton crearPildora(String texto, boolean activo, String badge) {
         String label = texto + (badge != null ? " [" + badge + "]" : "");
-        JButton b = new JButton(label);
+        JButton b = new happypets.ui.BotonAsset(label);
         b.setFont(new Font("Segoe UI", activo ? Font.BOLD : Font.PLAIN, 13));
         b.setForeground(activo ? new Color(15, 23, 42) : new Color(100, 116, 139));
         b.setBackground(Color.WHITE);
@@ -261,7 +264,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
     private JPanel crearGridDosColumnas() {
         JPanel grid = new JPanel(new GridBagLayout());
-        grid.setBackground(new Color(248, 250, 252));
+        grid.setBackground(Color.WHITE);
         GridBagConstraints g = new GridBagConstraints();
         g.insets = new Insets(0, 0, 0, 16);
         g.fill = GridBagConstraints.BOTH;
@@ -269,7 +272,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         // Columna Izquierda (65% del ancho)
         JPanel colIzquierda = new JPanel();
         colIzquierda.setLayout(new BoxLayout(colIzquierda, BoxLayout.Y_AXIS));
-        colIzquierda.setBackground(new Color(248, 250, 252));
+        colIzquierda.setBackground(Color.WHITE);
 
         colIzquierda.add(crearCardDatosGenerales());
         colIzquierda.add(Box.createVerticalStrut(18));
@@ -281,7 +284,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         // Columna Derecha (35% del ancho)
         JPanel colDerecha = new JPanel();
         colDerecha.setLayout(new BoxLayout(colDerecha, BoxLayout.Y_AXIS));
-        colDerecha.setBackground(new Color(248, 250, 252));
+        colDerecha.setBackground(Color.WHITE);
 
         colDerecha.add(crearCardModuloIA());
         colDerecha.add(Box.createVerticalStrut(18));
@@ -362,7 +365,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         // Logo row
         JPanel pLogo = new JPanel(new BorderLayout(14, 0));
-        pLogo.setBackground(new Color(248, 250, 252));
+        pLogo.setBackground(Color.WHITE);
         pLogo.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(10, 14, 10, 14)
@@ -371,7 +374,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JLabel lblBox = new JLabel(Iconos.crearIconoHuella(26, new Color(59, 130, 246)));
         JPanel txts = new JPanel();
         txts.setLayout(new BoxLayout(txts, BoxLayout.Y_AXIS));
-        txts.setBackground(new Color(248, 250, 252));
+        txts.setBackground(Color.WHITE);
         JLabel l1 = new JLabel("Logotipo Oficial para Recetas y Facturas");
         l1.setFont(new Font("Segoe UI", Font.BOLD, 12));
         JLabel l2 = new JLabel("Formatos aceptados: PNG, JPG, SVG. Máx 2MB");
@@ -380,7 +383,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         txts.add(l1);
         txts.add(l2);
 
-        JButton btnLogo = new JButton("Actualizar Imagen");
+        JButton btnLogo = new happypets.ui.BotonAsset("Actualizar Imagen");
         btnLogo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnLogo.setBackground(Color.WHITE);
         btnLogo.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -431,13 +434,13 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setBackground(Color.WHITE);
 
-        JButton btnGest = new JButton("Gestionar Roles");
+        JButton btnGest = new happypets.ui.BotonAsset("Gestionar Roles");
         btnGest.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnGest.setBackground(new Color(241, 245, 249));
         btnGest.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnGest.addActionListener(e -> JOptionPane.showMessageDialog(this, "Acceso a matriz de roles y permisos.", "Roles", JOptionPane.INFORMATION_MESSAGE));
 
-        JButton btnNew = new JButton("+ Nuevo Usuario");
+        JButton btnNew = new happypets.ui.BotonAsset("+ Nuevo Usuario");
         btnNew.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnNew.setBackground(new Color(15, 23, 42));
         btnNew.setForeground(Color.WHITE);
@@ -461,7 +464,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         tablaUsuarios.setShowVerticalLines(false);
         tablaUsuarios.setGridColor(new Color(241, 245, 249));
         tablaUsuarios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaUsuarios.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaUsuarios.getTableHeader().setBackground(Color.WHITE);
 
         tablaUsuarios.getColumnModel().getColumn(0).setPreferredWidth(200);
         tablaUsuarios.getColumnModel().getColumn(1).setPreferredWidth(140);
@@ -496,14 +499,14 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         JPanel pPags = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         pPags.setBackground(Color.WHITE);
-        JButton bAnt = new JButton("Anterior");
+        JButton bAnt = new happypets.ui.BotonAsset("Anterior");
         bAnt.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        JButton b1 = new JButton("1");
+        JButton b1 = new happypets.ui.BotonAsset("1");
         b1.setBackground(new Color(15, 23, 42));
         b1.setForeground(Color.WHITE);
-        JButton b2 = new JButton("2");
+        JButton b2 = new happypets.ui.BotonAsset("2");
         b2.setBackground(Color.WHITE);
-        JButton bSig = new JButton("Siguiente");
+        JButton bSig = new happypets.ui.BotonAsset("Siguiente");
         bSig.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 
         pPags.add(bAnt);
@@ -569,7 +572,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lMod.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lMod.setForeground(new Color(71, 85, 105));
 
-        JButton btnPrompts = new JButton("Ajustes de Prompts");
+        JButton btnPrompts = new happypets.ui.BotonAsset("Ajustes de Prompts");
         btnPrompts.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnPrompts.setBackground(new Color(241, 245, 249));
         btnPrompts.addActionListener(e -> JOptionPane.showMessageDialog(this, "System prompt configurado para triaje veterinario.", "Prompts", JOptionPane.INFORMATION_MESSAGE));
@@ -584,7 +587,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
     private JPanel crearMiniToggle(JCheckBox chk, String desc) {
         JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(new Color(248, 250, 252));
+        p.setBackground(Color.WHITE);
         p.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(6, 10, 6, 10)
@@ -592,7 +595,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         JPanel txt = new JPanel();
         txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
-        txt.setBackground(new Color(248, 250, 252));
+        txt.setBackground(Color.WHITE);
         JLabel t = new JLabel(chk.getText());
         t.setFont(new Font("Segoe UI", Font.BOLD, 12));
         JLabel d = new JLabel(desc);
@@ -602,7 +605,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         txt.add(d);
 
         chk.setText("");
-        chk.setBackground(new Color(248, 250, 252));
+        chk.setBackground(Color.WHITE);
         p.add(txt, BorderLayout.CENTER);
         p.add(chk, BorderLayout.EAST);
         return p;
@@ -690,12 +693,12 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JPanel bot = new JPanel(new GridLayout(1, 2, 8, 0));
         bot.setBackground(Color.WHITE);
 
-        JButton btnLogs = new JButton("Ver Logs Sistema");
+        JButton btnLogs = new happypets.ui.BotonAsset("Ver Logs Sistema");
         btnLogs.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnLogs.setBackground(new Color(241, 245, 249));
         btnLogs.addActionListener(e -> JOptionPane.showMessageDialog(this, "Logs del servidor: Estado óptimo, sin anomalías.", "Logs", JOptionPane.INFORMATION_MESSAGE));
 
-        JButton btnTicket = new JButton("🎫  Crear Ticket");
+        JButton btnTicket = new happypets.ui.BotonAsset("🎫  Crear Ticket");
         btnTicket.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnTicket.setBackground(new Color(241, 245, 249));
         btnTicket.addActionListener(e -> JOptionPane.showMessageDialog(this, "Formulario para reportar incidencia técnica.", "Nuevo Ticket", JOptionPane.INFORMATION_MESSAGE));
@@ -746,7 +749,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         for (int i = 0; i < Math.min(4, ints.size()); i++) {
             IntegracionExterna in = ints.get(i);
             JPanel r = new JPanel(new BorderLayout(8, 0));
-            r.setBackground(new Color(248, 250, 252));
+            r.setBackground(Color.WHITE);
             r.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                     BorderFactory.createEmptyBorder(6, 10, 6, 10)
@@ -754,7 +757,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
             JPanel t = new JPanel();
             t.setLayout(new BoxLayout(t, BoxLayout.Y_AXIS));
-            t.setBackground(new Color(248, 250, 252));
+            t.setBackground(Color.WHITE);
             JLabel lN = new JLabel(in.getNombre() + " " + (in.isActiva() ? "●" : "○"));
             lN.setFont(new Font("Segoe UI", Font.BOLD, 12));
             lN.setForeground(new Color(15, 23, 42));
@@ -764,7 +767,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
             t.add(lN);
             t.add(lS);
 
-            JButton b = new JButton(in.isActiva() ? "Configurar" : "Conectar");
+            JButton b = new happypets.ui.BotonAsset(in.isActiva() ? "Configurar" : "Conectar");
             b.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             b.setBackground(Color.WHITE);
             b.addActionListener(e -> {

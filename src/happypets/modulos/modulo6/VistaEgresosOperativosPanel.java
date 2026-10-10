@@ -49,7 +49,7 @@ import happypets.ui.Ui;
  * - Footer del wireframe: N.° de egresos: X | Total egresos: S/ 0.00.
  * - Mejoras: KPIs de control presupuestal, mayor categoría de gasto, filtros y voucher de egreso.
  */
-public class VistaEgresosOperativosPanel extends JPanel {
+public class VistaEgresosOperativosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);

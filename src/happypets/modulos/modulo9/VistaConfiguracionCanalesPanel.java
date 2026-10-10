@@ -36,7 +36,7 @@ import happypets.ui.Ui;
  * Permite activar, configurar y parametrizar los destinos (Email, SMS, Push) y
  * frecuencias de notificación, así como los tipos de eventos críticos a reportar.
  */
-public class VistaConfiguracionCanalesPanel extends JPanel {
+public class VistaConfiguracionCanalesPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -62,7 +62,7 @@ public class VistaConfiguracionCanalesPanel extends JPanel {
 
     public VistaConfiguracionCanalesPanel() {
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
@@ -76,7 +76,7 @@ public class VistaConfiguracionCanalesPanel extends JPanel {
         JScrollPane scroll = new JScrollPane(panelCentro);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.setBackground(new Color(248, 250, 252));
+        scroll.setBackground(Color.WHITE);
         add(scroll, BorderLayout.CENTER);
 
         add(crearBarraAccionesInferiores(), BorderLayout.SOUTH);
@@ -110,7 +110,7 @@ public class VistaConfiguracionCanalesPanel extends JPanel {
 
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
+        JLabel lblUsr = new happypets.ui.EtiquetaAsset("Usuario: Admin 👤");
         lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblUsr.setForeground(new Color(226, 232, 240));
         pnlUsr.add(lblUsr);

@@ -50,7 +50,7 @@ import happypets.ui.Ui;
  * (Top 5) y carga asistencial por especialista médico, junto a la tabla analítica
  * de diagnósticos confirmados y modal interactivo de ficha clínica completa.
  */
-public class VistaReportesClinicosPanel extends JPanel {
+public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -72,14 +72,15 @@ public class VistaReportesClinicosPanel extends JPanel {
 
     public VistaReportesClinicosPanel() {
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
 
         JPanel panelCuerpo = new JPanel();
         panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
-        panelCuerpo.setBackground(new Color(248, 250, 252));
+        panelCuerpo.setBackground(Color.WHITE);
+        panelCuerpo.setOpaque(false);
 
         panelCuerpo.add(crearPanelKPIs());
         panelCuerpo.add(Box.createVerticalStrut(16));
@@ -90,9 +91,11 @@ public class VistaReportesClinicosPanel extends JPanel {
         panelCuerpo.add(crearPanelTablaReportes());
 
         JScrollPane scrollGeneral = new JScrollPane(panelCuerpo);
+        scrollGeneral.setOpaque(false);
+        scrollGeneral.getViewport().setOpaque(false);
         scrollGeneral.setBorder(null);
         scrollGeneral.getVerticalScrollBar().setUnitIncrement(16);
-        scrollGeneral.setBackground(new Color(248, 250, 252));
+        scrollGeneral.setBackground(Color.WHITE);
         add(scrollGeneral, BorderLayout.CENTER);
 
         cargarDatosReportes();
@@ -486,7 +489,7 @@ public class VistaReportesClinicosPanel extends JPanel {
         tablaReportes.setRowHeight(38);
         tablaReportes.setGridColor(new Color(241, 245, 249));
         tablaReportes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaReportes.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaReportes.getTableHeader().setBackground(Color.WHITE);
         tablaReportes.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaReportes.setSelectionBackground(new Color(240, 249, 255));
         tablaReportes.setSelectionForeground(new Color(15, 23, 42));
@@ -646,7 +649,7 @@ public class VistaReportesClinicosPanel extends JPanel {
         txtTrat.setLineWrap(true);
         txtTrat.setWrapStyleWord(true);
         txtTrat.setEditable(false);
-        txtTrat.setBackground(new Color(248, 250, 252));
+        txtTrat.setBackground(Color.WHITE);
         txtTrat.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
@@ -667,7 +670,7 @@ public class VistaReportesClinicosPanel extends JPanel {
         txtObs.setLineWrap(true);
         txtObs.setWrapStyleWord(true);
         txtObs.setEditable(false);
-        txtObs.setBackground(new Color(248, 250, 252));
+        txtObs.setBackground(Color.WHITE);
         txtObs.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
@@ -678,7 +681,7 @@ public class VistaReportesClinicosPanel extends JPanel {
 
         // Barra inferior
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        bot.setBackground(new Color(248, 250, 252));
+        bot.setBackground(Color.WHITE);
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
 
         JButton btnImprimir = Ui.botonSecundario("Imprimir Ficha", Iconos.crearIconoDocumento(13, new Color(15, 23, 42)));

@@ -40,7 +40,7 @@ import happypets.ui.Ui;
  * (ATV Auxiliares Técnicos, Recepción, Peluquería/Grooming, Administración, Mantenimiento).
  * Diseñado según wireframe oficial (modulos/modulo-7/wireframe_page_5.png).
  */
-public class VistaPersonalApoyoPanel extends JPanel {
+public class VistaPersonalApoyoPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_FONDO = new Color(248, 250, 252);
@@ -242,7 +242,7 @@ public class VistaPersonalApoyoPanel extends JPanel {
 
     private JButton crearBotonPildora(String catClave, String texto) {
         boolean activo = categoriaSeleccionada.equalsIgnoreCase(catClave);
-        JButton btn = new JButton(texto);
+        JButton btn = new happypets.ui.BotonAsset(texto);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -389,9 +389,10 @@ public class VistaPersonalApoyoPanel extends JPanel {
                 new LineBorder(new Color(241, 245, 249), 1, true),
                 new EmptyBorder(8, 10, 8, 10)
         ));
-        panelCuerpo.setBackground(new Color(248, 250, 252));
+        panelCuerpo.setBackground(Color.WHITE);
+        panelCuerpo.setOpaque(false);
 
-        JLabel lblArea = new JLabel("📍 Área: " + p.getAreaAsignada() + "   (" + p.getExtensionInterna() + ")");
+        JLabel lblArea = new happypets.ui.EtiquetaAsset("📍 Área: " + p.getAreaAsignada() + "   (" + p.getExtensionInterna() + ")");
         lblArea.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblArea.setForeground(COLOR_TEXTO_TITULO);
 
@@ -399,7 +400,7 @@ public class VistaPersonalApoyoPanel extends JPanel {
         lblTurno.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblTurno.setForeground(COLOR_TEXTO_MUTED);
 
-        JLabel lblCert = new JLabel("🎖️ " + p.getCertificaciones());
+        JLabel lblCert = new happypets.ui.EtiquetaAsset("🎖️ " + p.getCertificaciones());
         lblCert.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblCert.setForeground(new Color(71, 85, 105));
 

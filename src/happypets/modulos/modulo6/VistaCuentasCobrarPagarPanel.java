@@ -47,7 +47,7 @@ import happypets.ui.Ui;
  * - CUENTAS POR PAGAR.pdf (Proveedores, Concepto, Monto, Vence, Estado, Botones Agregar/Modificar/Eliminar/Limpiar, Tabla y Total pendiente)
  * Incluye KPIs de liquidez, registro rápido de amortizaciones y enlace contable con Caja Chica y Egresos.
  */
-public class VistaCuentasCobrarPagarPanel extends JPanel {
+public class VistaCuentasCobrarPagarPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);

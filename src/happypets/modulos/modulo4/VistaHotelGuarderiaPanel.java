@@ -51,7 +51,7 @@ import happypets.ui.Ui;
  * - Plan de alimentación personalizado y cronograma de paseos recreativos.
  * - Reportes diarios a tutores vía WhatsApp y generación de contrato de hospedaje.
  */
-public class VistaHotelGuarderiaPanel extends JPanel {
+public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -112,6 +112,8 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -487,7 +489,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         tablaHospedaje.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         tablaHospedaje.setRowHeight(26);
         tablaHospedaje.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaHospedaje.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaHospedaje.getTableHeader().setBackground(Color.WHITE);
         tablaHospedaje.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaHospedaje.setSelectionBackground(new Color(224, 242, 254));
         tablaHospedaje.setSelectionForeground(new Color(3, 105, 161));
@@ -582,7 +584,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
     }
 
     private JButton crearBoton(String texto, boolean primario, Runnable accion) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

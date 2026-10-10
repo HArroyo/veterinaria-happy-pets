@@ -38,7 +38,7 @@ import happypets.ui.Iconos;
  * Submódulo 10.4: Módulo de IA y Soporte Técnico.
  * Basado fielmente en el wireframe 'MODULO IA.pdf'.
  */
-public class VistaModuloIASoportePanel extends JPanel {
+public class VistaModuloIASoportePanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -54,7 +54,7 @@ public class VistaModuloIASoportePanel extends JPanel {
 
     public VistaModuloIASoportePanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         inicializarUI();
         cargarDatos();
     }
@@ -62,7 +62,8 @@ public class VistaModuloIASoportePanel extends JPanel {
     private void inicializarUI() {
         JPanel contenedor = new JPanel();
         contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setBackground(new Color(248, 250, 252));
+        contenedor.setBackground(Color.WHITE);
+        contenedor.setOpaque(false);
         contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
 
         // 1. Tarjeta: "Módulo de IA HappyPets"
@@ -78,9 +79,11 @@ public class VistaModuloIASoportePanel extends JPanel {
         contenedor.add(Box.createVerticalGlue());
 
         JScrollPane scroll = new JScrollPane(contenedor);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(14);
-        scroll.getViewport().setBackground(new Color(248, 250, 252));
+        scroll.getViewport().setBackground(Color.WHITE);
         add(scroll, BorderLayout.CENTER);
     }
 
@@ -148,7 +151,7 @@ public class VistaModuloIASoportePanel extends JPanel {
         lblModeloActual.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblModeloActual.setForeground(new Color(71, 85, 105));
 
-        JButton btnPrompts = new JButton("Ajustes de Prompts");
+        JButton btnPrompts = new happypets.ui.BotonAsset("Ajustes de Prompts");
         btnPrompts.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnPrompts.setForeground(new Color(30, 41, 59));
         btnPrompts.setBackground(new Color(241, 245, 249));
@@ -171,7 +174,7 @@ public class VistaModuloIASoportePanel extends JPanel {
 
     private JPanel crearFilaSwitch(String titulo, String subtitulo, JCheckBox chk) {
         JPanel fila = new JPanel(new BorderLayout(14, 0));
-        fila.setBackground(new Color(248, 250, 252));
+        fila.setBackground(Color.WHITE);
         fila.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(10, 16, 10, 16)
@@ -179,7 +182,7 @@ public class VistaModuloIASoportePanel extends JPanel {
 
         JPanel textos = new JPanel();
         textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
-        textos.setBackground(new Color(248, 250, 252));
+        textos.setBackground(Color.WHITE);
 
         JLabel lTit = new JLabel(titulo);
         lTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -193,7 +196,7 @@ public class VistaModuloIASoportePanel extends JPanel {
         textos.add(Box.createVerticalStrut(2));
         textos.add(lSub);
 
-        chk.setBackground(new Color(248, 250, 252));
+        chk.setBackground(Color.WHITE);
         chk.setFocusPainted(false);
         chk.setCursor(new Cursor(Cursor.HAND_CURSOR));
         chk.addActionListener(e -> guardarConfiguracionIA());
@@ -249,12 +252,12 @@ public class VistaModuloIASoportePanel extends JPanel {
 
         JTextArea txtResultado = new JTextArea(7, 40);
         txtResultado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtResultado.setBackground(new Color(248, 250, 252));
+        txtResultado.setBackground(Color.WHITE);
         txtResultado.setEditable(false);
         txtResultado.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
         txtResultado.setText("Presione 'Ejecutar Diagnóstico IA' para procesar el caso clínico.");
 
-        JButton btnEjecutar = new JButton("⚡  Ejecutar Diagnóstico IA");
+        JButton btnEjecutar = new happypets.ui.BotonAsset("⚡  Ejecutar Diagnóstico IA");
         btnEjecutar.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnEjecutar.setForeground(Color.WHITE);
         btnEjecutar.setBackground(new Color(15, 23, 42));
@@ -344,7 +347,7 @@ public class VistaModuloIASoportePanel extends JPanel {
         JPanel botones = new JPanel(new GridLayout(1, 2, 12, 0));
         botones.setBackground(Color.WHITE);
 
-        JButton btnLogs = new JButton("Ver Logs Sistema");
+        JButton btnLogs = new happypets.ui.BotonAsset("Ver Logs Sistema");
         btnLogs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnLogs.setForeground(new Color(51, 65, 85));
         btnLogs.setBackground(new Color(241, 245, 249));
@@ -356,7 +359,7 @@ public class VistaModuloIASoportePanel extends JPanel {
         ));
         btnLogs.addActionListener(e -> abrirLogsSistema());
 
-        JButton btnTicket = new JButton("🎫  Crear Ticket");
+        JButton btnTicket = new happypets.ui.BotonAsset("🎫  Crear Ticket");
         btnTicket.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnTicket.setForeground(new Color(51, 65, 85));
         btnTicket.setBackground(new Color(241, 245, 249));
@@ -429,9 +432,9 @@ public class VistaModuloIASoportePanel extends JPanel {
         pnl.add(new JScrollPane(txtPrompt), BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        JButton btnCerrar = new JButton("Cancelar");
+        JButton btnCerrar = new happypets.ui.BotonAsset("Cancelar");
         btnCerrar.addActionListener(e -> dlg.dispose());
-        JButton btnGuardar = new JButton("Guardar Prompt");
+        JButton btnGuardar = new happypets.ui.BotonAsset("Guardar Prompt");
         btnGuardar.setBackground(new Color(15, 23, 42));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.addActionListener(e -> {
@@ -475,7 +478,7 @@ public class VistaModuloIASoportePanel extends JPanel {
 
         pnl.add(new JScrollPane(txtLogs), BorderLayout.CENTER);
 
-        JButton btnCerrar = new JButton("Cerrar Consola");
+        JButton btnCerrar = new happypets.ui.BotonAsset("Cerrar Consola");
         btnCerrar.addActionListener(e -> dlg.dispose());
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bot.setBackground(new Color(15, 23, 42));
@@ -527,9 +530,9 @@ public class VistaModuloIASoportePanel extends JPanel {
         pnl.add(new JScrollPane(txtDesc), g);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        JButton btnCan = new JButton("Cancelar");
+        JButton btnCan = new happypets.ui.BotonAsset("Cancelar");
         btnCan.addActionListener(e -> dlg.dispose());
-        JButton btnCrear = new JButton("Enviar Ticket");
+        JButton btnCrear = new happypets.ui.BotonAsset("Enviar Ticket");
         btnCrear.setBackground(new Color(15, 23, 42));
         btnCrear.setForeground(Color.WHITE);
         btnCrear.addActionListener(e -> {

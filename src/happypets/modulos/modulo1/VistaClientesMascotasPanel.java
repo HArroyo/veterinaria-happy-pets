@@ -45,7 +45,7 @@ import happypets.ui.Ui;
  * - Ficha de cliente con campos reordenados en tarjeta limpia (Ficha Propietario).
  * - Sección de mascotas vinculadas con tabla interactiva y resumen clínico inferior.
  */
-public class VistaClientesMascotasPanel extends JPanel {
+public class VistaClientesMascotasPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -116,6 +116,8 @@ public class VistaClientesMascotasPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -392,7 +394,7 @@ public class VistaClientesMascotasPanel extends JPanel {
     }
 
     private JButton crearBotonAccion(String texto, boolean primario) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

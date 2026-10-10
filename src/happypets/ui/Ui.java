@@ -46,7 +46,7 @@ import javax.swing.table.TableCellRenderer;
 public final class Ui {
 	public static final Color TURQUESA = new Color(0, 188, 212);
 	public static final Color TURQUESA_OSCURO = new Color(0, 150, 169);
-	public static final Color FONDO = new Color(242, 244, 247);
+	public static final Color FONDO = Color.WHITE;
 	public static final Color BORDE_SUAVE = new Color(205, 212, 218);
 	public static final Color TEXTO_TITULO = new Color(33, 37, 41);
 	public static final Color TEXTO_MUTED = new Color(108, 117, 125);
@@ -55,6 +55,20 @@ public final class Ui {
 	private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	private Ui() {
+	}
+
+	public static JButton botonPrimario(String texto, javax.swing.Icon icono) {
+		JButton b = boton(texto, true);
+		b.setIcon(icono != null ? icono : Iconos.paraTexto(texto, 16, Color.WHITE));
+		b.setIconTextGap(6);
+		return b;
+	}
+
+	public static JButton botonSecundario(String texto, javax.swing.Icon icono) {
+		JButton b = boton(texto, false);
+		b.setIcon(icono != null ? icono : Iconos.paraTexto(texto, 16, TURQUESA_OSCURO));
+		b.setIconTextGap(6);
+		return b;
 	}
 
 	public static void instalarApariencia() {
@@ -122,40 +136,7 @@ public final class Ui {
 
 			lblLogo.setIcon(logo);
 
-<<<<<<< HEAD
 		} else {
-=======
-    public static JButton botonPrimario(String texto, javax.swing.Icon icono) {
-        JButton b = boton(texto, true);
-        if (icono != null) {
-            b.setIcon(icono);
-            b.setIconTextGap(6);
-        }
-        return b;
-    }
-
-    public static JButton botonSecundario(String texto, javax.swing.Icon icono) {
-        JButton b = boton(texto, false);
-        if (icono != null) {
-            b.setIcon(icono);
-            b.setIconTextGap(6);
-        }
-        return b;
-    }
-
-    /**
-     * Campo de texto con borde elegante y tamaño uniforme.
-     */
-    public static JTextField campoTexto(int columnas) {
-        JTextField tf = new JTextField(columnas);
-        tf.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tf.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 185, 190), 1),
-                new EmptyBorder(5, 8, 5, 8)
-        ));
-        return tf;
-    }
->>>>>>> origin/main
 
 			lblLogo.setText("Happy Pets");
 
@@ -242,7 +223,7 @@ public final class Ui {
 		Color textoColor = principal ? Color.WHITE : new Color(40, 40, 40);
 		Color bordeColor = principal ? TURQUESA_OSCURO : new Color(170, 175, 180);
 
-		JButton boton = new JButton(texto) {
+		JButton boton = new happypets.ui.BotonAsset(texto) {
 			private static final long serialVersionUID = 1L;
 
 			@Override

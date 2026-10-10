@@ -42,7 +42,7 @@ import happypets.ui.Ui;
  * Registro forense y auditoría inmutable de accesos, descargas, modificaciones de configuración
  * y alertas de seguridad con filtrado cronológico y exportación masiva.
  */
-public class VistaLogsTrazabilidadPanel extends JPanel {
+public class VistaLogsTrazabilidadPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -62,7 +62,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
 
     public VistaLogsTrazabilidadPanel() {
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
@@ -104,7 +104,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
 
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
+        JLabel lblUsr = new happypets.ui.EtiquetaAsset("Usuario: Admin 👤");
         lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblUsr.setForeground(new Color(226, 232, 240));
         pnlUsr.add(lblUsr);
@@ -184,7 +184,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         tablaLogs.setRowHeight(36);
         tablaLogs.setGridColor(new Color(241, 245, 249));
         tablaLogs.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaLogs.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaLogs.getTableHeader().setBackground(Color.WHITE);
         tablaLogs.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaLogs.setSelectionBackground(new Color(240, 249, 255));
         tablaLogs.setSelectionForeground(new Color(15, 23, 42));
@@ -248,7 +248,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         JPanel pnlPaginacion = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pnlPaginacion.setOpaque(false);
 
-        JButton btnAnt = new JButton("◀");
+        JButton btnAnt = new happypets.ui.BotonAsset("◀");
         btnAnt.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnAnt.setBackground(Color.WHITE);
         btnAnt.addActionListener(e -> {
@@ -262,7 +262,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         lblPaginacion.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblPaginacion.setForeground(new Color(71, 85, 105));
 
-        JButton btnSig = new JButton("▶");
+        JButton btnSig = new happypets.ui.BotonAsset("▶");
         btnSig.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnSig.setBackground(Color.WHITE);
         btnSig.addActionListener(e -> {
@@ -364,7 +364,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         dlg.add(pnl, BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        bot.setBackground(new Color(248, 250, 252));
+        bot.setBackground(Color.WHITE);
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
 
         JButton btnCerrar = Ui.botonPrimario("Cerrar", null);

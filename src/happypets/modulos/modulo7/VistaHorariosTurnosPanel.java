@@ -47,7 +47,7 @@ import happypets.ui.Ui;
  * Submódulo 7.3: Cuadrante de Guardias - Horarios y Turnos Médicos.
  * Diseñado según wireframe oficial (modulos/modulo-7/wireframe_page_4.png).
  */
-public class VistaHorariosTurnosPanel extends JPanel {
+public class VistaHorariosTurnosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_FONDO = new Color(248, 250, 252);
@@ -116,7 +116,7 @@ public class VistaHorariosTurnosPanel extends JPanel {
         JPanel navSemana = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
         navSemana.setOpaque(false);
 
-        JButton btnPrev = new JButton("<");
+        JButton btnPrev = new happypets.ui.BotonAsset("<");
         btnPrev.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnPrev.setFocusPainted(false);
         btnPrev.setBackground(Color.WHITE);
@@ -127,7 +127,7 @@ public class VistaHorariosTurnosPanel extends JPanel {
             recargarDatos();
         });
 
-        JButton btnHoy = new JButton("Semana Actual");
+        JButton btnHoy = new happypets.ui.BotonAsset("Semana Actual");
         btnHoy.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnHoy.setFocusPainted(false);
         btnHoy.setBackground(Color.WHITE);
@@ -138,7 +138,7 @@ public class VistaHorariosTurnosPanel extends JPanel {
             recargarDatos();
         });
 
-        JButton btnNext = new JButton(">");
+        JButton btnNext = new happypets.ui.BotonAsset(">");
         btnNext.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnNext.setFocusPainted(false);
         btnNext.setBackground(Color.WHITE);
@@ -299,7 +299,7 @@ public class VistaHorariosTurnosPanel extends JPanel {
 
         JTableHeader header = tablaCuadrante.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        header.setBackground(new Color(248, 250, 252));
+        header.setBackground(Color.WHITE);
         header.setForeground(COLOR_TEXTO_TITULO);
         header.setPreferredSize(new Dimension(0, 36));
 
@@ -434,7 +434,7 @@ public class VistaHorariosTurnosPanel extends JPanel {
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
                 p.setOpaque(true);
                 p.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
-                JButton btn = new JButton("Editar");
+                JButton btn = new happypets.ui.BotonAsset("Editar");
                 btn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
                 btn.setBackground(Color.WHITE);
                 btn.setFocusPainted(false);
@@ -477,7 +477,7 @@ public class VistaHorariosTurnosPanel extends JPanel {
                 new EmptyBorder(12, 14, 12, 14)
         ));
 
-        JLabel lblTitCob = new JLabel("⚡ Cobertura de Turno en Vivo (Hoy)");
+        JLabel lblTitCob = new happypets.ui.EtiquetaAsset("⚡ Cobertura de Turno en Vivo (Hoy)");
         lblTitCob.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitCob.setForeground(COLOR_TEXTO_TITULO);
         widgetCobertura.add(lblTitCob, BorderLayout.NORTH);
@@ -485,15 +485,15 @@ public class VistaHorariosTurnosPanel extends JPanel {
         JPanel panelTurnosHoy = new JPanel(new GridLayout(3, 1, 0, 6));
         panelTurnosHoy.setOpaque(false);
 
-        lblCoberturaManana = new JLabel("☀️ Mañana (08:00 - 15:00): 5 Especialistas (Cirugía, Derma, Cardio, Felina)");
+        lblCoberturaManana = new happypets.ui.EtiquetaAsset("☀️ Mañana (08:00 - 15:00): 5 Especialistas (Cirugía, Derma, Cardio, Felina)");
         lblCoberturaManana.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblCoberturaManana.setForeground(COLOR_TEXTO_TITULO);
 
-        lblCoberturaTarde = new JLabel("🌤️ Tarde (15:00 - 22:00): 3 Especialistas (Exóticos, Oftalmología, Oncología)");
+        lblCoberturaTarde = new happypets.ui.EtiquetaAsset("🌤️ Tarde (15:00 - 22:00): 3 Especialistas (Exóticos, Oftalmología, Oncología)");
         lblCoberturaTarde.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblCoberturaTarde.setForeground(COLOR_TEXTO_TITULO);
 
-        lblCoberturaNoche = new JLabel("🌙 Noche / Guardia 24h: 1 Médico Intensivista (Dr. Carlos Méndez · Urgencias)");
+        lblCoberturaNoche = new happypets.ui.EtiquetaAsset("🌙 Noche / Guardia 24h: 1 Médico Intensivista (Dr. Carlos Méndez · Urgencias)");
         lblCoberturaNoche.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblCoberturaNoche.setForeground(COLOR_NARANJA);
 
@@ -511,13 +511,13 @@ public class VistaHorariosTurnosPanel extends JPanel {
                 new EmptyBorder(12, 14, 12, 14)
         ));
 
-        JLabel lblTitPerm = new JLabel("🔄 Solicitudes Pendientes de Cambios de Turno");
+        JLabel lblTitPerm = new happypets.ui.EtiquetaAsset("🔄 Solicitudes Pendientes de Cambios de Turno");
         lblTitPerm.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblTitPerm.setForeground(COLOR_TEXTO_TITULO);
         widgetPermutas.add(lblTitPerm, BorderLayout.NORTH);
 
         JPanel itemPermuta = new JPanel(new BorderLayout(8, 0));
-        itemPermuta.setBackground(new Color(248, 250, 252));
+        itemPermuta.setBackground(Color.WHITE);
         itemPermuta.setBorder(new CompoundBorder(
                 new LineBorder(COLOR_BORDE, 1, true),
                 new EmptyBorder(6, 10, 6, 10)

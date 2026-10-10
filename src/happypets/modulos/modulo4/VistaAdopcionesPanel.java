@@ -48,7 +48,7 @@ import happypets.ui.Ui;
  * - Recepción y evaluación de postulantes adoptantes.
  * - Emisión formal de Acta Legal de Adopción Responsable y difusión social.
  */
-public class VistaAdopcionesPanel extends JPanel {
+public class VistaAdopcionesPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -116,6 +116,8 @@ public class VistaAdopcionesPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -548,7 +550,7 @@ public class VistaAdopcionesPanel extends JPanel {
         tablaAdopciones.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         tablaAdopciones.setRowHeight(26);
         tablaAdopciones.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaAdopciones.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaAdopciones.getTableHeader().setBackground(Color.WHITE);
         tablaAdopciones.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaAdopciones.setSelectionBackground(new Color(224, 242, 254));
         tablaAdopciones.setSelectionForeground(new Color(3, 105, 161));
@@ -645,7 +647,7 @@ public class VistaAdopcionesPanel extends JPanel {
     }
 
     private JButton crearBoton(String texto, boolean primario, Runnable accion) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

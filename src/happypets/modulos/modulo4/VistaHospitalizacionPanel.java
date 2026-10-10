@@ -49,7 +49,7 @@ import happypets.ui.Ui;
  * - Expediente hospitalario (fluidoterapia, medicamentos, nutrición y evolución diaria).
  * - Control de altas médicas y costos de hospitalización.
  */
-public class VistaHospitalizacionPanel extends JPanel {
+public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -123,6 +123,8 @@ public class VistaHospitalizacionPanel extends JPanel {
         wrapper.add(contenido, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(wrapper);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
@@ -283,7 +285,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         for (int i = 0; i < 9; i++) {
             final int idx = i;
             String boxName = nombresBoxes[i];
-            JButton btnBox = new JButton() {
+            JButton btnBox = new happypets.ui.BotonAsset() {
                 private static final long serialVersionUID = 1L;
                 @Override
                 protected void paintComponent(Graphics g) {
@@ -337,7 +339,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         card.setPreferredSize(new Dimension(320, 0));
         card.setBorder(new EmptyBorder(12, 14, 12, 14));
 
-        JLabel tit = new JLabel("🚨 Alertas / Pacientes Críticos (UCI)");
+        JLabel tit = new happypets.ui.EtiquetaAsset("🚨 Alertas / Pacientes Críticos (UCI)");
         tit.setFont(new Font("Segoe UI", Font.BOLD, 12));
         tit.setForeground(new Color(185, 28, 28));
         card.add(tit, BorderLayout.NORTH);
@@ -629,7 +631,7 @@ public class VistaHospitalizacionPanel extends JPanel {
     }
 
     private JButton crearBotonWeb(String texto, boolean primario, Runnable accion) {
-        JButton btn = new JButton(texto) {
+        JButton btn = new happypets.ui.BotonAsset(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {

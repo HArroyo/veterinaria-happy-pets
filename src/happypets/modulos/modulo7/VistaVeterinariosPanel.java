@@ -44,7 +44,7 @@ import happypets.ui.Ui;
  * Submódulo 7.1: Directorio de Especialistas Clínicos Colegiados ("Nuestros Veterinarios").
  * Diseñado según wireframe oficial (modulos/modulo-7/wireframe_page_3.png).
  */
-public class VistaVeterinariosPanel extends JPanel {
+public class VistaVeterinariosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_FONDO = new Color(248, 250, 252);
@@ -316,7 +316,7 @@ public class VistaVeterinariosPanel extends JPanel {
         lblCol.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblCol.setForeground(COLOR_TEXTO_MUTED);
 
-        JLabel lblRating = new JLabel("★ " + String.format("%.1f", v.getCalificacionEstrellas()) +
+        JLabel lblRating = new happypets.ui.EtiquetaAsset("★ " + String.format("%.1f", v.getCalificacionEstrellas()) +
                 "  (" + v.getTotalAtencionesRealizadas() + " atenciones registradas)");
         lblRating.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblRating.setForeground(new Color(217, 119, 6)); // Ámbar oscuro
@@ -373,7 +373,7 @@ public class VistaVeterinariosPanel extends JPanel {
                 new EmptyBorder(8, 10, 8, 10)
         ));
 
-        JLabel lblDias = new JLabel("📅 Días: " + v.getDiasAtencion());
+        JLabel lblDias = new happypets.ui.EtiquetaAsset("📅 Días: " + v.getDiasAtencion());
         lblDias.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblDias.setForeground(COLOR_TEXTO_TITULO);
 
@@ -381,11 +381,11 @@ public class VistaVeterinariosPanel extends JPanel {
         lblHoras.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblHoras.setForeground(COLOR_TEXTO_TITULO);
 
-        JLabel lblLugar = new JLabel("📍 " + v.getConsultorioHabitual());
+        JLabel lblLugar = new happypets.ui.EtiquetaAsset("📍 " + v.getConsultorioHabitual());
         lblLugar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblLugar.setForeground(COLOR_TEXTO_TITULO);
 
-        JLabel lblProx = new JLabel("⚡ Cita libre: " + v.getProximaCitaLibre());
+        JLabel lblProx = new happypets.ui.EtiquetaAsset("⚡ Cita libre: " + v.getProximaCitaLibre());
         lblProx.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblProx.setForeground(COLOR_AZUL);
 
@@ -548,7 +548,7 @@ public class VistaVeterinariosPanel extends JPanel {
         txtBioFull.setLineWrap(true);
         txtBioFull.setWrapStyleWord(true);
         txtBioFull.setEditable(false);
-        txtBioFull.setBackground(new Color(248, 250, 252));
+        txtBioFull.setBackground(Color.WHITE);
         txtBioFull.setBorder(new CompoundBorder(
                 new LineBorder(COLOR_BORDE, 1, true),
                 new EmptyBorder(8, 10, 8, 10)

@@ -48,7 +48,7 @@ import happypets.ui.Ui;
  * Muestra KPIs ejecutivos, comparativo mensual de ingresos en Graphics2D nativo,
  * métricas de eficiencia operativa y la tabla de citas del día con búsqueda y paginación.
  */
-public class VistaTablerosMandoPanel extends JPanel {
+public class VistaTablerosMandoPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -93,7 +93,7 @@ public class VistaTablerosMandoPanel extends JPanel {
 
     public VistaTablerosMandoPanel() {
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         inicializarDatosCitas();
@@ -103,7 +103,8 @@ public class VistaTablerosMandoPanel extends JPanel {
         // Contenedor principal con scroll por si la resolución es menor
         JPanel panelCuerpo = new JPanel();
         panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
-        panelCuerpo.setBackground(new Color(248, 250, 252));
+        panelCuerpo.setBackground(Color.WHITE);
+        panelCuerpo.setOpaque(false);
 
         panelCuerpo.add(crearPanelKPIs());
         panelCuerpo.add(Box.createVerticalStrut(18));
@@ -112,9 +113,11 @@ public class VistaTablerosMandoPanel extends JPanel {
         panelCuerpo.add(crearPanelCitasHoy());
 
         JScrollPane scrollGeneral = new JScrollPane(panelCuerpo);
+        scrollGeneral.setOpaque(false);
+        scrollGeneral.getViewport().setOpaque(false);
         scrollGeneral.setBorder(null);
         scrollGeneral.getVerticalScrollBar().setUnitIncrement(16);
-        scrollGeneral.setBackground(new Color(248, 250, 252));
+        scrollGeneral.setBackground(Color.WHITE);
         add(scrollGeneral, BorderLayout.CENTER);
 
         filtrarCitas();
@@ -563,7 +566,7 @@ public class VistaTablerosMandoPanel extends JPanel {
         tablaCitas.setRowHeight(38);
         tablaCitas.setGridColor(new Color(241, 245, 249));
         tablaCitas.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaCitas.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaCitas.getTableHeader().setBackground(Color.WHITE);
         tablaCitas.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaCitas.setSelectionBackground(new Color(240, 249, 255));
         tablaCitas.setSelectionForeground(new Color(15, 23, 42));
@@ -647,7 +650,7 @@ public class VistaTablerosMandoPanel extends JPanel {
         JPanel pnlBotonesPag = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         pnlBotonesPag.setOpaque(false);
 
-        JButton btnAnt = new JButton("< Anterior");
+        JButton btnAnt = new happypets.ui.BotonAsset("< Anterior");
         btnAnt.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnAnt.setBackground(Color.WHITE);
         btnAnt.addActionListener(e -> {
@@ -657,12 +660,12 @@ public class VistaTablerosMandoPanel extends JPanel {
             }
         });
 
-        JButton btnP1 = new JButton("1");
+        JButton btnP1 = new happypets.ui.BotonAsset("1");
         btnP1.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnP1.setBackground(new Color(2, 132, 199));
         btnP1.setForeground(Color.WHITE);
 
-        JButton btnP2 = new JButton("2");
+        JButton btnP2 = new happypets.ui.BotonAsset("2");
         btnP2.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnP2.setBackground(Color.WHITE);
         btnP2.addActionListener(e -> {
@@ -670,7 +673,7 @@ public class VistaTablerosMandoPanel extends JPanel {
             actualizarTablaPaginada();
         });
 
-        JButton btnP3 = new JButton("3");
+        JButton btnP3 = new happypets.ui.BotonAsset("3");
         btnP3.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnP3.setBackground(Color.WHITE);
         btnP3.addActionListener(e -> {
@@ -678,7 +681,7 @@ public class VistaTablerosMandoPanel extends JPanel {
             actualizarTablaPaginada();
         });
 
-        JButton btnSig = new JButton("Siguiente >");
+        JButton btnSig = new happypets.ui.BotonAsset("Siguiente >");
         btnSig.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnSig.setBackground(Color.WHITE);
         btnSig.addActionListener(e -> {

@@ -42,7 +42,7 @@ import happypets.ui.Iconos;
  * Submódulo 10.2: Usuarios Activos, Roles y Permisos.
  * Basado fielmente en el wireframe 'USUARIO.pdf'.
  */
-public class VistaUsuariosRolesPanel extends JPanel {
+public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -64,14 +64,15 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
     public VistaUsuariosRolesPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         inicializarUI();
         recargarTabla();
     }
 
     private void inicializarUI() {
         JPanel contenedor = new JPanel(new BorderLayout(0, 16));
-        contenedor.setBackground(new Color(248, 250, 252));
+        contenedor.setBackground(Color.WHITE);
+        contenedor.setOpaque(false);
         contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
 
         // 1. Tarjeta Contenedora Principal (como en USUARIO.pdf)
@@ -122,7 +123,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setBackground(Color.WHITE);
 
-        JButton btnGestionarRoles = new JButton("Gestionar Roles");
+        JButton btnGestionarRoles = new happypets.ui.BotonAsset("Gestionar Roles");
         btnGestionarRoles.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnGestionarRoles.setForeground(new Color(51, 65, 85));
         btnGestionarRoles.setBackground(new Color(241, 245, 249));
@@ -135,7 +136,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         btnGestionarRoles.addActionListener(e -> abrirDialogoGestionRoles());
         der.add(btnGestionarRoles);
 
-        JButton btnNuevoUsuario = new JButton("+ Nuevo Usuario");
+        JButton btnNuevoUsuario = new happypets.ui.BotonAsset("+ Nuevo Usuario");
         btnNuevoUsuario.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnNuevoUsuario.setForeground(Color.WHITE);
         btnNuevoUsuario.setBackground(new Color(15, 23, 42));
@@ -151,7 +152,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
     private JPanel crearBarraFiltros() {
         JPanel bar = new JPanel(new BorderLayout(12, 0));
-        bar.setBackground(new Color(248, 250, 252));
+        bar.setBackground(Color.WHITE);
         bar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)
@@ -159,8 +160,8 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
         // Buscador reactivo
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        izq.setBackground(new Color(248, 250, 252));
-        JLabel lblLupa = new JLabel("🔍");
+        izq.setBackground(Color.WHITE);
+        JLabel lblLupa = new happypets.ui.EtiquetaAsset("🔍");
         txtBuscar = new JTextField(20);
         txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtBuscar.setPreferredSize(new Dimension(240, 32));
@@ -175,7 +176,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
         // Combos de filtro
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        der.setBackground(new Color(248, 250, 252));
+        der.setBackground(Color.WHITE);
 
         cbFiltroRol = new JComboBox<>(new String[]{"Rol: Todos", "Administrador", "Veterinario Titular", "Recepcionista", "Auxiliar Veterinario", "Contador / Auditor"});
         cbFiltroRol.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -187,7 +188,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         cbFiltroEstado.setBackground(Color.WHITE);
         cbFiltroEstado.addActionListener(e -> { paginaActual = 1; recargarTabla(); });
 
-        JButton btnLimpiar = new JButton("Limpiar");
+        JButton btnLimpiar = new happypets.ui.BotonAsset("Limpiar");
         btnLimpiar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnLimpiar.setBackground(Color.WHITE);
         btnLimpiar.setFocusPainted(false);
@@ -226,7 +227,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         tablaUsuarios.setShowVerticalLines(false);
         tablaUsuarios.setGridColor(new Color(241, 245, 249));
         tablaUsuarios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaUsuarios.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaUsuarios.getTableHeader().setBackground(Color.WHITE);
         tablaUsuarios.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaUsuarios.getTableHeader().setPreferredSize(new Dimension(10, 38));
 
@@ -292,7 +293,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         JPanel pnlPags = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pnlPags.setBackground(Color.WHITE);
 
-        btnAnterior = new JButton("Anterior");
+        btnAnterior = new happypets.ui.BotonAsset("Anterior");
         estilizarBotonPaginacion(btnAnterior);
         btnAnterior.addActionListener(e -> {
             if (paginaActual > 1) {
@@ -302,7 +303,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         });
         pnlPags.add(btnAnterior);
 
-        btnPagina1 = new JButton("1");
+        btnPagina1 = new happypets.ui.BotonAsset("1");
         estilizarBotonPaginacion(btnPagina1);
         btnPagina1.addActionListener(e -> {
             paginaActual = 1;
@@ -310,7 +311,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         });
         pnlPags.add(btnPagina1);
 
-        btnPagina2 = new JButton("2");
+        btnPagina2 = new happypets.ui.BotonAsset("2");
         estilizarBotonPaginacion(btnPagina2);
         btnPagina2.addActionListener(e -> {
             paginaActual = 2;
@@ -318,7 +319,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         });
         pnlPags.add(btnPagina2);
 
-        btnSiguiente = new JButton("Siguiente");
+        btnSiguiente = new happypets.ui.BotonAsset("Siguiente");
         estilizarBotonPaginacion(btnSiguiente);
         btnSiguiente.addActionListener(e -> {
             int total = usuariosFiltrados != null ? usuariosFiltrados.size() : 0;
@@ -435,7 +436,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
                     BorderFactory.createEmptyBorder(4, 10, 4, 10)
             ));
             badge.setOpaque(true);
-            badge.setBackground(new Color(248, 250, 252));
+            badge.setBackground(Color.WHITE);
             badge.setForeground(new Color(30, 41, 59));
 
             if ("Administrador".equalsIgnoreCase(rol)) {
@@ -467,7 +468,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 10));
             p.setBackground(isSelected ? new Color(241, 245, 249) : Color.WHITE);
 
-            JButton btnPermisos = new JButton("Permisos");
+            JButton btnPermisos = new happypets.ui.BotonAsset("Permisos");
             btnPermisos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnPermisos.setBackground(new Color(241, 245, 249));
             btnPermisos.setForeground(new Color(51, 65, 85));
@@ -476,7 +477,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
                     BorderFactory.createEmptyBorder(3, 8, 3, 8)
             ));
 
-            JButton btnEditar = new JButton("Editar");
+            JButton btnEditar = new happypets.ui.BotonAsset("Editar");
             btnEditar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnEditar.setBackground(new Color(241, 245, 249));
             btnEditar.setForeground(new Color(51, 65, 85));
@@ -528,10 +529,10 @@ public class VistaUsuariosRolesPanel extends JPanel {
         agregarFilaForm(pnl, g, fila++, "Estado:", cbEst);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        bot.setBackground(new Color(248, 250, 252));
-        JButton btnCan = new JButton("Cancelar");
+        bot.setBackground(Color.WHITE);
+        JButton btnCan = new happypets.ui.BotonAsset("Cancelar");
         btnCan.addActionListener(e -> dlg.dispose());
-        JButton btnOk = new JButton("Guardar Colaborador");
+        JButton btnOk = new happypets.ui.BotonAsset("Guardar Colaborador");
         btnOk.setBackground(new Color(15, 23, 42));
         btnOk.setForeground(Color.WHITE);
         btnOk.addActionListener(e -> {
@@ -639,9 +640,9 @@ public class VistaUsuariosRolesPanel extends JPanel {
         pnl.add(centro, BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        JButton btnCerrar = new JButton("Cerrar");
+        JButton btnCerrar = new happypets.ui.BotonAsset("Cerrar");
         btnCerrar.addActionListener(e -> dlg.dispose());
-        JButton btnGuardar = new JButton("Guardar Privilegios");
+        JButton btnGuardar = new happypets.ui.BotonAsset("Guardar Privilegios");
         btnGuardar.setBackground(new Color(15, 23, 42));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.addActionListener(e -> {

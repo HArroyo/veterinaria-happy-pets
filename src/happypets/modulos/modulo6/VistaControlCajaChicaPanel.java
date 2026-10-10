@@ -49,7 +49,7 @@ import happypets.ui.Ui;
  * - Totales inferiores: Total ingresos, Total egresos, Saldo actual.
  * - Mejoras: KPIs de fondo, Diálogo de Arqueo Físico (billetes/monedas) y Reporte de Cierre.
  */
-public class VistaControlCajaChicaPanel extends JPanel {
+public class VistaControlCajaChicaPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -658,7 +658,7 @@ public class VistaControlCajaChicaPanel extends JPanel {
         bot.setOpaque(false);
 
         JPanel pTotales = new JPanel(new GridLayout(2, 2, 8, 4));
-        pTotales.setBackground(new Color(248, 250, 252));
+        pTotales.setBackground(Color.WHITE);
         pTotales.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BORDE, 1),
                 new EmptyBorder(8, 12, 8, 12)

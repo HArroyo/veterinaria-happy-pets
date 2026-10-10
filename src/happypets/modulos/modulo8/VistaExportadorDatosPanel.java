@@ -44,7 +44,7 @@ import happypets.ui.Ui;
  * segmentación por filtros y campos, formato (Excel, CSV, PDF), cálculo de volumen estimado,
  * ejecución de exportación y tabla de historial con widget de cuota de almacenamiento.
  */
-public class VistaExportadorDatosPanel extends JPanel {
+public class VistaExportadorDatosPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -81,14 +81,15 @@ public class VistaExportadorDatosPanel extends JPanel {
 
     public VistaExportadorDatosPanel() {
         setLayout(new BorderLayout(0, 16));
-        setBackground(new Color(248, 250, 252));
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 24, 24, 24));
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
 
         JPanel panelCuerpo = new JPanel();
         panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
-        panelCuerpo.setBackground(new Color(248, 250, 252));
+        panelCuerpo.setBackground(Color.WHITE);
+        panelCuerpo.setOpaque(false);
 
         panelCuerpo.add(crearPaso1OrigenDatos());
         panelCuerpo.add(Box.createVerticalStrut(16));
@@ -99,9 +100,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         panelCuerpo.add(crearPanelHistorialYAlmacenamiento());
 
         JScrollPane scrollGeneral = new JScrollPane(panelCuerpo);
+        scrollGeneral.setOpaque(false);
+        scrollGeneral.getViewport().setOpaque(false);
         scrollGeneral.setBorder(null);
         scrollGeneral.getVerticalScrollBar().setUnitIncrement(16);
-        scrollGeneral.setBackground(new Color(248, 250, 252));
+        scrollGeneral.setBackground(Color.WHITE);
         add(scrollGeneral, BorderLayout.CENTER);
 
         actualizarEstimacion();
@@ -409,19 +412,19 @@ public class VistaExportadorDatosPanel extends JPanel {
         lblPaso.setForeground(new Color(71, 85, 105));
         izq.add(lblPaso);
 
-        btnFmtExcel = new JButton("Microsoft Excel (.xlsx)");
+        btnFmtExcel = new happypets.ui.BotonAsset("Microsoft Excel (.xlsx)");
         btnFmtExcel.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnFmtExcel.setFocusPainted(false);
         btnFmtExcel.addActionListener(e -> seleccionarFormato("XLSX"));
         izq.add(btnFmtExcel);
 
-        btnFmtCSV = new JButton("Valores CSV (.csv)");
+        btnFmtCSV = new happypets.ui.BotonAsset("Valores CSV (.csv)");
         btnFmtCSV.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnFmtCSV.setFocusPainted(false);
         btnFmtCSV.addActionListener(e -> seleccionarFormato("CSV"));
         izq.add(btnFmtCSV);
 
-        btnFmtPDF = new JButton("Documento PDF (.pdf)");
+        btnFmtPDF = new happypets.ui.BotonAsset("Documento PDF (.pdf)");
         btnFmtPDF.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         btnFmtPDF.setFocusPainted(false);
         btnFmtPDF.addActionListener(e -> seleccionarFormato("PDF"));
@@ -584,7 +587,7 @@ public class VistaExportadorDatosPanel extends JPanel {
         tablaHistorial.setRowHeight(36);
         tablaHistorial.setGridColor(new Color(241, 245, 249));
         tablaHistorial.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaHistorial.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaHistorial.getTableHeader().setBackground(Color.WHITE);
         tablaHistorial.getTableHeader().setForeground(new Color(71, 85, 105));
         tablaHistorial.setSelectionBackground(new Color(240, 249, 255));
         tablaHistorial.setSelectionForeground(new Color(15, 23, 42));
@@ -654,7 +657,7 @@ public class VistaExportadorDatosPanel extends JPanel {
 
         // Barra inferior de Cuota de Almacenamiento en Nube
         JPanel pnlAlmacenamiento = new JPanel(new BorderLayout(14, 4));
-        pnlAlmacenamiento.setBackground(new Color(248, 250, 252));
+        pnlAlmacenamiento.setBackground(Color.WHITE);
         pnlAlmacenamiento.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(10, 14, 10, 14)

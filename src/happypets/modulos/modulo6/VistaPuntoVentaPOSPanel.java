@@ -60,7 +60,7 @@ import happypets.ui.Ui;
  * - Vinculación directa con Clientes y Pacientes de la Veterinaria.
  * - Botones de acción oficial: [Cotización] e [Imprimir / Procesar Venta] con emisión de ticket.
  */
-public class VistaPuntoVentaPOSPanel extends JPanel {
+public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = new Color(226, 232, 240);
@@ -231,7 +231,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         });
         panelSearch.add(txtBuscar, BorderLayout.CENTER);
 
-        JButton btnBorrar = new JButton("✕");
+        JButton btnBorrar = new happypets.ui.BotonAsset("✕");
         btnBorrar.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnBorrar.setForeground(COLOR_TEXTO_MUTED);
         btnBorrar.setBorder(null);
@@ -269,7 +269,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
 
         JScrollPane scrollGrid = new JScrollPane(panelGridProductos);
         scrollGrid.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        scrollGrid.getViewport().setBackground(new Color(248, 250, 252));
+        scrollGrid.getViewport().setBackground(Color.WHITE);
         scrollGrid.getVerticalScrollBar().setUnitIncrement(16);
 
         col.add(scrollGrid, BorderLayout.CENTER);
@@ -287,7 +287,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
     }
 
     private JButton crearPillCategoria(String nombre) {
-        JButton btn = new JButton(nombre) {
+        JButton btn = new happypets.ui.BotonAsset(nombre) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -430,7 +430,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         lblPrecio.setForeground(COLOR_PRIMARIO);
         bot.add(lblPrecio, BorderLayout.WEST);
 
-        JButton btnAdd = new JButton("+ Agregar");
+        JButton btnAdd = new happypets.ui.BotonAsset("+ Agregar");
         btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnAdd.setForeground(Color.WHITE);
         btnAdd.setBackground(COLOR_PRIMARIO);
@@ -663,7 +663,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         JPanel panelAcciones = new JPanel(new GridLayout(1, 2, 10, 0));
         panelAcciones.setOpaque(false);
 
-        JButton btnCotizacion = new JButton(" Cotización") {
+        JButton btnCotizacion = new happypets.ui.BotonAsset(" Cotización") {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -687,7 +687,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         btnCotizacion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnCotizacion.addActionListener(e -> procesarVenta(true));
 
-        JButton btnImprimir = new JButton(" Imprimir / Cobrar") {
+        JButton btnImprimir = new happypets.ui.BotonAsset(" Imprimir / Cobrar") {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -725,7 +725,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
     }
 
     private JButton crearBotonMetodoPago(String metodo, Icon ico, boolean activoInicial) {
-        JButton btn = new JButton(metodo) {
+        JButton btn = new happypets.ui.BotonAsset(metodo) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
