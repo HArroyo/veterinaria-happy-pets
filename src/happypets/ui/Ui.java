@@ -519,7 +519,7 @@ public final class Ui {
      * - Alineaciones uniformes según el tipo de columna.
      */
     public static void formatearTabla(JTable tabla) {
-        formatearTabla(tabla, new int[]{0}, new int[]{});
+        formatearTabla(tabla, null, null);
     }
 
     public static void formatearTabla(JTable tabla, int[] colsCentradas, int[] colsDerecha) {
@@ -532,52 +532,43 @@ public final class Ui {
         tabla.setSelectionBackground(TURQUESA_SUAVE);
         tabla.setSelectionForeground(TURQUESA_PROFUNDO);
 
-        // Header institucional
+        // Header institucional centrado
         tabla.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabla.getTableHeader().setBackground(new Color(241, 245, 249));
         tabla.getTableHeader().setForeground(TEXTO_TITULO);
         tabla.getTableHeader().setPreferredSize(new Dimension(tabla.getColumnModel().getTotalColumnWidth(), 36));
         tabla.getTableHeader().setReorderingAllowed(false);
 
-        // Renderers con alineación estandarizada y alternancia de filas (Zebra)
+        TableCellRenderer defaultHeaderRenderer = tabla.getTableHeader().getDefaultRenderer();
+        if (defaultHeaderRenderer != null) {
+            tabla.getTableHeader().setDefaultRenderer((tbl, value, isSelected, hasFocus, row, col) -> {
+                Component comp = defaultHeaderRenderer.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
+                if (comp instanceof JLabel) {
+                    ((JLabel) comp).setHorizontalAlignment(SwingConstants.CENTER);
+                }
+                return comp;
+            });
+        }
+
+        // Todos los datos de las tablas deben estar centrados
         DefaultTableCellRenderer renderCentro = new CeldaAlternadaRenderer(SwingConstants.CENTER);
-        DefaultTableCellRenderer renderDerecha = new CeldaAlternadaRenderer(SwingConstants.RIGHT);
-        DefaultTableCellRenderer renderIzquierda = new CeldaAlternadaRenderer(SwingConstants.LEFT);
-
-        Set<Integer> setCentro = new HashSet<>();
-        if (colsCentradas != null) {
-            for (int c : colsCentradas) setCentro.add(c);
-        }
-
-        Set<Integer> setDerecha = new HashSet<>();
-        if (colsDerecha != null) {
-            for (int c : colsDerecha) setDerecha.add(c);
-        }
-
         for (int i = 0; i < tabla.getColumnCount(); i++) {
-            if (setCentro.contains(i)) {
-                tabla.getColumnModel().getColumn(i).setCellRenderer(renderCentro);
-            } else if (setDerecha.contains(i)) {
-                tabla.getColumnModel().getColumn(i).setCellRenderer(renderDerecha);
-            } else {
-                tabla.getColumnModel().getColumn(i).setCellRenderer(renderIzquierda);
-            }
+            tabla.getColumnModel().getColumn(i).setCellRenderer(renderCentro);
         }
     }
 
     private static class CeldaAlternadaRenderer extends DefaultTableCellRenderer {
         private static final long serialVersionUID = 1L;
-        private final int alineacion;
 
         CeldaAlternadaRenderer(int alineacion) {
-            this.alineacion = alineacion;
-            setHorizontalAlignment(alineacion);
+            setHorizontalAlignment(SwingConstants.CENTER);
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            setHorizontalAlignment(SwingConstants.CENTER);
             if (isSelected) {
                 c.setBackground(TURQUESA_SUAVE);
                 c.setForeground(TURQUESA_PROFUNDO);
@@ -585,14 +576,7 @@ public final class Ui {
                 c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
                 c.setForeground(TEXTO_REGULAR);
             }
-
-            if (alineacion == SwingConstants.LEFT) {
-                setBorder(new EmptyBorder(0, 10, 0, 4));
-            } else if (alineacion == SwingConstants.RIGHT) {
-                setBorder(new EmptyBorder(0, 4, 0, 10));
-            } else {
-                setBorder(new EmptyBorder(0, 4, 0, 4));
-            }
+            setBorder(new EmptyBorder(0, 6, 0, 6));
             return c;
         }
     }
@@ -703,6 +687,8 @@ public final class Ui {
     private static final class BotonColumnaRendererEditor extends AbstractCellEditor
             implements TableCellRenderer, TableCellEditor {
         private static final long serialVersionUID = 1L;
+        private final JPanel panelVisual = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
+        private final JPanel panelEditor = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
         private final JButton visual;
         private final JButton editor;
         private final JTable tabla;
@@ -714,6 +700,10 @@ public final class Ui {
             this.accion = accion;
             this.visual = boton(texto, false);
             this.editor = boton(texto, false);
+            panelVisual.setOpaque(false);
+            panelEditor.setOpaque(false);
+            panelVisual.add(visual);
+            panelEditor.add(editor);
 
             this.editor.addActionListener(e -> {
                 fireEditingStopped();
@@ -724,14 +714,14 @@ public final class Ui {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
-            return visual;
+            return panelVisual;
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                                                      boolean isSelected, int row, int column) {
             this.filaSeleccionada = table.convertRowIndexToModel(row);
-            return editor;
+            return panelEditor;
         }
 
         @Override

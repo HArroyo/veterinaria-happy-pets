@@ -221,6 +221,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         tablaUsuarios.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row, int col) {
                 super.getTableCellRendererComponent(t, val, sel, foc, row, col);
+                setHorizontalAlignment(SwingConstants.CENTER);
                 setForeground(new Color(71, 85, 105));
                 setFont(new Font("Segoe UI", Font.PLAIN, 13));
                 setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
@@ -386,11 +387,13 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
             if (value instanceof Usuario) {
                 Usuario u = (Usuario) value;
-                JLabel lblNom = new JLabel(u.getNombreCompleto());
+                JLabel lblNom = new JLabel(u.getNombreCompleto(), SwingConstants.CENTER);
+                lblNom.setAlignmentX(Component.CENTER_ALIGNMENT);
                 lblNom.setFont(new Font("Segoe UI", Font.BOLD, 13));
                 lblNom.setForeground(new Color(15, 23, 42));
 
-                JLabel lblMail = new JLabel(u.getCorreo());
+                JLabel lblMail = new JLabel(u.getCorreo(), SwingConstants.CENTER);
+                lblMail.setAlignmentX(Component.CENTER_ALIGNMENT);
                 lblMail.setFont(new Font("Segoe UI", Font.PLAIN, 12));
                 lblMail.setForeground(new Color(100, 116, 139));
 
@@ -404,11 +407,11 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
     private static class RolCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 12));
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 12));
             p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
 
             String rol = value != null ? value.toString() : "";
-            JLabel badge = new JLabel(rol);
+            JLabel badge = new JLabel(rol, SwingConstants.CENTER);
             badge.setFont(new Font("Segoe UI", Font.PLAIN, 12));
             badge.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
@@ -431,13 +434,13 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
     private static class EstadoCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 16));
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 16));
             p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
 
             String estado = value != null ? value.toString() : "Activo";
             boolean activo = "Activo".equalsIgnoreCase(estado);
 
-            JLabel lbl = new JLabel("● " + estado);
+            JLabel lbl = new JLabel("● " + estado, SwingConstants.CENTER);
             lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
             lbl.setForeground(activo ? Ui.TURQUESA_OSCURO : new Color(148, 163, 184));
             p.add(lbl);
@@ -447,7 +450,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
     private static class AccionesCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 10));
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 10));
             p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
 
             JButton btnPermisos = new JButton("Permisos");
