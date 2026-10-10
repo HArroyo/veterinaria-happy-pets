@@ -1875,6 +1875,94 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Alias para Icono de Editar / Modificar (Lapiz).
+     */
+    public static Icon crearIconoEditar(int size, Color color) {
+        return crearIconoLapiz(size, color);
+    }
+
+    /**
+     * Icono de Papelera / Eliminar / Suprimir.
+     */
+    public static Icon crearIconoEliminar(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        g.drawLine((int)(s * 0.20), (int)(s * 0.28), (int)(s * 0.80), (int)(s * 0.28));
+        g.draw(new RoundRectangle2D.Double(s * 0.40, s * 0.16, s * 0.20, s * 0.12, 2, 2));
+
+        int[] px = {(int)(s * 0.26), (int)(s * 0.74), (int)(s * 0.68), (int)(s * 0.32)};
+        int[] py = {(int)(s * 0.30), (int)(s * 0.30), (int)(s * 0.84), (int)(s * 0.84)};
+        g.drawPolygon(px, py, 4);
+
+        g.drawLine((int)(s * 0.42), (int)(s * 0.40), (int)(s * 0.44), (int)(s * 0.74));
+        g.drawLine((int)(s * 0.58), (int)(s * 0.40), (int)(s * 0.56), (int)(s * 0.74));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    public static Icon crearIconoPapelera(int size, Color color) {
+        return crearIconoEliminar(size, color);
+    }
+
+    /**
+     * Icono de Signo Mas / Nuevo / Registrar.
+     */
+    public static Icon crearIconoMas(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.8, s * 0.14);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        int mid = (int)(s * 0.5);
+        int pad = (int)(s * 0.20);
+        g.drawLine(pad, mid, (int)(s - pad), mid);
+        g.drawLine(mid, pad, mid, (int)(s - pad));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    public static Icon crearIconoAgregar(int size, Color color) {
+        return crearIconoMas(size, color);
+    }
+
+    /**
+     * Icono de Ubicacion / Pin de Mapa.
+     */
+    public static Icon crearIconoUbicacion(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.4, s * 0.08);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        double r = s * 0.24;
+        double cx = s * 0.50;
+        double cy = s * 0.36;
+        g.draw(new Ellipse2D.Double(cx - r, cy - r, r * 2, r * 2));
+        double pr = s * 0.08;
+        g.fill(new Ellipse2D.Double(cx - pr, cy - pr, pr * 2, pr * 2));
+
+        Path2D punta = new Path2D.Double();
+        punta.moveTo(cx - r * 0.85, cy + r * 0.45);
+        punta.lineTo(cx, s * 0.86);
+        punta.lineTo(cx + r * 0.85, cy + r * 0.45);
+        g.draw(punta);
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }
