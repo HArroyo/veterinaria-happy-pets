@@ -102,19 +102,55 @@ public class LoginFrame extends JFrame {
 
 				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
+<<<<<<< HEAD
 				g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+=======
+        JLabel lblBienvenido = new JLabel("Iniciar Sesión", SwingConstants.LEFT);
+        lblBienvenido.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        lblBienvenido.setForeground(Ui.TEXTO_TITULO);
+        lblBienvenido.setHorizontalAlignment(SwingConstants.LEFT);
+        lblBienvenido.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel lblSub = new JLabel("Ingresa con tu cuenta para acceder a la clínica", SwingConstants.LEFT);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
+        lblSub.setHorizontalAlignment(SwingConstants.LEFT);
+        lblSub.setAlignmentX(LEFT_ALIGNMENT);
+>>>>>>> origin/main
 
 				if (fondoLogin != null) {
 
 					int panelW = getWidth();
 
+<<<<<<< HEAD
 					int panelH = getHeight();
+=======
+        // Campo Usuario
+        JLabel lblUsu = new JLabel("Usuario o Correo", SwingConstants.LEFT);
+        lblUsu.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblUsu.setForeground(new Color(60, 65, 70));
+        lblUsu.setHorizontalAlignment(SwingConstants.LEFT);
+        lblUsu.setAlignmentX(LEFT_ALIGNMENT);
+        cuerpo.add(lblUsu);
+        cuerpo.add(Box.createVerticalStrut(6));
+>>>>>>> origin/main
 
 					int imgW = fondoLogin.getWidth(this);
 
+<<<<<<< HEAD
 					int imgH = fondoLogin.getHeight(this);
+=======
+        // Campo Contraseña
+        JLabel lblPass = new JLabel("Contraseña", SwingConstants.LEFT);
+        lblPass.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblPass.setForeground(new Color(60, 65, 70));
+        lblPass.setHorizontalAlignment(SwingConstants.LEFT);
+        lblPass.setAlignmentX(LEFT_ALIGNMENT);
+        cuerpo.add(lblPass);
+        cuerpo.add(Box.createVerticalStrut(6));
+>>>>>>> origin/main
 
 					if (imgW > 0 && imgH > 0) {
 

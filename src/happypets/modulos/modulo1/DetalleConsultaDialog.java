@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import happypets.model.ConsultaClinica;
@@ -73,9 +74,10 @@ public class DetalleConsultaDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = row++;
         gbc.weightx = 0.0;
-        JLabel lblObs = new JLabel("Observaciones:");
+        JLabel lblObs = new JLabel("Observaciones:", SwingConstants.LEFT);
         lblObs.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblObs.setForeground(new Color(60, 60, 60));
+        lblObs.setHorizontalAlignment(SwingConstants.LEFT);
         body.add(lblObs, gbc);
 
         gbc.gridx = 1;
@@ -110,9 +112,10 @@ public class DetalleConsultaDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0.0;
-        JLabel lbl = new JLabel(etiqueta);
+        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lbl.setForeground(new Color(60, 60, 60));
+        lbl.setHorizontalAlignment(SwingConstants.LEFT);
         panel.add(lbl, gbc);
 
         gbc.gridx = 1;

@@ -122,7 +122,40 @@ public final class Ui {
 
 			lblLogo.setIcon(logo);
 
+<<<<<<< HEAD
 		} else {
+=======
+    public static JButton botonPrimario(String texto, javax.swing.Icon icono) {
+        JButton b = boton(texto, true);
+        if (icono != null) {
+            b.setIcon(icono);
+            b.setIconTextGap(6);
+        }
+        return b;
+    }
+
+    public static JButton botonSecundario(String texto, javax.swing.Icon icono) {
+        JButton b = boton(texto, false);
+        if (icono != null) {
+            b.setIcon(icono);
+            b.setIconTextGap(6);
+        }
+        return b;
+    }
+
+    /**
+     * Campo de texto con borde elegante y tamaño uniforme.
+     */
+    public static JTextField campoTexto(int columnas) {
+        JTextField tf = new JTextField(columnas);
+        tf.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tf.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 185, 190), 1),
+                new EmptyBorder(5, 8, 5, 8)
+        ));
+        return tf;
+    }
+>>>>>>> origin/main
 
 			lblLogo.setText("Happy Pets");
 

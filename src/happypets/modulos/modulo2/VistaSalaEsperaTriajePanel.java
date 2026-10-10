@@ -366,6 +366,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
 
         JPanel f1 = new JPanel(new GridLayout(1, 2, 8, 0));
         f1.setOpaque(false);
+        f1.setAlignmentX(Component.LEFT_ALIGNMENT);
         f1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         f1.add(crearFilaCampo("Nombre de la Mascota *", txtNombreMascota));
         f1.add(crearFilaCampo("Especie y Raza *", txtEspecieRaza));
@@ -377,6 +378,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
 
         JPanel f2 = new JPanel(new GridLayout(1, 2, 8, 0));
         f2.setOpaque(false);
+        f2.setAlignmentX(Component.LEFT_ALIGNMENT);
         f2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         f2.add(crearFilaCampo("Propietario Responsable *", txtPropietario));
         f2.add(crearFilaCampo("Teléfono de Contacto", txtTelefono));
@@ -393,6 +395,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
 
         JPanel fConstantes = new JPanel(new GridLayout(1, 3, 8, 0));
         fConstantes.setOpaque(false);
+        fConstantes.setAlignmentX(Component.LEFT_ALIGNMENT);
         fConstantes.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         fConstantes.add(crearFilaCampo("Peso (kg) *", txtPeso));
         fConstantes.add(crearFilaCampo("Temp (°C) *", txtTemperatura));
@@ -555,12 +558,14 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
     private JPanel crearFilaCampo(String label, Component componente) {
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 
-        JLabel lbl = new JLabel(label);
+        JLabel lbl = new JLabel(label, SwingConstants.LEFT);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lbl.setForeground(new Color(100, 116, 139));
         lbl.setHorizontalAlignment(SwingConstants.LEFT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         p.add(lbl, BorderLayout.NORTH);
         p.add(componente, BorderLayout.CENTER);
