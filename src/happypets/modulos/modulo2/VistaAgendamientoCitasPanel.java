@@ -652,6 +652,7 @@ public class VistaAgendamientoCitasPanel extends happypets.ui.AssetsModulo {
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         p.add(lbl, BorderLayout.NORTH);
+        happypets.ui.Ui.ajustarAlturaCampo(componente);
         p.add(componente, BorderLayout.CENTER);
         return p;
     }

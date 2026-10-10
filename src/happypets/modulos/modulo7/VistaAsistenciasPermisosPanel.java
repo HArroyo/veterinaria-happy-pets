@@ -170,8 +170,11 @@ public class VistaAsistenciasPermisosPanel extends happypets.ui.AssetsModulo {
         panelBotones.add(btnExportar);
         panelBotones.add(btnPaseLista);
 
+        for (java.awt.Component componente : textos.getComponents()) {
+            if (componente instanceof javax.swing.JComponent jc) jc.setAlignmentX(LEFT_ALIGNMENT);
+        }
         cab.add(textos, BorderLayout.CENTER);
-        cab.add(panelBotones, BorderLayout.EAST);
+        cab.add(panelBotones, BorderLayout.SOUTH);
         return cab;
     }
 
@@ -516,9 +519,8 @@ public class VistaAsistenciasPermisosPanel extends happypets.ui.AssetsModulo {
         return panel;
     }
 
-    private JPanel crearPanelLateralControl() {
+    private JScrollPane crearPanelLateralControl() {
         JPanel lateral = new JPanel(new BorderLayout(0, 14));
-        lateral.setPreferredSize(new Dimension(340, 0));
         lateral.setOpaque(false);
 
         // Tarjeta Superior: Detalle del colaborador seleccionado
@@ -656,7 +658,14 @@ public class VistaAsistenciasPermisosPanel extends happypets.ui.AssetsModulo {
 
         lateral.add(cardDetalle, BorderLayout.NORTH);
         lateral.add(cardPermisosYNoche, BorderLayout.CENTER);
-        return lateral;
+        lateral.setPreferredSize(new Dimension(320, lateral.getPreferredSize().height));
+        JScrollPane scrollLateral = new JScrollPane(lateral);
+        scrollLateral.setPreferredSize(new Dimension(340, 0));
+        scrollLateral.setBorder(null);
+        scrollLateral.setOpaque(false);
+        scrollLateral.getViewport().setOpaque(false);
+        scrollLateral.getVerticalScrollBar().setUnitIncrement(16);
+        return scrollLateral;
     }
 
     private void actualizarListaPermisosHoy() {

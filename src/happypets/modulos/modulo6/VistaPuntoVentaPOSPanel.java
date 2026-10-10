@@ -221,6 +221,7 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
 
         txtBuscar = new JTextField();
         txtBuscar.setBorder(null);
+        txtBuscar.setPreferredSize(new Dimension(160, 28));
         txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtBuscar.setToolTipText("Buscar producto o servicio por código o nombre...");
         txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -235,6 +236,8 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
         btnBorrar.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnBorrar.setForeground(COLOR_TEXTO_MUTED);
         btnBorrar.setBorder(null);
+        btnBorrar.setPreferredSize(new Dimension(28, 28));
+        btnBorrar.setToolTipText("Limpiar búsqueda");
         btnBorrar.setContentAreaFilled(false);
         btnBorrar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnBorrar.addActionListener(e -> {
@@ -618,7 +621,7 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
         panelInferior.add(Box.createVerticalStrut(8));
 
         // Selector de Métodos de Pago (Botones Toggle)
-        JPanel panelMetodos = new JPanel(new GridLayout(1, 4, 6, 0));
+        JPanel panelMetodos = new JPanel(new GridLayout(2, 2, 6, 6));
         panelMetodos.setOpaque(false);
 
         btnPagoEfectivo = crearBotonMetodoPago("Efectivo", Iconos.crearIconoMonedas(14, Color.WHITE), true);

@@ -57,6 +57,13 @@ public final class Ui {
 	private Ui() {
 	}
 
+	public static void ajustarAlturaCampo(Component campo) {
+		if (campo instanceof JTextField || campo instanceof javax.swing.JComboBox<?>) {
+			Dimension size = campo.getPreferredSize();
+			campo.setPreferredSize(new Dimension(size.width, Math.max(26, size.height)));
+		}
+	}
+
 	public static JButton botonPrimario(String texto, javax.swing.Icon icono) {
 		JButton b = boton(texto, true);
 		b.setIcon(icono != null ? icono : Iconos.paraTexto(texto, 16, Color.WHITE));

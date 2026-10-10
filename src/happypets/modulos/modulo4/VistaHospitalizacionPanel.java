@@ -593,6 +593,7 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         p.add(lbl, BorderLayout.NORTH);
+        happypets.ui.Ui.ajustarAlturaCampo(campo);
         p.add(campo, BorderLayout.CENTER);
         return p;
     }

@@ -229,6 +229,10 @@ public class VistaModuloIASoportePanel extends happypets.ui.AssetsModulo {
         JTextField txtRaza = new JTextField("Golden Retriever");
         JTextField txtEdad = new JTextField("48"); // 48 meses
         JTextField txtSintomas = new JTextField("Tos seca nocturna recurrente, arcadas post ejercicio, letargo moderado.");
+        for (Component campo : new Component[]{cbEspecie, txtRaza, txtEdad, txtSintomas}) {
+            Dimension tamano = campo.getPreferredSize();
+            campo.setPreferredSize(new Dimension(tamano.width, 30));
+        }
 
         g.gridx = 0; g.gridy = 0; g.weightx = 0.25;
         form.add(new JLabel("Especie:"), g);

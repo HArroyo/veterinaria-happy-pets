@@ -13,6 +13,25 @@ public class BotonAsset extends JButton {
     public BotonAsset(String texto, Icon icono) { super(texto, icono); }
 
     @Override
+    public void updateUI() {
+        // El tema de Windows ignora el fondo personalizado y deja texto blanco sobre blanco.
+        setUI(new javax.swing.plaf.basic.BasicButtonUI());
+    }
+
+    @Override
+    public java.awt.Dimension getPreferredSize() {
+        java.awt.Dimension size = super.getPreferredSize();
+        if (getFont() == null) return size;
+        java.awt.Insets padding = getInsets();
+        int anchoIcono = getIcon() == null ? 0 : getIcon().getIconWidth();
+        int anchoTexto = getText() == null || getText().startsWith("<html>") ? 0
+                : getFontMetrics(getFont()).stringWidth(getText());
+        int gap = anchoIcono > 0 && anchoTexto > 0 ? getIconTextGap() : 0;
+        return new java.awt.Dimension(Math.max(size.width, anchoTexto + anchoIcono + gap + padding.left + padding.right),
+                Math.max(size.height, Math.max(24, getFontMetrics(getFont()).getHeight() + padding.top + padding.bottom)));
+    }
+
+    @Override
     public void setText(String texto) {
         super.setText(Iconos.textoSinEmoji(texto));
         if (texto != null && !texto.isBlank()) {

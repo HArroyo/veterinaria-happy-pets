@@ -184,8 +184,11 @@ public class VistaHorariosTurnosPanel extends happypets.ui.AssetsModulo {
         panelBotones.add(btnCalendario);
         panelBotones.add(btnAsignar);
 
+        for (java.awt.Component componente : textos.getComponents()) {
+            if (componente instanceof javax.swing.JComponent jc) jc.setAlignmentX(LEFT_ALIGNMENT);
+        }
         cab.add(textos, BorderLayout.CENTER);
-        cab.add(panelBotones, BorderLayout.EAST);
+        cab.add(panelBotones, BorderLayout.SOUTH);
         return cab;
     }
 
@@ -249,8 +252,8 @@ public class VistaHorariosTurnosPanel extends happypets.ui.AssetsModulo {
         filaLeyenda.add(crearItemLeyenda("Guardia 24h", new Color(254, 243, 199), COLOR_NARANJA));
         filaLeyenda.add(crearItemLeyenda("Descanso / Libre", new Color(241, 245, 249), COLOR_TEXTO_MUTED));
 
-        contenedor.add(filaIzquierda, BorderLayout.WEST);
-        contenedor.add(filaLeyenda, BorderLayout.EAST);
+        contenedor.add(filaIzquierda, BorderLayout.NORTH);
+        contenedor.add(filaLeyenda, BorderLayout.SOUTH);
         return contenedor;
     }
 
@@ -540,7 +543,7 @@ public class VistaHorariosTurnosPanel extends happypets.ui.AssetsModulo {
         botonesPerm.add(btnRechazar);
 
         itemPermuta.add(lblDetallePerm, BorderLayout.CENTER);
-        itemPermuta.add(botonesPerm, BorderLayout.EAST);
+        itemPermuta.add(botonesPerm, BorderLayout.SOUTH);
 
         widgetPermutas.add(itemPermuta, BorderLayout.CENTER);
 

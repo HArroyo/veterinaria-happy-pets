@@ -401,6 +401,8 @@ public class VistaDashboardAdministracionPanel extends happypets.ui.AssetsModulo
     }
 
     private JPanel crearCampo(String tit, Component c) {
+        Dimension tamano = c.getPreferredSize();
+        c.setPreferredSize(new Dimension(tamano.width, Math.max(30, tamano.height)));
         JPanel p = new JPanel(new BorderLayout(0, 4));
         p.setBackground(Color.WHITE);
         JLabel l = new JLabel(tit);

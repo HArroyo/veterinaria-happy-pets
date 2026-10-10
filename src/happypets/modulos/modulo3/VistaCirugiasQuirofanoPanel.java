@@ -610,6 +610,7 @@ public class VistaCirugiasQuirofanoPanel extends happypets.ui.AssetsModulo {
 		lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
 		lbl.setForeground(new Color(71, 85, 105));
 		p.add(lbl, BorderLayout.NORTH);
+		happypets.ui.Ui.ajustarAlturaCampo(campo);
 		p.add(campo, BorderLayout.CENTER);
 		return p;
 	}

@@ -146,8 +146,11 @@ public class VistaPersonalApoyoPanel extends happypets.ui.AssetsModulo {
         panelBotones.add(btnActualizar);
         panelBotones.add(btnNuevo);
 
+        for (java.awt.Component componente : textos.getComponents()) {
+            if (componente instanceof javax.swing.JComponent jc) jc.setAlignmentX(LEFT_ALIGNMENT);
+        }
         cab.add(textos, BorderLayout.CENTER);
-        cab.add(panelBotones, BorderLayout.EAST);
+        cab.add(panelBotones, BorderLayout.SOUTH);
         return cab;
     }
 

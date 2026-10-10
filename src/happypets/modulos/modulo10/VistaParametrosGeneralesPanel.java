@@ -329,6 +329,7 @@ public class VistaParametrosGeneralesPanel extends happypets.ui.AssetsModulo {
         l.setFont(new Font("Segoe UI", Font.BOLD, 12));
         l.setForeground(new Color(71, 85, 105));
         p.add(l, BorderLayout.NORTH);
+        happypets.ui.Ui.ajustarAlturaCampo(campo);
         p.add(campo, BorderLayout.CENTER);
         return p;
     }

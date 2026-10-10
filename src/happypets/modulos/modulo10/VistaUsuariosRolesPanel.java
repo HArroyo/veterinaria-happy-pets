@@ -87,7 +87,6 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
         card.add(crearCabeceraTarjeta(), BorderLayout.NORTH);
 
         // Barra de Búsqueda y Filtros
-        card.add(crearBarraFiltros(), BorderLayout.AFTER_LINE_ENDS); // O justo antes de la tabla
 
         // Panel Central con Filtros y Tabla
         JPanel centro = new JPanel(new BorderLayout(0, 12));
@@ -253,6 +252,7 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
         tablaUsuarios.getColumnModel().getColumn(3).setCellRenderer(new EstadoCellRenderer());
 
         tablaUsuarios.getColumnModel().getColumn(4).setPreferredWidth(170);
+        tablaUsuarios.getColumnModel().getColumn(4).setMinWidth(200);
         tablaUsuarios.getColumnModel().getColumn(4).setCellRenderer(new AccionesCellRenderer());
 
         // Evento de clic en acciones
@@ -264,7 +264,7 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
                     Usuario u = obtenerUsuarioDeFila(row);
                     if (u != null) {
                         int x = e.getX() - tablaUsuarios.getCellRect(row, col, true).x;
-                        if (x < 80) {
+                        if (x < tablaUsuarios.getCellRect(row, col, true).width / 2) {
                             abrirDialogoPermisosUsuario(u);
                         } else {
                             abrirDialogoUsuario(u);
@@ -465,7 +465,8 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
 
     private static class AccionesCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 10));
+            JPanel p = new JPanel(new GridLayout(1, 2, 6, 0));
+            p.setBorder(BorderFactory.createEmptyBorder(10, 4, 10, 4));
             p.setBackground(isSelected ? new Color(241, 245, 249) : Color.WHITE);
 
             JButton btnPermisos = new happypets.ui.BotonAsset("Permisos");
