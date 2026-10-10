@@ -609,10 +609,10 @@ public class VistaGroomingPeluqueriaPanel extends happypets.ui.AssetsModulo {
         try {
             String[] p = txtHoraTurno.getText().trim().split(":");
             hora = LocalTime.of(Integer.parseInt(p[0].trim()), Integer.parseInt(p[1].trim()));
-        } catch (Exception ignored) {}
+        } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
         double costo = 70.0;
-        try { costo = Double.parseDouble(txtCosto.getText().trim()); } catch (Exception ignored) {}
+        try { costo = happypets.model.Validacion.numero(txtCosto.getText(), "Valor numérico", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
         String ecto = chkPulgas.isSelected() ? "Presencia leve - Requiere champú antiparasitario" : "Libre de ectoparásitos";
         String piel = chkHeridas.isSelected() ? "Piel sana sin lesiones" : "Sensibilidad dérmica observada";

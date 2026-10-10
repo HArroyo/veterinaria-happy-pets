@@ -269,8 +269,8 @@ public class VistaModuloIASoportePanel extends happypets.ui.AssetsModulo {
         btnEjecutar.addActionListener(e -> {
             int edadM = 24;
             try {
-                edadM = Integer.parseInt(txtEdad.getText().trim());
-            } catch (Exception ex) {}
+                edadM = happypets.model.Validacion.entero(txtEdad.getText(), "Valor", false);
+            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ingrese un valor numérico válido.", "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
             String res = repo.simularDiagnosticoTriajeIA(
                     (String) cbEspecie.getSelectedItem(),

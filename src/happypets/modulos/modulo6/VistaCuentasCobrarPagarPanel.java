@@ -756,11 +756,6 @@ public class VistaCuentasCobrarPagarPanel extends happypets.ui.AssetsModulo {
                 repo.registrarAbonoCuentaPorCobrar(cuenta.getIdCuenta(), abono);
 
                 // Opcional: registrar automáticamente en caja chica
-                repo.guardarMovimientoCajaChica(new happypets.model.MovimientoCajaChica(
-                        null, LocalDate.now(), "Ingreso",
-                        "Cobro CXC " + cuenta.getIdCuenta() + " - " + cuenta.getCliente(),
-                        abono, "Joanna Corrales", "Recibo Cobro #0" + cuenta.getIdCuenta()
-                ));
 
                 recargarDatos();
                 JOptionPane.showMessageDialog(this, "Abono de S/ " + String.format("%.2f", abono) + " registrado con éxito.", "Cobro Registrado", JOptionPane.INFORMATION_MESSAGE);

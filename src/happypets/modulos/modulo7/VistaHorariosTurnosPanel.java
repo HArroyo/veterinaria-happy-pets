@@ -534,10 +534,22 @@ public class VistaHorariosTurnosPanel extends happypets.ui.AssetsModulo {
 
         JButton btnAprobar = Ui.botonPrimario("Aprobar", null);
         btnAprobar.setBackground(COLOR_VERDE);
-        btnAprobar.addActionListener(e -> JOptionPane.showMessageDialog(this, "Permuta de turno aprobada y actualizada en el cuadrante semanal.", "Turno Aprobado", JOptionPane.INFORMATION_MESSAGE));
+        btnAprobar.setEnabled("Pendiente".equals(repo.getEstadoPermuta()));
+        btnAprobar.addActionListener(e -> {
+            try { repo.resolverPermuta(true); }
+            catch (RuntimeException ex) { JOptionPane.showMessageDialog(this, "No se pudo resolver la permuta: " + ex.getMessage()); return; }
+            btnAprobar.setEnabled(false); recargarDatos();
+            lblDetallePerm.setText("Permuta aprobada y aplicada al cuadrante semanal.");
+        });
 
         JButton btnRechazar = Ui.botonSecundario("Rechazar", null);
-        btnRechazar.addActionListener(e -> JOptionPane.showMessageDialog(this, "Solicitud de permuta rechazada.", "Turno Rechazado", JOptionPane.INFORMATION_MESSAGE));
+        btnRechazar.setEnabled("Pendiente".equals(repo.getEstadoPermuta()));
+        btnRechazar.addActionListener(e -> {
+            try { repo.resolverPermuta(false); }
+            catch (RuntimeException ex) { JOptionPane.showMessageDialog(this, ex.getMessage()); return; }
+            btnRechazar.setEnabled(false); btnAprobar.setEnabled(false);
+            lblDetallePerm.setText("Permuta rechazada; horarios conservados.");
+        });
 
         botonesPerm.add(btnAprobar);
         botonesPerm.add(btnRechazar);
@@ -633,8 +645,9 @@ public class VistaHorariosTurnosPanel extends happypets.ui.AssetsModulo {
         btnGuardar.setBackground(COLOR_AZUL);
         btnGuardar.addActionListener(e -> {
             for (int i = 0; i < 7; i++) {
-                t.setHorarioDia(i, txtHorarios[i].getText().trim(), (String) cmbTipos[i].getSelectedItem());
+                try { happypets.model.TurnoSemanal.validarHorario(txtHorarios[i].getText().trim(), (String) cmbTipos[i].getSelectedItem()); } catch (IllegalArgumentException ex) { JOptionPane.showMessageDialog(dlg, ex.getMessage()); return; }
             }
+            for (int i = 0; i < 7; i++) t.setHorarioDia(i, txtHorarios[i].getText().trim(), (String) cmbTipos[i].getSelectedItem());
             repo.guardarTurnoSemanal(t);
             JOptionPane.showMessageDialog(dlg, "Cuadrante de turnos actualizado para " + t.getNombreProfesional(), "Actualización Exitosa", JOptionPane.INFORMATION_MESSAGE);
             dlg.dispose();

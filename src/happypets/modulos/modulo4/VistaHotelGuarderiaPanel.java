@@ -344,7 +344,7 @@ public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
         pIn.setAlignmentX(Component.LEFT_ALIGNMENT);
         pIn.setLayout(new BoxLayout(pIn, BoxLayout.Y_AXIS));
         pIn.add(crearEtiquetaCampo("Check-In:"));
-        txtFechaIngreso = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        txtFechaIngreso = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT)));
         estilizarControl(txtFechaIngreso);
         pIn.add(txtFechaIngreso);
         gridFechas.add(pIn);
@@ -354,7 +354,7 @@ public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
         pOut.setAlignmentX(Component.LEFT_ALIGNMENT);
         pOut.setLayout(new BoxLayout(pOut, BoxLayout.Y_AXIS));
         pOut.add(crearEtiquetaCampo("Check-Out:"));
-        txtFechaSalida = new JTextField(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        txtFechaSalida = new JTextField(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT)));
         estilizarControl(txtFechaSalida);
         pOut.add(txtFechaSalida);
         gridFechas.add(pOut);
@@ -685,8 +685,8 @@ public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
         LocalDate fechaIn = LocalDate.now();
         LocalDate fechaOut = LocalDate.now().plusDays(2);
         try {
-            fechaIn = LocalDate.parse(txtFechaIngreso.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            fechaOut = LocalDate.parse(txtFechaSalida.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            fechaIn = LocalDate.parse(txtFechaIngreso.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT));
+            fechaOut = LocalDate.parse(txtFechaSalida.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Formato de fechas incorrecto. Use dd/MM/yyyy.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
             return;
@@ -697,8 +697,8 @@ public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
 
         double tarifaNoche = 55.0;
         try {
-            tarifaNoche = Double.parseDouble(txtCostoNoche.getText().trim());
-        } catch (Exception ignored) {}
+            tarifaNoche = happypets.model.Validacion.numero(txtCostoNoche.getText(), "Valor numérico", false);
+        } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
         double costoTotal = (noches * tarifaNoche) + (chkBanoSalida.isSelected() ? 35.0 : 0.0);
 
@@ -723,7 +723,7 @@ public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
                 "En Estadía / Hospedado"
         );
 
-        repo.guardarReservaHospedaje(r);
+        try { repo.guardarReservaHospedaje(r); } catch (IllegalArgumentException ex) { JOptionPane.showMessageDialog(this, ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
         recargarDatos();
 
         JOptionPane.showMessageDialog(this,
@@ -848,8 +848,8 @@ public class VistaHotelGuarderiaPanel extends happypets.ui.AssetsModulo {
         txtDieta.setText("Ración balanceada 2v/día");
         txtMedicacion.setText("Ninguna");
         chkBanoSalida.setSelected(false);
-        txtFechaIngreso.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        txtFechaSalida.setText(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        txtFechaIngreso.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT)));
+        txtFechaSalida.setText(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT)));
     }
 
     // Helper para Combo de Paciente

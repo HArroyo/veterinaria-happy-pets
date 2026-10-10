@@ -43,6 +43,7 @@ public class BotonAsset extends JButton {
 
     @Override
     public void setForeground(java.awt.Color color) {
+        if (java.util.Objects.equals(color, getForeground())) return;
         super.setForeground(color);
         if (automaticIcon != null && getIcon() == automaticIcon && getText() != null && !getText().isBlank()) {
             automaticIcon = Iconos.paraTexto(getText(), 16, color);

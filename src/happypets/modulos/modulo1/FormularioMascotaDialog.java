@@ -127,9 +127,9 @@ public class FormularioMascotaDialog extends JDialog {
             double peso = 0.0;
             try {
                 if (!txtPeso.getText().trim().isEmpty()) {
-                    peso = Double.parseDouble(txtPeso.getText().trim());
+                    peso = happypets.model.Validacion.numero(txtPeso.getText(), "Peso", true);
                 }
-            } catch (NumberFormatException ex) {
+            } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, "El peso debe ser un número válido.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }

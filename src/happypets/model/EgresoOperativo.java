@@ -33,7 +33,7 @@ public class EgresoOperativo {
         this.categoria = categoria != null ? categoria : "Otros Gastos";
         this.descripcion = descripcion != null ? descripcion : "";
         this.proveedor = proveedor != null ? proveedor : "-";
-        this.monto = Math.max(0.0, monto);
+        this.monto = Validacion.importe(monto, "Monto", false);
         this.metodoPago = metodoPago != null ? metodoPago : "Efectivo";
         this.comprobante = comprobante != null ? comprobante : "-";
         this.estado = estado != null ? estado : "Pagado";
@@ -88,7 +88,7 @@ public class EgresoOperativo {
     }
 
     public void setMonto(double monto) {
-        this.monto = Math.max(0.0, monto);
+        this.monto = Validacion.importe(monto, "Monto", false);
     }
 
     public String getMetodoPago() {

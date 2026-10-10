@@ -385,7 +385,7 @@ public class VistaParametrosGeneralesPanel extends happypets.ui.AssetsModulo {
         JOptionPane.showMessageDialog(
                 this,
                 "✓ Los parámetros generales de HappyPets se han guardado exitosamente.\n"
-                        + "Todos los documentos, recetas y facturas aplicarán esta configuración.",
+                        + "La configuración está disponible en memoria y se usa en las exportaciones y tickets.",
                 "Configuración Actualizada",
                 JOptionPane.INFORMATION_MESSAGE
         );

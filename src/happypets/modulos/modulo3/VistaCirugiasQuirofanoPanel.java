@@ -749,8 +749,7 @@ public class VistaCirugiasQuirofanoPanel extends happypets.ui.AssetsModulo {
 		try {
 			String[] partes = txtHoraProg.getText().trim().split(":");
 			hora = LocalTime.of(Integer.parseInt(partes[0].trim()), Integer.parseInt(partes[1].trim()));
-		} catch (Exception ignored) {
-		}
+		} catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
 		RegistroCirugia c = new RegistroCirugia(null, m.getCodigo(), m.getNombre(),
 				m.getEspecie() + " · " + m.getRaza(), optC.map(Cliente::getNombreCompleto).orElse("Tutor"),

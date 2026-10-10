@@ -773,21 +773,17 @@ public class VistaConsultasMedicasPanel extends happypets.ui.AssetsModulo {
 		int fc = 100;
 		double costo = 80.0;
 		try {
-			peso = Double.parseDouble(txtPeso.getText().trim());
-		} catch (Exception ignored) {
-		}
+			peso = happypets.model.Validacion.numero(txtPeso.getText(), "Valor numérico", false);
+		} catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 		try {
-			temp = Double.parseDouble(txtTemperatura.getText().trim());
-		} catch (Exception ignored) {
-		}
+			temp = happypets.model.Validacion.numero(txtTemperatura.getText(), "Valor numérico", false);
+		} catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 		try {
-			fc = Integer.parseInt(txtFC.getText().trim());
-		} catch (Exception ignored) {
-		}
+			fc = happypets.model.Validacion.entero(txtFC.getText(), "Cantidad", false);
+		} catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 		try {
-			costo = Double.parseDouble(txtCosto.getText().trim());
-		} catch (Exception ignored) {
-		}
+			costo = happypets.model.Validacion.numero(txtCosto.getText(), "Valor numérico", false);
+		} catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
 		AtencionMedica nueva = new AtencionMedica(null, m.getCodigo(), m.getNombre(),
 				m.getEspecie() + " · " + m.getRaza(), "", txtTutor.getText().trim(), txtTelefono.getText().trim(),

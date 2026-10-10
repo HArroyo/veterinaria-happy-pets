@@ -724,10 +724,10 @@ public class VistaSalaEsperaTriajePanel extends happypets.ui.AssetsModulo {
         double temp = 38.5;
         int fc = 90;
         try {
-            peso = Double.parseDouble(txtPeso.getText().trim());
-            temp = Double.parseDouble(txtTemperatura.getText().trim());
-            fc = Integer.parseInt(txtFrecuenciaCardiaca.getText().trim());
-        } catch (Exception ignored) { }
+            peso = happypets.model.Validacion.numero(txtPeso.getText(), "Valor numérico", false);
+            temp = happypets.model.Validacion.numero(txtTemperatura.getText(), "Valor numérico", false);
+            fc = happypets.model.Validacion.entero(txtFrecuenciaCardiaca.getText(), "Cantidad", false);
+        } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
         String nivel = rbRojo.isSelected() ? "ROJO (Emergencia crítica)" :
                        rbAmarillo.isSelected() ? "AMARILLO (Urgencia)" : "VERDE (Normal)";

@@ -746,10 +746,10 @@ public class VistaCatalogoProductosPanel extends happypets.ui.AssetsModulo {
         int stock = 10;
         int min = 5;
 
-        try { costo = Double.parseDouble(txtPrecioCosto.getText().trim()); } catch (Exception ignored) {}
-        try { venta = Double.parseDouble(txtPrecioVenta.getText().trim()); } catch (Exception ignored) {}
-        try { stock = Integer.parseInt(txtStockActual.getText().trim()); } catch (Exception ignored) {}
-        try { min = Integer.parseInt(txtStockMinimo.getText().trim()); } catch (Exception ignored) {}
+        try { costo = happypets.model.Validacion.numero(txtPrecioCosto.getText(), "Valor numérico", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
+        try { venta = happypets.model.Validacion.numero(txtPrecioVenta.getText(), "Valor numérico", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
+        try { stock = happypets.model.Validacion.entero(txtStockActual.getText(), "Cantidad", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
+        try { min = happypets.model.Validacion.entero(txtStockMinimo.getText(), "Cantidad", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
         ProductoFarmacia p = new ProductoFarmacia(
                 cod,
@@ -877,7 +877,7 @@ public class VistaCatalogoProductosPanel extends happypets.ui.AssetsModulo {
                 "║        Av. Primavera 1230, Surco - Tel. 984 552 110   ║\n" +
                 "╠═══════════════════════════════════════════════════════╣\n" +
                 "║ PACIENTE: ____________________  TUTOR: ______________ ║\n" +
-                "║ FECHA   : " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "        MÉDICO: Dr(a). Veterinario/a ║\n" +
+                "║ FECHA   : " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT)) + "        MÉDICO: Dr(a). Veterinario/a ║\n" +
                 "╠═══════════════════════════════════════════════════════╣\n" +
                 "║ MEDICAMENTO: " + String.format("%-39s", p.getNombre()) + "║\n" +
                 "║ DOSIS: _______________________ FRECUENCIA: __________ ║\n" +

@@ -310,19 +310,11 @@ public class VistaRepositorioDocumentalPanel extends happypets.ui.AssetsModulo {
                 JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
                 null, new String[]{"Descargar Copia", "Cerrar"}, "Descargar Copia");
 
-        if (opt == 0) {
-            repo.registrarLogAuditoria(new happypets.model.LogAuditoria(
-                    "#EV-" + (1043 + repo.getLogsAuditoria().size()),
-                    "Descarga de " + d.getNombreArchivo(),
-                    "admin_user", LocalDateTime.now(), "127.0.0.1", "ÉXITO",
-                    "Descarga completada del documento digital desde el Repositorio Documental"
-            ));
-            JOptionPane.showMessageDialog(this,
-                    "Archivo " + d.getNombreArchivo() + " descargado exitosamente.\nGuardado temporalmente en carpeta de descargas de usuario.",
-                    "Descarga Exitosa", JOptionPane.INFORMATION_MESSAGE);
+        if (opt == 0 && happypets.ui.ExportacionesUi.guardarBytes(this, d.getContenido(), d.getNombreArchivo())) {
+            repo.registrarLogAuditoria(new happypets.model.LogAuditoria(null, "Descarga de " + d.getNombreArchivo(),
+                    RepositorioVeterinaria.usuarioSesion(), LocalDateTime.now(), "127.0.0.1", "ÉXITO", "Archivo guardado por el usuario"));
         }
     }
-
     private void mostrarModalSubirArchivo() {
         JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Subir Archivo al Repositorio Documental", JDialog.ModalityType.APPLICATION_MODAL);
         dlg.setSize(480, 340);
@@ -380,9 +372,18 @@ public class VistaRepositorioDocumentalPanel extends happypets.ui.AssetsModulo {
             String tipo = (String) comboTipo.getSelectedItem();
             String cat = (String) comboCat.getSelectedItem();
 
+            javax.swing.JFileChooser selector = new javax.swing.JFileChooser();
+            if (selector.showOpenDialog(dlg) != javax.swing.JFileChooser.APPROVE_OPTION) return;
+            byte[] contenido;
+            try { contenido = java.nio.file.Files.readAllBytes(selector.getSelectedFile().toPath()); }
+            catch (java.io.IOException ex) { JOptionPane.showMessageDialog(dlg, "No se pudo leer el archivo: " + ex.getMessage()); return; }
+            nom = selector.getSelectedFile().getName();
+            int punto = nom.lastIndexOf('.');
+            tipo = punto < 0 ? "Archivo" : nom.substring(punto + 1).toUpperCase(java.util.Locale.ROOT);
             DocumentoRepositorio doc = new DocumentoRepositorio(
-                    null, tipo, nom, cat, 2.1, LocalDateTime.now(), "admin_user", "docs/" + nom
+                    null, tipo, nom, cat, contenido.length / (1024.0 * 1024.0), LocalDateTime.now(), RepositorioVeterinaria.usuarioSesion(), nom
             );
+            doc.setContenido(contenido);
             repo.agregarDocumentoRepositorio(doc);
             cargarDatosDocumentos();
             dlg.dispose();

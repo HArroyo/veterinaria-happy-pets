@@ -19,7 +19,7 @@ public class Usuario {
     public Usuario(String username, String password, String nombreCompleto, String rol, String correo,
                    String especialidadArea, String estado) {
         this.username = username;
-        this.password = password;
+        setPassword(password);
         this.nombreCompleto = nombreCompleto;
         this.rol = rol;
         this.correo = correo;
@@ -31,7 +31,20 @@ public class Usuario {
     public void setUsername(String username) { this.username = username; }
 
     public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setPassword(String password) {
+        if (password == null) throw new IllegalArgumentException("Ingrese una contraseña.");
+
+        byte[] sal = new byte[16]; new java.security.SecureRandom().nextBytes(sal);
+        this.password = "pbkdf2$" + java.util.Base64.getEncoder().encodeToString(sal) + "$" + java.util.Base64.getEncoder().encodeToString(derivar(password, sal));
+    }
+    public void conservarPasswordDe(Usuario usuario) { this.password = usuario.password; }
+    private static byte[] derivar(String texto, byte[] sal) {
+        try {
+            var especificacion = new javax.crypto.spec.PBEKeySpec(texto.toCharArray(), sal, 120000, 256);
+            try { return javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(especificacion).getEncoded(); }
+            finally { especificacion.clearPassword(); }
+        } catch (java.security.GeneralSecurityException ex) { throw new IllegalStateException(ex); }
+    }
 
     public String getNombreCompleto() { return nombreCompleto; }
     public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
@@ -53,7 +66,9 @@ public class Usuario {
     }
 
     public boolean validarPassword(String pass) {
-        return this.password != null && this.password.equals(pass);
+        if (pass == null || password == null) return false;
+        String[] partes = password.split("\\$");
+        return java.security.MessageDigest.isEqual(java.util.Base64.getDecoder().decode(partes[2]), derivar(pass, java.util.Base64.getDecoder().decode(partes[1])));
     }
 }
 

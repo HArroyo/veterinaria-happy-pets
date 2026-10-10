@@ -157,9 +157,7 @@ public class VistaClientesMascotasPanel extends happypets.ui.AssetsModulo {
         der.setOpaque(false);
 
         JButton btnExportar = crearBotonAccion("Exportar Datos", false);
-        btnExportar.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Los datos de clientes y mascotas se exportaron exitosamente a formato CSV/Excel.",
-                "Exportación", JOptionPane.INFORMATION_MESSAGE));
+        btnExportar.addActionListener(e -> happypets.ui.ExportacionesUi.guardar(this, repo.datosParaExportar("Pacientes y Fichas Clínicas", "Todos", java.util.List.of("Tutor", "Chip")), "CSV", "clientes_mascotas"));
 
         JButton btnNuevo = crearBotonAccion("+ Nuevo Cliente", true);
         btnNuevo.addActionListener(e -> nuevoCliente());
@@ -708,7 +706,7 @@ public class VistaClientesMascotasPanel extends happypets.ui.AssetsModulo {
                 "¿Está seguro de eliminar al cliente " + clienteActual.getNombreCompleto() + " y todas sus mascotas asociadas?",
                 "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (r == JOptionPane.YES_OPTION) {
-            repo.eliminarCliente(clienteActual.getCodigo());
+            try { repo.eliminarCliente(clienteActual.getCodigo()); } catch (IllegalArgumentException ex) { JOptionPane.showMessageDialog(this, ex.getMessage(), "Cliente vinculado", JOptionPane.WARNING_MESSAGE); return; }
             nuevoCliente();
             JOptionPane.showMessageDialog(this, "Cliente eliminado exitosamente.", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
         }

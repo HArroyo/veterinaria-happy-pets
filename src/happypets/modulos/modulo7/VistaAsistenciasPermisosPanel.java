@@ -909,7 +909,7 @@ public class VistaAsistenciasPermisosPanel extends happypets.ui.AssetsModulo {
         btnGuardar.setBackground(COLOR_MORADO);
         btnGuardar.addActionListener(e -> {
             int retardo = 0;
-            try { retardo = Integer.parseInt(txtRetardoMin.getText().trim()); } catch (Exception ignored) {}
+            try { retardo = happypets.model.Validacion.entero(txtRetardoMin.getText(), "Valor", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ingrese un valor numérico válido.", "Validación", JOptionPane.WARNING_MESSAGE); return; }
             String nuevoEst = (String) cmbNuevoEst.getSelectedItem();
 
             repo.marcarEntrada(a.getId(), txtEntrada.getText().trim(), nuevoEst, retardo, txtNota.getText().trim());

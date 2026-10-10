@@ -203,7 +203,7 @@ public class VistaRecordatoriosPanel extends happypets.ui.AssetsModulo {
         lblEst.setForeground(COLOR_TEXTO_MUTED);
         izq.add(lblEst);
 
-        cbFiltroEstado = new JComboBox<>(new String[]{"Todos los estados", "Confirmado", "Enviado", "Pendiente"});
+        cbFiltroEstado = new JComboBox<>(new String[]{"Todos los estados", "Confirmado", "Preparado localmente", "Pendiente"});
         cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         cbFiltroEstado.setPreferredSize(new Dimension(130, 26));
         cbFiltroEstado.setBackground(Color.WHITE);
@@ -705,13 +705,13 @@ public class VistaRecordatoriosPanel extends happypets.ui.AssetsModulo {
                 canal,
                 LocalDateTime.now(),
                 mensaje,
-                "Enviado"
+                "Preparado localmente"
         );
         repo.agregarRecordatorio(rec);
 
         JOptionPane.showMessageDialog(this,
-                "Recordatorio transmitido exitosamente por " + canal + " a " + ci.cita.getNombreCliente() + " (" + destino + ").",
-                "Notificación Enviada", JOptionPane.INFORMATION_MESSAGE);
+                "Recordatorio preparado en memoria para " + canal + " a " + ci.cita.getNombreCliente() + " (" + destino + ").",
+                "Recordatorio Local", JOptionPane.INFORMATION_MESSAGE);
 
         recargarDatos();
     }
@@ -724,9 +724,9 @@ public class VistaRecordatoriosPanel extends happypets.ui.AssetsModulo {
         }
         RecordatorioCita r = listaActual.get(row);
         r.setFechaEnvio(LocalDateTime.now());
-        r.setEstado("Enviado");
+        r.setEstado("Preparado localmente");
         recargarDatos();
-        JOptionPane.showMessageDialog(this, "Recordatorio reenviado a " + r.getNombreCliente() + " por " + r.getCanal() + ".", "Reenvío Exitoso", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Recordatorio preparado nuevamente para " + r.getNombreCliente() + " por " + r.getCanal() + ".", "Preparación Local", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void marcarConfirmadoSeleccionado() {
@@ -780,7 +780,7 @@ public class VistaRecordatoriosPanel extends happypets.ui.AssetsModulo {
             if (!isSelected) {
                 if ("Confirmado".equalsIgnoreCase(st)) {
                     lbl.setForeground(new Color(22, 163, 74));
-                } else if ("Enviado".equalsIgnoreCase(st)) {
+                } else if ("Preparado localmente".equalsIgnoreCase(st)) {
                     lbl.setForeground(new Color(2, 132, 199));
                 } else {
                     lbl.setForeground(new Color(217, 119, 6));

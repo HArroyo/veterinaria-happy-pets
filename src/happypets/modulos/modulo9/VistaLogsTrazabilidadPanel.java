@@ -391,11 +391,9 @@ public class VistaLogsTrazabilidadPanel extends happypets.ui.AssetsModulo {
     }
 
     private void exportarLogsAuditoria() {
-        String msg = "Generando archivo de auditoría inmutable en formatos CSV y PDF...\n"
-                + "• Total registros incluidos: " + logsFiltrados.size() + "\n"
-                + "• Rango auditado: Marzo 2026\n"
-                + "• Hash de firma: 8f2b3e41... (Certificado digital)\n\n"
-                + "Archivo generado: exports/audit_logs_marzo_2026.csv";
-        JOptionPane.showMessageDialog(this, msg, "Exportación de Auditoría", JOptionPane.INFORMATION_MESSAGE);
+        java.util.List<java.util.List<String>> tabla = new java.util.ArrayList<>();
+        tabla.add(java.util.List.of("Evento", "Fecha", "Usuario", "Estado", "Detalle"));
+        for (var log : logsFiltrados) tabla.add(java.util.List.of(log.getTipoEvento(), log.getFechaHoraFormateada(), log.getUsuario(), log.getEstado(), log.getDetalles()));
+        happypets.ui.ExportacionesUi.guardar(this, tabla, "CSV", "auditoria");
     }
 }

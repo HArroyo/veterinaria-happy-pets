@@ -904,7 +904,7 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
         VentaPOS venta = new VentaPOS(
                 null, null, tipoComp, LocalDateTime.now(), cliente, "-",
                 mascota, itemsVenta, descPorc, metodoPagoSeleccionado, recibido,
-                esCotizacion ? "Cotización" : "Pagada", "Joanna Corrales"
+                esCotizacion ? "Cotización" : "Pagada", RepositorioVeterinaria.usuarioSesion()
         );
 
         if (!esCotizacion) {
@@ -919,7 +919,7 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
                 repo.guardarMovimientoCajaChica(new happypets.model.MovimientoCajaChica(
                         null, java.time.LocalDate.now(), "Ingreso",
                         "Cobro POS " + venta.getNumeroComprobante() + " - " + cliente,
-                        venta.getTotal(), "Joanna Corrales", venta.getNumeroComprobante()
+                        venta.getTotal(), RepositorioVeterinaria.usuarioSesion(), venta.getNumeroComprobante()
                 ));
             }
         }
@@ -955,12 +955,12 @@ public class VistaPuntoVentaPOSPanel extends happypets.ui.AssetsModulo {
 
         StringBuilder sb = new StringBuilder();
         sb.append("========================================\n");
-        sb.append("       VETERINARIA HAPPY PETS S.A.C.    \n");
-        sb.append("        RUC: 20608912345 · LIMA - PERÚ  \n");
-        sb.append("       Av. San Borja Sur 482 · San Borja\n");
-        sb.append("       Central: (01) 432-9980 / 984-552-110\n");
-        sb.append("========================================\n");
-        sb.append(esCotizacion ? "     *** PROFORMA / COTIZACIÓN ***\n" :
+        var cfg = repo.getConfiguracionClinica();
+        sb.append(cfg.getNombreComercial()).append("\n");
+        sb.append(cfg.getIdentificadorFiscal()).append("\n");
+        sb.append(cfg.getDireccionSedePrincipal()).append("\n");
+        sb.append(cfg.getTelefonoUrgencias()).append("\n");
+        sb.append("========================================\n");        sb.append(esCotizacion ? "     *** PROFORMA / COTIZACIÓN ***\n" :
                                  "   " + venta.getTipoComprobante().toUpperCase() + "\n");
         sb.append("N° Comprobante: ").append(venta.getNumeroComprobante()).append("\n");
         sb.append("Fecha y Hora  : ").append(venta.getFechaHoraTexto()).append("\n");

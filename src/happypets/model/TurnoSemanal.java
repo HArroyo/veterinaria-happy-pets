@@ -114,6 +114,7 @@ public class TurnoSemanal implements Serializable {
     }
 
     public void setHorarioDia(int diaIndex, String horario, String tipoTurno) {
+        validarHorario(horario, tipoTurno);
         if (diaIndex >= 0 && diaIndex < 7) {
             horariosDias[diaIndex] = horario;
             tiposTurnoDias[diaIndex] = tipoTurno;
@@ -125,6 +126,19 @@ public class TurnoSemanal implements Serializable {
             return tiposTurnoDias[diaIndex];
         }
         return "Descanso";
+    }
+
+    public static void validarHorario(String horario, String tipo) {
+        if (horario == null || horario.isBlank()) throw new IllegalArgumentException("Ingrese el horario o indique Descanso.");
+        if (horario.toLowerCase().contains("descanso") || horario.toLowerCase().contains("libre")) return;
+        var matcher = java.util.regex.Pattern.compile("(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})").matcher(horario);
+        if (!matcher.find()) throw new IllegalArgumentException("Horario inválido. Use HH:mm - HH:mm.");
+        try {
+            var inicio = java.time.LocalTime.parse(matcher.group(1));
+            var fin = java.time.LocalTime.parse(matcher.group(2));
+            if (inicio.equals(fin) || (fin.isBefore(inicio) && (tipo == null || !tipo.toLowerCase().contains("guardia"))))
+                throw new IllegalArgumentException("El final del turno debe ser posterior al inicio; las guardias pueden cruzar medianoche.");
+        } catch (java.time.DateTimeException ex) { throw new IllegalArgumentException("La hora del turno no es válida."); }
     }
 
     @Override

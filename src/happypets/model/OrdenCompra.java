@@ -21,6 +21,9 @@ public class OrdenCompra {
     private double total;
     private String estado; // "Borrador", "Enviada a Proveedor", "Recibida en Almacén", "Cancelada"
     private String solicitante;
+    private java.util.Map<String, Integer> detalleProductos = new java.util.LinkedHashMap<>();
+    public java.util.Map<String, Integer> getDetalleProductos() { return java.util.Map.copyOf(detalleProductos); }
+    public void setDetalleProductos(java.util.Map<String, Integer> detalle) { detalleProductos = new java.util.LinkedHashMap<>(detalle); }
 
     public OrdenCompra(String idOrden, String rucProveedor, String nombreProveedor,
                        LocalDate fechaEmision, LocalDate fechaEntregaEstimada,

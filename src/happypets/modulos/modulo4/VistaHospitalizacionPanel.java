@@ -89,6 +89,7 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
     private JTextField txtCostoDia;
 
     // Tabla de Hospitalizados
+    private JTextArea txtAlertas;
     private JTable tablaHospitalizados;
     private DefaultTableModel modeloHospitalizados;
     private JLabel lblContadorHosp;
@@ -344,17 +345,12 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
         tit.setForeground(new Color(185, 28, 28));
         card.add(tit, BorderLayout.NORTH);
 
-        JTextArea txtAlertas = new JTextArea();
+        txtAlertas = new JTextArea();
         txtAlertas.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         txtAlertas.setEditable(false);
         txtAlertas.setOpaque(false);
         txtAlertas.setLineWrap(true);
         txtAlertas.setWrapStyleWord(true);
-        txtAlertas.setText(
-                "• Box 01 [UCI]: Zeus (Rottweiler) - Toxicosis por rodenticida. Monitorear diuresis y reflejos cada 2 horas.\n\n" +
-                "• Box 05 [Aislamiento]: Bimba (Persa) - Gastroenteritis infecciosa. Verificar bomba de infusión a 15 ml/h.\n\n" +
-                "• Box 02 [General]: Toby (Pug) - Alta postquirúrgica programada para mañana 09:00 hrs."
-        );
         card.add(txtAlertas, BorderLayout.CENTER);
 
         return card;
@@ -675,7 +671,9 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
         listaActual = repo.getInternamientos();
         modeloHospitalizados.setRowCount(0);
 
-        // Actualizar visual del mapa de boxes
+        txtAlertas.setText(listaActual.stream().filter(h -> !"Alta Médica".equalsIgnoreCase(h.getEstado()))
+                .map(h -> h.getNumeroBox() + " · " + h.getNombreMascota() + " · " + h.getNivelAlerta() + "\n" + h.getDiagnosticoIngreso())
+                .collect(java.util.stream.Collectors.joining("\n\n")));        // Actualizar visual del mapa de boxes
         for (int i = 0; i < 9; i++) {
             String bName = nombresBoxes[i];
             Optional<InternamientoHospitalario> optH = listaActual.stream()
@@ -774,7 +772,17 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
         Optional<Cliente> optC = repo.getClienteDeMascota(m.getCodigo());
 
         double costo = 100.0;
-        try { costo = Double.parseDouble(txtCostoDia.getText().trim()); } catch (Exception ignored) {}
+        double peso, temperatura;
+        int frecuencia;
+        try {
+            costo = happypets.model.Validacion.numero(txtCostoDia.getText(), "Tarifa diaria", false);
+            peso = happypets.model.Validacion.numero(txtPeso.getText(), "Peso", true);
+            temperatura = happypets.model.Validacion.numero(txtTemperatura.getText(), "Temperatura", true);
+            frecuencia = happypets.model.Validacion.entero(txtFC.getText(), "Frecuencia cardiaca", true);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         String boxSel = (String) cbBoxAsignado.getSelectedItem();
         String tipoBox = boxSel.contains("01") ? "UCI / Cuidados Intensivos" : boxSel.contains("05") ? "Aislamiento Infeccioso" : "Hospitalización General";
@@ -793,9 +801,9 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
                 LocalDate.now(),
                 LocalTime.now(),
                 LocalDate.now().plusDays(2),
-                m.getPesoActualKg(),
-                38.5,
-                110,
+                peso,
+                temperatura,
+                frecuencia,
                 txtFluidoterapia.getText().trim(),
                 txtMedicacion.getText().trim(),
                 txtEvolucion.getText().trim(),
@@ -804,7 +812,11 @@ public class VistaHospitalizacionPanel extends happypets.ui.AssetsModulo {
                 "Internado / En Tratamiento"
         );
 
-        repo.guardarInternamiento(h);
+        try { repo.guardarInternamiento(h); }
+        catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         JOptionPane.showMessageDialog(this,
                 "Paciente " + m.getNombre() + " ingresado satisfactoriamente al " + boxSel + " (" + tipoBox + ").",
                 "Ingreso Hospitalario Exitoso", JOptionPane.INFORMATION_MESSAGE);

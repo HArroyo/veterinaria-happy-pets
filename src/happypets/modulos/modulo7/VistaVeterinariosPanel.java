@@ -688,7 +688,7 @@ public class VistaVeterinariosPanel extends happypets.ui.AssetsModulo {
                 return;
             }
             int exp = 5;
-            try { exp = Integer.parseInt(txtExp.getText().trim()); } catch (Exception ignored) {}
+            try { exp = happypets.model.Validacion.entero(txtExp.getText(), "Valor", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ingrese un valor numérico válido.", "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
             Veterinario nuevo = new Veterinario(
                     "VET-" + String.format("%02d", repo.getVeterinarios().size() + 1),

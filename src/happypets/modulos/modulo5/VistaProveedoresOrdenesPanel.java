@@ -420,7 +420,7 @@ public class VistaProveedoresOrdenesPanel extends happypets.ui.AssetsModulo {
         form.add(Box.createVerticalStrut(6));
 
         form.add(crearEtiquetaCampo("Fecha de Entrega Estimada:"));
-        txtFechaEntrega = new JTextField(LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        txtFechaEntrega = new JTextField(LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT)));
         estilizarControl(txtFechaEntrega);
         form.add(txtFechaEntrega);
         form.add(Box.createVerticalStrut(6));
@@ -700,12 +700,12 @@ public class VistaProveedoresOrdenesPanel extends happypets.ui.AssetsModulo {
 
     private void calcularTotalesOrden() {
         try {
-            double sub = Double.parseDouble(txtSubtotalOrden.getText().trim());
+            double sub = happypets.model.Validacion.numero(txtSubtotalOrden.getText(), "Valor numérico", false);
             double igv = sub * 0.18;
             double tot = sub + igv;
             txtIgvOrden.setText(String.format("%.2f", igv));
             txtTotalOrden.setText(String.format("%.2f", tot));
-        } catch (Exception ignored) {}
+        } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
     }
 
     private void guardarProveedor() {
@@ -757,14 +757,14 @@ public class VistaProveedoresOrdenesPanel extends happypets.ui.AssetsModulo {
         }
 
         double sub = 1000.0;
-        try { sub = Double.parseDouble(txtSubtotalOrden.getText().trim()); } catch (Exception ignored) {}
+        try { sub = happypets.model.Validacion.numero(txtSubtotalOrden.getText(), "Valor numérico", false); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
         double igv = sub * 0.18;
         double tot = sub + igv;
 
         LocalDate entrega = LocalDate.now().plusDays(4);
         try {
-            entrega = LocalDate.parse(txtFechaEntrega.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception ignored) {}
+            entrega = LocalDate.parse(txtFechaEntrega.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT));
+        } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
         OrdenCompra oc = new OrdenCompra(
                 null,
@@ -820,7 +820,25 @@ public class VistaProveedoresOrdenesPanel extends happypets.ui.AssetsModulo {
                 "Confirmar Recepción de Mercadería", JOptionPane.YES_NO_OPTION);
 
         if (r == JOptionPane.YES_OPTION) {
-            repo.actualizarEstadoOrdenCompra(oc.getIdOrden(), "Recibida en Almacén");
+            var productos = repo.getProductosFarmacia();
+            var modelo = new javax.swing.table.DefaultTableModel(new Object[]{"Código", "Producto", "Cantidad recibida"}, 0) {
+                @Override public boolean isCellEditable(int fila, int columna) { return columna == 2; }
+            };
+            for (var producto : productos) modelo.addRow(new Object[]{producto.getCodigo(), producto.getNombre(), oc.getDetalleProductos().getOrDefault(producto.getCodigo(), 0)});
+            JTable tabla = new JTable(modelo);
+            if (JOptionPane.showConfirmDialog(this, new JScrollPane(tabla), "Detalle de recepción: indique cantidades", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+            if (tabla.isEditing() && !tabla.getCellEditor().stopCellEditing()) return;
+            java.util.Map<String, Integer> detalle = new java.util.LinkedHashMap<>();
+            try {
+                for (int i = 0; i < modelo.getRowCount(); i++) {
+                    int cantidad = happypets.model.Validacion.entero(String.valueOf(modelo.getValueAt(i, 2)), "Cantidad", false);
+                    if (cantidad > 0) detalle.put(String.valueOf(modelo.getValueAt(i, 0)), cantidad);
+                }
+                repo.recibirOrdenCompra(oc.getIdOrden(), detalle);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Recepción no registrada", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             recargarDatos();
             JOptionPane.showMessageDialog(this, "Recepción completada. Stock de fármacos incrementado en el Kardex de Happy Pets.", "Recepción Conforme", JOptionPane.INFORMATION_MESSAGE);
         }

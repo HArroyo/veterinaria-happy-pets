@@ -137,17 +137,12 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         JPanel pnlControles = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlControles.setOpaque(false);
 
-        comboPeriodo = new JComboBox<>(new String[]{
-                "2024 (Q1 - Q2 Acumulado)",
-                "Mayo 2024 (Mes en Curso)",
-                "Primer Trimestre 2024 (Q1)",
-                "Ejercicio Fiscal Completo 2023"
-        });
+        comboPeriodo = new JComboBox<>(new String[]{"Rango definido en los filtros"});
         comboPeriodo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboPeriodo.setPreferredSize(new Dimension(200, 34));
         comboPeriodo.setBackground(Color.WHITE);
 
-        comboDivisa = new JComboBox<>(new String[]{"PEN (S/)", "EUR (€)", "USD ($)"});
+        comboDivisa = new JComboBox<>(new String[]{"PEN (S/)"});
         comboDivisa.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboDivisa.setPreferredSize(new Dimension(95, 34));
         comboDivisa.setBackground(Color.WHITE);
@@ -155,9 +150,10 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         JButton btnDescargar = Ui.botonPrimario("Descargar Resumen", Iconos.crearIconoDocumento(14, Color.WHITE));
         btnDescargar.setPreferredSize(new Dimension(175, 34));
         btnDescargar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                    "Generando Resumen Ejecutivo Financiero...\nArchivo exportado: exports/balance_financiero_2024_q1_q2.pdf",
-                    "Descargar Balance", JOptionPane.INFORMATION_MESSAGE);
+            java.util.List<java.util.List<String>> tabla = new java.util.ArrayList<>();
+            tabla.add(java.util.List.of("Mes", "Servicios", "Farmacia", "Egresos", "Saldo"));
+            for (var m : metricasFiltradas()) tabla.add(java.util.List.of(m.getMesEtiqueta(), String.valueOf(m.getServiciosClinicos()), String.valueOf(m.getFarmaciaAlimentos()), String.valueOf(m.getCostesOperativos()), String.valueOf(m.getMargenNeto())));
+            happypets.ui.ExportacionesUi.guardar(this, tabla, "PDF", "resumen_financiero");
         });
 
         pnlControles.add(comboPeriodo);
@@ -168,6 +164,34 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         return cab;
     }
 
+    private java.time.LocalDate filtroInicio = java.time.LocalDate.MIN, filtroFin = java.time.LocalDate.MAX;
+    private String filtroPago = "Todos los Canales";
+    private java.util.List<happypets.model.VentaPOS> ventasFiltradas() {
+        return repo.getVentasPOS().stream().filter(v -> "Pagada".equalsIgnoreCase(v.getEstado()))
+                .filter(v -> !v.getFechaHora().toLocalDate().isBefore(filtroInicio) && !v.getFechaHora().toLocalDate().isAfter(filtroFin))
+                .filter(v -> filtroPago.equals("Todos los Canales") || (filtroPago.equals("Efectivo") && v.getMetodoPago().equalsIgnoreCase("Efectivo"))
+                        || (filtroPago.equals("POS / Tarjeta") && v.getMetodoPago().toLowerCase().contains("tarjeta"))
+                        || (filtroPago.equals("Transferencia / Yape") && (v.getMetodoPago().toLowerCase().contains("transfer") || v.getMetodoPago().toLowerCase().contains("yape")))).toList();
+    }
+    private java.util.List<happypets.model.MetricaMensualIngreso> metricasFiltradas() {
+        var meses = new java.util.TreeMap<java.time.YearMonth, happypets.model.MetricaMensualIngreso>();
+        for (var v : ventasFiltradas()) {
+            var mes = java.time.YearMonth.from(v.getFechaHora());
+            var metrica = meses.computeIfAbsent(mes, m -> new happypets.model.MetricaMensualIngreso(m.toString(), m.getYear(), m.getMonthValue(), 0, 0, 0));
+            for (var item : v.getItems()) {
+                double importe = item.getSubtotal() * (1 - v.getPorcentajeDescuento() / 100);
+                boolean producto = repo.getProductosFarmacia().stream().anyMatch(p -> p.getCodigo().equalsIgnoreCase(item.getCodigo()));
+                if (producto) metrica.setFarmaciaAlimentos(metrica.getFarmaciaAlimentos() + importe);
+                else metrica.setServiciosClinicos(metrica.getServiciosClinicos() + importe);
+            }
+        }
+        for (var e : repo.getEgresosOperativos()) if (!e.getFecha().isBefore(filtroInicio) && !e.getFecha().isAfter(filtroFin)) {
+            var mes = java.time.YearMonth.from(e.getFecha());
+            var metrica = meses.computeIfAbsent(mes, m -> new happypets.model.MetricaMensualIngreso(m.toString(), m.getYear(), m.getMonthValue(), 0, 0, 0));
+            metrica.setCostesOperativos(metrica.getCostesOperativos() + e.getMonto());
+        }
+        return new java.util.ArrayList<>(meses.values());
+    }
     private JPanel crearPanelKPIs() {
         JPanel panelKPIs = new JPanel(new GridLayout(1, 4, 14, 0));
         panelKPIs.setOpaque(false);
@@ -176,7 +200,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 1: Ingresos Brutos Totales
         panelKPIs.add(crearTarjetaKPI(
                 "Ingresos Brutos Totales",
-                String.format("S/ %.2f", repo.getMetricasOperativas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getTotalIngresos).sum()),
+                String.format("S/ %.2f", metricasFiltradas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getTotalIngresos).sum()),
                 "Datos en memoria",
                 new Color(16, 185, 129),
                 "Registros actuales de la sesión",
@@ -187,7 +211,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 2: Costes Operativos
         panelKPIs.add(crearTarjetaKPI(
                 "Costes y Gastos Operativos",
-                String.format("S/ %.2f", repo.getMetricasOperativas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getCostesOperativos).sum()),
+                String.format("S/ %.2f", metricasFiltradas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getCostesOperativos).sum()),
                 "Datos en memoria",
                 new Color(16, 185, 129),
                 "Registros actuales de la sesión",
@@ -198,7 +222,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 3: Margen Operativo Neto (EBITDA)
         panelKPIs.add(crearTarjetaKPI(
                 "Ingresos POS menos egresos",
-                String.format("S/ %.2f", repo.getMetricasOperativas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getMargenNeto).sum()),
+                String.format("S/ %.2f", metricasFiltradas().stream().mapToDouble(happypets.model.MetricaMensualIngreso::getMargenNeto).sum()),
                 "Datos en memoria",
                 new Color(2, 132, 199),
                 "Registros actuales de la sesión",
@@ -209,7 +233,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         // KPI 4: Ticket Medio
         panelKPIs.add(crearTarjetaKPI(
                 "Ticket Medio por Paciente",
-                String.format("S/ %.2f", repo.getVentasPOS().stream().filter(v -> "Pagada".equalsIgnoreCase(v.getEstado())).mapToDouble(happypets.model.VentaPOS::getTotal).average().orElse(0)),
+                String.format("S/ %.2f", ventasFiltradas().stream().mapToDouble(happypets.model.VentaPOS::getTotal).average().orElse(0)),
                 "Datos en memoria",
                 new Color(100, 116, 139),
                 "Registros actuales de la sesión",
@@ -288,7 +312,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         lblF.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblF.setForeground(new Color(100, 116, 139));
         pnlFec.add(lblF, BorderLayout.NORTH);
-        txtRangoFechas = new JTextField("01/01/2024 - 30/06/2024", 14);
+        txtRangoFechas = new JTextField(java.time.LocalDate.now().withDayOfYear(1).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu")) + " - " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu")), 14);
         txtRangoFechas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtRangoFechas.setPreferredSize(new Dimension(170, 30));
         pnlFec.add(txtRangoFechas, BorderLayout.CENTER);
@@ -301,7 +325,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         lblS.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblS.setForeground(new Color(100, 116, 139));
         pnlSede.add(lblS, BorderLayout.NORTH);
-        comboSede = new JComboBox<>(new String[]{"Todas las Sedes y Filiales", "Sede Central (Miraflores)", "Sede Filial (San Borja)"});
+        comboSede = new JComboBox<>(new String[]{"Todos los registros en memoria"});
         comboSede.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboSede.setPreferredSize(new Dimension(190, 30));
         comboSede.setBackground(Color.WHITE);
@@ -331,6 +355,15 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         JButton btnAplicar = Ui.botonPrimario("Aplicar Filtro", Iconos.crearIconoRefrescar(12, Color.WHITE));
         btnAplicar.setPreferredSize(new Dimension(125, 32));
         btnAplicar.addActionListener(e -> {
+            try {
+                String[] fechas = txtRangoFechas.getText().trim().split("\\s+-\\s+");
+                var formato = java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT);
+                if (fechas.length != 2) throw new IllegalArgumentException();
+                var inicio = java.time.LocalDate.parse(fechas[0], formato);
+                var fin = java.time.LocalDate.parse(fechas[1], formato);
+                if (fin.isBefore(inicio)) throw new IllegalArgumentException();
+                filtroInicio = inicio; filtroFin = fin; filtroPago = String.valueOf(comboMetodoPago.getSelectedItem());
+            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ingrese un rango válido: dd/MM/yyyy - dd/MM/yyyy."); return; }
             if (panelKPIsActual != null) {
                 JPanel nuevos = crearPanelKPIs();
                 panelKPIsActual.removeAll();
@@ -346,6 +379,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
         JButton btnRestablecer = Ui.botonSecundario("Restablecer", null);
         btnRestablecer.setPreferredSize(new Dimension(100, 32));
         btnRestablecer.addActionListener(e -> {
+            filtroInicio = java.time.LocalDate.MIN; filtroFin = java.time.LocalDate.MAX; filtroPago = "Todos los Canales";
             comboSede.setSelectedIndex(0);
             comboMetodoPago.setSelectedIndex(0);
             if (panelKPIsActual != null) {
@@ -666,7 +700,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
     /**
      * Gráfico Donut de 6 canales en Graphics2D con centro blanco.
      */
-    private static class GraficoDonutCanalesPanel extends JPanel {
+    private class GraficoDonutCanalesPanel extends JPanel {
         private static final long serialVersionUID = 1L;
 
         GraficoDonutCanalesPanel() {
@@ -687,7 +721,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
             int cx = 20 + size / 2;
             int cy = h / 2;
 
-            var metricas = RepositorioVeterinaria.getInstancia().getMetricasOperativas();
+            var metricas = metricasFiltradas();
             double clinica = metricas.stream().mapToDouble(happypets.model.MetricaMensualIngreso::getServiciosClinicos).sum();
             double farmacia = metricas.stream().mapToDouble(happypets.model.MetricaMensualIngreso::getFarmaciaAlimentos).sum();
             double total = clinica + farmacia;
@@ -742,7 +776,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
     /**
      * Gráfico de Barras Dobles: Ingresos vs Gastos Mensuales (Ene a Jun).
      */
-    private static class GraficoIngresosGastosPanel extends JPanel {
+    private class GraficoIngresosGastosPanel extends JPanel {
         private static final long serialVersionUID = 1L;
 
         GraficoIngresosGastosPanel() {
@@ -772,7 +806,7 @@ public class VistaReportesFinancierosPanel extends happypets.ui.AssetsModulo {
                 return;
             }
 
-            var metricas = RepositorioVeterinaria.getInstancia().getMetricasOperativas();
+            var metricas = metricasFiltradas();
             if (metricas.isEmpty()) { g2.dispose(); return; }
             double maxVal = Math.max(1, metricas.stream().mapToDouble(m -> Math.max(m.getTotalIngresos(), m.getCostesOperativos())).max().orElse(1)) * 1.1;
             g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));

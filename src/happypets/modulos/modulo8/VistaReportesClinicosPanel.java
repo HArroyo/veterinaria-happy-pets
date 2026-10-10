@@ -149,9 +149,10 @@ public class VistaReportesClinicosPanel extends happypets.ui.AssetsModulo {
         JButton btnDescargarPDF = Ui.botonPrimario("Descargar Resumen PDF", Iconos.crearIconoDocumento(14, Color.WHITE));
         btnDescargarPDF.setPreferredSize(new Dimension(195, 34));
         btnDescargarPDF.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                    "Generando informe analítico PDF con tablas y gráficos diagnósticos...\nGuardado en: exports/reporte_clinico_resumen.pdf",
-                    "Exportar Resumen PDF", JOptionPane.INFORMATION_MESSAGE);
+            java.util.List<java.util.List<String>> tabla = new java.util.ArrayList<>();
+            tabla.add(java.util.List.of("Fecha", "Paciente", "Veterinario", "Diagnóstico", "Tratamiento"));
+            for (var r : reportesActuales) tabla.add(java.util.List.of(r.getFechaFormateada(), r.getNombrePaciente(), r.getVeterinarioTratante(), r.getDiagnosticoConfirmado(), r.getTratamiento()));
+            happypets.ui.ExportacionesUi.guardar(this, tabla, "PDF", "resumen_clinico");
         });
 
         pnlBotones.add(btnActualizar);

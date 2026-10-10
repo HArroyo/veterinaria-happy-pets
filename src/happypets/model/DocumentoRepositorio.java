@@ -8,6 +8,9 @@ import java.time.format.DateTimeFormatter;
  * Modelo para los archivos del Repositorio Documental centralizado (Módulo 9).
  */
 public class DocumentoRepositorio implements Serializable {
+    private byte[] contenido;
+    public byte[] getContenido() { return contenido == null ? null : contenido.clone(); }
+    public void setContenido(byte[] datos) { contenido = datos == null ? null : datos.clone(); }
     private static final long serialVersionUID = 1L;
 
     private String id;

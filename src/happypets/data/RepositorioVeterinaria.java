@@ -1069,6 +1069,9 @@ public class RepositorioVeterinaria {
     }
 
     public void eliminarCliente(String codigo) {
+        var cliente = clientes.stream().filter(c -> c.getCodigo().equalsIgnoreCase(codigo)).findFirst().orElse(null);
+        if (cliente != null && !cliente.getMascotas().isEmpty())
+            throw new IllegalArgumentException("El cliente tiene mascotas vinculadas. Consérvelo para mantener sus historias y citas.");
         clientes.removeIf(c -> c.getCodigo().equalsIgnoreCase(codigo));
     }
 
@@ -1383,6 +1386,17 @@ public class RepositorioVeterinaria {
 
     public void guardarInternamiento(happypets.model.InternamientoHospitalario h) {
         if (h == null) return;
+        happypets.model.Validacion.importe(h.getPesoActualKg(), "Peso", true);
+        happypets.model.Validacion.importe(h.getTemperaturaC(), "Temperatura", true);
+        happypets.model.Validacion.importe(h.getFrecuenciaCardiaca(), "Frecuencia cardiaca", true);
+        happypets.model.Validacion.importe(h.getCostoDia(), "Tarifa diaria", false);
+        if (h.getDiagnosticoIngreso() == null || h.getDiagnosticoIngreso().isBlank())
+            throw new IllegalArgumentException("Ingrese el diagnóstico de hospitalización.");
+        if (!"Alta Médica".equalsIgnoreCase(h.getEstado())) for (var otro : internamientos) {
+            if (java.util.Objects.equals(otro.getIdInternamiento(), h.getIdInternamiento()) || "Alta Médica".equalsIgnoreCase(otro.getEstado())) continue;
+            if (otro.getNumeroBox().equalsIgnoreCase(h.getNumeroBox())) throw new IllegalArgumentException("El box seleccionado ya está ocupado.");
+            if (otro.getCodigoMascota().equalsIgnoreCase(h.getCodigoMascota())) throw new IllegalArgumentException("El paciente ya está hospitalizado.");
+        }
         boolean existe = false;
         for (int i = 0; i < internamientos.size(); i++) {
             if (internamientos.get(i).getIdInternamiento().equalsIgnoreCase(h.getIdInternamiento())) {
@@ -1415,6 +1429,14 @@ public class RepositorioVeterinaria {
 
     public void guardarReservaHospedaje(happypets.model.ReservaHospedaje r) {
         if (r == null) return;
+        happypets.model.Validacion.importe(r.getCostoNoche(), "Tarifa por noche", false);
+        if (r.getFechaCheckIn() == null || r.getFechaCheckOut() == null || !r.getFechaCheckOut().isAfter(r.getFechaCheckIn()))
+            throw new IllegalArgumentException("La salida debe ser posterior al ingreso.");
+        if (!r.getEstado().toLowerCase().contains("cancel") && !r.getEstado().toLowerCase().contains("finalizada")) for (var otra : reservasHospedaje) {
+            if (java.util.Objects.equals(otra.getIdReserva(), r.getIdReserva()) || otra.getEstado().toLowerCase().contains("cancel") || otra.getEstado().toLowerCase().contains("finalizada")) continue;
+            if (otra.getNumeroSuite().equalsIgnoreCase(r.getNumeroSuite()) && r.getFechaCheckIn().isBefore(otra.getFechaCheckOut()) && otra.getFechaCheckIn().isBefore(r.getFechaCheckOut()))
+                throw new IllegalArgumentException("La suite ya está reservada para esas fechas.");
+        }
         boolean existe = false;
         for (int i = 0; i < reservasHospedaje.size(); i++) {
             if (reservasHospedaje.get(i).getIdReserva().equalsIgnoreCase(r.getIdReserva())) {
@@ -1583,6 +1605,11 @@ public class RepositorioVeterinaria {
     }
 
     public void actualizarEstadoOrdenCompra(String idOrden, String nuevoEstado) {
+        if ("Recibida en Almacén".equalsIgnoreCase(nuevoEstado)) {
+            var orden = ordenesCompra.stream().filter(o -> o.getIdOrden().equalsIgnoreCase(idOrden)).findFirst().orElseThrow();
+            recibirOrdenCompra(idOrden, orden.getDetalleProductos());
+            return;
+        }
         for (happypets.model.OrdenCompra oc : ordenesCompra) {
             if (oc.getIdOrden().equalsIgnoreCase(idOrden)) {
                 oc.setEstado(nuevoEstado);
@@ -1592,6 +1619,33 @@ public class RepositorioVeterinaria {
     }
 
     // 4. Ajustes y Mermas
+    public void recibirOrdenCompra(String id, java.util.Map<String, Integer> detalle) {
+        var orden = ordenesCompra.stream().filter(o -> o.getIdOrden().equalsIgnoreCase(id)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Orden de compra no encontrada."));
+        if ("Recibida en Almacén".equalsIgnoreCase(orden.getEstado())) throw new IllegalArgumentException("La orden ya fue recibida.");
+        if ("Cancelada".equalsIgnoreCase(orden.getEstado())) throw new IllegalArgumentException("La orden está cancelada.");
+        if (detalle == null || detalle.isEmpty()) throw new IllegalArgumentException("Indique los productos y cantidades recibidos.");
+        var normalizado = new java.util.LinkedHashMap<String, Integer>();
+        for (var linea : detalle.entrySet()) {
+            if (linea.getKey() == null || linea.getValue() == null || linea.getValue() <= 0) throw new IllegalArgumentException("Producto o cantidad inválido.");
+            normalizado.merge(linea.getKey().toLowerCase(java.util.Locale.ROOT), linea.getValue(), Math::addExact);
+        }
+        detalle = normalizado;        for (var linea : detalle.entrySet()) {
+            var producto = productosFarmacia.stream().filter(p -> p.getCodigo().equalsIgnoreCase(linea.getKey())).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Producto desconocido: " + linea.getKey()));
+            if (linea.getValue() == null || linea.getValue() <= 0) throw new IllegalArgumentException("La cantidad recibida debe ser positiva.");
+            Math.addExact(producto.getStockActual(), linea.getValue());
+        }
+        for (var linea : detalle.entrySet()) {
+            var p = productosFarmacia.stream().filter(producto -> producto.getCodigo().equalsIgnoreCase(linea.getKey())).findFirst().orElseThrow();
+            registrarMovimientoStock(new happypets.model.LoteMovimientoStock(null, p.getCodigo(), p.getNombre(), id,
+                    "Ingreso por Compra / Proveedor", linea.getValue(), p.getStockActual(), p.getStockActual() + linea.getValue(),
+                    LocalDate.now(), null, orden.getSolicitante(), "Recepción " + id));
+        }
+        orden.setDetalleProductos(detalle);
+        orden.setEstado("Recibida en Almacén");
+    }
+
     public List<happypets.model.AjusteMerma> getAjustesMermas() {
         return new ArrayList<>(ajustesMermas);
     }
@@ -1713,6 +1767,7 @@ public class RepositorioVeterinaria {
         for (CuentaPorCobrar c : cuentasPorCobrar) {
             if (c.getIdCuenta().equalsIgnoreCase(idCuenta)) {
                 c.registrarAbono(abono);
+                guardarMovimientoCajaChica(new MovimientoCajaChica(null, LocalDate.now(), "Ingreso", "Abono " + idCuenta, abono, usuarioSesion(), idCuenta));
                 break;
             }
         }
@@ -1749,6 +1804,7 @@ public class RepositorioVeterinaria {
         for (CuentaPorPagar c : cuentasPorPagar) {
             if (c.getIdCuenta().equalsIgnoreCase(idCuenta)) {
                 c.registrarPago(pago);
+                guardarMovimientoCajaChica(new MovimientoCajaChica(null, LocalDate.now(), "Egreso", "Pago " + idCuenta, pago, usuarioSesion(), idCuenta));
                 break;
             }
         }
@@ -2308,6 +2364,20 @@ public class RepositorioVeterinaria {
     }
 
     // --- Métodos de Submódulo 7.4: Asistencias y Permisos ---
+    private String estadoPermuta = "Pendiente";
+    public String getEstadoPermuta() { return estadoPermuta; }
+    public void resolverPermuta(boolean aprobar) {
+        if (!"Pendiente".equals(estadoPermuta)) throw new IllegalArgumentException("La solicitud ya fue resuelta.");
+        if (aprobar) {
+            var mario = cuadranteTurnos.stream().filter(t -> t.getNombreProfesional().contains("Mario Silva")).findFirst().orElseThrow();
+            var laura = cuadranteTurnos.stream().filter(t -> t.getNombreProfesional().contains("Laura Morales")).findFirst().orElseThrow();
+            String horario = mario.getHorarioDia(5), tipo = mario.getTipoTurnoDia(5);
+            mario.setHorarioDia(5, laura.getHorarioDia(5), laura.getTipoTurnoDia(5));
+            laura.setHorarioDia(5, horario, tipo);
+        }
+        estadoPermuta = aprobar ? "Aprobada" : "Rechazada";
+    }
+
     public List<RegistroAsistencia> getAsistencias() {
         return new ArrayList<>(asistencias);
     }
@@ -2975,8 +3045,14 @@ public class RepositorioVeterinaria {
         return res;
     }
 
+    public static String usuarioSesion() {
+        var usuario = happypets.auth.ServicioAutenticacion.getInstancia().getSesionActual();
+        return usuario == null ? "Sistema" : usuario.getUsername();
+    }
     public void registrarLogAuditoria(LogAuditoria log) {
         if (log != null) {
+            if (log.getIdEvento() == null) log.setIdEvento("EV-" + java.util.UUID.randomUUID());
+            log.setUsuario(usuarioSesion());
             logsAuditoria.add(0, log);
         }
     }

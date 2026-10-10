@@ -32,8 +32,8 @@ public class CuentaPorPagar {
         this.idCuenta = idCuenta;
         this.proveedor = proveedor != null ? proveedor : "";
         this.concepto = concepto != null ? concepto : "";
-        this.monto = Math.max(0.0, monto);
-        this.montoPagado = Math.max(0.0, montoPagado);
+        this.monto = Validacion.importe(monto, "Monto", false);
+        this.montoPagado = Validacion.importe(montoPagado, "Monto pagado", false);
         this.fechaRegistro = fechaRegistro != null ? fechaRegistro : LocalDate.now();
         this.fechaVence = fechaVence != null ? fechaVence : LocalDate.now().plusDays(20);
         this.rucProveedor = rucProveedor != null ? rucProveedor : "";
@@ -46,8 +46,9 @@ public class CuentaPorPagar {
     }
 
     public void registrarPago(double pago) {
-        if (pago <= 0) return;
-        this.montoPagado = Math.min(this.monto, this.montoPagado + pago);
+        Validacion.importe(pago, "Pago", true);
+        if (pago > getSaldo()) throw new IllegalArgumentException("El pago supera el saldo pendiente.");
+        this.montoPagado += pago;
         if (this.montoPagado >= this.monto) {
             this.estado = "Pagado";
         } else {
@@ -84,7 +85,7 @@ public class CuentaPorPagar {
     }
 
     public void setMonto(double monto) {
-        this.monto = Math.max(0.0, monto);
+        this.monto = Validacion.importe(monto, "Monto", false);
     }
 
     public double getMontoPagado() {
@@ -92,7 +93,7 @@ public class CuentaPorPagar {
     }
 
     public void setMontoPagado(double montoPagado) {
-        this.montoPagado = Math.max(0.0, montoPagado);
+        this.montoPagado = Validacion.importe(montoPagado, "Monto pagado", false);
     }
 
     public LocalDate getFechaVence() {

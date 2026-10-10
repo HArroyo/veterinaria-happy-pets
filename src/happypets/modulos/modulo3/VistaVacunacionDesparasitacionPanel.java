@@ -706,9 +706,8 @@ public class VistaVacunacionDesparasitacionPanel extends happypets.ui.AssetsModu
 
 		double peso = m.getPesoActualKg();
 		try {
-			peso = Double.parseDouble(txtPesoDesp.getText().trim());
-		} catch (Exception ignored) {
-		}
+			peso = happypets.model.Validacion.numero(txtPesoDesp.getText(), "Valor numérico", false);
+		} catch (Exception ex) { JOptionPane.showMessageDialog(this, "Revise los datos numéricos, fechas y horas: " + ex.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE); return; }
 
 		RegistroInmunizacion reg = new RegistroInmunizacion(null, (String) cbTipoDesp.getSelectedItem(), m.getCodigo(),
 				m.getNombre(), m.getEspecie() + " · " + m.getRaza(),

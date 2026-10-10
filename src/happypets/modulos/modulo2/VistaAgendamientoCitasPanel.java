@@ -909,7 +909,7 @@ public class VistaAgendamientoCitasPanel extends happypets.ui.AssetsModulo {
         recargarDatos();
 
         JOptionPane.showMessageDialog(this,
-                "Recordatorio enviado exitosamente vía WhatsApp a " + c.getNombreCliente() + " (" + c.getTelefonoCliente() + "):\n\n" +
+                "Recordatorio preparado localmente para WhatsApp: " + c.getNombreCliente() + " (" + c.getTelefonoCliente() + "):\n\n" +
                 "\"Hola " + c.getNombreCliente() + ", te recordamos que " + c.getNombreMascota() + " tiene cita de " + c.getTipoServicio() + " el " + c.getFechaFormateada() + " a las " + c.getHoraFormateada() + " hrs con el " + c.getVeterinario() + " en Happy Pets.\"",
                 "Recordatorio WhatsApp Enviado", JOptionPane.INFORMATION_MESSAGE);
     }

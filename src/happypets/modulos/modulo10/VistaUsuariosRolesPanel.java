@@ -511,7 +511,7 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
         JTextField txtUser = new JTextField(uExistente != null ? uExistente.getUsername() : "");
         if (uExistente != null) txtUser.setEditable(false);
         JTextField txtMail = new JTextField(uExistente != null ? uExistente.getCorreo() : "");
-        JTextField txtPass = new JTextField(uExistente != null ? uExistente.getPassword() : "123456");
+        javax.swing.JPasswordField txtPass = new javax.swing.JPasswordField();
 
         JComboBox<String> cbRol = new JComboBox<>(new String[]{"Administrador", "Veterinario Titular", "Recepcionista", "Auxiliar Veterinario", "Contador / Auditor"});
         if (uExistente != null) cbRol.setSelectedItem(uExistente.getRol());
@@ -540,8 +540,9 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
             String nom = txtNom.getText().trim();
             String user = txtUser.getText().trim();
             String mail = txtMail.getText().trim();
-            String pass = txtPass.getText().trim();
-            if (nom.isEmpty() || user.isEmpty() || mail.isEmpty() || pass.isEmpty()) {
+            String pass = new String(txtPass.getPassword());
+
+            if (nom.isEmpty() || user.isEmpty() || mail.isEmpty() || (pass.isEmpty() && uExistente == null)) {
                 JOptionPane.showMessageDialog(dlg, "Por favor complete los campos obligatorios.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -550,6 +551,7 @@ public class VistaUsuariosRolesPanel extends happypets.ui.AssetsModulo {
                 return;
             }
             Usuario nuevo = new Usuario(user, pass, nom, (String) cbRol.getSelectedItem(), mail, txtArea.getText().trim(), (String) cbEst.getSelectedItem());
+            if (pass.isEmpty() && uExistente != null) nuevo.conservarPasswordDe(uExistente);
             repo.guardarUsuarioSistema(nuevo);
             recargarTabla();
             dlg.dispose();

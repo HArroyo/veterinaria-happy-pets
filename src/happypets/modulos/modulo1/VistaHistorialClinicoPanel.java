@@ -158,16 +158,19 @@ public class VistaHistorialClinicoPanel extends happypets.ui.AssetsModulo {
         btnImprimir.setIconTextGap(4);
         btnImprimir.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnImprimir.setPreferredSize(new Dimension(btnImprimir.getPreferredSize().width, 28));
-        btnImprimir.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Enviando historial clínico de " + (mascotaActual != null ? mascotaActual.getNombre() : "") + " a la cola de impresión.",
-                "Impresión", JOptionPane.INFORMATION_MESSAGE));
+        btnImprimir.addActionListener(e -> { try { tablaConsultas.print(); } catch (java.awt.print.PrinterException ex) { JOptionPane.showMessageDialog(this, "No se pudo imprimir: " + ex.getMessage()); } });
 
         JButton btnExportarPdf = Ui.boton("Exportar PDF", false);
         btnExportarPdf.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnExportarPdf.setPreferredSize(new Dimension(btnExportarPdf.getPreferredSize().width, 28));
-        btnExportarPdf.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Historial clínico generado y exportado exitosamente a formato PDF.",
-                "Exportación Exitosa", JOptionPane.INFORMATION_MESSAGE));
+        btnExportarPdf.addActionListener(e -> {
+            if (mascotaActual == null) return;
+            java.util.List<java.util.List<String>> tabla = new java.util.ArrayList<>();
+            tabla.add(java.util.List.of("Paciente", mascotaActual.getNombre(), mascotaActual.getCodigo()));
+            tabla.add(java.util.List.of("Fecha", "Motivo", "Diagnóstico", "Tratamiento", "Veterinario"));
+            for (var consulta : repo.getConsultasPorMascota(mascotaActual.getCodigo())) tabla.add(java.util.List.of(consulta.getFechaFormateada(), consulta.getMotivo(), consulta.getDiagnostico(), consulta.getTratamiento(), consulta.getVeterinario()));
+            happypets.ui.ExportacionesUi.guardar(this, tabla, "PDF", "historial_" + mascotaActual.getCodigo());
+        });
 
         JButton btnNuevaConsulta = Ui.boton("+ Nueva Consulta", true);
         btnNuevaConsulta.setFont(new Font("Segoe UI", Font.BOLD, 11));

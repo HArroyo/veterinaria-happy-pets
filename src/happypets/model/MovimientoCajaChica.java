@@ -32,7 +32,7 @@ public class MovimientoCajaChica {
         this.fecha = fecha != null ? fecha : LocalDate.now();
         this.tipo = (tipo != null && tipo.toLowerCase().contains("egreso")) ? "Egreso" : "Ingreso";
         this.concepto = concepto != null ? concepto : "";
-        this.monto = Math.max(0.0, monto);
+        this.monto = Validacion.importe(monto, "Monto", false);
         this.responsable = responsable != null ? responsable : "Cajero de Turno";
         this.comprobante = comprobante != null ? comprobante : "-";
         this.saldoResultante = saldoResultante;
@@ -87,7 +87,7 @@ public class MovimientoCajaChica {
     }
 
     public void setMonto(double monto) {
-        this.monto = Math.max(0.0, monto);
+        this.monto = Validacion.importe(monto, "Monto", false);
     }
 
     public String getResponsable() {

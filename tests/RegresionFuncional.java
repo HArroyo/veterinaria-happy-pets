@@ -107,10 +107,114 @@ public final class RegresionFuncional {
             if (formato.equals("PDF")) verificar(new String(contenido, StandardCharsets.ISO_8859_1).startsWith("%PDF-1.4"), "Cabecera PDF");
         }
         auth.cerrarSesion();
+        verificar(!repo.getUsuariosSistema().get(0).getPassword().equals("admin123"), "Contraseñas derivadas en memoria");
+        verificar(repo.getUsuariosSistema().get(0).validarPassword("admin123"), "Credenciales conservadas");
+        var ocupado = repo.getInternamientos().stream().filter(h -> !"Alta Médica".equals(h.getEstado())).findFirst().orElseThrow();
+        int hospitalizados = repo.getInternamientos().size();
+        rechazar(() -> repo.guardarInternamiento(internamiento(ocupado.getNumeroBox(), "TEST-HOSP")), "Box ocupado rechazado");
+        verificar(repo.getInternamientos().size() == hospitalizados, "Rechazo sin duplicar internamiento");
+        var nuevoIngreso = internamiento("Box 09", "TEST-HOSP");
+        repo.guardarInternamiento(nuevoIngreso);
+        verificar(nuevoIngreso.getPesoActualKg() == 12 && nuevoIngreso.getTemperaturaC() == 39 && nuevoIngreso.getFrecuenciaCardiaca() == 120, "Signos vitales conservados");
+        rechazar(() -> repo.guardarInternamiento(internamiento("Box 08", "TEST-HOSP")), "Paciente internado no se duplica");
+        repo.actualizarEstadoInternamiento(nuevoIngreso.getIdInternamiento(), "Alta Médica");
+        repo.guardarInternamiento(internamiento("Box 09", "TEST-HOSP-2"));
+        var orden = repo.getOrdenesCompra().stream().filter(o -> !"Recibida en Almacén".equals(o.getEstado()) && !"Cancelada".equals(o.getEstado())).findFirst().orElseThrow();
+        int stockCompra = producto.getStockActual(), movimientosCompra = repo.getMovimientosStock().size();
+        rechazar(() -> repo.recibirOrdenCompra(orden.getIdOrden(), Map.of("NO-EXISTE", 1)), "Recepción inválida rechazada");
+        verificar(producto.getStockActual() == stockCompra && repo.getMovimientosStock().size() == movimientosCompra, "Recepción inválida atómica");
+        repo.recibirOrdenCompra(orden.getIdOrden(), Map.of(producto.getCodigo(), 3));
+        verificar(producto.getStockActual() == stockCompra + 3 && repo.getMovimientosStock().size() == movimientosCompra + 1, "Recepción actualiza stock y Kardex");
+        rechazar(() -> repo.recibirOrdenCompra(orden.getIdOrden(), Map.of(producto.getCodigo(), 3)), "Recepción única");
+        var cobrar = repo.getCuentasPorCobrar().stream().filter(c -> c.getSaldo() > 1).findFirst().orElseThrow();
+        double saldoAnterior = cobrar.getSaldo();
+        int cajaAnterior = repo.getMovimientosCajaChica().size();
+        rechazar(() -> repo.registrarAbonoCuentaPorCobrar(cobrar.getIdCuenta(), Double.NaN), "Abono NaN rechazado");
+        rechazar(() -> repo.registrarAbonoCuentaPorCobrar(cobrar.getIdCuenta(), saldoAnterior + 1), "Abono superior al saldo rechazado");
+        verificar(cobrar.getSaldo() == saldoAnterior && repo.getMovimientosCajaChica().size() == cajaAnterior, "Abonos inválidos sin mutación");
+        repo.registrarAbonoCuentaPorCobrar(cobrar.getIdCuenta(), 1);
+        verificar(cobrar.getSaldo() == saldoAnterior - 1 && repo.getMovimientosCajaChica().size() == cajaAnterior + 1, "Abono reflejado en caja");
+        var pagar = repo.getCuentasPorPagar().stream().filter(c -> c.getSaldo() > 1).findFirst().orElseThrow();
+        double saldoPago = pagar.getSaldo();
+        repo.registrarPagoCuentaPorPagar(pagar.getIdCuenta(), 1);
+        verificar(pagar.getSaldo() == saldoPago - 1 && repo.getMovimientosCajaChica().size() == cajaAnterior + 2, "Pago reflejado en caja");
+        var mario = repo.getCuadranteTurnos().stream().filter(t -> t.getNombreProfesional().contains("Mario Silva")).findFirst().orElseThrow();
+        var laura = repo.getCuadranteTurnos().stream().filter(t -> t.getNombreProfesional().contains("Laura Morales")).findFirst().orElseThrow();
+        String marioAntes = mario.getHorarioDia(5), lauraAntes = laura.getHorarioDia(5);
+        repo.resolverPermuta(true);
+        verificar(mario.getHorarioDia(5).equals(lauraAntes) && laura.getHorarioDia(5).equals(marioAntes), "Permuta modifica ambos horarios");
+        rechazar(() -> repo.resolverPermuta(true), "Permuta no se aplica dos veces");
+        rechazar(() -> TurnoSemanal.validarHorario("25:00 - 30:00", "Mañana"), "Horas inválidas rechazadas");
+        rechazar(() -> TurnoSemanal.validarHorario("15:00 - 08:00", "Mañana"), "Intervalo inválido rechazado");
+        TurnoSemanal.validarHorario("20:00 - 08:00", "Guardia");
+        var documento = repo.getDocumentosRepositorio().get(0);
+        byte[] original = new byte[]{1, 2, 3}; documento.setContenido(original); original[0] = 9;
+        verificar(documento.getContenido()[0] == 1, "Archivo almacenado por copia en memoria");
+        byte[] copia = documento.getContenido(); copia[1] = 9;
+        verificar(documento.getContenido()[1] == 2, "Descarga no muta el archivo en memoria");
+        verificar(auth.autenticar("admin", "admin").isPresent(), "Sesión para auditoría");
+        var log = new LogAuditoria(null, "Prueba", "admin_user", LocalDateTime.now(), "127.0.0.1", "ÉXITO", "Prueba");
+        repo.registrarLogAuditoria(log);
+        verificar(log.getUsuario().equals(auth.getSesionActual().getUsername()) && log.getIdEvento() != null, "Auditoría usa sesión e ID real");
+        auth.cerrarSesion();
+        var reserva = new ReservaHospedaje(null, "SUITE-PRUEBA", "TEST", "Paciente", "Canino", "Tutor", "000", "000",
+                LocalDate.of(2035, 1, 1), LocalDate.of(2035, 1, 3), 2, "Dieta", "Paseos", false, "", 50, 100, "Confirmada");
+        repo.guardarReservaHospedaje(reserva);
+        var solapada = new ReservaHospedaje(null, "SUITE-PRUEBA", "OTRO", "Otro", "Canino", "Tutor", "000", "000",
+                LocalDate.of(2035, 1, 2), LocalDate.of(2035, 1, 4), 2, "Dieta", "Paseos", false, "", 50, 100, "Confirmada");
+        rechazar(() -> repo.guardarReservaHospedaje(solapada), "Suite reservada no se duplica");
+        repo.actualizarEstadoHospedaje(reserva.getIdReserva(), "Finalizada / Check-out");
+        repo.guardarReservaHospedaje(solapada);
+        verificar(solapada.getIdReserva() != null, "Check-out libera suite");
+        rechazar(() -> Validacion.numero("NaN", "Precio", false), "NaN en formulario rechazado");
+        rechazar(() -> Validacion.numero("Infinity", "Precio", false), "Infinito en formulario rechazado");
+        rechazar(() -> Validacion.entero("-1", "Stock", false), "Stock negativo rechazado");
+        verificar(icono("Hospitalización") != icono("Documento"), "Hospitalización tiene icono propio");
+        verificar(icono("Hotel / Guardería") != icono("Documento"), "Hotel tiene icono propio");
+        verificar(icono("Adopciones") != icono("Documento"), "Adopciones tiene icono propio");
+        verificar(icono("Farmacia") != icono("IA"), "Farmacia no se confunde con IA");
+        verificar(icono("Historial Clínico") != icono("IA"), "Historial no se confunde con IA");
+        javax.swing.SwingUtilities.invokeAndWait(() -> {
+            try {
+                var panel = new happypets.modulos.modulo4.VistaHospitalizacionPanel();
+                ((javax.swing.JComboBox<?>) campo(panel, "cbBoxAsignado")).setSelectedItem("Box 08");
+                ((javax.swing.JTextField) campo(panel, "txtPeso")).setText("13.5");
+                ((javax.swing.JTextField) campo(panel, "txtTemperatura")).setText("37.9");
+                ((javax.swing.JTextField) campo(panel, "txtFC")).setText("95");
+                var ingreso = panel.getClass().getDeclaredMethod("ingresarPacienteHospitalario"); ingreso.setAccessible(true);
+                try { ingreso.invoke(panel); }
+                catch (java.lang.reflect.InvocationTargetException ex) { if (!(ex.getCause() instanceof java.awt.HeadlessException)) throw ex; }
+                var guardado = repo.getInternamientos().stream().filter(h -> "Box 08".equals(h.getNumeroBox())).findFirst().orElseThrow();
+                verificar(guardado.getPesoActualKg() == 13.5 && guardado.getTemperaturaC() == 37.9 && guardado.getFrecuenciaCardiaca() == 95, "Formulario hospitalario guarda los signos escritos");
+                var financiero = new happypets.modulos.modulo8.VistaReportesFinancierosPanel();
+                ((javax.swing.JTextField) campo(financiero, "txtRangoFechas")).setText("01/01/2035 - 31/01/2035");
+                try { boton(financiero, "Aplicar Filtro").doClick(); } catch (java.awt.HeadlessException ex) { /* Mensaje final sin pantalla. */ }
+                var metricas = financiero.getClass().getDeclaredMethod("metricasFiltradas"); metricas.setAccessible(true);
+                verificar(((List<?>) metricas.invoke(financiero)).isEmpty(), "Filtro financiero excluye operaciones fuera del rango");
+            } catch (ReflectiveOperationException ex) { throw new AssertionError(ex); }
+        });
         System.out.println("Regresión funcional: " + comprobaciones + " comprobaciones correctas; datos de prueba solo en memoria.");
     }
     private static Cita cita(LocalDate fecha, LocalTime hora) {
         return new Cita(null, "TEST", "Paciente", "Canino", "TEST", "Tutor", "000", fecha, hora, 30,
                 "Veterinario de prueba", "Consulta", "Programada", "Prueba", "Normal", "", 75);
+    }
+    private static InternamientoHospitalario internamiento(String box, String mascota) {
+        return new InternamientoHospitalario(null, box, "General", mascota, "Paciente", "Canino", "Tutor", "000", "Prueba", "Veterinario", LocalDate.now(), LocalTime.now(), LocalDate.now().plusDays(1), 12, 39, 120, "", "", "", "ESTABLE", 100, "Internado / En Tratamiento");
+    }
+    private static Object campo(Object objeto, String nombre) throws ReflectiveOperationException {
+        var campo = objeto.getClass().getDeclaredField(nombre); campo.setAccessible(true); return campo.get(objeto);
+    }
+    private static javax.swing.JButton boton(java.awt.Container panel, String texto) {
+        for (var componente : panel.getComponents()) {
+            if (componente instanceof javax.swing.JButton b && texto.equals(b.getText())) return b;
+            if (componente instanceof java.awt.Container c) { var resultado = boton(c, texto); if (resultado != null) return resultado; }
+        }
+        return null;
+    }
+    private static int icono(String texto) {
+        var icono = (javax.swing.ImageIcon) happypets.ui.Iconos.paraTexto(texto, 16, java.awt.Color.BLACK);
+        var imagen = (java.awt.image.BufferedImage) icono.getImage();
+        return java.util.Arrays.hashCode(imagen.getRGB(0, 0, 16, 16, null, 0, 16));
     }
 }

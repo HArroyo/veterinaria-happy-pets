@@ -138,14 +138,13 @@ public class DetalleDocumentoDialog extends JDialog {
     }
 
     public static void descargarPdf(DocumentoMascota documento) {
-        String nombreSugerido = (documento != null ? documento.getTipo().replace(" ", "_") : "Documento") + ".pdf";
-        JFileChooser chooser = new JFileChooser();
-        chooser.setSelectedFile(new java.io.File(nombreSugerido));
-        int res = chooser.showSaveDialog(null);
-        if (res == JFileChooser.APPROVE_OPTION) {
-            JOptionPane.showMessageDialog(null,
-                    "Documento generado exitosamente en:\n" + chooser.getSelectedFile().getAbsolutePath(),
-                    "Descarga Completada", JOptionPane.INFORMATION_MESSAGE);
-        }
+        if (documento == null) return;
+        happypets.ui.ExportacionesUi.guardar(null, java.util.List.of(
+                java.util.List.of("Documento", documento.getTipo()),
+                java.util.List.of("Paciente", documento.getCodigoMascota()),
+                java.util.List.of("Descripción", documento.getDescripcion()),
+                java.util.List.of("Emisor", java.util.Objects.toString(documento.getVeterinarioEmisor(), "")),
+                java.util.List.of("Actualización", documento.getFechaActualizacionFormateada())
+        ), "PDF", documento.getTipo().replace(' ', '_'));
     }
 }

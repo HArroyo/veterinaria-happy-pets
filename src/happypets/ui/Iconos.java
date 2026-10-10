@@ -28,6 +28,32 @@ public final class Iconos {
     /** Selección semántica compartida por los botones y cabeceras de las diez áreas. */
     public static Icon paraTexto(String texto, int size, Color color) {
         String t = texto == null ? "" : texto.toLowerCase(java.util.Locale.ROOT);
+        if (t.matches(".*(guardar|grabar).*")) return crearIconoGuardar(size, color);
+        if (t.matches(".*(exportar|descargar).*")) return crearIconoExportar(size, color);
+        if (t.contains("propietario") || t.contains("mascotas") || t.contains("clientes")) return crearIconoClientes(size, color);
+        if (t.contains("veterinarios")) return crearIconoDoctor(size, color);
+        if (t.contains("hospital") || t.matches("(?s).*\\bbox\\s*\\d+.*")) return crearIconoCamaHospital(size, color);
+        if (t.contains("hotel") || t.contains("guarder")) return crearIconoCasaMascota(size, color);
+        if (t.contains("adop") || t.contains("rescate")) return crearIconoCorazonMascota(size, color);
+        if (t.contains("proveedor") || t.contains("compra")) return crearIconoCamionProveedor(size, color);
+        if (t.contains("merma") || t.contains("ajuste")) return crearIconoAlertaMerma(size, color);
+        if (t.contains("stock") || t.contains("lote")) return crearIconoCajaAlmacen(size, color);
+        if (t.contains("catálogo") || t.contains("farmacia") || t.contains("fármac")) return crearIconoPildora(size, color);
+        if (t.contains("punto de venta") || t.contains("pos")) return crearIconoPOS(size, color);
+        if (t.contains("cuentas")) return crearIconoCuentas(size, color);
+        if (t.contains("caja chica")) return crearIconoCajaChica(size, color);
+        if (t.contains("egreso")) return crearIconoEgresos(size, color);
+        if (t.contains("historial")) return crearIconoHistorial(size, color);
+        if (t.contains("recordatorio")) return crearIconoCampana(size, color);
+        if (t.contains("triaje")) return crearIconoAlertaTriaje(size, color);
+        if (t.contains("cirug") || t.contains("quiróf")) return crearIconoBisturi(size, color);
+        if (t.contains("consulta")) return crearIconoCruzMedica(size, color);
+        if (t.contains("asistencia")) return crearIconoAsistencia(size, color);
+        if (t.contains("horario") || t.contains("cuadrante")) return crearIconoTurno(size, color);
+        if (t.contains("integrac")) return crearIconoEnchufe(size, color);
+        if (t.contains("parámetro") || t.contains("configura")) return crearIconoConfiguracion(size, color);
+        if (t.contains("logs") || t.contains("trazabilidad")) return crearIconoCandado(size, color);
+        if (t.contains("reporte") || t.contains("tablero")) return crearIconoReportes(size, color);
         if (t.matches(".*(guardar|grabar|💾).*")) return crearIconoGuardar(size, color);
         if (t.matches(".*(imprimir|ticket|recibo|🖨|🎫).*")) return crearIconoImprimir(size, color);
         if (t.matches(".*(buscar|filtrar|🔍).*")) return crearIconoBuscar(size, color);
@@ -40,7 +66,7 @@ public final class Iconos {
         if (t.matches(".*(export|descargar).*")) return crearIconoExportar(size, color);
         if (t.matches(".*(turno|cita|calendario|mañana|tarde|noche).*")) return crearIconoCalendario(size, color);
         if (t.matches(".*(usuario|colaborador|perfil|veterinario).*")) return crearIconoUsuario(size, color);
-        if (t.matches(".*(diagnóstico|ia|⚡).*")) return crearIconoRobot(size, color);
+        if (t.matches(".*(diagnóstico|\\bia\\b|⚡).*")) return crearIconoRobot(size, color);
         if (t.matches(".*(certific|🎖).*")) return crearIconoCertificado(size, color);
         if (t.matches(".*(detalle|ver |👁).*")) return crearIconoOjo(size, color);
         if (t.matches(".*(quitar|borrar|eliminar|✕|❌).*")) return crearIconoAlertaMerma(size, color);
