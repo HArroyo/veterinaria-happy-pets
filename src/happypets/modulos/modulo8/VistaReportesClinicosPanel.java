@@ -141,13 +141,9 @@ public class VistaReportesClinicosPanel extends JPanel {
                     "Actualización", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JButton btnDescargarPDF = Ui.botonPrimario("Descargar Resumen PDF", Iconos.crearIconoDocumento(14, Color.WHITE));
-        btnDescargarPDF.setPreferredSize(new Dimension(195, 34));
-        btnDescargarPDF.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                    "Generando informe analítico PDF con tablas y gráficos diagnósticos...\nGuardado en: exports/reporte_clinico_resumen.pdf",
-                    "Exportar Resumen PDF", JOptionPane.INFORMATION_MESSAGE);
-        });
+        JButton btnDescargarPDF = Ui.botonPrimario("Descargar Resumen PDF", Iconos.crearIconoDescargar(14, Color.WHITE));
+        btnDescargarPDF.setPreferredSize(new Dimension(205, 34));
+        btnDescargarPDF.addActionListener(e -> generarResumenReportesPDF());
 
         pnlBotones.add(btnActualizar);
         pnlBotones.add(btnDescargarPDF);
@@ -482,20 +478,8 @@ public class VistaReportesClinicosPanel extends JPanel {
         };
 
         tablaReportes = new JTable(modeloReportes);
-        tablaReportes.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaReportes.setRowHeight(38);
-        tablaReportes.setGridColor(new Color(241, 245, 249));
-        tablaReportes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaReportes.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaReportes.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaReportes.setSelectionBackground(new Color(240, 249, 255));
-        tablaReportes.setSelectionForeground(new Color(15, 23, 42));
-
-        DefaultTableCellRenderer centroRenderer = new DefaultTableCellRenderer();
-        centroRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        tablaReportes.getColumnModel().getColumn(0).setCellRenderer(centroRenderer);
+        Ui.formatearTabla(tablaReportes, new int[]{0, 1, 6, 7}, new int[]{});
         tablaReportes.getColumnModel().getColumn(0).setPreferredWidth(100);
-        tablaReportes.getColumnModel().getColumn(1).setCellRenderer(centroRenderer);
         tablaReportes.getColumnModel().getColumn(1).setPreferredWidth(85);
         tablaReportes.getColumnModel().getColumn(2).setPreferredWidth(110);
         tablaReportes.getColumnModel().getColumn(3).setPreferredWidth(150);
@@ -520,8 +504,8 @@ public class VistaReportesClinicosPanel extends JPanel {
                     l.setBackground(new Color(254, 243, 199));
                     l.setForeground(new Color(180, 83, 9));
                 } else {
-                    l.setBackground(new Color(236, 253, 245));
-                    l.setForeground(new Color(16, 185, 129));
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
                 }
                 return l;
             }
@@ -534,7 +518,7 @@ public class VistaReportesClinicosPanel extends JPanel {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(table, "Ver Ficha", isSelected, hasFocus, row, col);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
-                l.setForeground(new Color(2, 132, 199));
+                l.setForeground(Ui.TURQUESA_PROFUNDO);
                 l.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 return l;
             }
@@ -553,7 +537,7 @@ public class VistaReportesClinicosPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(tablaReportes);
         scroll.setPreferredSize(new Dimension(800, 240));
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(241, 245, 249), 1));
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
         card.add(scroll, BorderLayout.CENTER);
 
         return card;
@@ -681,9 +665,21 @@ public class VistaReportesClinicosPanel extends JPanel {
         bot.setBackground(new Color(248, 250, 252));
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
 
-        JButton btnImprimir = Ui.botonSecundario("Imprimir Ficha", Iconos.crearIconoDocumento(13, new Color(15, 23, 42)));
+        JButton btnImprimir = Ui.botonSecundario("Imprimir / Exportar", Iconos.crearIconoDescargar(13, Ui.TEXTO_TITULO));
         btnImprimir.addActionListener(e -> {
-            JOptionPane.showMessageDialog(dlg, "Enviando Ficha " + r.getCodigoReporte() + " a la cola de impresión.", "Impresión", JOptionPane.INFORMATION_MESSAGE);
+            String[][] datosFicha = new String[][]{
+                {"1", r.getCodigoReporte(), r.getFechaFormateada(), r.getNombrePaciente(), r.getEspecieRaza(), r.getNombrePropietario(), r.getVeterinarioTratante(), r.getDiagnosticoConfirmado(), r.getSeveridad()}
+            };
+            Ui.mostrarVisorReporte(
+                dlg,
+                "FICHA CLÍNICA DETALLADA",
+                "Expediente Caso Médico: " + r.getCodigoReporte(),
+                "Paciente: " + r.getNombrePaciente() + " | Tutor: " + r.getNombrePropietario(),
+                new String[]{"N°", "Código", "Fecha", "Paciente", "Raza", "Propietario", "Médico", "Diagnóstico", "Severidad"},
+                datosFicha,
+                "Tratamiento sugerido: " + r.getTratamiento(),
+                "Ficha_Clinica_" + r.getCodigoReporte()
+            );
         });
 
         JButton btnCerrar = Ui.botonPrimario("Cerrar", null);
@@ -694,6 +690,45 @@ public class VistaReportesClinicosPanel extends JPanel {
         dlg.add(bot, BorderLayout.SOUTH);
 
         dlg.setVisible(true);
+    }
+
+    private void generarResumenReportesPDF() {
+        if (reportesActuales == null || reportesActuales.isEmpty()) {
+            cargarDatosReportes();
+        }
+        String[][] datos = new String[reportesActuales.size()][7];
+        for (int i = 0; i < reportesActuales.size(); i++) {
+            ReporteClinicoDetalle r = reportesActuales.get(i);
+            datos[i] = new String[]{
+                String.valueOf(i + 1),
+                r.getCodigoReporte(),
+                r.getFechaFormateada(),
+                r.getNombrePaciente() + " (" + r.getEspecieRaza() + ")",
+                r.getVeterinarioTratante(),
+                r.getDiagnosticoConfirmado(),
+                r.getSeveridad()
+            };
+        }
+
+        String[][] meta = new String[][]{
+            {"Módulo", "Reportes Clínicos y Epidemiología"},
+            {"Filtro Veterinario", comboVeterinario != null ? comboVeterinario.getSelectedItem().toString() : "Todos"},
+            {"Filtro Diagnóstico", comboDiagnostico != null ? comboDiagnostico.getSelectedItem().toString() : "Todos"},
+            {"Total Casos", String.valueOf(reportesActuales.size())},
+            {"Institución", "Clínica Veterinaria Happy Pets 24H"},
+            {"Estado", "Auditoría Médica Conforme"}
+        };
+
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this),
+            "INFORME EPIDEMIOLÓGICO Y REPORTES CLÍNICOS",
+            "Consolidado de Morbilidad y Casuística Asistencial",
+            meta,
+            new String[]{"N°", "Cód. Caso", "Fecha", "Paciente", "Médico Veterinario", "Diagnóstico", "Severidad"},
+            datos,
+            "Resumen estadístico de atenciones médicas veterinarias generadas en memoria.",
+            "Reporte_Clinico_Consolidado"
+        );
     }
 
     private JPanel crearItemDetalle(String campo, String valor) {

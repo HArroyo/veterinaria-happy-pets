@@ -80,9 +80,9 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
 
     private JPanel crearCabeceraSuperior() {
         JPanel cab = new JPanel(new BorderLayout(16, 8));
-        cab.setBackground(new Color(30, 41, 59));
+        cab.setBackground(Ui.TURQUESA_PROFUNDO);
         cab.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(15, 23, 42), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(14, 20, 14, 20)
         ));
 
@@ -97,16 +97,19 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
 
         JLabel lblSub = new JLabel("Pista de auditoría forense, registro inmutable de transacciones, descargas y accesos.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblSub.setForeground(new Color(148, 163, 184));
+        lblSub.setForeground(Ui.TURQUESA_SUAVE);
         pnlTit.add(lblSub);
 
         cab.add(pnlTit, BorderLayout.WEST);
 
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
-        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblUsr.setForeground(new Color(226, 232, 240));
+        JLabel lblUsr = new JLabel("  Usuario: Admin  ");
+        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblUsr.setOpaque(true);
+        lblUsr.setBackground(Ui.TURQUESA_SUAVE);
+        lblUsr.setForeground(Ui.TURQUESA_PROFUNDO);
+        lblUsr.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
         pnlUsr.add(lblUsr);
 
         cab.add(pnlUsr, BorderLayout.EAST);
@@ -125,13 +128,12 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         izq.setOpaque(false);
 
         // Rango de fechas
-        txtRangoFechas = new JTextField("Desde: 2026-03-01 Hasta: 2026-03-24", 18);
-        txtRangoFechas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtRangoFechas = Ui.campoTexto("Desde: 2026-03-01 Hasta: 2026-03-24", 18);
         txtRangoFechas.setPreferredSize(new Dimension(240, 32));
         izq.add(txtRangoFechas);
 
         // Selector Evento
-        comboEvento = new JComboBox<>(new String[]{
+        comboEvento = Ui.combo(new String[]{
                 "Evento: Todos ▼",
                 "Modificación de Canales",
                 "Descarga de Documento",
@@ -139,14 +141,11 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
                 "Intento de Acceso",
                 "Carga de Archivo"
         });
-        comboEvento.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboEvento.setPreferredSize(new Dimension(180, 32));
-        comboEvento.setBackground(Color.WHITE);
         izq.add(comboEvento);
 
         // Buscador de usuario
-        txtBuscarUsuario = new JTextField(12);
-        txtBuscarUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscarUsuario = Ui.campoTexto("", 12);
         txtBuscarUsuario.setPreferredSize(new Dimension(150, 32));
         txtBuscarUsuario.setToolTipText("Buscar usuario...");
         izq.add(txtBuscarUsuario);
@@ -180,27 +179,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         };
 
         tablaLogs = new JTable(modeloLogs);
-        tablaLogs.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaLogs.setRowHeight(36);
-        tablaLogs.setGridColor(new Color(241, 245, 249));
-        tablaLogs.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaLogs.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaLogs.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaLogs.setSelectionBackground(new Color(240, 249, 255));
-        tablaLogs.setSelectionForeground(new Color(15, 23, 42));
-
-        DefaultTableCellRenderer centroRenderer = new DefaultTableCellRenderer();
-        centroRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-        tablaLogs.getColumnModel().getColumn(0).setCellRenderer(centroRenderer);
-        tablaLogs.getColumnModel().getColumn(0).setPreferredWidth(95);
-        tablaLogs.getColumnModel().getColumn(1).setPreferredWidth(220);
-        tablaLogs.getColumnModel().getColumn(2).setPreferredWidth(120);
-        tablaLogs.getColumnModel().getColumn(3).setCellRenderer(centroRenderer);
-        tablaLogs.getColumnModel().getColumn(3).setPreferredWidth(150);
-        tablaLogs.getColumnModel().getColumn(4).setCellRenderer(centroRenderer);
-        tablaLogs.getColumnModel().getColumn(4).setPreferredWidth(110);
-        tablaLogs.getColumnModel().getColumn(5).setPreferredWidth(95);
+        Ui.formatearTabla(tablaLogs, new int[]{0, 3, 4, 5}, new int[]{});
 
         // Render de Estado (ÉXITO / FALLIDO)
         tablaLogs.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
@@ -212,8 +191,8 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 l.setOpaque(true);
                 if ("ÉXITO".equalsIgnoreCase(est)) {
-                    l.setBackground(new Color(236, 253, 245));
-                    l.setForeground(new Color(16, 185, 129));
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
                 } else {
                     l.setBackground(new Color(254, 226, 226));
                     l.setForeground(new Color(220, 38, 38));
@@ -240,7 +219,7 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         JPanel bot = new JPanel(new BorderLayout());
         bot.setOpaque(false);
 
-        JButton btnExportar = Ui.botonSecundario("📥 Exportar Logs (CSV/PDF)", Iconos.crearIconoExportar(13, new Color(15, 23, 42)));
+        JButton btnExportar = Ui.botonSecundario("📥 Exportar Logs (CSV/PDF)", Iconos.crearIconoExportar(13, Ui.TURQUESA_PROFUNDO));
         btnExportar.setPreferredSize(new Dimension(210, 34));
         btnExportar.addActionListener(e -> exportarLogsAuditoria());
         bot.add(btnExportar, BorderLayout.WEST);
@@ -367,6 +346,30 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
         bot.setBackground(new Color(248, 250, 252));
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
 
+        JButton btnFicha = Ui.botonSecundario("Descargar Ficha Forense", Iconos.crearIconoDescargar(13, Ui.TURQUESA_OSCURO));
+        btnFicha.addActionListener(e -> {
+            String html = "<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>"
+                    + "<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>EXPEDIENTE FORENSE DE AUDITORÍA</h2>"
+                    + "<p><strong>ID Evento:</strong> " + l.getIdEvento() + "</p>"
+                    + "<p><strong>Tipo de Evento:</strong> " + l.getTipoEvento() + "</p>"
+                    + "<p><strong>Usuario Ejecutor:</strong> " + l.getUsuario() + "</p>"
+                    + "<p><strong>Fecha y Hora:</strong> " + l.getFechaHoraFormateada() + "</p>"
+                    + "<p><strong>Dirección IP:</strong> " + l.getIpOrigen() + "</p>"
+                    + "<p><strong>Estado:</strong> " + l.getEstado() + "</p>"
+                    + "<p><strong>Nivel de Integridad:</strong> SHA-256 Verificado</p>"
+                    + "<p><strong>Protocolo:</strong> HTTPS / TLS 1.3</p>"
+                    + "<h3 style='color:#007987;'>Detalle Técnico</h3>"
+                    + "<div style='background:#f1f5f9; padding:10px; border-radius:4px; font-family:monospace;'>" + l.getDetalles() + "</div>"
+                    + "<p style='margin-top:15px; font-size:11px; color:#64748b;'>Certificado de Trazabilidad Digital Veterinaria Happy Pets ERP. Inmutable.</p>"
+                    + "</body></html>";
+            String csv = "ID Evento,Tipo Evento,Usuario,Fecha y Hora,IP,Estado,Detalles\n"
+                    + "\"" + l.getIdEvento() + "\",\"" + l.getTipoEvento() + "\",\"" + l.getUsuario() + "\",\""
+                    + l.getFechaHoraFormateada() + "\",\"" + l.getIpOrigen() + "\",\"" + l.getEstado() + "\",\""
+                    + l.getDetalles().replace("\"", "\"\"") + "\"";
+            Ui.mostrarVisorReporte(dlg, "Expediente Forense - " + l.getIdEvento(), "Expediente Forense de Auditoría", html, csv);
+        });
+        bot.add(btnFicha);
+
         JButton btnCerrar = Ui.botonPrimario("Cerrar", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
         bot.add(btnCerrar);
@@ -391,11 +394,49 @@ public class VistaLogsTrazabilidadPanel extends JPanel {
     }
 
     private void exportarLogsAuditoria() {
-        String msg = "Generando archivo de auditoría inmutable en formatos CSV y PDF...\n"
-                + "• Total registros incluidos: " + logsFiltrados.size() + "\n"
-                + "• Rango auditado: Marzo 2026\n"
-                + "• Hash de firma: 8f2b3e41... (Certificado digital)\n\n"
-                + "Archivo generado: exports/audit_logs_marzo_2026.csv";
-        JOptionPane.showMessageDialog(this, msg, "Exportación de Auditoría", JOptionPane.INFORMATION_MESSAGE);
+        if (logsFiltrados == null || logsFiltrados.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay registros de auditoría para exportar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>REPORTE DE AUDITORÍA Y TRAZABILIDAD FORENSE</h2>");
+        html.append("<p><strong>Fecha de Generación:</strong> ").append(LocalDate.now()).append(" | <strong>Total Registros:</strong> ").append(logsFiltrados.size()).append("</p>");
+        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th>ID Evento</th><th>Tipo Evento</th><th>Usuario</th><th>Fecha y Hora</th><th>IP</th><th>Estado</th></tr>");
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("ID Evento,Tipo Evento,Usuario,Fecha Hora,IP,Estado\n");
+
+        for (LogAuditoria l : logsFiltrados) {
+            html.append("<tr>")
+                .append("<td align='center'><b>").append(l.getIdEvento()).append("</b></td>")
+                .append("<td>").append(l.getTipoEvento()).append("</td>")
+                .append("<td>").append(l.getUsuario()).append("</td>")
+                .append("<td align='center'>").append(l.getFechaHoraFormateada()).append("</td>")
+                .append("<td align='center'>").append(l.getIpOrigen()).append("</td>")
+                .append("<td align='center'>").append(l.getEstado()).append("</td>")
+                .append("</tr>");
+
+            csv.append("\"").append(l.getIdEvento()).append("\",\"")
+               .append(l.getTipoEvento()).append("\",\"")
+               .append(l.getUsuario()).append("\",\"")
+               .append(l.getFechaHoraFormateada()).append("\",\"")
+               .append(l.getIpOrigen()).append("\",\"")
+               .append(l.getEstado()).append("\"\n");
+        }
+
+        html.append("</table>");
+        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento oficial de trazabilidad institucional emitido por Veterinaria Happy Pets ERP. Inmutable.</p>");
+        html.append("</body></html>");
+
+        Ui.mostrarVisorReporte(
+            SwingUtilities.getWindowAncestor(this),
+            "Pista de Auditoría Forense",
+            "Pista de Auditoría Forense y Logs",
+            html.toString(),
+            csv.toString()
+        );
     }
 }

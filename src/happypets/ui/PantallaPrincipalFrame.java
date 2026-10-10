@@ -109,14 +109,14 @@ public class PantallaPrincipalFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
     // Colores del sistema basados en la referencia web
-    private static final Color COLOR_FONDO_APP = new Color(248, 250, 252);
+    private static final Color COLOR_FONDO_APP = Ui.FONDO;
     private static final Color COLOR_SIDEBAR = Color.WHITE;
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_PILL_ACTIVO = new Color(224, 242, 254);
-    private static final Color COLOR_TEXTO_ACTIVO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_PILL_ACTIVO = Ui.TURQUESA_SUAVE;
+    private static final Color COLOR_TEXTO_ACTIVO = Ui.TURQUESA_PROFUNDO;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
     private final ServicioAutenticacion auth = ServicioAutenticacion.getInstancia();

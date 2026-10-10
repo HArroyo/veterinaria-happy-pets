@@ -33,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.Cita;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 2.2: Calendario Global de Citas y Turnos de la Clínica.
@@ -40,10 +41,10 @@ import happypets.ui.Iconos;
 public class VistaCalendarioGlobalPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -481,7 +482,7 @@ public class VistaCalendarioGlobalPanel extends JPanel {
                         g2.setColor(COLOR_AZUL_PRIMARIO);
                         g2.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 6, 6);
                     } else if (esHoy) {
-                        g2.setColor(new Color(224, 242, 254));
+                        g2.setColor(Ui.TURQUESA_SUAVE);
                         g2.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 6, 6);
                     } else if (citasEnEsteDia > 0) {
                         g2.setColor(new Color(241, 245, 249));
@@ -489,7 +490,7 @@ public class VistaCalendarioGlobalPanel extends JPanel {
                     }
                     super.paintComponent(g);
                     if (citasEnEsteDia > 0 && !esSeleccionado) {
-                        g2.setColor(new Color(2, 132, 199));
+                        g2.setColor(Ui.TURQUESA);
                         g2.fillOval(getWidth() / 2 - 2, getHeight() - 5, 4, 4);
                     }
                     g2.dispose();

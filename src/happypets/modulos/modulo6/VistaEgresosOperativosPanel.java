@@ -52,14 +52,6 @@ import happypets.ui.Ui;
 public class VistaEgresosOperativosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_PRIMARIO = new Color(249, 115, 22);
-    private static final Color COLOR_ROJO = new Color(239, 68, 68);
-    private static final Color COLOR_AZUL = new Color(14, 165, 233);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
-
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -123,7 +115,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         izq.setOpaque(false);
 
-        JLabel ico = new JLabel(Iconos.crearIconoEgresos(22, COLOR_ROJO));
+        JLabel ico = new JLabel(Iconos.crearIconoEgresos(22, Ui.TURQUESA));
         izq.add(ico);
 
         JPanel titulos = new JPanel();
@@ -132,11 +124,11 @@ public class VistaEgresosOperativosPanel extends JPanel {
 
         JLabel lblTit = new JLabel("Submódulo 6.4: Gestión de Egresos Operativos");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        lblTit.setForeground(Ui.TEXTO_TITULO);
 
         JLabel lblSub = new JLabel("Registro y clasificación de gastos fijos, suministros, servicios y obligaciones operacionales");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setForeground(Ui.TEXTO_MUTED);
 
         titulos.add(lblTit);
         titulos.add(lblSub);
@@ -148,7 +140,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
         der.setOpaque(false);
 
         JButton btnVoucher = Ui.boton("Emitir Voucher Contable", true);
-        btnVoucher.setBackground(COLOR_PRIMARIO);
+        btnVoucher.setBackground(Ui.TURQUESA);
         btnVoucher.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
         btnVoucher.addActionListener(e -> generarVoucherEgreso());
 
@@ -168,10 +160,10 @@ public class VistaEgresosOperativosPanel extends JPanel {
         lblKpiMayorCategoria = new JLabel("-");
         lblKpiPromedioEgreso = new JLabel("S/ 0.00");
 
-        fila.add(crearCardKpi("Gasto Total del Periodo", lblKpiTotalEgresos, COLOR_ROJO, "Suma global de egresos"));
-        fila.add(crearCardKpi("Egresos Contabilizados", lblKpiCantEgresos, COLOR_AZUL, "Cantidad de operaciones"));
-        fila.add(crearCardKpi("Categoría Principal", lblKpiMayorCategoria, COLOR_PRIMARIO, "Mayor peso presupuestal"));
-        fila.add(crearCardKpi("Ticket Promedio por Gasto", lblKpiPromedioEgreso, COLOR_VERDE, "Distribución unitaria"));
+        fila.add(crearCardKpi("Gasto Total del Periodo", lblKpiTotalEgresos, Ui.COLOR_PELIGRO, "Suma global de egresos"));
+        fila.add(crearCardKpi("Egresos Contabilizados", lblKpiCantEgresos, Ui.TURQUESA_OSCURO, "Cantidad de operaciones"));
+        fila.add(crearCardKpi("Categoría Principal", lblKpiMayorCategoria, Ui.TURQUESA, "Mayor peso presupuestal"));
+        fila.add(crearCardKpi("Ticket Promedio por Gasto", lblKpiPromedioEgreso, Ui.COLOR_EXITO, "Distribución unitaria"));
 
         return fila;
     }
@@ -185,7 +177,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
+                g2.setColor(Ui.BORDE_SUAVE);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
                 g2.setColor(colorAcento);
                 g2.fillRect(0, 0, 4, getHeight());
@@ -198,14 +190,14 @@ public class VistaEgresosOperativosPanel extends JPanel {
 
         JLabel lblT = new JLabel(titulo.toUpperCase());
         lblT.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lblT.setForeground(COLOR_TEXTO_MUTED);
+        lblT.setForeground(Ui.TEXTO_MUTED);
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
         lblValor.setForeground(colorAcento);
 
         JLabel lblS = new JLabel(subtitulo);
         lblS.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblS.setForeground(COLOR_TEXTO_MUTED);
+        lblS.setForeground(Ui.TEXTO_MUTED);
 
         card.add(lblT, BorderLayout.NORTH);
         card.add(lblValor, BorderLayout.CENTER);
@@ -225,7 +217,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
         JPanel boxForm = new JPanel(new BorderLayout(0, 10));
         boxForm.setBackground(Color.WHITE);
         boxForm.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 new EmptyBorder(12, 18, 14, 18)
         ));
 
@@ -235,17 +227,16 @@ public class VistaEgresosOperativosPanel extends JPanel {
         // Fila 1: Fecha y Categoría
         JPanel fFec = new JPanel(new BorderLayout(6, 0));
         fFec.setOpaque(false);
-        JLabel lFec = new JLabel("Fecha:");
-        lFec.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel lFec = Ui.crearLabelFormulario("Fecha:");
         lFec.setPreferredSize(new Dimension(105, 24));
-        txtFecha = new JTextField(LocalDate.now().format(FORMATO_FECHA));
+        txtFecha = Ui.campoTexto(10);
+        txtFecha.setText(LocalDate.now().format(FORMATO_FECHA));
         fFec.add(lFec, BorderLayout.WEST);
         fFec.add(txtFecha, BorderLayout.CENTER);
 
         JPanel fCat = new JPanel(new BorderLayout(6, 0));
         fCat.setOpaque(false);
-        JLabel lCat = new JLabel("Categoría:");
-        lCat.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel lCat = Ui.crearLabelFormulario("Categoría:");
         lCat.setPreferredSize(new Dimension(105, 24));
         String[] categorias = {
                 "Alquiler de Local Clínico",
@@ -257,7 +248,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
                 "Gestión de Residuos Biológicos",
                 "Otros Gastos Operativos"
         };
-        cboCategoria = new JComboBox<>(categorias);
+        cboCategoria = Ui.combo(categorias);
         fCat.add(lCat, BorderLayout.WEST);
         fCat.add(cboCategoria, BorderLayout.CENTER);
 
@@ -267,19 +258,17 @@ public class VistaEgresosOperativosPanel extends JPanel {
         // Fila 2: Descripción y Monto
         JPanel fDes = new JPanel(new BorderLayout(6, 0));
         fDes.setOpaque(false);
-        JLabel lDes = new JLabel("Descripción:");
-        lDes.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel lDes = Ui.crearLabelFormulario("Descripción:");
         lDes.setPreferredSize(new Dimension(105, 24));
-        txtDescripcion = new JTextField();
+        txtDescripcion = Ui.campoTexto(20);
         fDes.add(lDes, BorderLayout.WEST);
         fDes.add(txtDescripcion, BorderLayout.CENTER);
 
         JPanel fMon = new JPanel(new BorderLayout(6, 0));
         fMon.setOpaque(false);
-        JLabel lMon = new JLabel("Monto S/:");
-        lMon.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel lMon = Ui.crearLabelFormulario("Monto S/:");
         lMon.setPreferredSize(new Dimension(105, 24));
-        txtMonto = new JTextField();
+        txtMonto = Ui.campoTexto(10);
         fMon.add(lMon, BorderLayout.WEST);
         fMon.add(txtMonto, BorderLayout.CENTER);
 
@@ -289,19 +278,17 @@ public class VistaEgresosOperativosPanel extends JPanel {
         // Fila 3: Proveedor y Método de pago
         JPanel fPro = new JPanel(new BorderLayout(6, 0));
         fPro.setOpaque(false);
-        JLabel lPro = new JLabel("Proveedor:");
-        lPro.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel lPro = Ui.crearLabelFormulario("Proveedor:");
         lPro.setPreferredSize(new Dimension(105, 24));
-        txtProveedor = new JTextField();
+        txtProveedor = Ui.campoTexto(15);
         fPro.add(lPro, BorderLayout.WEST);
         fPro.add(txtProveedor, BorderLayout.CENTER);
 
         JPanel fMet = new JPanel(new BorderLayout(6, 0));
         fMet.setOpaque(false);
-        JLabel lMet = new JLabel("Método de pago:");
-        lMet.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel lMet = Ui.crearLabelFormulario("Método de pago:");
         lMet.setPreferredSize(new Dimension(105, 24));
-        cboMetodoPago = new JComboBox<>(new String[]{"Transferencia", "Efectivo", "Yape / Plin", "Tarjeta", "Cheque"});
+        cboMetodoPago = Ui.combo(new String[]{"Transferencia", "Efectivo", "Yape / Plin", "Tarjeta", "Cheque"});
         fMet.add(lMet, BorderLayout.WEST);
         fMet.add(cboMetodoPago, BorderLayout.CENTER);
 
@@ -314,20 +301,19 @@ public class VistaEgresosOperativosPanel extends JPanel {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 4));
         panelBotones.setOpaque(false);
 
-        JButton btnAgregar = Ui.boton("Agregar", true);
+        JButton btnAgregar = Ui.botonPrimario("Agregar");
         btnAgregar.setPreferredSize(new Dimension(115, 34));
         btnAgregar.addActionListener(e -> agregarEgreso());
 
-        JButton btnModificar = Ui.boton("Modificar", false);
+        JButton btnModificar = Ui.botonSecundario("Modificar");
         btnModificar.setPreferredSize(new Dimension(115, 34));
         btnModificar.addActionListener(e -> modificarEgreso());
 
-        JButton btnEliminar = Ui.boton("Eliminar", false);
+        JButton btnEliminar = Ui.botonPeligro("Eliminar");
         btnEliminar.setPreferredSize(new Dimension(115, 34));
-        btnEliminar.setForeground(COLOR_ROJO);
         btnEliminar.addActionListener(e -> eliminarEgreso());
 
-        JButton btnLimpiar = Ui.boton("Limpiar", false);
+        JButton btnLimpiar = Ui.botonSecundario("Limpiar");
         btnLimpiar.setPreferredSize(new Dimension(115, 34));
         btnLimpiar.addActionListener(e -> limpiarFormulario());
 
@@ -359,7 +345,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
         };
 
         tablaEgresos = new JTable(modeloEgresos);
-        Ui.formatearTabla(tablaEgresos);
+        Ui.formatearTabla(tablaEgresos, new int[]{0, 5}, new int[]{4});
         tablaEgresos.getColumnModel().getColumn(0).setPreferredWidth(85);
         tablaEgresos.getColumnModel().getColumn(1).setPreferredWidth(170);
         tablaEgresos.getColumnModel().getColumn(2).setPreferredWidth(240);
@@ -374,7 +360,7 @@ public class VistaEgresosOperativosPanel extends JPanel {
         });
 
         JScrollPane scroll = new JScrollPane(tablaEgresos);
-        scroll.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
         sec.add(scroll, BorderLayout.CENTER);
 
         // Footer exacto del Wireframe:
@@ -382,17 +368,17 @@ public class VistaEgresosOperativosPanel extends JPanel {
         JPanel footer = new JPanel(new BorderLayout());
         footer.setBackground(Color.WHITE);
         footer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 new EmptyBorder(8, 18, 8, 18)
         ));
 
         lblNumEgresos = new JLabel("N.° de egresos: 0", SwingConstants.LEFT);
         lblNumEgresos.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblNumEgresos.setForeground(COLOR_TEXTO_TITULO);
+        lblNumEgresos.setForeground(Ui.TEXTO_TITULO);
 
         lblTotalEgresos = new JLabel("Total egresos: S/ 0.00", SwingConstants.RIGHT);
         lblTotalEgresos.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblTotalEgresos.setForeground(COLOR_ROJO);
+        lblTotalEgresos.setForeground(Ui.COLOR_PELIGRO);
 
         footer.add(lblNumEgresos, BorderLayout.WEST);
         footer.add(lblTotalEgresos, BorderLayout.EAST);
@@ -603,14 +589,37 @@ public class VistaEgresosOperativosPanel extends JPanel {
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bot.setOpaque(false);
-        JButton btnImp = Ui.boton("Imprimir Voucher", true);
-        btnImp.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
+
+        JButton btnExportar = Ui.boton("Descargar PDF / Excel", true);
+        btnExportar.setBackground(Ui.TURQUESA);
+        btnExportar.setIcon(Iconos.crearIconoDescargar(14, Color.WHITE));
+        btnExportar.addActionListener(ev -> {
+            String[][] datosVoucher = new String[][]{
+                {"1", "Gasto Operativo: " + e.getCategoria(), e.getProveedor(), e.getMetodoPago(), String.format("S/ %.2f", e.getMonto())}
+            };
+            Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "VOUCHER DE EGRESO OPERACIONAL",
+                "Comprobante Interno: " + e.getIdEgreso() + " | Fecha: " + e.getFechaTexto(),
+                "Beneficiario: " + e.getProveedor() + " | Concepto: " + e.getDescripcion(),
+                new String[]{"Ítem", "Concepto / Categoría", "Beneficiario", "Método Pago", "Importe"},
+                datosVoucher,
+                String.format("TOTAL PAGADO: S/ %.2f", e.getMonto()),
+                "Voucher_Egreso_" + e.getIdEgreso()
+            );
+        });
+
+        JButton btnImp = Ui.boton("Imprimir Voucher", false);
+        btnImp.setIcon(Iconos.crearIconoImprimir(14, Ui.TEXTO_TITULO));
         btnImp.addActionListener(ev -> {
-            JOptionPane.showMessageDialog(dlg, "Voucher de egreso impreso correctamente.", "Impresión", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(dlg, "Voucher de egreso enviado a impresión correctamente.", "Impresión", JOptionPane.INFORMATION_MESSAGE);
             dlg.dispose();
         });
+
         JButton btnCerrar = Ui.boton("Cerrar", false);
         btnCerrar.addActionListener(ev -> dlg.dispose());
+
+        bot.add(btnExportar);
         bot.add(btnImp);
         bot.add(btnCerrar);
         p.add(bot, BorderLayout.SOUTH);

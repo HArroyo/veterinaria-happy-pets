@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.ConfiguracionCanalNotificacion;
@@ -86,9 +87,9 @@ public class VistaConfiguracionCanalesPanel extends JPanel {
 
     private JPanel crearCabeceraSuperior() {
         JPanel cab = new JPanel(new BorderLayout(16, 8));
-        cab.setBackground(new Color(30, 41, 59));
+        cab.setBackground(Ui.TURQUESA_PROFUNDO);
         cab.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(15, 23, 42), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(14, 20, 14, 20)
         ));
 
@@ -103,16 +104,19 @@ public class VistaConfiguracionCanalesPanel extends JPanel {
 
         JLabel lblSub = new JLabel("Parametrización de pasarelas de entrega (Email, SMS y Push) y políticas de envío.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblSub.setForeground(new Color(148, 163, 184));
+        lblSub.setForeground(Ui.TURQUESA_SUAVE);
         pnlTit.add(lblSub);
 
         cab.add(pnlTit, BorderLayout.WEST);
 
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
-        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblUsr.setForeground(new Color(226, 232, 240));
+        JLabel lblUsr = new JLabel("  Usuario: Admin  ");
+        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblUsr.setOpaque(true);
+        lblUsr.setBackground(Ui.TURQUESA_SUAVE);
+        lblUsr.setForeground(Ui.TURQUESA_PROFUNDO);
+        lblUsr.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
         pnlUsr.add(lblUsr);
 
         cab.add(pnlUsr, BorderLayout.EAST);
@@ -287,6 +291,35 @@ public class VistaConfiguracionCanalesPanel extends JPanel {
     private JPanel crearBarraAccionesInferiores() {
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         bot.setOpaque(false);
+
+        JButton btnExportar = Ui.botonSecundario("Exportar Configuración", Iconos.crearIconoDescargar(13, Ui.TEXTO_TITULO));
+        btnExportar.setPreferredSize(new Dimension(190, 36));
+        btnExportar.addActionListener(e -> {
+            String[][] meta = new String[][]{
+                {"Módulo", "Configuración de Canales y Políticas de Envío"},
+                {"Fecha de Configuración", java.time.LocalDate.now().toString()},
+                {"Usuario Administrador", "Admin Central"},
+                {"Canal Email", chkEmail.isSelected() ? "Activo (" + txtEmail.getText() + ")" : "Inactivo"},
+                {"Canal SMS", chkSMS.isSelected() ? "Activo (" + txtSMS.getText() + ")" : "Inactivo"},
+                {"Canal Push", chkPush.isSelected() ? "Activo (" + txtPush.getText() + ")" : "Inactivo"}
+            };
+            String[][] datos = new String[][]{
+                {"1", "Email Gateway", txtEmail.getText(), comboFrecEmail.getSelectedItem().toString(), chkEmail.isSelected() ? "Activo" : "Inactivo"},
+                {"2", "SMS Movil", txtSMS.getText(), comboFrecSMS.getSelectedItem().toString(), chkSMS.isSelected() ? "Activo" : "Inactivo"},
+                {"3", "Web Push", txtPush.getText(), comboFrecPush.getSelectedItem().toString(), chkPush.isSelected() ? "Activo" : "Inactivo"}
+            };
+            Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "CONFIGURACIÓN DE CANALES Y REGLAS DE ENVÍO",
+                "Directivas de Comunicación y Notificación ERP",
+                meta,
+                new String[]{"N°", "Canal de Pasarela", "Destinatario / Endpoint", "Frecuencia", "Estado"},
+                datos,
+                "Políticas de comunicación corporativa Happy Pets.",
+                "Config_Canales_Notificaciones"
+            );
+        });
+        bot.add(btnExportar);
 
         JButton btnCancelar = Ui.botonSecundario("Cancelar", null);
         btnCancelar.setPreferredSize(new Dimension(110, 36));

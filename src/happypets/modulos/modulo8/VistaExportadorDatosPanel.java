@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -127,16 +128,16 @@ public class VistaExportadorDatosPanel extends JPanel {
         JLabel badgeSede = new JLabel("  Sede Central y Filiales  ");
         badgeSede.setFont(new Font("Segoe UI", Font.BOLD, 11));
         badgeSede.setOpaque(true);
-        badgeSede.setBackground(new Color(224, 242, 254));
-        badgeSede.setForeground(new Color(3, 105, 161));
-        badgeSede.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+        badgeSede.setBackground(Ui.TURQUESA_SUAVE);
+        badgeSede.setForeground(Ui.TURQUESA_PROFUNDO);
+        badgeSede.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
         filaT.add(badgeSede);
         pnlTit.add(filaT);
         pnlTit.add(Box.createVerticalStrut(3));
 
         JLabel lblSub = new JLabel("Extracción masiva y modular de conjuntos de datos clínicos, financieros e inventario.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(new Color(100, 116, 139));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
         pnlTit.add(lblSub);
 
         cab.add(pnlTit, BorderLayout.WEST);
@@ -258,9 +259,9 @@ public class VistaExportadorDatosPanel extends JPanel {
 
     private void actualizarEstiloTarjetaOrigen(JPanel card, boolean seleccionada) {
         if (seleccionada) {
-            card.setBackground(new Color(240, 249, 255));
+            card.setBackground(Ui.TURQUESA_SUAVE);
             card.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(2, 132, 199), 2),
+                    BorderFactory.createLineBorder(Ui.TURQUESA, 2),
                     BorderFactory.createEmptyBorder(12, 14, 12, 14)
             ));
         } else {
@@ -463,10 +464,10 @@ public class VistaExportadorDatosPanel extends JPanel {
     private void estilizarBotonFormato(JButton btn, boolean seleccionado) {
         if (btn == null) return;
         if (seleccionado) {
-            btn.setBackground(new Color(2, 132, 199));
+            btn.setBackground(Ui.TURQUESA);
             btn.setForeground(Color.WHITE);
             btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(3, 105, 161), 1),
+                    BorderFactory.createLineBorder(Ui.TURQUESA_OSCURO, 1),
                     BorderFactory.createEmptyBorder(6, 12, 6, 12)
             ));
         } else {
@@ -509,16 +510,27 @@ public class VistaExportadorDatosPanel extends JPanel {
         HistorialExportacion exp = repo.generarExportacion(origenSeleccionado, formatoSeleccionado, filtros, campos);
         cargarHistorial();
 
-        String msg = "¡EXPORTACIÓN COMPLETADA CON ÉXITO!\n\n"
-                + "• Identificador: " + exp.getIdExportacion() + "\n"
-                + "• Origen: " + exp.getOrigenDatos() + "\n"
-                + "• Formato: " + exp.getFormato() + "\n"
-                + "• Filas procesadas: " + String.format("%,d", exp.getTotalFilas()) + "\n"
-                + "• Tamaño generado: " + exp.getTamanoLegible() + "\n"
-                + "• Archivo: " + exp.getRutaArchivo() + "\n\n"
-                + "El archivo se ha indexado en el historial de exportaciones recientes.";
-
-        JOptionPane.showMessageDialog(this, msg, "Descarga Finalizada", JOptionPane.INFORMATION_MESSAGE);
+        String[][] meta = new String[][]{
+            {"Identificador", exp.getIdExportacion()},
+            {"Conjunto de Datos", exp.getOrigenDatos()},
+            {"Formato de Salida", exp.getFormato()},
+            {"Filtrado Aplicado", filtros},
+            {"Total Registros", String.format("%,d", exp.getTotalFilas())},
+            {"Tamaño Calculado", exp.getTamanoLegible()}
+        };
+        String[][] datos = new String[][]{
+            {"1", exp.getIdExportacion(), exp.getOrigenDatos(), exp.getFechaCreacionFormateada(), exp.getFormato(), String.format("%,d", exp.getTotalFilas()), exp.getTamanoLegible(), "Completado"}
+        };
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "EXPORTACIÓN DE CONJUNTO DE DATOS",
+            "Módulo de Extracción y BI - " + exp.getOrigenDatos(),
+            meta,
+            new String[]{"N°", "Cód. Archivo", "Origen de Datos", "Fecha Generación", "Formato", "Filas", "Tamaño", "Estado"},
+            datos,
+            "Dataset procesado en memoria. Puede descargarlo directamente en formato PDF o Excel.",
+            "Export_" + exp.getIdExportacion()
+        );
     }
 
     private JPanel crearPanelHistorialYAlmacenamiento() {
@@ -580,31 +592,13 @@ public class VistaExportadorDatosPanel extends JPanel {
         };
 
         tablaHistorial = new JTable(modeloHistorial);
-        tablaHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaHistorial.setRowHeight(36);
-        tablaHistorial.setGridColor(new Color(241, 245, 249));
-        tablaHistorial.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaHistorial.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaHistorial.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaHistorial.setSelectionBackground(new Color(240, 249, 255));
-        tablaHistorial.setSelectionForeground(new Color(15, 23, 42));
-
-        DefaultTableCellRenderer centroRenderer = new DefaultTableCellRenderer();
-        centroRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        DefaultTableCellRenderer derRenderer = new DefaultTableCellRenderer();
-        derRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-
-        tablaHistorial.getColumnModel().getColumn(0).setCellRenderer(centroRenderer);
+        Ui.formatearTabla(tablaHistorial, new int[]{0, 2, 4, 7, 8}, new int[]{5});
         tablaHistorial.getColumnModel().getColumn(0).setPreferredWidth(105);
         tablaHistorial.getColumnModel().getColumn(1).setPreferredWidth(170);
-        tablaHistorial.getColumnModel().getColumn(2).setCellRenderer(centroRenderer);
         tablaHistorial.getColumnModel().getColumn(2).setPreferredWidth(120);
         tablaHistorial.getColumnModel().getColumn(3).setPreferredWidth(190);
-        tablaHistorial.getColumnModel().getColumn(4).setCellRenderer(centroRenderer);
         tablaHistorial.getColumnModel().getColumn(4).setPreferredWidth(75);
-        tablaHistorial.getColumnModel().getColumn(5).setCellRenderer(derRenderer);
         tablaHistorial.getColumnModel().getColumn(5).setPreferredWidth(85);
-        tablaHistorial.getColumnModel().getColumn(6).setCellRenderer(centroRenderer);
         tablaHistorial.getColumnModel().getColumn(6).setPreferredWidth(75);
         tablaHistorial.getColumnModel().getColumn(7).setPreferredWidth(100);
         tablaHistorial.getColumnModel().getColumn(8).setPreferredWidth(85);
@@ -617,8 +611,8 @@ public class VistaExportadorDatosPanel extends JPanel {
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 l.setOpaque(true);
-                l.setBackground(new Color(236, 253, 245));
-                l.setForeground(new Color(16, 185, 129));
+                l.setBackground(Ui.TURQUESA_SUAVE);
+                l.setForeground(Ui.TURQUESA_PROFUNDO);
                 return l;
             }
         });
@@ -630,7 +624,7 @@ public class VistaExportadorDatosPanel extends JPanel {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(table, "Descargar", isSelected, hasFocus, row, col);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
-                l.setForeground(new Color(2, 132, 199));
+                l.setForeground(Ui.TURQUESA_PROFUNDO);
                 l.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 return l;
             }
@@ -649,7 +643,7 @@ public class VistaExportadorDatosPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(tablaHistorial);
         scroll.setPreferredSize(new Dimension(800, 190));
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(241, 245, 249), 1));
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
         card.add(scroll, BorderLayout.CENTER);
 
         // Barra inferior de Cuota de Almacenamiento en Nube
@@ -721,10 +715,27 @@ public class VistaExportadorDatosPanel extends JPanel {
         if (fila < 0 || fila >= historialActual.size()) return;
         HistorialExportacion h = historialActual.get(fila);
 
-        JOptionPane.showMessageDialog(this,
-                "Descargando archivo: " + h.getIdExportacion() + " (" + h.getFormato() + ")\n"
-                        + "Ubicación en disco: " + h.getRutaArchivo() + "\n"
-                        + "Tamaño: " + h.getTamanoLegible(),
-                "Descarga de Archivo", JOptionPane.INFORMATION_MESSAGE);
+        String[][] meta = new String[][]{
+            {"Identificador", h.getIdExportacion()},
+            {"Conjunto de Datos", h.getOrigenDatos()},
+            {"Fecha de Generación", h.getFechaCreacionFormateada()},
+            {"Filtros de Segmentación", h.getFiltrosAplicados()},
+            {"Formato Original", h.getFormato()},
+            {"Volumen de Filas", String.format("%,d", h.getTotalFilas())},
+            {"Tamaño Calculado", h.getTamanoLegible()}
+        };
+        String[][] datos = new String[][]{
+            {"1", h.getIdExportacion(), h.getOrigenDatos(), h.getFechaCreacionFormateada(), h.getFormato(), String.format("%,d", h.getTotalFilas()), h.getTamanoLegible(), h.getEstado()}
+        };
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "DESCARGA DE ARCHIVO DE EXPORTACIÓN",
+            "Extracción Histórica: " + h.getIdExportacion() + " (" + h.getOrigenDatos() + ")",
+            meta,
+            new String[]{"N°", "Cód. Archivo", "Origen de Datos", "Fecha Generación", "Formato", "Filas", "Tamaño", "Estado"},
+            datos,
+            "Descarga directa en memoria generada por Happy Pets ERP.",
+            "Descarga_" + h.getIdExportacion()
+        );
     }
 }

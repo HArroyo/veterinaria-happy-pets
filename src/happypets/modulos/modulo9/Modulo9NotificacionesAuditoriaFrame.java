@@ -51,19 +51,19 @@ public class Modulo9NotificacionesAuditoriaFrame extends JFrame {
         tabs.setBackground(Color.WHITE);
 
         tabs.addTab("Centro de Notificaciones",
-                Iconos.crearIconoCampana(16, new Color(220, 38, 38)),
+                Iconos.crearIconoCampana(16, Ui.TURQUESA),
                 vistaCentroNotificaciones);
 
         tabs.addTab("Configuración de Canales",
-                Iconos.crearIconoCanales(16, new Color(2, 132, 199)),
+                Iconos.crearIconoCanales(16, Ui.TURQUESA_MEDIO),
                 vistaConfiguracionCanales);
 
         tabs.addTab("Repositorio Documental",
-                Iconos.crearIconoDocumento(16, new Color(13, 148, 136)),
+                Iconos.crearIconoDocumento(16, Ui.TURQUESA_OSCURO),
                 vistaRepositorioDocumental);
 
         tabs.addTab("Logs y Trazabilidad",
-                Iconos.crearIconoHistorial(16, new Color(100, 116, 139)),
+                Iconos.crearIconoHistorial(16, Ui.TURQUESA_PROFUNDO),
                 vistaLogsTrazabilidad);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {

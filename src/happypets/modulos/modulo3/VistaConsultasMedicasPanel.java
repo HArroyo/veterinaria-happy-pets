@@ -32,6 +32,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -56,10 +57,10 @@ import happypets.ui.Ui;
 public class VistaConsultasMedicasPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -537,8 +538,7 @@ public class VistaConsultasMedicasPanel extends JPanel {
         };
 
         tablaConsultas = new JTable(modeloConsultas);
-        Ui.formatearTabla(tablaConsultas);
-        tablaConsultas.setRowHeight(30);
+        Ui.formatearTabla(tablaConsultas, new int[]{0, 1, 7}, new int[]{});
 
         tablaConsultas.getColumnModel().getColumn(0).setPreferredWidth(85);
         tablaConsultas.getColumnModel().getColumn(1).setPreferredWidth(75);
@@ -630,7 +630,7 @@ public class VistaConsultasMedicasPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -855,24 +855,22 @@ public class VistaConsultasMedicasPanel extends JPanel {
             return;
         }
 
-        String doc = "╔════════════════════════════════════════════════════════════════╗\n" +
-                     "║           VETERINARIA HAPPY PETS · RECETA MÉDICA               ║\n" +
-                     "║            Atención Médica Veterinaria Colegiada               ║\n" +
-                     "╠════════════════════════════════════════════════════════════════╣\n" +
-                     " Fecha: " + LocalDate.now().format(AtencionMedica.FECHA_FORMATTER) + "               Hora: " + LocalTime.now().format(AtencionMedica.HORA_FORMATTER) + "\n" +
-                     " Paciente: " + mascota + "        Propietario: " + txtTutor.getText() + "\n" +
-                     " Veterinario Tratante: " + txtVeterinario.getText() + "\n" +
-                     " Diagnóstico: " + txtDiagDefinitivo.getText() + "\n" +
-                     "────────────────────────────────────────────────────────────────\n" +
-                     " RP./ PRESCRIPCIÓN FARMACOLÓGICA Y POSOLOGÍA:\n" +
-                     receta + "\n\n" +
-                     "────────────────────────────────────────────────────────────────\n" +
-                     " INDICACIONES DE CUIDADO Y DIETA:\n" +
-                     indic + "\n\n" +
-                     " Próxima cita de control: " + txtSeguimiento.getText() + "\n" +
-                     "╚════════════════════════════════════════════════════════════════╝";
+        String[][] datos = new String[][]{
+            {"1", "Prescripción / Medicamentos", receta, "Según indicación médica"},
+            {"2", "Cuidados Generales y Dieta", indic.isEmpty() ? "Dieta balanceada e hidratación" : indic, "Cuidados en casa"},
+            {"3", "Próximo Control", txtSeguimiento.getText(), "Revisión programada"}
+        };
 
-        JOptionPane.showMessageDialog(this, doc, "Vista Previa de Receta Impresa - Happy Pets", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "RECETA MÉDICA VETERINARIA",
+            "Paciente: " + mascota + " | Propietario: " + txtTutor.getText() + " | Fecha: " + LocalDate.now(),
+            "Veterinario Tratante: " + txtVeterinario.getText() + " | Diagnóstico: " + txtDiagDefinitivo.getText(),
+            new String[]{"Ítem", "Concepto Farmacológico", "Posología / Detalle", "Observación"},
+            datos,
+            "RECETA VÁLIDA · VETERINARIA HAPPY PETS S.A.C.",
+            "RecetaMedica_" + mascota
+        );
     }
 
     private void limpiarFormulario() {

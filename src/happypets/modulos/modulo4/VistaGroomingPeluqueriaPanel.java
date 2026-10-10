@@ -53,10 +53,10 @@ import happypets.ui.Ui;
 public class VistaGroomingPeluqueriaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -173,7 +173,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         lblKpiListosEntrega = new JLabel("1", SwingConstants.LEFT);
         lblKpiFacturacion = new JLabel("S/. 215", SwingConstants.LEFT);
 
-        fila.add(crearCardKpi(lblKpiTurnosHoy, "TURNOS PROGRAMADOS", new Color(224, 242, 254), COLOR_AZUL_PRIMARIO, Iconos.crearIconoTijeras(20, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiTurnosHoy, "TURNOS PROGRAMADOS", Ui.TURQUESA_SUAVE, COLOR_AZUL_PRIMARIO, Iconos.crearIconoTijeras(20, COLOR_AZUL_PRIMARIO)));
         fila.add(crearCardKpi(lblKpiEnProceso, "EN BAÑO / SECADO", new Color(254, 243, 199), new Color(217, 119, 6), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
         fila.add(crearCardKpi(lblKpiListosEntrega, "LISTOS PARA RETIRO", new Color(220, 252, 231), new Color(22, 163, 74), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
         fila.add(crearCardKpi(lblKpiFacturacion, "FACTURACIÓN ESTIMADA", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoFactura(20, new Color(147, 51, 234))));
@@ -438,8 +438,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         };
 
         tablaGrooming = new JTable(modeloGrooming);
-        Ui.formatearTabla(tablaGrooming);
-        tablaGrooming.setRowHeight(32);
+        Ui.formatearTabla(tablaGrooming, new int[]{0, 1, 6}, new int[]{});
 
         tablaGrooming.getColumnModel().getColumn(0).setPreferredWidth(70);
         tablaGrooming.getColumnModel().getColumn(1).setPreferredWidth(60);
@@ -525,7 +524,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -689,22 +688,21 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         }
         ServicioGrooming g = listaActual.get(row);
 
-        String t = "╔════════════════════════════════════════════════════════════════╗\n" +
-                   "║       HAPPY PETS · SPA & GROOMING VETERINARIO                  ║\n" +
-                   "║            Comprobante de Retiro de Estética                   ║\n" +
-                   "╠════════════════════════════════════════════════════════════════╣\n" +
-                   " Código Turno: " + g.getIdGrooming() + "  |  Hora: " + g.getHoraTurnoFormateada() + " hrs\n" +
-                   " Paciente: " + g.getNombreMascota() + " (" + g.getEspecieRaza() + ")\n" +
-                   " Tutor: " + g.getNombreTutor() + "  |  Tel: " + g.getTelefonoTutor() + "\n" +
-                   " Estilista: " + g.getGroomer() + "\n" +
-                   " Servicio Realizado: " + g.getTipoServicio() + "\n" +
-                   " Checklist Sanitario: " + g.getControlEctoparasitos() + " / " + g.getEstadoPiel() + "\n" +
-                   " Cosmética Empleada: " + g.getProductosUtilizados() + "\n" +
-                   " Total a Pagar: S/. " + String.format("%.2f", g.getCosto()) + "\n" +
-                   " Estado: " + g.getEstado() + "\n" +
-                   "╚════════════════════════════════════════════════════════════════╝";
+        String[][] datos = new String[][]{
+            {"1", "Servicio Principal: " + g.getTipoServicio(), "Estilista: " + g.getGroomer(), g.getHoraTurnoFormateada() + " hrs", String.format("S/ %.2f", g.getCosto())},
+            {"2", "Control Sanitario y Cosmética", g.getControlEctoparasitos() + " | " + g.getEstadoPiel(), g.getProductosUtilizados(), "-"}
+        };
 
-        JOptionPane.showMessageDialog(this, t, "Ticket de Retiro - " + g.getIdGrooming(), JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this),
+            "COMPROBANTE DE SPA & GROOMING VETERINARIO",
+            "Paciente: " + g.getNombreMascota() + " (" + g.getEspecieRaza() + ") | Tutor: " + g.getNombreTutor() + " | Tel: " + g.getTelefonoTutor(),
+            "Código Turno: " + g.getIdGrooming() + " | Estilista: " + g.getGroomer() + " | Estado: " + g.getEstado(),
+            new String[]{"N°", "Servicio / Tratamiento", "Detalle Sanitario", "Horario / Cosmética", "Importe"},
+            datos,
+            String.format("TOTAL: S/ %.2f · SERVICIO DE BIENESTAR Y BELLEZA", g.getCosto()),
+            "TicketGrooming_" + g.getIdGrooming()
+        );
     }
 
     private static class PacienteItem {

@@ -27,8 +27,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import java.time.LocalDate;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.ConfiguracionClinica;
@@ -37,6 +39,7 @@ import happypets.model.DiagnosticoSistema;
 import happypets.model.IntegracionExterna;
 import happypets.model.Usuario;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Vista Consolidada 'PÁGINA COMPLETA.pdf' del Módulo 10: Configuración, Integraciones y Soporte.
@@ -125,9 +128,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         // Buscador
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         izq.setBackground(Color.WHITE);
-        JTextField txtBuscarTop = new JTextField("Buscar parámetro, usuario o configuración...", 26);
-        txtBuscarTop.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtBuscarTop.setForeground(new Color(100, 116, 139));
+        JTextField txtBuscarTop = Ui.campoTexto("Buscar parámetro, usuario o configuración...", 26);
         txtBuscarTop.setPreferredSize(new Dimension(300, 32));
         izq.add(txtBuscarTop);
         izq.add(new JLabel("🔍"));
@@ -141,9 +142,8 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lblSedeT.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblSedeT.setForeground(new Color(100, 116, 139));
 
-        cbSedeTop = new JComboBox<>(new String[]{"Sede Norte - Principal", "Sede Sur - Miraflores", "Sede Este - La Molina"});
-        cbSedeTop.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cbSedeTop.setBackground(Color.WHITE);
+        cbSedeTop = Ui.combo(new String[]{"Sede Norte - Principal", "Sede Sur - Miraflores", "Sede Este - La Molina"});
+        cbSedeTop.setPreferredSize(new Dimension(190, 32));
 
         der.add(lblSedeT);
         der.add(cbSedeTop);
@@ -151,7 +151,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         // Perfil
         JPanel perfil = new JPanel(new BorderLayout(8, 0));
         perfil.setBackground(Color.WHITE);
-        JLabel lblAvatar = new JLabel(Iconos.crearIconoDoctor(28, new Color(59, 130, 246)));
+        JLabel lblAvatar = new JLabel(Iconos.crearIconoDoctor(28, Ui.TURQUESA_OSCURO));
 
         JPanel textosUser = new JPanel();
         textosUser.setLayout(new BoxLayout(textosUser, BoxLayout.Y_AXIS));
@@ -161,7 +161,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lblNomU.setForeground(new Color(15, 23, 42));
         JLabel lblRolU = new JLabel("Administrador General");
         lblRolU.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblRolU.setForeground(new Color(100, 116, 139));
+        lblRolU.setForeground(Ui.TURQUESA_OSCURO);
         textosUser.add(lblNomU);
         textosUser.add(lblRolU);
 
@@ -183,7 +183,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         JLabel lblBreadcrumb = new JLabel("Ajustes > Configuración Empresarial");
         lblBreadcrumb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblBreadcrumb.setForeground(new Color(100, 116, 139));
+        lblBreadcrumb.setForeground(Ui.TURQUESA_OSCURO);
         izq.add(lblBreadcrumb);
         izq.add(Box.createVerticalStrut(2));
 
@@ -203,26 +203,18 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setBackground(new Color(248, 250, 252));
 
-        JButton btnRestablecer = new JButton("Restablecer Valores");
-        btnRestablecer.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnRestablecer.setForeground(new Color(51, 65, 85));
-        btnRestablecer.setBackground(Color.WHITE);
-        btnRestablecer.setFocusPainted(false);
-        btnRestablecer.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnRestablecer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
+        JButton btnExportar = Ui.botonSecundario("📄 Exportar Auditoría Global", Iconos.crearIconoExportar(13, Ui.TURQUESA_PROFUNDO));
+        btnExportar.setPreferredSize(new Dimension(215, 34));
+        btnExportar.addActionListener(e -> exportarResumenAdministracion());
+        der.add(btnExportar);
+
+        JButton btnRestablecer = Ui.botonSecundario("Restablecer Valores", null);
+        btnRestablecer.setPreferredSize(new Dimension(160, 34));
         btnRestablecer.addActionListener(e -> cargarDatos());
         der.add(btnRestablecer);
 
-        JButton btnGuardar = new JButton("💾  Guardar Todos los Cambios");
-        btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnGuardar.setForeground(Color.WHITE);
-        btnGuardar.setBackground(new Color(15, 23, 42));
-        btnGuardar.setFocusPainted(false);
-        btnGuardar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnGuardar.setBorder(BorderFactory.createEmptyBorder(9, 18, 9, 18));
+        JButton btnGuardar = Ui.botonPrimario("Guardar Cambios", Iconos.crearIconoGuardar(13, Color.WHITE));
+        btnGuardar.setPreferredSize(new Dimension(160, 34));
         btnGuardar.addActionListener(e -> guardarTodo());
         der.add(btnGuardar);
 
@@ -248,12 +240,12 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         String label = texto + (badge != null ? " [" + badge + "]" : "");
         JButton b = new JButton(label);
         b.setFont(new Font("Segoe UI", activo ? Font.BOLD : Font.PLAIN, 13));
-        b.setForeground(activo ? new Color(15, 23, 42) : new Color(100, 116, 139));
-        b.setBackground(Color.WHITE);
+        b.setForeground(activo ? Color.WHITE : new Color(71, 85, 105));
+        b.setBackground(activo ? Ui.TURQUESA_PROFUNDO : Color.WHITE);
         b.setFocusPainted(false);
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
         b.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(activo ? new Color(15, 23, 42) : new Color(226, 232, 240), activo ? 2 : 1),
+                BorderFactory.createLineBorder(activo ? Ui.TURQUESA_PROFUNDO : new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(6, 14, 6, 14)
         ));
         return b;
@@ -312,8 +304,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblTit.setForeground(new Color(15, 23, 42));
 
-        txtIdentificadorFiscal = new JTextField(12);
-        txtIdentificadorFiscal.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtIdentificadorFiscal = Ui.campoTexto(12);
         JPanel pId = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pId.setBackground(Color.WHITE);
         pId.add(new JLabel("Identificador Fiscal:"));
@@ -330,16 +321,14 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         g.insets = new Insets(6, 6, 6, 6);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        txtRazonSocial = new JTextField();
-        txtNombreComercial = new JTextField();
-        txtCorreo = new JTextField();
-        txtTelefono = new JTextField();
-        txtDireccion = new JTextField();
+        txtRazonSocial = Ui.campoTexto(15);
+        txtNombreComercial = Ui.campoTexto(15);
+        txtCorreo = Ui.campoTexto(15);
+        txtTelefono = Ui.campoTexto(15);
+        txtDireccion = Ui.campoTexto(25);
 
-        cbMoneda = new JComboBox<>(new String[]{"COP ($) - Peso Colombiano", "PEN (S/) - Sol Peruano", "USD ($) - Dólar"});
-        cbMoneda.setBackground(Color.WHITE);
-        cbZonaHoraria = new JComboBox<>(new String[]{"America/Bogota (UTC -05:00)", "America/Lima (UTC -05:00)"});
-        cbZonaHoraria.setBackground(Color.WHITE);
+        cbMoneda = Ui.combo(new String[]{"COP ($) - Peso Colombiano", "PEN (S/) - Sol Peruano", "USD ($) - Dólar"});
+        cbZonaHoraria = Ui.combo(new String[]{"America/Bogota (UTC -05:00)", "America/Lima (UTC -05:00)"});
 
         g.gridx = 0; g.gridy = 0; g.weightx = 0.5;
         form.add(crearCampo("Razón Social / Nombre Legal", txtRazonSocial), g);
@@ -368,7 +357,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                 BorderFactory.createEmptyBorder(10, 14, 10, 14)
         ));
 
-        JLabel lblBox = new JLabel(Iconos.crearIconoHuella(26, new Color(59, 130, 246)));
+        JLabel lblBox = new JLabel(Iconos.crearIconoHuella(26, Ui.TURQUESA_OSCURO));
         JPanel txts = new JPanel();
         txts.setLayout(new BoxLayout(txts, BoxLayout.Y_AXIS));
         txts.setBackground(new Color(248, 250, 252));
@@ -380,10 +369,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         txts.add(l1);
         txts.add(l2);
 
-        JButton btnLogo = new JButton("Actualizar Imagen");
-        btnLogo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnLogo.setBackground(Color.WHITE);
-        btnLogo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnLogo = Ui.botonSecundario("Actualizar Imagen", null);
         btnLogo.addActionListener(e -> seleccionarLogo());
 
         pLogo.add(lblBox, BorderLayout.WEST);
@@ -423,7 +409,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         izq.setBackground(Color.WHITE);
-        izq.add(new JLabel(Iconos.crearIconoUsuario(20, new Color(15, 23, 42))));
+        izq.add(new JLabel(Iconos.crearIconoUsuario(20, Ui.TURQUESA_OSCURO)));
         JLabel lblTit = new JLabel("Usuarios Activos y Asignación de Roles");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 15));
         izq.add(lblTit);
@@ -431,20 +417,42 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setBackground(Color.WHITE);
 
-        JButton btnGest = new JButton("Gestionar Roles");
-        btnGest.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnGest.setBackground(new Color(241, 245, 249));
-        btnGest.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnExportUsers = Ui.botonSecundario("Exportar", Iconos.crearIconoDescargar(12, Ui.TURQUESA_PROFUNDO));
+        btnExportUsers.setPreferredSize(new Dimension(105, 30));
+        btnExportUsers.addActionListener(e -> {
+            List<Usuario> us = repo.getUsuariosSistema();
+            StringBuilder html = new StringBuilder();
+            html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+            html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>DIRECTORIO DE COLABORADORES</h2>");
+            html.append("<p><strong>Total Usuarios:</strong> ").append(us.size()).append("</p>");
+            html.append("<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+            html.append("<tr style='background-color:#006064; color:white;'><th>Nombre Completo</th><th>Usuario</th><th>Rol</th><th>Especialidad / Área</th><th>Estado</th></tr>");
+            StringBuilder csv = new StringBuilder("Nombre,Usuario,Rol,Especialidad,Estado\n");
+            for (Usuario u : us) {
+                html.append("<tr><td>").append(u.getNombreCompleto()).append("</td>")
+                    .append("<td>").append(u.getUsername()).append("</td>")
+                    .append("<td><b>").append(u.getRol()).append("</b></td>")
+                    .append("<td>").append(u.getEspecialidadArea()).append("</td>")
+                    .append("<td align='center'>").append(u.getEstado()).append("</td></tr>");
+                csv.append("\"").append(u.getNombreCompleto()).append("\",\"")
+                   .append(u.getUsername()).append("\",\"")
+                   .append(u.getRol()).append("\",\"")
+                   .append(u.getEspecialidadArea()).append("\",\"")
+                   .append(u.getEstado()).append("\"\n");
+            }
+            html.append("</table></body></html>");
+            Ui.mostrarVisorReporte(SwingUtilities.getWindowAncestor(this), "Directorio de Colaboradores", "Directorio Oficial de Colaboradores ERP", html.toString(), csv.toString());
+        });
+        der.add(btnExportUsers);
+
+        JButton btnGest = Ui.botonSecundario("Gestionar Roles", null);
+        btnGest.setPreferredSize(new Dimension(130, 30));
         btnGest.addActionListener(e -> JOptionPane.showMessageDialog(this, "Acceso a matriz de roles y permisos.", "Roles", JOptionPane.INFORMATION_MESSAGE));
-
-        JButton btnNew = new JButton("+ Nuevo Usuario");
-        btnNew.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnNew.setBackground(new Color(15, 23, 42));
-        btnNew.setForeground(Color.WHITE);
-        btnNew.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnNew.addActionListener(e -> JOptionPane.showMessageDialog(this, "Formulario de alta de usuario.", "Nuevo Usuario", JOptionPane.INFORMATION_MESSAGE));
-
         der.add(btnGest);
+
+        JButton btnNew = Ui.botonPrimario("+ Nuevo Usuario", null);
+        btnNew.setPreferredSize(new Dimension(135, 30));
+        btnNew.addActionListener(e -> JOptionPane.showMessageDialog(this, "Formulario de alta de usuario.", "Nuevo Usuario", JOptionPane.INFORMATION_MESSAGE));
         der.add(btnNew);
 
         head.add(izq, BorderLayout.WEST);
@@ -457,11 +465,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         tablaUsuarios = new JTable(modeloUsuarios);
-        tablaUsuarios.setRowHeight(48);
-        tablaUsuarios.setShowVerticalLines(false);
-        tablaUsuarios.setGridColor(new Color(241, 245, 249));
-        tablaUsuarios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaUsuarios.getTableHeader().setBackground(new Color(248, 250, 252));
+        Ui.formatearTabla(tablaUsuarios, new int[]{3}, new int[]{});
 
         tablaUsuarios.getColumnModel().getColumn(0).setPreferredWidth(200);
         tablaUsuarios.getColumnModel().getColumn(1).setPreferredWidth(140);
@@ -471,12 +475,19 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         tablaUsuarios.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
             public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
-                super.getTableCellRendererComponent(t, v, s, f, r, c);
+                JLabel l = (JLabel) super.getTableCellRendererComponent(t, v, s, f, r, c);
+                l.setHorizontalAlignment(SwingConstants.CENTER);
                 String est = v != null ? v.toString() : "Activo";
-                setText("● " + est);
-                setForeground("Activo".equalsIgnoreCase(est) ? new Color(34, 197, 94) : new Color(148, 163, 184));
-                setFont(new Font("Segoe UI", Font.BOLD, 12));
-                return this;
+                l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                l.setOpaque(true);
+                if ("Activo".equalsIgnoreCase(est)) {
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
+                } else {
+                    l.setBackground(new Color(241, 245, 249));
+                    l.setForeground(new Color(148, 163, 184));
+                }
+                return l;
             }
         });
 
@@ -499,7 +510,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JButton bAnt = new JButton("Anterior");
         bAnt.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         JButton b1 = new JButton("1");
-        b1.setBackground(new Color(15, 23, 42));
+        b1.setBackground(Ui.TURQUESA_PROFUNDO);
         b1.setForeground(Color.WHITE);
         JButton b2 = new JButton("2");
         b2.setBackground(Color.WHITE);
@@ -534,7 +545,8 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         JLabel badgeH = new JLabel("Habilitado");
         badgeH.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeH.setBackground(new Color(241, 245, 249));
+        badgeH.setBackground(Ui.TURQUESA_SUAVE);
+        badgeH.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeH.setOpaque(true);
         badgeH.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
 
@@ -569,9 +581,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lMod.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lMod.setForeground(new Color(71, 85, 105));
 
-        JButton btnPrompts = new JButton("Ajustes de Prompts");
-        btnPrompts.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        btnPrompts.setBackground(new Color(241, 245, 249));
+        JButton btnPrompts = Ui.botonSecundario("Ajustes de Prompts", null);
         btnPrompts.addActionListener(e -> JOptionPane.showMessageDialog(this, "System prompt configurado para triaje veterinario.", "Prompts", JOptionPane.INFORMATION_MESSAGE));
 
         pie.add(lMod, BorderLayout.WEST);
@@ -624,7 +634,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         lblContadorIntegraciones = new JLabel("3 de 5 activas");
         lblContadorIntegraciones.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblContadorIntegraciones.setForeground(new Color(100, 116, 139));
+        lblContadorIntegraciones.setForeground(Ui.TURQUESA_OSCURO);
 
         head.add(lblTit, BorderLayout.WEST);
         head.add(lblContadorIntegraciones, BorderLayout.EAST);
@@ -651,14 +661,14 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         head.setBackground(Color.WHITE);
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         izq.setBackground(Color.WHITE);
-        izq.add(new JLabel(Iconos.crearIconoAuriculares(18, new Color(15, 23, 42))));
+        izq.add(new JLabel(Iconos.crearIconoAuriculares(18, Ui.TURQUESA_PROFUNDO)));
         JLabel lblTit = new JLabel("Soporte Técnico y Diagnóstico");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 15));
         izq.add(lblTit);
 
         JLabel lblNorm = new JLabel("Estado: Normal");
         lblNorm.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblNorm.setForeground(new Color(30, 41, 59));
+        lblNorm.setForeground(Ui.TURQUESA_OSCURO);
 
         head.add(izq, BorderLayout.WEST);
         head.add(lblNorm, BorderLayout.EAST);
@@ -670,7 +680,7 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         lblEstadoBD = new JLabel("En línea (0.12 ms)");
         lblEstadoBD.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblEstadoBD.setForeground(new Color(34, 197, 94));
+        lblEstadoBD.setForeground(Ui.TURQUESA_OSCURO);
 
         lblUltimoRespaldo = new JLabel("Hoy, 03:00 AM");
         lblUltimoRespaldo.setFont(new Font("Segoe UI", Font.BOLD, 12));
@@ -690,14 +700,10 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         JPanel bot = new JPanel(new GridLayout(1, 2, 8, 0));
         bot.setBackground(Color.WHITE);
 
-        JButton btnLogs = new JButton("Ver Logs Sistema");
-        btnLogs.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnLogs.setBackground(new Color(241, 245, 249));
+        JButton btnLogs = Ui.botonSecundario("Ver Logs Sistema", null);
         btnLogs.addActionListener(e -> JOptionPane.showMessageDialog(this, "Logs del servidor: Estado óptimo, sin anomalías.", "Logs", JOptionPane.INFORMATION_MESSAGE));
 
-        JButton btnTicket = new JButton("🎫  Crear Ticket");
-        btnTicket.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnTicket.setBackground(new Color(241, 245, 249));
+        JButton btnTicket = Ui.botonSecundario("🎫  Crear Ticket", null);
         btnTicket.addActionListener(e -> JOptionPane.showMessageDialog(this, "Formulario para reportar incidencia técnica.", "Nuevo Ticket", JOptionPane.INFORMATION_MESSAGE));
 
         bot.add(btnLogs);
@@ -757,16 +763,15 @@ public class VistaDashboardAdministracionPanel extends JPanel {
             t.setBackground(new Color(248, 250, 252));
             JLabel lN = new JLabel(in.getNombre() + " " + (in.isActiva() ? "●" : "○"));
             lN.setFont(new Font("Segoe UI", Font.BOLD, 12));
-            lN.setForeground(new Color(15, 23, 42));
+            lN.setForeground(in.isActiva() ? Ui.TURQUESA_OSCURO : new Color(100, 116, 139));
             JLabel lS = new JLabel(in.getSubtitulo());
             lS.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             lS.setForeground(new Color(100, 116, 139));
             t.add(lN);
             t.add(lS);
 
-            JButton b = new JButton(in.isActiva() ? "Configurar" : "Conectar");
-            b.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            b.setBackground(Color.WHITE);
+            JButton b = Ui.botonSecundario(in.isActiva() ? "Configurar" : "Conectar", null);
+            b.setPreferredSize(new Dimension(100, 28));
             b.addActionListener(e -> {
                 repo.conmutarEstadoIntegracion(in.getId());
                 cargarDatos();
@@ -819,6 +824,89 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                         + "Todos los módulos del ERP se encuentran sincronizados con los parámetros actuales.",
                 "Cambios Guardados",
                 JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    private void exportarResumenAdministracion() {
+        ConfiguracionClinica cfg = repo.getConfiguracionClinica();
+        List<Usuario> us = repo.getUsuariosSistema();
+        List<IntegracionExterna> ints = repo.getIntegracionesExternas();
+        DiagnosticoSistema diag = repo.getDiagnosticoSistema();
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>FICHA INTEGRAL DE ADMINISTRACIÓN Y CONFIGURACIÓN ERP</h2>");
+        html.append("<p><strong>Fecha de Emisión:</strong> ").append(LocalDate.now()).append(" | <strong>Sede Activa:</strong> ").append(cfg != null ? cfg.getSedeActiva() : "Sede Principal").append("</p>");
+
+        html.append("<h3 style='color:#007987;'>1. Parámetros de la Clínica</h3>");
+        html.append("<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+        html.append("<tr><td style='background:#f1f5f9; width:30%;'><b>Razón Social:</b></td><td>").append(cfg != null ? cfg.getRazonSocial() : "").append("</td></tr>");
+        html.append("<tr><td style='background:#f1f5f9;'><b>Nombre Comercial:</b></td><td>").append(cfg != null ? cfg.getNombreComercial() : "").append("</td></tr>");
+        html.append("<tr><td style='background:#f1f5f9;'><b>Identificador Fiscal:</b></td><td>").append(cfg != null ? cfg.getIdentificadorFiscal() : "").append("</td></tr>");
+        html.append("<tr><td style='background:#f1f5f9;'><b>Correo Institucional:</b></td><td>").append(cfg != null ? cfg.getCorreoInstitucional() : "").append("</td></tr>");
+        html.append("<tr><td style='background:#f1f5f9;'><b>Teléfono de Urgencias:</b></td><td>").append(cfg != null ? cfg.getTelefonoUrgencias() : "").append("</td></tr>");
+        html.append("<tr><td style='background:#f1f5f9;'><b>Dirección Principal:</b></td><td>").append(cfg != null ? cfg.getDireccionSedePrincipal() : "").append("</td></tr>");
+        html.append("<tr><td style='background:#f1f5f9;'><b>Moneda / Zona Horaria:</b></td><td>").append(cfg != null ? cfg.getMonedaPrincipal() + " / " + cfg.getZonaHoraria() : "").append("</td></tr>");
+        html.append("</table>");
+
+        html.append("<h3 style='color:#007987;'>2. Directorio de Colaboradores y Roles (").append(us.size()).append(")</h3>");
+        html.append("<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th>Nombre Completo</th><th>Usuario</th><th>Rol</th><th>Especialidad / Área</th><th>Estado</th></tr>");
+        for (Usuario u : us) {
+            html.append("<tr>")
+                .append("<td>").append(u.getNombreCompleto()).append("</td>")
+                .append("<td>").append(u.getUsername()).append("</td>")
+                .append("<td><b>").append(u.getRol()).append("</b></td>")
+                .append("<td>").append(u.getEspecialidadArea()).append("</td>")
+                .append("<td align='center'>").append(u.getEstado()).append("</td>")
+                .append("</tr>");
+        }
+        html.append("</table>");
+
+        html.append("<h3 style='color:#007987;'>3. Integraciones Externas y Estado</h3>");
+        html.append("<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th>Servicio</th><th>Subtítulo</th><th>Ambiente</th><th>Estado</th><th>Última Sincronización</th></tr>");
+        for (IntegracionExterna ie : ints) {
+            html.append("<tr>")
+                .append("<td><b>").append(ie.getNombre()).append("</b></td>")
+                .append("<td>").append(ie.getSubtitulo()).append("</td>")
+                .append("<td>").append(ie.getAmbiente()).append("</td>")
+                .append("<td align='center'>").append(ie.isActiva() ? "ACTIVA" : "INACTIVA").append("</td>")
+                .append("<td>").append(ie.getUltimaSincronizacion()).append("</td>")
+                .append("</tr>");
+        }
+        html.append("</table>");
+
+        html.append("<h3 style='color:#007987;'>4. Telemetría y Salud del Sistema</h3>");
+        html.append("<p><strong>Base de Datos:</strong> ").append(diag != null ? diag.getEstadoBaseDatos() : "Óptimo")
+            .append(" | <strong>Último Respaldo Cloud:</strong> ").append(diag != null ? diag.getUltimoRespaldoCloud() : "Hoy")
+            .append(" | <strong>Tickets Pendientes:</strong> ").append(diag != null ? diag.getTicketsPendientes() : 0).append("</p>");
+
+        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento de auditoría administrativa expedido por Veterinaria Happy Pets ERP. Válido institucionalmente.</p>");
+        html.append("</body></html>");
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("SECCION,PARAMETRO,VALOR\n");
+        if (cfg != null) {
+            csv.append("CLINICA,Razon Social,\"").append(cfg.getRazonSocial()).append("\"\n");
+            csv.append("CLINICA,Identificador Fiscal,\"").append(cfg.getIdentificadorFiscal()).append("\"\n");
+            csv.append("CLINICA,Correo Institucional,\"").append(cfg.getCorreoInstitucional()).append("\"\n");
+            csv.append("CLINICA,Telefono Urgencias,\"").append(cfg.getTelefonoUrgencias()).append("\"\n");
+            csv.append("CLINICA,Moneda,\"").append(cfg.getMonedaPrincipal()).append("\"\n");
+        }
+        for (Usuario u : us) {
+            csv.append("USUARIO,\"").append(u.getNombreCompleto()).append("\",\"").append(u.getRol()).append(" - ").append(u.getEstado()).append("\"\n");
+        }
+        for (IntegracionExterna ie : ints) {
+            csv.append("INTEGRACION,\"").append(ie.getNombre()).append("\",\"").append(ie.isActiva() ? "ACTIVA" : "INACTIVA").append("\"\n");
+        }
+
+        Ui.mostrarVisorReporte(
+            SwingUtilities.getWindowAncestor(this),
+            "Ficha Administrativa ERP",
+            "Ficha Administrativa y Configuración Global",
+            html.toString(),
+            csv.toString()
         );
     }
 

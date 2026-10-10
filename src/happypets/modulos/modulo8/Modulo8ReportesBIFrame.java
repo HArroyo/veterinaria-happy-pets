@@ -51,19 +51,19 @@ public class Modulo8ReportesBIFrame extends JFrame {
         tabs.setBackground(Color.WHITE);
 
         tabs.addTab("Tableros de Mando (Dashboards)",
-                Iconos.crearIconoReportes(16, new Color(0, 115, 125)),
+                Iconos.crearIconoReportes(16, Ui.TURQUESA_OSCURO),
                 vistaTablerosMando);
 
         tabs.addTab("Reportes Clínicos",
-                Iconos.crearIconoDoctor(16, new Color(13, 148, 136)),
+                Iconos.crearIconoDoctor(16, Ui.TURQUESA),
                 vistaReportesClinicos);
 
         tabs.addTab("Reportes Financieros",
-                Iconos.crearIconoPOS(16, new Color(16, 185, 129)),
+                Iconos.crearIconoPOS(16, Ui.TURQUESA_PROFUNDO),
                 vistaReportesFinancieros);
 
         tabs.addTab("Exportador de Datos",
-                Iconos.crearIconoExportar(16, new Color(2, 132, 199)),
+                Iconos.crearIconoExportar(16, Ui.TURQUESA_OSCURO),
                 vistaExportadorDatos);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {

@@ -54,8 +54,8 @@ import happypets.ui.Ui;
 public class VistaHotelGuarderiaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
     private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
     private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
@@ -147,11 +147,11 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         JLabel badgeCapacidad = new JLabel(" Capacidad Total: 8 Suites Climatizadas ", SwingConstants.CENTER);
         badgeCapacidad.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeCapacidad.setForeground(new Color(2, 132, 199));
+        badgeCapacidad.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeCapacidad.setOpaque(true);
-        badgeCapacidad.setBackground(new Color(224, 242, 254));
+        badgeCapacidad.setBackground(Ui.TURQUESA_SUAVE);
         badgeCapacidad.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(186, 230, 253), 1, true),
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
         der.add(badgeCapacidad);
@@ -397,7 +397,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         chkBanoSalida = new JCheckBox("Incluir Baño y Deslanado de Salida (+ S/. 35.00)");
         chkBanoSalida.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        chkBanoSalida.setForeground(new Color(3, 105, 161));
+        chkBanoSalida.setForeground(Ui.TURQUESA_OSCURO);
         chkBanoSalida.setOpaque(false);
         chkBanoSalida.setSelected(true);
         chkBanoSalida.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -484,15 +484,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         };
 
         tablaHospedaje = new JTable(modeloHospedaje);
-        tablaHospedaje.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaHospedaje.setRowHeight(26);
-        tablaHospedaje.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaHospedaje.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaHospedaje.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaHospedaje.setSelectionBackground(new Color(224, 242, 254));
-        tablaHospedaje.setSelectionForeground(new Color(3, 105, 161));
-        tablaHospedaje.setShowGrid(false);
-        tablaHospedaje.setIntercellSpacing(new Dimension(0, 0));
+        Ui.formatearTabla(tablaHospedaje, new int[]{0, 4, 5, 6, 8}, new int[]{7});
 
         tablaHospedaje.getColumnModel().getColumn(0).setPreferredWidth(65);
         tablaHospedaje.getColumnModel().getColumn(1).setPreferredWidth(100);
@@ -513,13 +505,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 String st = value != null ? value.toString() : "";
                 if (st.contains("En Estadía") || st.contains("Hospedado")) {
-                    l.setForeground(new Color(2, 132, 199));
-                    l.setBackground(new Color(224, 242, 254));
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
+                    l.setBackground(Ui.TURQUESA_SUAVE);
                 } else if (st.contains("Confirmada")) {
                     l.setForeground(new Color(245, 158, 11));
                     l.setBackground(new Color(254, 243, 199));
                 } else {
-                    l.setForeground(new Color(16, 185, 129));
+                    l.setForeground(Ui.COLOR_EXITO);
                     l.setBackground(new Color(209, 250, 229));
                 }
                 l.setOpaque(true);
@@ -589,13 +581,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 if (!primario) {
-                    g2.setColor(COLOR_BORDE);
+                    g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
                 super.paintComponent(g2);
@@ -833,13 +825,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
                 "     Firma del Tutor                        Administración Happy Pets\n" +
                 "  DNI: _________________                     Hotel Canino & Felino\n";
 
-        JTextArea ta = new JTextArea(contrato);
-        ta.setFont(new Font("Consolas", Font.PLAIN, 11));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(540, 320));
-
-        JOptionPane.showMessageDialog(this, sp, "Contrato de Hospedaje Responsable", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Contrato de Hospedaje - " + r.getIdReserva(),
+                "CONTRATO DE PRESTACIÓN DE SERVICIOS DE HOSPEDAJE",
+                contrato,
+                "Contrato_Hospedaje_" + r.getIdReserva()
+        );
     }
 
     private void limpiarFormulario() {

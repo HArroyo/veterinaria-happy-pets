@@ -51,19 +51,19 @@ public class Modulo7PersonalRRHHFrame extends JFrame {
         tabs.setBackground(Color.WHITE);
 
         tabs.addTab("Nuestros Veterinarios",
-                Iconos.crearIconoDoctor(16, new Color(126, 34, 206)),
+                Iconos.crearIconoDoctor(16, Ui.TURQUESA_PROFUNDO),
                 vistaVeterinarios);
 
         tabs.addTab("Personal de Apoyo",
-                Iconos.crearIconoUsuario(16, new Color(13, 148, 136)),
+                Iconos.crearIconoUsuario(16, Ui.TURQUESA),
                 vistaPersonalApoyo);
 
         tabs.addTab("Horarios y Turnos Médicos",
-                Iconos.crearIconoTurno(16, new Color(2, 132, 199)),
+                Iconos.crearIconoTurno(16, Ui.TURQUESA_OSCURO),
                 vistaHorariosTurnos);
 
         tabs.addTab("Asistencias y Permisos",
-                Iconos.crearIconoAsistencia(16, new Color(168, 85, 247)),
+                Iconos.crearIconoAsistencia(16, Ui.TURQUESA_PROFUNDO),
                 vistaAsistenciasPermisos);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {

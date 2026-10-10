@@ -48,10 +48,10 @@ import happypets.ui.Ui;
 public class VistaRecordatoriosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -245,7 +245,7 @@ public class VistaRecordatoriosPanel extends JPanel {
         fila.setOpaque(false);
 
         lblKpiTotalEnviados = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiTotalEnviados, "RECORDATORIOS EMITIDOS", new Color(224, 242, 254), Iconos.crearIconoMensaje(20, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiTotalEnviados, "RECORDATORIOS EMITIDOS", Ui.TURQUESA_SUAVE, Iconos.crearIconoMensaje(20, COLOR_AZUL_PRIMARIO)));
 
         lblKpiConfirmados = new JLabel("0");
         fila.add(crearCardKpi(lblKpiConfirmados, "CONFIRMADOS POR CLIENTES", new Color(220, 252, 231), Iconos.crearIconoWhatsApp(20, new Color(22, 163, 74))));
@@ -488,9 +488,7 @@ public class VistaRecordatoriosPanel extends JPanel {
         };
 
         tablaRecordatorios = new JTable(modeloRecordatorios);
-        Ui.formatearTabla(tablaRecordatorios);
-        tablaRecordatorios.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaRecordatorios.setRowHeight(26);
+        Ui.formatearTabla(tablaRecordatorios, new int[]{0, 1, 4, 5}, new int[]{});
 
         tablaRecordatorios.getColumnModel().getColumn(5).setCellRenderer(new BadgeEstadoRecRenderer());
 
@@ -566,7 +564,7 @@ public class VistaRecordatoriosPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
                 if (esPrimario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }

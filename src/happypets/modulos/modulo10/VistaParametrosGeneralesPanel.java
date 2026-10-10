@@ -24,10 +24,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import java.time.LocalDate;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.ConfiguracionClinica;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 10.1: Parámetros Generales de la Clínica Veterinaria.
@@ -92,7 +95,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
 
         JLabel lblBreadcrumb = new JLabel("Ajustes > Configuración Empresarial > Parámetros Generales");
         lblBreadcrumb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblBreadcrumb.setForeground(new Color(100, 116, 139));
+        lblBreadcrumb.setForeground(Ui.TURQUESA_OSCURO);
         izq.add(lblBreadcrumb);
         izq.add(Box.createVerticalStrut(4));
 
@@ -109,30 +112,22 @@ public class VistaParametrosGeneralesPanel extends JPanel {
 
         header.add(izq, BorderLayout.CENTER);
 
-        // Lado Derecho: Botones [Restablecer Valores] y [Guardar Todos los Cambios]
+        // Lado Derecho: Botones [Exportar], [Restablecer Valores] y [Guardar Todos los Cambios]
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setBackground(new Color(248, 250, 252));
 
-        JButton btnRestablecer = new JButton("Restablecer Valores");
-        btnRestablecer.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnRestablecer.setForeground(new Color(51, 65, 85));
-        btnRestablecer.setBackground(Color.WHITE);
-        btnRestablecer.setFocusPainted(false);
-        btnRestablecer.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnRestablecer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
+        JButton btnExportar = Ui.botonSecundario("📄 Exportar Parámetros", Iconos.crearIconoExportar(13, Ui.TURQUESA_PROFUNDO));
+        btnExportar.setPreferredSize(new Dimension(190, 34));
+        btnExportar.addActionListener(e -> exportarParametrosReporte());
+        der.add(btnExportar);
+
+        JButton btnRestablecer = Ui.botonSecundario("Restablecer Valores", null);
+        btnRestablecer.setPreferredSize(new Dimension(160, 34));
         btnRestablecer.addActionListener(e -> cargarDatos());
         der.add(btnRestablecer);
 
-        JButton btnGuardar = new JButton("💾  Guardar Todos los Cambios");
-        btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnGuardar.setForeground(Color.WHITE);
-        btnGuardar.setBackground(new Color(15, 23, 42)); // Slate-900 oscuro elegante
-        btnGuardar.setFocusPainted(false);
-        btnGuardar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnGuardar.setBorder(BorderFactory.createEmptyBorder(9, 18, 9, 18));
+        JButton btnGuardar = Ui.botonPrimario("Guardar Cambios", Iconos.crearIconoGuardar(13, Color.WHITE));
+        btnGuardar.setPreferredSize(new Dimension(160, 34));
         btnGuardar.addActionListener(e -> guardarCambios());
         der.add(btnGuardar);
 
@@ -157,13 +152,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         lblTitCard.setForeground(new Color(30, 41, 59));
         headCard.add(lblTitCard, BorderLayout.WEST);
 
-        txtIdentificadorFiscal = new JTextField(16);
-        txtIdentificadorFiscal.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        txtIdentificadorFiscal.setForeground(new Color(71, 85, 105));
-        txtIdentificadorFiscal.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(4, 8, 4, 8)
-        ));
+        txtIdentificadorFiscal = Ui.campoTexto(16);
 
         JPanel pnlIdFiscal = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pnlIdFiscal.setBackground(Color.WHITE);
@@ -184,10 +173,8 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Fila 1: Razón Social y Nombre Comercial
-        txtRazonSocial = new JTextField();
-        estilizarCampoTexto(txtRazonSocial);
-        txtNombreComercial = new JTextField();
-        estilizarCampoTexto(txtNombreComercial);
+        txtRazonSocial = Ui.campoTexto(15);
+        txtNombreComercial = Ui.campoTexto(15);
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.5;
         form.add(crearGrupoCampo("Razón Social / Nombre Legal", txtRazonSocial), gbc);
@@ -196,10 +183,8 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         form.add(crearGrupoCampo("Nombre Comercial", txtNombreComercial), gbc);
 
         // Fila 2: Correo Institucional y Teléfono de Urgencias
-        txtCorreo = new JTextField();
-        estilizarCampoTexto(txtCorreo);
-        txtTelefono = new JTextField();
-        estilizarCampoTexto(txtTelefono);
+        txtCorreo = Ui.campoTexto(15);
+        txtTelefono = Ui.campoTexto(15);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.5;
         form.add(crearGrupoCampo("Correo Electrónico Institucional", txtCorreo), gbc);
@@ -208,28 +193,25 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         form.add(crearGrupoCampo("Línea Telefónica de Urgencias", txtTelefono), gbc);
 
         // Fila 3: Dirección Sede Principal (Full Width)
-        txtDireccion = new JTextField();
-        estilizarCampoTexto(txtDireccion);
+        txtDireccion = Ui.campoTexto(25);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2; gbc.weightx = 1.0;
         form.add(crearGrupoCampo("Dirección Sede Principal", txtDireccion), gbc);
         gbc.gridwidth = 1;
 
         // Fila 4: Moneda Principal, Zona Horaria y Sede Activa
-        cbMoneda = new JComboBox<>(new String[]{
+        cbMoneda = Ui.combo(new String[]{
                 "COP ($) - Peso Colombiano",
                 "PEN (S/) - Sol Peruano",
                 "USD ($) - Dólar Estadounidense"
         });
-        estilizarCombo(cbMoneda);
 
-        cbZonaHoraria = new JComboBox<>(new String[]{
+        cbZonaHoraria = Ui.combo(new String[]{
                 "America/Bogota (UTC -05:00)",
                 "America/Lima (UTC -05:00)",
                 "America/Santiago (UTC -04:00)",
                 "America/Mexico_City (UTC -06:00)"
         });
-        estilizarCombo(cbZonaHoraria);
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0.5;
         form.add(crearGrupoCampo("Moneda Principal", cbMoneda), gbc);
@@ -255,7 +237,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         pnlLogoBox.setPreferredSize(new Dimension(80, 80));
         pnlLogoBox.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
 
-        lblLogoPreview = new JLabel(Iconos.crearIconoHuella(36, new Color(59, 130, 246)), SwingConstants.CENTER);
+        lblLogoPreview = new JLabel(Iconos.crearIconoHuella(36, Ui.TURQUESA_OSCURO), SwingConstants.CENTER);
         pnlLogoBox.add(lblLogoPreview, BorderLayout.CENTER);
 
         // Texto informativo del logotipo
@@ -275,13 +257,12 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         info.add(lblFmt);
         info.add(Box.createVerticalStrut(6));
 
-        cbSede = new JComboBox<>(new String[]{
+        cbSede = Ui.combo(new String[]{
                 "Sede Norte - Principal",
                 "Sede Sur - Miraflores",
                 "Sede Este - La Molina"
         });
-        estilizarCombo(cbSede);
-        cbSede.setPreferredSize(new Dimension(220, 30));
+        cbSede.setPreferredSize(new Dimension(220, 32));
 
         JPanel pnlSedeSel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSedeSel.setBackground(Color.WHITE);
@@ -296,16 +277,7 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 20));
         pnlDer.setBackground(Color.WHITE);
 
-        JButton btnActualizarLogo = new JButton("Actualizar Imagen");
-        btnActualizarLogo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnActualizarLogo.setForeground(new Color(30, 41, 59));
-        btnActualizarLogo.setBackground(new Color(241, 245, 249));
-        btnActualizarLogo.setFocusPainted(false);
-        btnActualizarLogo.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnActualizarLogo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
+        JButton btnActualizarLogo = Ui.botonSecundario("Actualizar Imagen", null);
         btnActualizarLogo.addActionListener(e -> seleccionarLogo());
         pnlDer.add(btnActualizarLogo);
 
@@ -400,5 +372,45 @@ public class VistaParametrosGeneralesPanel extends JPanel {
                     JOptionPane.INFORMATION_MESSAGE
             );
         }
+    }
+
+    private void exportarParametrosReporte() {
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>FICHA TÉCNICA DE PARÁMETROS EMPRESARIALES</h2>");
+        html.append("<p><strong>Fecha de Emisión:</strong> ").append(LocalDate.now()).append(" | <strong>Sistema:</strong> Veterinaria Happy Pets ERP</p>");
+        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:12px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th align='left'>Parámetro Institucional</th><th align='left'>Valor Asignado</th></tr>");
+        html.append("<tr><td><b>Razón Social / Nombre Legal:</b></td><td>").append(txtRazonSocial.getText()).append("</td></tr>");
+        html.append("<tr><td><b>Nombre Comercial:</b></td><td>").append(txtNombreComercial.getText()).append("</td></tr>");
+        html.append("<tr><td><b>Identificador Fiscal (RUC/NIT):</b></td><td>").append(txtIdentificadorFiscal.getText()).append("</td></tr>");
+        html.append("<tr><td><b>Correo Electrónico Oficial:</b></td><td>").append(txtCorreo.getText()).append("</td></tr>");
+        html.append("<tr><td><b>Teléfono Urgencias 24/7:</b></td><td>").append(txtTelefono.getText()).append("</td></tr>");
+        html.append("<tr><td><b>Dirección Sede Principal:</b></td><td>").append(txtDireccion.getText()).append("</td></tr>");
+        html.append("<tr><td><b>Moneda Base ERP:</b></td><td>").append(cbMoneda.getSelectedItem()).append("</td></tr>");
+        html.append("<tr><td><b>Zona Horaria Servidor:</b></td><td>").append(cbZonaHoraria.getSelectedItem()).append("</td></tr>");
+        html.append("<tr><td><b>Sede Activa en Edición:</b></td><td>").append(cbSede.getSelectedItem()).append("</td></tr>");
+        html.append("</table>");
+        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento oficial de configuración del ERP emitido para auditoría técnica y fiscal.</p>");
+        html.append("</body></html>");
+
+        StringBuilder csv = new StringBuilder("PARAMETRO,VALOR\n");
+        csv.append("\"Razon Social\",\"").append(txtRazonSocial.getText()).append("\"\n");
+        csv.append("\"Nombre Comercial\",\"").append(txtNombreComercial.getText()).append("\"\n");
+        csv.append("\"Identificador Fiscal\",\"").append(txtIdentificadorFiscal.getText()).append("\"\n");
+        csv.append("\"Correo\",\"").append(txtCorreo.getText()).append("\"\n");
+        csv.append("\"Telefono\",\"").append(txtTelefono.getText()).append("\"\n");
+        csv.append("\"Direccion\",\"").append(txtDireccion.getText()).append("\"\n");
+        csv.append("\"Moneda\",\"").append(cbMoneda.getSelectedItem()).append("\"\n");
+        csv.append("\"Zona Horaria\",\"").append(cbZonaHoraria.getSelectedItem()).append("\"\n");
+        csv.append("\"Sede\",\"").append(cbSede.getSelectedItem()).append("\"\n");
+
+        Ui.mostrarVisorReporte(
+            SwingUtilities.getWindowAncestor(this),
+            "Parámetros Generales ERP",
+            "Ficha Técnica de Parámetros Generales",
+            html.toString(),
+            csv.toString()
+        );
     }
 }

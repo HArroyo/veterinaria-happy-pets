@@ -36,6 +36,7 @@ import javax.swing.table.DefaultTableModel;
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.ProductoFarmacia;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 5.1: Catálogo de Productos y Fármacos.
@@ -48,8 +49,8 @@ import happypets.ui.Iconos;
 public class VistaCatalogoProductosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
     private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
     private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
@@ -144,11 +145,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JLabel badgeFarmacia = new JLabel(" Regencia Farmacéutica Activa · Happy Pets ", SwingConstants.CENTER);
         badgeFarmacia.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeFarmacia.setForeground(new Color(2, 132, 199));
+        badgeFarmacia.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeFarmacia.setOpaque(true);
-        badgeFarmacia.setBackground(new Color(224, 242, 254));
+        badgeFarmacia.setBackground(Ui.TURQUESA_SUAVE);
         badgeFarmacia.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(186, 230, 253), 1, true),
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
         der.add(badgeFarmacia);
@@ -542,15 +543,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
         };
 
         tablaProductos = new JTable(modeloProductos);
-        tablaProductos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaProductos.setRowHeight(26);
-        tablaProductos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaProductos.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaProductos.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaProductos.setSelectionBackground(new Color(224, 242, 254));
-        tablaProductos.setSelectionForeground(new Color(3, 105, 161));
-        tablaProductos.setShowGrid(false);
-        tablaProductos.setIntercellSpacing(new Dimension(0, 0));
+        Ui.formatearTabla(tablaProductos, new int[]{0, 2, 3, 6, 7}, new int[]{4, 5});
 
         tablaProductos.getColumnModel().getColumn(0).setPreferredWidth(65);
         tablaProductos.getColumnModel().getColumn(1).setPreferredWidth(170);
@@ -570,13 +563,13 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 String st = value != null ? value.toString() : "";
                 if ("Disponible".equalsIgnoreCase(st)) {
-                    l.setForeground(new Color(16, 185, 129));
+                    l.setForeground(Ui.COLOR_EXITO);
                     l.setBackground(new Color(209, 250, 229));
                 } else if ("Bajo Stock".equalsIgnoreCase(st)) {
                     l.setForeground(new Color(245, 158, 11));
                     l.setBackground(new Color(254, 243, 199));
                 } else {
-                    l.setForeground(new Color(220, 38, 38));
+                    l.setForeground(Ui.COLOR_PELIGRO);
                     l.setBackground(new Color(254, 226, 226));
                 }
                 l.setOpaque(true);
@@ -650,13 +643,13 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 if (!primario) {
-                    g2.setColor(COLOR_BORDE);
+                    g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
                 super.paintComponent(g2);
@@ -849,13 +842,13 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 "=========================================================================\n" +
                 "Dirección Técnica Farmacéutica · Happy Pets Clínicas Veterinarias";
 
-        JTextArea ta = new JTextArea(prospecto);
-        ta.setFont(new Font("Consolas", Font.PLAIN, 11));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(540, 320));
-
-        JOptionPane.showMessageDialog(this, sp, "Ficha Técnica Farmacéutica", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Ficha Técnica - " + p.getCodigo(),
+                "FARMACOVIGILANCIA VETERINARIA · " + p.getNombre(),
+                prospecto,
+                "FichaTecnica_" + p.getCodigo()
+        );
     }
 
     private void generarEtiquetaDispensacion() {
@@ -884,13 +877,13 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 "║ CONSERVACIÓN: " + (p.isCadenaFrio() ? "MANTENER REFRIGERADO (2°C - 8°C)       " : "CONSERVAR EN LUGAR SECO Y FRESCO        ") + "║\n" +
                 "╚═══════════════════════════════════════════════════════╝";
 
-        JTextArea ta = new JTextArea(etiqueta);
-        ta.setFont(new Font("Consolas", Font.BOLD, 12));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(500, 220));
-
-        JOptionPane.showMessageDialog(this, sp, "Etiqueta Térmica de Dispensación al Paciente", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Etiqueta de Dispensación - " + p.getCodigo(),
+                "FARMACIA HAPPY PETS · " + p.getNombre(),
+                etiqueta,
+                "Etiqueta_" + p.getCodigo()
+        );
     }
 
     private void limpiarFormulario() {

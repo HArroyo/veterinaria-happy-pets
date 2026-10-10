@@ -63,12 +63,12 @@ import happypets.ui.Ui;
 public class VistaPuntoVentaPOSPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_PRIMARIO = new Color(249, 115, 22); // Acento naranja cálido ventas
-    private static final Color COLOR_PRIMARIO_OSCURO = new Color(234, 88, 12);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_PRIMARIO = Ui.TURQUESA; // Estandarizado al Turquesa Clínico Original
+    private static final Color COLOR_PRIMARIO_OSCURO = Ui.TURQUESA_OSCURO;
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
     private static final Color COLOR_FONDO_CARD = Color.WHITE;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -543,7 +543,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         };
 
         tablaVenta = new JTable(modeloVenta);
-        Ui.formatearTabla(tablaVenta);
+        Ui.formatearTabla(tablaVenta, new int[]{1, 4}, new int[]{2, 3});
         tablaVenta.getColumnModel().getColumn(0).setPreferredWidth(160);
         tablaVenta.getColumnModel().getColumn(1).setPreferredWidth(45);
         tablaVenta.getColumnModel().getColumn(2).setPreferredWidth(65);
@@ -1000,6 +1000,31 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         JPanel botDlg = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         botDlg.setOpaque(false);
 
+        JButton btnExportar = Ui.boton("Descargar PDF / Excel", false);
+        btnExportar.setIcon(Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
+        btnExportar.addActionListener(e -> {
+            List<Object[]> filasItems = new ArrayList<>();
+            for (ItemVentaPOS it : venta.getItems()) {
+                filasItems.add(new Object[]{it.getCodigo(), it.getDescripcion(), it.getCantidad(), String.format("S/ %.2f", it.getPrecioUnitario()), String.format("S/ %.2f", it.getSubtotal())});
+            }
+            Ui.mostrarVisorReporte(dlg,
+                    venta.getTipoComprobante() + " " + venta.getNumeroComprobante(),
+                    "Comprobante Electrónico Oficial Happy Pets ERP",
+                    new String[][]{
+                            {"Cliente", venta.getClienteNombre()},
+                            {"DNI / RUC", venta.getClienteDocumento()},
+                            {"Paciente", venta.getMascotaNombre()},
+                            {"Método de Pago", venta.getMetodoPago()},
+                            {"Fecha y Hora", venta.getFechaHoraTexto()},
+                            {"Cajero", venta.getCajero()}
+                    },
+                    new String[]{"Código", "Descripción", "Cantidad", "Precio Unit.", "Subtotal"},
+                    filasItems,
+                    "Subtotal: S/ " + String.format("%.2f", venta.getSubtotal()) + " | IGV (18%): S/ " + String.format("%.2f", venta.getIgv()) + " | TOTAL: S/ " + String.format("%.2f", venta.getTotal()),
+                    "comprobante_pos_" + venta.getNumeroComprobante()
+            );
+        });
+
         JButton btnPrint = Ui.boton("Imprimir en Ticketera Térmica (80mm)", true);
         btnPrint.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
         btnPrint.addActionListener(e -> {
@@ -1012,6 +1037,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         JButton btnCerrar = Ui.boton("Cerrar", false);
         btnCerrar.addActionListener(e -> dlg.dispose());
 
+        botDlg.add(btnExportar);
         botDlg.add(btnPrint);
         botDlg.add(btnCerrar);
         p.add(botDlg, BorderLayout.SOUTH);
@@ -1054,7 +1080,7 @@ public class VistaPuntoVentaPOSPanel extends JPanel {
         }
 
         JTable tab = new JTable(mod);
-        Ui.formatearTabla(tab);
+        Ui.formatearTabla(tab, new int[]{0, 1, 2, 5, 7}, new int[]{6});
 
         p.add(new JScrollPane(tab), BorderLayout.CENTER);
 

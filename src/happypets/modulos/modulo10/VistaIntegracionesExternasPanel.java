@@ -22,10 +22,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import java.time.LocalDate;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.IntegracionExterna;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 10.3: Integraciones Externas.
@@ -65,18 +67,27 @@ public class VistaIntegracionesExternasPanel extends JPanel {
 
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         izq.setBackground(Color.WHITE);
-        izq.add(new JLabel(Iconos.crearIconoEnchufe(24, new Color(15, 23, 42))));
+        izq.add(new JLabel(Iconos.crearIconoEnchufe(24, Ui.TURQUESA_PROFUNDO)));
         JLabel lblTit = new JLabel("Integraciones Externas");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTit.setForeground(new Color(15, 23, 42));
         izq.add(lblTit);
 
+        JPanel derHead = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        derHead.setBackground(Color.WHITE);
+
         lblContadorActivas = new JLabel("3 de 5 activas");
         lblContadorActivas.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblContadorActivas.setForeground(new Color(100, 116, 139));
+        lblContadorActivas.setForeground(Ui.TURQUESA_OSCURO);
+        derHead.add(lblContadorActivas);
+
+        JButton btnExportar = Ui.botonSecundario("📄 Exportar Reporte APIs", Iconos.crearIconoExportar(13, Ui.TURQUESA_PROFUNDO));
+        btnExportar.setPreferredSize(new Dimension(190, 32));
+        btnExportar.addActionListener(e -> exportarReporteIntegraciones());
+        derHead.add(btnExportar);
 
         head.add(izq, BorderLayout.WEST);
-        head.add(lblContadorActivas, BorderLayout.EAST);
+        head.add(derHead, BorderLayout.EAST);
         card.add(head, BorderLayout.NORTH);
 
         // Lista de tarjetas de servicio
@@ -135,7 +146,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
 
         JLabel lblDot = new JLabel("●");
         lblDot.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblDot.setForeground(inte.isActiva() ? new Color(34, 197, 94) : new Color(148, 163, 184)); // Verde o Gris
+        lblDot.setForeground(inte.isActiva() ? Ui.TURQUESA_OSCURO : new Color(148, 163, 184));
         pnlNombrePunto.add(lblDot);
 
         izq.add(pnlNombrePunto);
@@ -152,16 +163,8 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         der.setBackground(Color.WHITE);
 
-        JButton btnAccion = new JButton(inte.isActiva() ? "Configurar" : "Conectar");
-        btnAccion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnAccion.setForeground(new Color(51, 65, 85));
-        btnAccion.setBackground(new Color(241, 245, 249));
-        btnAccion.setFocusPainted(false);
-        btnAccion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnAccion.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(6, 16, 6, 16)
-        ));
+        JButton btnAccion = Ui.botonSecundario(inte.isActiva() ? "Configurar" : "Conectar", null);
+        btnAccion.setPreferredSize(new Dimension(110, 32));
 
         btnAccion.addActionListener(e -> {
             if (inte.isActiva()) {
@@ -213,9 +216,9 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         g.insets = new Insets(6, 6, 6, 6);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField txtUrl = new JTextField(inte.getEndpointUrl());
-        JTextField txtKey = new JTextField(inte.getApiKey());
-        JComboBox<String> cbAmb = new JComboBox<>(new String[]{"Producción", "Sandbox / Pruebas"});
+        JTextField txtUrl = Ui.campoTexto(inte.getEndpointUrl(), 20);
+        JTextField txtKey = Ui.campoTexto(inte.getApiKey(), 20);
+        JComboBox<String> cbAmb = Ui.combo(new String[]{"Producción", "Sandbox / Pruebas"});
         cbAmb.setSelectedItem(inte.getAmbiente());
 
         JLabel lblSync = new JLabel(inte.getUltimaSincronizacion());
@@ -244,8 +247,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
 
         // Botón de prueba de conexión
         g.gridx = 0; g.gridy = 4; g.gridwidth = 2;
-        JButton btnTest = new JButton("⚡ Probar Conexión en Vivo");
-        btnTest.setBackground(new Color(241, 245, 249));
+        JButton btnTest = Ui.botonSecundario("⚡ Probar Conexión en Vivo", null);
         btnTest.addActionListener(e -> {
             JOptionPane.showMessageDialog(dlg, "✓ Conexión exitosa con " + inte.getNombre() + " (Respuesta: HTTP 200 OK en 48ms).", "Ping Exitoso", JOptionPane.INFORMATION_MESSAGE);
         });
@@ -255,8 +257,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         bot.setBackground(new Color(248, 250, 252));
 
-        JButton btnDesconectar = new JButton("Desconectar Servicio");
-        btnDesconectar.setForeground(new Color(239, 68, 68));
+        JButton btnDesconectar = Ui.botonPeligro("Desconectar Servicio", null);
         btnDesconectar.addActionListener(e -> {
             repo.conmutarEstadoIntegracion(inte.getId());
             recargarIntegraciones();
@@ -264,9 +265,7 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         });
         bot.add(btnDesconectar);
 
-        JButton btnGuardar = new JButton("Guardar Cambios");
-        btnGuardar.setBackground(new Color(15, 23, 42));
-        btnGuardar.setForeground(Color.WHITE);
+        JButton btnGuardar = Ui.botonPrimario("Guardar Cambios", null);
         btnGuardar.addActionListener(e -> {
             inte.setEndpointUrl(txtUrl.getText().trim());
             inte.setApiKey(txtKey.getText().trim());
@@ -281,5 +280,47 @@ public class VistaIntegracionesExternasPanel extends JPanel {
         dlg.add(pnl, BorderLayout.CENTER);
         dlg.add(bot, BorderLayout.SOUTH);
         dlg.setVisible(true);
+    }
+
+    private void exportarReporteIntegraciones() {
+        List<IntegracionExterna> lista = repo.getIntegracionesExternas();
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>ESTADO DE CONECTIVIDAD E INTEGRACIONES EXTERNAS</h2>");
+        html.append("<p><strong>Fecha de Verificación:</strong> ").append(LocalDate.now()).append(" | <strong>Total Pasarelas:</strong> ").append(lista.size()).append("</p>");
+        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th>Servicio / API</th><th>Detalle / Uso</th><th>Ambiente</th><th>Endpoint</th><th>Estado</th><th>Último Ping</th></tr>");
+
+        StringBuilder csv = new StringBuilder("Servicio,Detalle,Ambiente,Endpoint,Estado,Ultimo Ping\n");
+
+        for (IntegracionExterna ie : lista) {
+            html.append("<tr>")
+                .append("<td><b>").append(ie.getNombre()).append("</b></td>")
+                .append("<td>").append(ie.getSubtitulo()).append("</td>")
+                .append("<td>").append(ie.getAmbiente()).append("</td>")
+                .append("<td>").append(ie.getEndpointUrl()).append("</td>")
+                .append("<td align='center'>").append(ie.isActiva() ? "<span style='color:#007987;'><b>ACTIVA</b></span>" : "<span style='color:#64748b;'>INACTIVA</span>").append("</td>")
+                .append("<td align='center'>").append(ie.getUltimaSincronizacion()).append("</td>")
+                .append("</tr>");
+
+            csv.append("\"").append(ie.getNombre()).append("\",\"")
+               .append(ie.getSubtitulo()).append("\",\"")
+               .append(ie.getAmbiente()).append("\",\"")
+               .append(ie.getEndpointUrl()).append("\",\"")
+               .append(ie.isActiva() ? "ACTIVA" : "INACTIVA").append("\",\"")
+               .append(ie.getUltimaSincronizacion()).append("\"\n");
+        }
+
+        html.append("</table>");
+        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Reporte técnico de conectividad emitido por Happy Pets ERP Gateway.</p>");
+        html.append("</body></html>");
+
+        Ui.mostrarVisorReporte(
+            SwingUtilities.getWindowAncestor(this),
+            "Integraciones y APIs",
+            "Estado de Conectividad de Integraciones Externas",
+            html.toString(),
+            csv.toString()
+        );
     }
 }

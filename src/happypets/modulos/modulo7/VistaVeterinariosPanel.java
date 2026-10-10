@@ -47,14 +47,14 @@ import happypets.ui.Ui;
 public class VistaVeterinariosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = new Color(248, 250, 252);
-    private static final Color COLOR_CARD = Color.WHITE;
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_TEXTO_TITULO = new Color(15, 23, 42);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
-    private static final Color COLOR_AZUL = new Color(2, 132, 199);
-    private static final Color COLOR_MORADO = new Color(126, 34, 206);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
+    private static final Color COLOR_FONDO = Ui.FONDO;
+    private static final Color COLOR_CARD = Ui.FONDO_CARD;
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
+    private static final Color COLOR_AZUL = Ui.TURQUESA;
+    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
     private static final Color COLOR_AMBAR = new Color(245, 158, 11);
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
@@ -347,10 +347,10 @@ public class VistaVeterinariosPanel extends JPanel {
         JLabel badgeEsp = new JLabel("  " + v.getEspecialidad() + "  ");
         badgeEsp.setOpaque(true);
         badgeEsp.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeEsp.setBackground(new Color(243, 232, 255)); // Morado suave
-        badgeEsp.setForeground(COLOR_MORADO);
+        badgeEsp.setBackground(Ui.TURQUESA_SUAVE);
+        badgeEsp.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeEsp.setBorder(new CompoundBorder(
-                new LineBorder(new Color(216, 180, 254), 1, true),
+                new LineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(3, 6, 3, 6)
         ));
         panelEsp.add(badgeEsp);
@@ -581,6 +581,24 @@ public class VistaVeterinariosPanel extends JPanel {
         JButton btnCerrar = Ui.botonSecundario("Cerrar", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
 
+        JButton btnExportar = Ui.botonSecundario("Descargar Ficha PDF", Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
+        btnExportar.addActionListener(e -> {
+            String textoFicha = "FICHA TÉCNICA DEL ESPECIALISTA VETERINARIO\n" +
+                    "CLÍNICA VETERINARIA HAPPY PETS S.A.C.\n" +
+                    "=========================================================================\n\n" +
+                    "NOMBRE COMPLETO     : " + v.getNombreCompleto() + "\n" +
+                    "COLEGIATURA CMPV    : " + v.getColegiaturaCMPV() + "\n" +
+                    "ESPECIALIDAD        : " + v.getEspecialidad() + "\n" +
+                    "AÑOS EXPERIENCIA    : " + v.getAniosExperiencia() + " años\n" +
+                    "CONSULTORIO         : " + v.getConsultorioHabitual() + "\n" +
+                    "TURNOS / HORARIOS   : " + v.getDiasAtencion() + " (" + v.getHorarioTurno() + ")\n" +
+                    "ESTADO ACTUAL       : " + v.getEstadoDisponibilidad() + "\n" +
+                    "CONTACTO            : " + v.getTelefono() + " | " + v.getEmail() + "\n\n" +
+                    "PERFIL CLÍNICO:\n" + v.getDescripcionBio() + "\n";
+            Ui.mostrarVisorReporte(dlg, "Ficha Profesional - " + v.getNombreCompleto(), "CUADRO MÉDICO COLEGIADO", textoFicha, "FichaVeterinario_" + v.getColegiaturaCMPV());
+        });
+
+        bot.add(btnExportar);
         bot.add(btnGuardarEstado);
         bot.add(btnCerrar);
         panel.add(bot, BorderLayout.SOUTH);

@@ -119,6 +119,14 @@ public class VentaPOS {
         return clienteNombre;
     }
 
+    public String getCliente() {
+        return clienteNombre;
+    }
+
+    public String getFechaFormateada() {
+        return getFechaHoraTexto();
+    }
+
     public void setClienteNombre(String clienteNombre) {
         this.clienteNombre = clienteNombre;
     }

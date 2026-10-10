@@ -28,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -50,10 +51,10 @@ import happypets.ui.Ui;
 public class VistaVacunacionDesparasitacionPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -505,8 +506,7 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
         };
 
         tablaHistorial = new JTable(modeloHistorial);
-        Ui.formatearTabla(tablaHistorial);
-        tablaHistorial.setRowHeight(30);
+        Ui.formatearTabla(tablaHistorial, new int[]{0, 1, 4, 7, 8}, new int[]{});
 
         tablaHistorial.getColumnModel().getColumn(0).setPreferredWidth(85);
         tablaHistorial.getColumnModel().getColumn(1).setPreferredWidth(80);
@@ -569,7 +569,7 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -769,22 +769,20 @@ public class VistaVacunacionDesparasitacionPanel extends JPanel {
         }
         RegistroInmunizacion r = listaActual.get(row);
 
-        String carnet = "╔════════════════════════════════════════════════════════════════╗\n" +
-                        "║        VETERINARIA HAPPY PETS · CARNET SANITARIO               ║\n" +
-                        "║           Control Oficial de Inmunizaciones                   ║\n" +
-                        "╠════════════════════════════════════════════════════════════════╣\n" +
-                        " Paciente: " + r.getNombreMascota() + " (" + r.getEspecieRaza() + ")\n" +
-                        " Propietario: " + r.getNombreTutor() + "\n" +
-                        "────────────────────────────────────────────────────────────────\n" +
-                        " REGISTRO VIGENTE:\n" +
-                        " • " + r.getTipoControl() + ": " + r.getProducto() + "\n" +
-                        " • Fecha Aplicación: " + r.getFechaAplicacionFormateada() + "    Dosis: " + r.getDosis() + "\n" +
-                        " • Lote / Laboratorio: " + r.getLaboratorioLote() + "\n" +
-                        " • Médico Veterinario: " + r.getVeterinario() + "\n" +
-                        " • PRÓXIMO REFUERZO: " + r.getProximaFechaFormateada() + "\n" +
-                        "╚════════════════════════════════════════════════════════════════╝";
+        String[][] datos = new String[][]{
+            {"1", r.getTipoControl(), r.getProducto(), r.getLaboratorioLote(), r.getFechaAplicacionFormateada(), r.getProximaFechaFormateada(), r.getEstado()}
+        };
 
-        JOptionPane.showMessageDialog(this, carnet, "Carnet Vacunal Digital - Happy Pets", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "CARNET OFICIAL DE INMUNIZACIONES Y VACUNAS",
+            "Paciente: " + r.getNombreMascota() + " (" + r.getEspecieRaza() + ") | Tutor: " + r.getNombreTutor(),
+            "Médico Veterinario: " + r.getVeterinario() + " | Dosis: " + r.getDosis(),
+            new String[]{"N°", "Tipo Control", "Biológico / Fármaco", "Lote", "Fecha Apl.", "Próximo Refuerzo", "Estado"},
+            datos,
+            "REGISTRO SANITARIO CERTIFICADO · HAPPY PETS",
+            "CarnetVacunal_" + r.getNombreMascota()
+        );
     }
 
     private static class PacienteItem {

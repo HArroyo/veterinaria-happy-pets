@@ -156,9 +156,9 @@ public class VistaTablerosMandoPanel extends JPanel {
         JLabel badgeSede = new JLabel("  Sede Central y Filiales  ");
         badgeSede.setFont(new Font("Segoe UI", Font.BOLD, 11));
         badgeSede.setOpaque(true);
-        badgeSede.setBackground(new Color(224, 242, 254));
-        badgeSede.setForeground(new Color(3, 105, 161));
-        badgeSede.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+        badgeSede.setBackground(Ui.TURQUESA_SUAVE);
+        badgeSede.setForeground(Ui.TURQUESA_PROFUNDO);
+        badgeSede.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
         filaTitulo.add(badgeSede);
 
         pnlTitulos.add(filaTitulo);
@@ -166,7 +166,7 @@ public class VistaTablerosMandoPanel extends JPanel {
 
         JLabel lblSub = new JLabel("Monitoreo ejecutivo de indicadores de rendimiento, citas e ingresos en tiempo real.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(new Color(100, 116, 139));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
         pnlTitulos.add(lblSub);
 
         cabecera.add(pnlTitulos, BorderLayout.WEST);
@@ -175,28 +175,24 @@ public class VistaTablerosMandoPanel extends JPanel {
         JPanel pnlFiltros = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlFiltros.setOpaque(false);
 
-        comboPeriodo = new JComboBox<>(new String[]{
+        comboPeriodo = Ui.combo(new String[]{
                 "01 May 2024 - 31 May 2024",
                 "Abril 2024 (Mes Completo)",
                 "Primer Trimestre 2024 (Q1)",
                 "Últimos 12 Meses"
         });
-        comboPeriodo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboPeriodo.setPreferredSize(new Dimension(210, 34));
-        comboPeriodo.setBackground(Color.WHITE);
 
-        comboEspecie = new JComboBox<>(new String[]{
+        comboEspecie = Ui.combo(new String[]{
                 "Todas las Especies",
                 "Sólo Caninos",
                 "Sólo Felinos",
                 "Animales Exóticos"
         });
-        comboEspecie.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboEspecie.setPreferredSize(new Dimension(150, 34));
-        comboEspecie.setBackground(Color.WHITE);
 
-        JButton btnActualizar = Ui.botonPrimario("Actualizar Indicadores", Iconos.crearIconoRefrescar(14, Color.WHITE));
-        btnActualizar.setPreferredSize(new Dimension(175, 34));
+        JButton btnActualizar = Ui.botonSecundario("Actualizar", Iconos.crearIconoRefrescar(14, Ui.TEXTO_TITULO));
+        btnActualizar.setPreferredSize(new Dimension(115, 34));
         btnActualizar.addActionListener(e -> {
             graficoMensual.repaint();
             filtrarCitas();
@@ -205,9 +201,14 @@ public class VistaTablerosMandoPanel extends JPanel {
                     "Sincronización BI", JOptionPane.INFORMATION_MESSAGE);
         });
 
+        JButton btnReporteBI = Ui.botonPrimario("Descargar Reporte BI", Iconos.crearIconoDescargar(14, Color.WHITE));
+        btnReporteBI.setPreferredSize(new Dimension(185, 34));
+        btnReporteBI.addActionListener(e -> generarReporteEjecutivoBI());
+
         pnlFiltros.add(comboPeriodo);
         pnlFiltros.add(comboEspecie);
         pnlFiltros.add(btnActualizar);
+        pnlFiltros.add(btnReporteBI);
 
         cabecera.add(pnlFiltros, BorderLayout.EAST);
         return cabecera;
@@ -559,19 +560,7 @@ public class VistaTablerosMandoPanel extends JPanel {
         };
 
         tablaCitas = new JTable(modeloCitas);
-        tablaCitas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaCitas.setRowHeight(38);
-        tablaCitas.setGridColor(new Color(241, 245, 249));
-        tablaCitas.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaCitas.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaCitas.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaCitas.setSelectionBackground(new Color(240, 249, 255));
-        tablaCitas.setSelectionForeground(new Color(15, 23, 42));
-
-        // Centrado de horas y estados
-        DefaultTableCellRenderer centroRenderer = new DefaultTableCellRenderer();
-        centroRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        tablaCitas.getColumnModel().getColumn(0).setCellRenderer(centroRenderer);
+        Ui.formatearTabla(tablaCitas, new int[]{0, 5, 6}, new int[]{});
         tablaCitas.getColumnModel().getColumn(0).setPreferredWidth(90);
         tablaCitas.getColumnModel().getColumn(1).setPreferredWidth(170);
         tablaCitas.getColumnModel().getColumn(2).setPreferredWidth(150);
@@ -580,7 +569,7 @@ public class VistaTablerosMandoPanel extends JPanel {
         tablaCitas.getColumnModel().getColumn(5).setPreferredWidth(110);
         tablaCitas.getColumnModel().getColumn(6).setPreferredWidth(90);
 
-        // Render de Estado con badges de color
+        // Render de Estado con badges institucionales
         tablaCitas.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -590,8 +579,8 @@ public class VistaTablerosMandoPanel extends JPanel {
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 l.setOpaque(true);
                 if ("En Atención".equalsIgnoreCase(st)) {
-                    l.setBackground(new Color(224, 242, 254));
-                    l.setForeground(new Color(3, 105, 161));
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
                 } else if ("En Espera".equalsIgnoreCase(st)) {
                     l.setBackground(new Color(254, 243, 199));
                     l.setForeground(new Color(180, 83, 9));
@@ -613,7 +602,7 @@ public class VistaTablerosMandoPanel extends JPanel {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(table, "Ver Ficha", isSelected, hasFocus, row, col);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
-                l.setForeground(new Color(2, 132, 199));
+                l.setForeground(Ui.TURQUESA_PROFUNDO);
                 l.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 return l;
             }
@@ -632,7 +621,7 @@ public class VistaTablerosMandoPanel extends JPanel {
 
         JScrollPane scrollTabla = new JScrollPane(tablaCitas);
         scrollTabla.setPreferredSize(new Dimension(800, 215));
-        scrollTabla.setBorder(BorderFactory.createLineBorder(new Color(241, 245, 249), 1));
+        scrollTabla.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
         card.add(scrollTabla, BorderLayout.CENTER);
 
         // Pie de paginación
@@ -641,7 +630,7 @@ public class VistaTablerosMandoPanel extends JPanel {
 
         JLabel lblInfoPags = new JLabel("Mostrando 5 de 18 citas programadas");
         lblInfoPags.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblInfoPags.setForeground(new Color(100, 116, 139));
+        lblInfoPags.setForeground(Ui.TEXTO_MUTED);
         piePaginacion.add(lblInfoPags, BorderLayout.WEST);
 
         JPanel pnlBotonesPag = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
@@ -659,7 +648,7 @@ public class VistaTablerosMandoPanel extends JPanel {
 
         JButton btnP1 = new JButton("1");
         btnP1.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnP1.setBackground(new Color(2, 132, 199));
+        btnP1.setBackground(Ui.TURQUESA);
         btnP1.setForeground(Color.WHITE);
 
         JButton btnP2 = new JButton("2");
@@ -750,19 +739,69 @@ public class VistaTablerosMandoPanel extends JPanel {
                 + "• Hora Programada: " + c.hora + "\n"
                 + "• Motivo de Consulta: " + c.motivo + "\n"
                 + "• Estado de Atención: " + c.estado + "\n\n"
-                + "¿Desea iniciar la atención o derivar a triaje?";
+                + "¿Qué acción desea realizar?";
 
         int opt = JOptionPane.showOptionDialog(this, msg, "Detalle de Cita - " + c.paciente,
-                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                null, new String[]{"Atender Paciente", "Cerrar"}, "Atender Paciente");
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                null, new String[]{"Ver Ficha A4 / Imprimir", "Atender Paciente", "Cerrar"}, "Ver Ficha A4 / Imprimir");
 
         if (opt == 0) {
+            String[][] datos = new String[][]{
+                {"1", c.hora, c.paciente, c.especieRaza, c.propietario, c.veterinario, c.motivo, c.estado}
+            };
+            Ui.mostrarVisorReporte(
+                (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this),
+                "ORDEN DE ATENCIÓN CLÍNICA",
+                "Comprobante de Cita Médica - " + c.paciente,
+                "Tutor: " + c.propietario + " | Médico Asignado: " + c.veterinario,
+                new String[]{"N°", "Hora", "Paciente", "Especie / Raza", "Propietario", "Veterinario", "Motivo", "Estado"},
+                datos,
+                "Documento de triage y admisión médica para Happy Pets.",
+                "Cita_" + c.paciente
+            );
+        } else if (opt == 1) {
             c.estado = "En Atención";
             actualizarTablaPaginada();
             JOptionPane.showMessageDialog(this,
                     "El estado del paciente " + c.paciente + " ha cambiado a 'En Atención'.",
                     "Paciente en Consulta", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    private void generarReporteEjecutivoBI() {
+        String[][] datos = new String[listaCitasHoy.size()][7];
+        for (int i = 0; i < listaCitasHoy.size(); i++) {
+            FilaCitaHoy c = listaCitasHoy.get(i);
+            datos[i] = new String[]{
+                String.valueOf(i + 1),
+                c.hora,
+                c.paciente + " (" + c.especieRaza + ")",
+                c.propietario,
+                c.veterinario,
+                c.motivo,
+                c.estado
+            };
+        }
+
+        String[][] meta = new String[][]{
+            {"Período Analizado", comboPeriodo != null ? comboPeriodo.getSelectedItem().toString() : "Mayo 2024"},
+            {"Filtro Especie", comboEspecie != null ? comboEspecie.getSelectedItem().toString() : "Todas"},
+            {"Total Citas Hoy", String.valueOf(listaCitasHoy.size()) + " pacientes"},
+            {"Ingresos Totales", "S/ 148,250.00 (+12.4%)"},
+            {"Ticket Promedio", "S/ 104.40"},
+            {"Puntualidad Global", "92% (Espera media: 8.4 min)"}
+        };
+
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this),
+            "TABLERO EJECUTIVO DE MANDO Y AGENDA BI",
+            "Módulo de Business Intelligence & Analítica Operativa",
+            meta,
+            new String[]{"N°", "Hora", "Paciente y Raza", "Propietario", "Veterinario", "Motivo de Cita", "Estado"},
+            datos,
+            "Indicadores de eficiencia clínica y demanda asistencial en tiempo real.",
+            "Reporte_Dashboard_BI"
+        );
     }
 
     /**

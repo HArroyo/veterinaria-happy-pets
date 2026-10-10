@@ -31,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -49,10 +50,10 @@ import happypets.ui.Ui;
 public class VistaAgendamientoCitasPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -165,9 +166,28 @@ public class VistaAgendamientoCitasPanel extends JPanel {
         JButton btnExportar = crearBotonAccion("Exportar Agenda", false);
         btnExportar.setIcon(Iconos.crearIconoImprimir(12, COLOR_AZUL_PRIMARIO));
         btnExportar.setIconTextGap(4);
-        btnExportar.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "La agenda de citas fue exportada satisfactoriamente a formato Excel / PDF.",
-                "Exportación Exitosa", JOptionPane.INFORMATION_MESSAGE));
+        btnExportar.addActionListener(e -> {
+            int rows = modeloCitas.getRowCount();
+            String[][] datos = new String[rows][6];
+            for (int i = 0; i < rows; i++) {
+                datos[i][0] = String.valueOf(modeloCitas.getValueAt(i, 0));
+                datos[i][1] = String.valueOf(modeloCitas.getValueAt(i, 1));
+                datos[i][2] = String.valueOf(modeloCitas.getValueAt(i, 2));
+                datos[i][3] = String.valueOf(modeloCitas.getValueAt(i, 3));
+                datos[i][4] = String.valueOf(modeloCitas.getValueAt(i, 4));
+                datos[i][5] = String.valueOf(modeloCitas.getValueAt(i, 6));
+            }
+            Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "AGENDA DE CITAS VETERINARIAS",
+                "Programación de Turnos · Fecha: " + LocalDate.now(),
+                "Total Citas Programadas: " + rows + " | Estado Operativo Activo",
+                new String[]{"Hora", "ID Cita", "Paciente", "Propietario", "Servicio", "Estado"},
+                datos,
+                "PROGRAMACIÓN CLÍNICA HAPPY PETS",
+                "Agenda_Citas_" + LocalDate.now()
+            );
+        });
 
         JButton btnNuevaCita = crearBotonAccion("+ Nueva Cita", true);
         btnNuevaCita.addActionListener(e -> {
@@ -590,9 +610,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
         };
 
         tablaCitas = new JTable(modeloCitas);
-        Ui.formatearTabla(tablaCitas);
-        tablaCitas.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaCitas.setRowHeight(26);
+        Ui.formatearTabla(tablaCitas, new int[]{0, 1, 6, 7}, new int[]{});
 
         // Renderizador de Estado y Prioridad con colores
         tablaCitas.getColumnModel().getColumn(6).setCellRenderer(new BadgeEstadoRenderer());
@@ -675,7 +693,7 @@ public class VistaAgendamientoCitasPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
                 if (esPrimario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }

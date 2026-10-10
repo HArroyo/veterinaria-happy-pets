@@ -52,10 +52,10 @@ import happypets.ui.Ui;
 public class VistaHospitalizacionPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -172,7 +172,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         lblKpiDisponibles = new JLabel("6", SwingConstants.LEFT);
         lblKpiTasaOcupacion = new JLabel("33%", SwingConstants.LEFT);
 
-        fila.add(crearCardKpi(lblKpiOcupados, "CANÍLES OCUPADOS", new Color(224, 242, 254), COLOR_AZUL_PRIMARIO, Iconos.crearIconoCamaHospital(20, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiOcupados, "CANÍLES OCUPADOS", Ui.TURQUESA_SUAVE, COLOR_AZUL_PRIMARIO, Iconos.crearIconoCamaHospital(20, COLOR_AZUL_PRIMARIO)));
         fila.add(crearCardKpi(lblKpiCriticos, "PACIENTES EN ESTADO CRÍTICO", new Color(254, 226, 226), new Color(220, 38, 38), Iconos.crearIconoAlertaTriaje(20, new Color(220, 38, 38))));
         fila.add(crearCardKpi(lblKpiDisponibles, "CANÍLES DISPONIBLES", new Color(220, 252, 231), new Color(22, 163, 74), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
         fila.add(crearCardKpi(lblKpiTasaOcupacion, "OCUPACIÓN CLÍNICA", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoReportes(20, new Color(147, 51, 234))));
@@ -545,8 +545,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         };
 
         tablaHospitalizados = new JTable(modeloHospitalizados);
-        Ui.formatearTabla(tablaHospitalizados);
-        tablaHospitalizados.setRowHeight(32);
+        Ui.formatearTabla(tablaHospitalizados, new int[]{0, 4, 5, 6}, new int[]{});
 
         tablaHospitalizados.getColumnModel().getColumn(0).setPreferredWidth(60);
         tablaHospitalizados.getColumnModel().getColumn(1).setPreferredWidth(85);
@@ -636,7 +635,7 @@ public class VistaHospitalizacionPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -852,27 +851,22 @@ public class VistaHospitalizacionPanel extends JPanel {
         }
         InternamientoHospitalario h = listaActual.get(row);
 
-        String epicrisis = "╔════════════════════════════════════════════════════════════════╗\n" +
-                           "║        HAPPY PETS · RESUMEN DE INTERNAMIENTO Y EPICRISIS       ║\n" +
-                           "║             Unidad de Cuidados Hospitalarios 24/7              ║\n" +
-                           "╠════════════════════════════════════════════════════════════════╣\n" +
-                           " ID Internamiento: " + h.getIdInternamiento() + "  |  Ubicación: " + h.getNumeroBox() + "\n" +
-                           " Paciente: " + h.getNombreMascota() + " (" + h.getEspecieRaza() + ")\n" +
-                           " Tutor: " + h.getNombreTutor() + "  |  Tel: " + h.getTelefonoTutor() + "\n" +
-                           " Fecha de Ingreso: " + h.getFechaIngresoFormateada() + " " + h.getHoraIngresoFormateada() + " hrs\n" +
-                           " Diagnóstico Clínico: " + h.getDiagnosticoIngreso() + "\n" +
-                           " Veterinario Responsable: " + h.getVeterinarioTratante() + "\n" +
-                           "────────────────────────────────────────────────────────────────\n" +
-                           " TERAPIA INTRAHOSPITALARIA:\n" +
-                           " • Fluidoterapia: " + h.getFluidoterapia() + "\n" +
-                           " • Fármacos Administrados: " + h.getMedicacionActual() + "\n" +
-                           "────────────────────────────────────────────────────────────────\n" +
-                           " NOTAS DE EVOLUCIÓN Y ENFERMERÍA:\n" +
-                           " " + h.getEvolucionNotas() + "\n\n" +
-                           " Estado Final: " + h.getEstado() + "  |  Nivel Alerta: " + h.getNivelAlerta() + "\n" +
-                           "╚════════════════════════════════════════════════════════════════╝";
+        String[][] datos = new String[][]{
+            {"1", "Ingreso y Diagnóstico", h.getDiagnosticoIngreso(), "Fecha: " + h.getFechaIngresoFormateada() + " " + h.getHoraIngresoFormateada(), "Ingresado"},
+            {"2", "Terapia y Medicación", h.getFluidoterapia() + " | " + h.getMedicacionActual(), "Veterinario: " + h.getVeterinarioTratante(), h.getNivelAlerta()},
+            {"3", "Evolución y Alta", h.getEvolucionNotas(), "Canil Box: " + h.getNumeroBox(), h.getEstado()}
+        };
 
-        JOptionPane.showMessageDialog(this, epicrisis, "Epicrisis Médica Hospitalaria - " + h.getIdInternamiento(), JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this),
+            "EPICRISIS Y REPORTE DE HOSPITALIZACIÓN",
+            "Paciente: " + h.getNombreMascota() + " (" + h.getEspecieRaza() + ") | Tutor: " + h.getNombreTutor() + " | Tel: " + h.getTelefonoTutor(),
+            "Código Internamiento: " + h.getIdInternamiento() + " | Box: " + h.getNumeroBox() + " | Estado: " + h.getEstado(),
+            new String[]{"Fase", "Etapa Clínica", "Protocolo / Medicación", "Responsable / Ubicación", "Estado"},
+            datos,
+            "UNIDAD DE CUIDADOS INTENSIVOS Y HOSPITALIZACIÓN · HAPPY PETS",
+            "Epicrisis_" + h.getIdInternamiento()
+        );
     }
 
     private static class PacienteItem {

@@ -50,13 +50,13 @@ import happypets.ui.Ui;
 public class VistaCuentasCobrarPagarPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_PRIMARIO = new Color(249, 115, 22);
-    private static final Color COLOR_AZUL = new Color(14, 165, 233);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
-    private static final Color COLOR_ROJO = new Color(239, 68, 68);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_PRIMARIO = Ui.TURQUESA; // Turquesa Clínico Original
+    private static final Color COLOR_AZUL = Ui.TURQUESA_OSCURO;
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
+    private static final Color COLOR_ROJO = Ui.COLOR_PELIGRO;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -345,7 +345,7 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         };
 
         tablaCobrar = new JTable(modeloCobrar);
-        Ui.formatearTabla(tablaCobrar);
+        Ui.formatearTabla(tablaCobrar, new int[]{3, 4}, new int[]{2});
 
         tablaCobrar.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -528,7 +528,7 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         };
 
         tablaPagar = new JTable(modeloPagar);
-        Ui.formatearTabla(tablaPagar);
+        Ui.formatearTabla(tablaPagar, new int[]{3, 4}, new int[]{2});
 
         tablaPagar.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {

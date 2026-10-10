@@ -51,19 +51,19 @@ public class Modulo6FinanzasVentasFrame extends JFrame {
         tabs.setBackground(Color.WHITE);
 
         tabs.addTab("Punto de Venta (POS)",
-                Iconos.crearIconoPOS(16, new Color(249, 115, 22)),
+                Iconos.crearIconoPOS(16, Ui.TURQUESA),
                 vistaPOS);
 
         tabs.addTab("Cuentas por Cobrar y Pagar",
-                Iconos.crearIconoCuentas(16, new Color(14, 165, 233)),
+                Iconos.crearIconoCuentas(16, Ui.TURQUESA_OSCURO),
                 vistaCuentas);
 
         tabs.addTab("Control de Caja Chica",
-                Iconos.crearIconoCajaChica(16, new Color(16, 185, 129)),
+                Iconos.crearIconoCajaChica(16, Ui.TURQUESA),
                 vistaCajaChica);
 
         tabs.addTab("Gestión de Egresos Operativos",
-                Iconos.crearIconoEgresos(16, new Color(239, 68, 68)),
+                Iconos.crearIconoEgresos(16, Ui.TURQUESA_OSCURO),
                 vistaEgresos);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {

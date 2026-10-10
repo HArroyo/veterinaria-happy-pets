@@ -50,15 +50,15 @@ import happypets.ui.Ui;
 public class VistaHorariosTurnosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = new Color(248, 250, 252);
-    private static final Color COLOR_CARD = Color.WHITE;
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_TEXTO_TITULO = new Color(15, 23, 42);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
-    private static final Color COLOR_AZUL = new Color(2, 132, 199);
-    private static final Color COLOR_MORADO = new Color(126, 34, 206);
+    private static final Color COLOR_FONDO = Ui.FONDO;
+    private static final Color COLOR_CARD = Ui.FONDO_CARD;
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
+    private static final Color COLOR_AZUL = Ui.TURQUESA;
+    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
     private static final Color COLOR_NARANJA = new Color(234, 88, 12);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -171,7 +171,29 @@ public class VistaHorariosTurnosPanel extends JPanel {
         panelBotones.setOpaque(false);
 
         JButton btnDescargarPDF = Ui.botonSecundario("Descargar PDF", Iconos.crearIconoDocumento(14, COLOR_TEXTO_MUTED));
-        btnDescargarPDF.addActionListener(e -> JOptionPane.showMessageDialog(this, "Generando Cuadrante Semanal de Guardias en formato PDF oficial para imprimir.", "Exportación PDF", JOptionPane.INFORMATION_MESSAGE));
+        btnDescargarPDF.addActionListener(e -> {
+            String[] cols = new String[]{"Especialista", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+            List<Object[]> filas = new java.util.ArrayList<>();
+            if (listaTurnosActual != null) {
+                for (TurnoSemanal ts : listaTurnosActual) {
+                    filas.add(new Object[]{
+                        ts.getNombreProfesional() + " (" + ts.getEspecialidad() + ")",
+                        ts.getHorarioDia(0), ts.getHorarioDia(1), ts.getHorarioDia(2),
+                        ts.getHorarioDia(3), ts.getHorarioDia(4), ts.getHorarioDia(5), ts.getHorarioDia(6)
+                    });
+                }
+            }
+            Ui.mostrarVisorReporte(
+                SwingUtilities.getWindowAncestor(this),
+                "CUADRANTE SEMANAL DE GUARDIAS Y TURNOS",
+                "Semana: " + lblSemanaRango.getText() + " | Sede Central Happy Pets",
+                "DIRECCIÓN MÉDICA Y GESTIÓN DE TURNOS",
+                cols,
+                filas,
+                "CUADRANTE DE ROL OPERATIVO VETERINARIA HAPPY PETS",
+                "Cuadrante_Turnos"
+            );
+        });
 
         JButton btnCalendario = Ui.botonSecundario("Exportar a Calendario", Iconos.crearIconoCalendario(14, COLOR_TEXTO_MUTED));
         btnCalendario.addActionListener(e -> JOptionPane.showMessageDialog(this, "Sincronizando turnos médicos con Google Calendar / Outlook iCal.", "Sincronización Exitosa", JOptionPane.INFORMATION_MESSAGE));

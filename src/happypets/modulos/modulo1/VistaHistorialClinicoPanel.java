@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -50,10 +51,10 @@ import happypets.ui.Ui;
 public class VistaHistorialClinicoPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
     private Mascota mascotaActual;
@@ -156,18 +157,15 @@ public class VistaHistorialClinicoPanel extends JPanel {
         btnImprimir.setIconTextGap(4);
         btnImprimir.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnImprimir.setPreferredSize(new Dimension(btnImprimir.getPreferredSize().width, 28));
-        btnImprimir.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Enviando historial clínico de " + (mascotaActual != null ? mascotaActual.getNombre() : "") + " a la cola de impresión.",
-                "Impresión", JOptionPane.INFORMATION_MESSAGE));
+        btnImprimir.addActionListener(e -> exportarHistorialDocumento());
 
-        JButton btnExportarPdf = Ui.boton("Exportar PDF", false);
+        JButton btnExportarPdf = Ui.boton("Exportar PDF / Excel", true);
+        btnExportarPdf.setIcon(Iconos.crearIconoDescargar(12, Color.WHITE));
         btnExportarPdf.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnExportarPdf.setPreferredSize(new Dimension(btnExportarPdf.getPreferredSize().width, 28));
-        btnExportarPdf.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Historial clínico generado y exportado exitosamente a formato PDF.",
-                "Exportación Exitosa", JOptionPane.INFORMATION_MESSAGE));
+        btnExportarPdf.addActionListener(e -> exportarHistorialDocumento());
 
-        JButton btnNuevaConsulta = Ui.boton("+ Nueva Consulta", true);
+        JButton btnNuevaConsulta = Ui.boton("+ Nueva Consulta", false);
         btnNuevaConsulta.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnNuevaConsulta.setPreferredSize(new Dimension(btnNuevaConsulta.getPreferredSize().width, 28));
         btnNuevaConsulta.addActionListener(e -> registrarNuevaConsulta());
@@ -293,7 +291,7 @@ public class VistaHistorialClinicoPanel extends JPanel {
         // 1. Paciente Mascota
         lblKpiMascotaVal = new JLabel("Rocky");
         lblKpiMascotaSub = new JLabel("Canino · Golden Retriever");
-        fila.add(crearCardKpi(lblKpiMascotaVal, lblKpiMascotaSub, "PACIENTE SELECCIONADO", new Color(224, 242, 254), Iconos.crearIconoHuella(22, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiMascotaVal, lblKpiMascotaSub, "PACIENTE SELECCIONADO", Ui.TURQUESA_SUAVE, Iconos.crearIconoHuella(22, COLOR_AZUL_PRIMARIO)));
 
         // 2. Propietario Responsable
         lblKpiClienteVal = new JLabel("Carlos Morales");
@@ -414,9 +412,7 @@ public class VistaHistorialClinicoPanel extends JPanel {
         };
 
         tablaConsultas = new JTable(modeloConsultas);
-        Ui.formatearTabla(tablaConsultas);
-        tablaConsultas.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaConsultas.setRowHeight(26);
+        Ui.formatearTabla(tablaConsultas, new int[]{0, 1, 6}, new int[]{});
 
         tablaConsultas.addMouseListener(new MouseAdapter() {
             @Override
@@ -577,5 +573,33 @@ public class VistaHistorialClinicoPanel extends JPanel {
             cargarMascota(mascotaActual);
             JOptionPane.showMessageDialog(this, "Consulta médica registrada correctamente en el historial.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    private void exportarHistorialDocumento() {
+        if (mascotaActual == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un paciente para generar el reporte de historial clínico.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int rows = modeloConsultas.getRowCount();
+        String[][] datos = new String[rows][5];
+        for (int i = 0; i < rows; i++) {
+            datos[i][0] = String.valueOf(modeloConsultas.getValueAt(i, 0));
+            datos[i][1] = String.valueOf(modeloConsultas.getValueAt(i, 1));
+            datos[i][2] = String.valueOf(modeloConsultas.getValueAt(i, 2));
+            datos[i][3] = String.valueOf(modeloConsultas.getValueAt(i, 3));
+            datos[i][4] = String.valueOf(modeloConsultas.getValueAt(i, 5));
+        }
+
+        Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "HISTORIAL CLÍNICO VETERINARIO",
+                "Paciente: " + mascotaActual.getNombre() + " (" + mascotaActual.getEspecieRaza() + ") | Código: " + mascotaActual.getCodigo(),
+                "Propietario: " + (clienteActual != null ? clienteActual.getNombreCompleto() : "N/D") + " | Total Consultas: " + rows,
+                new String[]{"Código", "Fecha", "Motivo", "Diagnóstico", "Veterinario"},
+                datos,
+                "ESTADO: PACIENTE CONTROLADO · HISTORIAL COMPLETO",
+                "HistorialClinico_" + mascotaActual.getNombre()
+        );
     }
 }

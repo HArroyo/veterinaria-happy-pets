@@ -48,10 +48,11 @@ public class Modulo3ServiciosMedicosFrame extends JFrame {
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabs.setBackground(Color.WHITE);
 
-        tabs.addTab("Consultas Médicas", Iconos.crearIconoEstetoscopio(16, new Color(20, 184, 166)), vistaConsultas);
-        tabs.addTab("Vacunación y Desparasitación", Iconos.crearIconoJeringa(16, new Color(2, 132, 199)), vistaVacunacion);
-        tabs.addTab("Cirugías y Quirófano", Iconos.crearIconoBisturi(16, new Color(220, 38, 38)), vistaCirugias);
-        tabs.addTab("Laboratorio e Imágenes", Iconos.crearIconoMicroscopio(16, new Color(147, 51, 234)), vistaLaboratorio);
+        setIconImage(happypets.ui.Ui.icono());
+        tabs.addTab("Consultas Médicas", Iconos.crearIconoEstetoscopio(16, happypets.ui.Ui.TURQUESA), vistaConsultas);
+        tabs.addTab("Vacunación y Desparasitación", Iconos.crearIconoJeringa(16, happypets.ui.Ui.TURQUESA_OSCURO), vistaVacunacion);
+        tabs.addTab("Cirugías y Quirófano", Iconos.crearIconoBisturi(16, happypets.ui.Ui.COLOR_PELIGRO), vistaCirugias);
+        tabs.addTab("Laboratorio e Imágenes", Iconos.crearIconoMicroscopio(16, happypets.ui.Ui.TURQUESA_PROFUNDO), vistaLaboratorio);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {
             tabs.setSelectedIndex(pestanaInicial);

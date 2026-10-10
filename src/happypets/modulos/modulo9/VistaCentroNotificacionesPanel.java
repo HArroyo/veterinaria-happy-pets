@@ -86,9 +86,9 @@ public class VistaCentroNotificacionesPanel extends JPanel {
 
     private JPanel crearCabeceraSuperior() {
         JPanel cab = new JPanel(new BorderLayout(16, 8));
-        cab.setBackground(new Color(30, 41, 59)); // Cabecera oscura elegante
+        cab.setBackground(Ui.TURQUESA_PROFUNDO);
         cab.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(15, 23, 42), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(14, 20, 14, 20)
         ));
 
@@ -104,7 +104,7 @@ public class VistaCentroNotificacionesPanel extends JPanel {
 
         JLabel lblSub = new JLabel("Monitoreo en vivo de incidentes de seguridad, alertas de capacidad y mensajes del sistema.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblSub.setForeground(new Color(148, 163, 184));
+        lblSub.setForeground(Ui.TURQUESA_SUAVE);
         pnlTit.add(lblSub);
 
         cab.add(pnlTit, BorderLayout.WEST);
@@ -113,9 +113,12 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
 
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
-        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblUsr.setForeground(new Color(226, 232, 240));
+        JLabel lblUsr = new JLabel("  Usuario: Admin  ");
+        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblUsr.setOpaque(true);
+        lblUsr.setBackground(Ui.TURQUESA_SUAVE);
+        lblUsr.setForeground(Ui.TURQUESA_PROFUNDO);
+        lblUsr.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
         pnlUsr.add(lblUsr);
 
         cab.add(pnlUsr, BorderLayout.EAST);
@@ -187,10 +190,10 @@ public class VistaCentroNotificacionesPanel extends JPanel {
     private void estilizarPestana(JButton btn, boolean activa) {
         if (btn == null) return;
         if (activa) {
-            btn.setBackground(new Color(2, 132, 199));
+            btn.setBackground(Ui.TURQUESA);
             btn.setForeground(Color.WHITE);
             btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(3, 105, 161), 1),
+                    BorderFactory.createLineBorder(Ui.TURQUESA_OSCURO, 1),
                     BorderFactory.createEmptyBorder(6, 16, 6, 16)
             ));
         } else {
@@ -347,6 +350,31 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         bot.setBackground(new Color(248, 250, 252));
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
 
+        JButton btnDescargar = Ui.botonSecundario("Descargar PDF", Iconos.crearIconoDescargar(13, Ui.TEXTO_TITULO));
+        btnDescargar.addActionListener(e -> {
+            String[][] meta = new String[][]{
+                {"Identificador", notificacionSeleccionada.getId()},
+                {"Tipo / Etiqueta", notificacionSeleccionada.getTipo()},
+                {"Categoría", notificacionSeleccionada.getCategoria()},
+                {"Fecha y Hora", notificacionSeleccionada.getFechaFormateada()},
+                {"Módulo de Origen", notificacionSeleccionada.getOrigen()},
+                {"Estado Lectura", notificacionSeleccionada.isLeida() ? "Leída" : "No leída"}
+            };
+            String[][] datos = new String[][]{
+                {"1", notificacionSeleccionada.getId(), notificacionSeleccionada.getTipo(), notificacionSeleccionada.getOrigen(), notificacionSeleccionada.getMensaje()}
+            };
+            Ui.mostrarVisorReporte(
+                dlg,
+                "NOTIFICACIÓN OFICIAL DEL SISTEMA",
+                notificacionSeleccionada.getTitulo(),
+                meta,
+                new String[]{"N°", "Cód. Notificación", "Tipo", "Origen", "Detalle / Contenido"},
+                datos,
+                "Registro de auditoría interna de mensajería y eventos ERP.",
+                "Notificacion_" + notificacionSeleccionada.getId()
+            );
+        });
+
         JButton btnMarcar = Ui.botonSecundario("Marcar Leída", null);
         btnMarcar.addActionListener(e -> {
             repo.marcarNotificacionComoLeida(notificacionSeleccionada.getId());
@@ -357,6 +385,7 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         JButton btnCerrar = Ui.botonPrimario("Cerrar", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
 
+        bot.add(btnDescargar);
         bot.add(btnMarcar);
         bot.add(btnCerrar);
         dlg.add(bot, BorderLayout.SOUTH);
@@ -456,9 +485,9 @@ public class VistaCentroNotificacionesPanel extends JPanel {
 
         private void actualizarEstilo() {
             if (seleccionada) {
-                setBackground(new Color(240, 249, 255));
+                setBackground(Ui.TURQUESA_SUAVE);
                 setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(2, 132, 199), 2),
+                        BorderFactory.createLineBorder(Ui.TURQUESA, 2),
                         BorderFactory.createEmptyBorder(10, 14, 10, 14)
                 ));
             } else {
@@ -474,7 +503,7 @@ public class VistaCentroNotificacionesPanel extends JPanel {
             if (tipo == null) return new Color(100, 116, 139);
             if (tipo.contains("ALERTA")) return new Color(220, 38, 38);       // Rojo
             if (tipo.contains("IMPORTANTE")) return new Color(79, 70, 229);    // Índigo
-            if (tipo.contains("MENSAJE")) return new Color(2, 132, 199);       // Azul cielo
+            if (tipo.contains("MENSAJE")) return Ui.TURQUESA_PROFUNDO;         // Turquesa institucional
             if (tipo.contains("CLÍNICO")) return new Color(16, 185, 129);      // Verde esmeralda
             return new Color(100, 116, 139);                                   // Slate
         }

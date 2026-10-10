@@ -1495,10 +1495,27 @@ public class RepositorioVeterinaria {
 
     public void actualizarStockProducto(String codigo, int deltaCantidad) {
         for (happypets.model.ProductoFarmacia p : productosFarmacia) {
-            if (p.getCodigo().equalsIgnoreCase(codigo)) {
+            if (p.getCodigo().equalsIgnoreCase(codigo) || p.getNombre().equalsIgnoreCase(codigo)) {
                 int nuevo = p.getStockActual() + deltaCantidad;
                 if (nuevo < 0) nuevo = 0;
                 p.setStockActual(nuevo);
+                if (nuevo <= p.getStockMinimo()) {
+                    boolean yaNotificado = notificaciones.stream().anyMatch(n -> n.getTitulo().contains(p.getNombre()));
+                    if (!yaNotificado) {
+                        notificaciones.add(0, new NotificacionSistema(
+                                "NOTIF-STK-" + (notificaciones.size() + 1),
+                                "ALERTA DE INVENTARIO",
+                                "Alerta",
+                                "Stock Crítico: " + p.getNombre(),
+                                "El producto " + p.getNombre() + " (" + p.getCodigo() + ") tiene stock bajo: " + nuevo + " " + p.getPresentacion() + " (mínimo: " + p.getStockMinimo() + ").",
+                                LocalDateTime.now(),
+                                "Hace instantes",
+                                false,
+                                "Alta",
+                                "Inventario"
+                        ));
+                    }
+                }
                 break;
             }
         }
@@ -1614,11 +1631,62 @@ public class RepositorioVeterinaria {
         }
         ventasPOS.add(0, venta);
 
-        // Descontar stock para productos físicos dispensados si la venta no es solo cotización
+        // Sincronización viva en memoria
         if (!"Cotización".equalsIgnoreCase(venta.getEstado())) {
+            // 1. Descuento de stock e inserción en Kardex
             for (ItemVentaPOS item : venta.getItems()) {
                 actualizarStockProducto(item.getCodigo(), -item.getCantidad());
+                movimientosStock.add(0, new happypets.model.LoteMovimientoStock(
+                        "MOV-POS-" + (100 + movimientosStock.size()),
+                        item.getCodigo(),
+                        item.getNombre(),
+                        "LOTE-POS-2026",
+                        "Salida Venta POS",
+                        item.getCantidad(),
+                        0,
+                        0,
+                        LocalDate.now(),
+                        LocalDate.now().plusMonths(12),
+                        "Caja POS",
+                        "Dispensado en comprobante " + venta.getNumeroComprobante()
+                ));
             }
+
+            // 2. Registro en Caja Chica si fue Efectivo
+            if ("Efectivo".equalsIgnoreCase(venta.getMetodoPago())) {
+                movimientosCajaChica.add(0, new MovimientoCajaChica(
+                        "MOV-CC-" + (100 + movimientosCajaChica.size()),
+                        LocalDate.now(),
+                        "Ingreso",
+                        "Cobro Venta POS #" + venta.getNumeroComprobante() + " - " + venta.getCliente(),
+                        venta.getTotal(),
+                        "admin_user",
+                        venta.getNumeroComprobante()
+                ));
+            }
+
+            // 3. Registro en Cuentas por Cobrar si fue al Crédito
+            if ("Crédito".equalsIgnoreCase(venta.getMetodoPago()) || "Credito".equalsIgnoreCase(venta.getMetodoPago())) {
+                cuentasPorCobrar.add(0, new CuentaPorCobrar(
+                        "CXC-2024-" + String.format("%03d", cuentasPorCobrar.size() + 1),
+                        venta.getCliente(),
+                        "Venta POS #" + venta.getNumeroComprobante(),
+                        venta.getTotal(),
+                        LocalDate.now().plusDays(30),
+                        "Pendiente"
+                ));
+            }
+
+            // 4. Auditoría inmutable
+            registrarLogAuditoria(new LogAuditoria(
+                    "#EV-" + (1043 + logsAuditoria.size()),
+                    "Venta POS " + venta.getNumeroComprobante(),
+                    "admin_user",
+                    LocalDateTime.now(),
+                    "127.0.0.1",
+                    "ÉXITO",
+                    "Venta emitida por S/ " + String.format("%.2f", venta.getTotal()) + " [" + venta.getMetodoPago() + "]"
+            ));
         }
     }
 
@@ -1630,6 +1698,15 @@ public class RepositorioVeterinaria {
                 for (ItemVentaPOS item : v.getItems()) {
                     actualizarStockProducto(item.getCodigo(), item.getCantidad());
                 }
+                registrarLogAuditoria(new LogAuditoria(
+                        "#EV-" + (1043 + logsAuditoria.size()),
+                        "Anulación Venta POS " + v.getNumeroComprobante(),
+                        "admin_user",
+                        LocalDateTime.now(),
+                        "127.0.0.1",
+                        "ÉXITO",
+                        "Comprobante anulado y stock restituido"
+                ));
                 break;
             }
         }
@@ -2624,6 +2701,43 @@ public class RepositorioVeterinaria {
 
         String id = "EXP-" + LocalDate.now().getYear() + "-" + String.format("%04d", 520 + historialExportaciones.size());
         String ruta = "exports/export_" + id.toLowerCase().replace('-', '_') + extension;
+
+        java.io.File archivo = new java.io.File(ruta);
+        try {
+            List<Object[]> datosFilas = new ArrayList<>();
+            if ("Inventario y Farmacia".equalsIgnoreCase(origen)) {
+                for (happypets.model.ProductoFarmacia p : productosFarmacia) {
+                    datosFilas.add(new Object[]{p.getCodigo(), p.getNombre(), p.getCategoria(), "Stock: " + p.getStockActual(), "S/ " + p.getPrecioVenta()});
+                }
+            } else if ("Finanzas y Facturación".equalsIgnoreCase(origen)) {
+                for (VentaPOS v : ventasPOS) {
+                    datosFilas.add(new Object[]{v.getIdVenta(), v.getCliente(), v.getMetodoPago(), v.getFechaFormateada(), "S/ " + v.getTotal()});
+                }
+            } else {
+                for (Cliente c : clientes) {
+                    datosFilas.add(new Object[]{c.getCodigo(), c.getNombreCompleto(), c.getTelefonoPrincipal(), "Mascotas: " + c.getMascotas().size(), "Activo"});
+                }
+            }
+
+            if (fmt.contains("PDF")) {
+                happypets.ui.GeneradorDocumentos.generarPDF(
+                        "REPORTE OFICIAL DE " + origen.toUpperCase(),
+                        "Filtros: " + (filtros != null ? filtros : "Todos") + " · Sistema Happy Pets ERP",
+                        new String[][]{{"Origen de Datos", origen}, {"Filtros", filtros != null ? filtros : "Predeterminados"}, {"Formato", fmt}},
+                        new String[]{"ID", "Nombre / Concepto", "Referencia", "Detalle", "Monto / Estado"},
+                        datosFilas,
+                        "Exportación completada · Total procesado: " + filas + " registros",
+                        archivo
+                );
+            } else {
+                happypets.ui.GeneradorDocumentos.generarExcel(
+                        "REPORTE OFICIAL DE " + origen.toUpperCase(),
+                        new String[]{"ID", "Nombre / Concepto", "Referencia", "Detalle", "Monto / Estado"},
+                        datosFilas,
+                        archivo
+                );
+            }
+        } catch (Exception ignored) { }
 
         HistorialExportacion exp = new HistorialExportacion(
                 id, origen, LocalDateTime.now(), filtros != null && !filtros.isEmpty() ? filtros : "Filtros predeterminados",

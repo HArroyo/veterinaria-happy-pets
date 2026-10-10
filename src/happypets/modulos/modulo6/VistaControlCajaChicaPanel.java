@@ -12,6 +12,7 @@ import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -52,13 +53,13 @@ import happypets.ui.Ui;
 public class VistaControlCajaChicaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_PRIMARIO = new Color(249, 115, 22);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
-    private static final Color COLOR_ROJO = new Color(239, 68, 68);
-    private static final Color COLOR_AZUL = new Color(14, 165, 233);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_PRIMARIO = Ui.TURQUESA; // Turquesa Clínico Original
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
+    private static final Color COLOR_ROJO = Ui.COLOR_PELIGRO;
+    private static final Color COLOR_AZUL = Ui.TURQUESA_OSCURO;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -355,7 +356,7 @@ public class VistaControlCajaChicaPanel extends JPanel {
         };
 
         tablaCaja = new JTable(modeloCaja);
-        Ui.formatearTabla(tablaCaja);
+        Ui.formatearTabla(tablaCaja, new int[]{0, 1, 5}, new int[]{3});
         tablaCaja.getColumnModel().getColumn(0).setPreferredWidth(85);
         tablaCaja.getColumnModel().getColumn(1).setPreferredWidth(75);
         tablaCaja.getColumnModel().getColumn(2).setPreferredWidth(230);
@@ -747,6 +748,33 @@ public class VistaControlCajaChicaPanel extends JPanel {
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bot.setOpaque(false);
+
+        JButton btnExportar = Ui.boton("Descargar PDF / Excel", false);
+        btnExportar.setIcon(Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
+        btnExportar.addActionListener(e -> {
+            List<Object[]> filasMovs = new ArrayList<>();
+            double totalIng = 0.0;
+            double totalEg = 0.0;
+            for (MovimientoCajaChica m : repo.getMovimientosCajaChica()) {
+                filasMovs.add(new Object[]{m.getFechaTexto(), m.getTipo(), m.getConcepto(), String.format("S/ %.2f", m.getMonto()), m.getResponsable(), m.getComprobante()});
+                if (m.esIngreso()) totalIng += m.getMonto(); else totalEg += m.getMonto();
+            }
+            Ui.mostrarVisorReporte(dlg,
+                    "REPORTE OFICIAL DE MOVIMIENTOS DE CAJA CHICA",
+                    "Clínica Veterinaria Happy Pets 24H · Arqueo y Conciliación",
+                    new String[][]{
+                            {"Responsable de Caja", "Joanna Corrales / Harry Arroyo"},
+                            {"Fecha de Emisión", LocalDate.now().format(FORMATO_FECHA)},
+                            {"Estado de Cuadre", "Conciliado y Conforme"},
+                            {"Saldo Actual en Caja", String.format("S/ %.2f", (totalIng - totalEg))}
+                    },
+                    new String[]{"Fecha", "Tipo", "Concepto", "Monto", "Responsable", "Comprobante"},
+                    filasMovs,
+                    "Total Ingresos: S/ " + String.format("%.2f", totalIng) + " | Total Egresos: S/ " + String.format("%.2f", totalEg) + " | Saldo Disponible: S/ " + String.format("%.2f", (totalIng - totalEg)),
+                    "caja_chica_arqueo"
+            );
+        });
+
         JButton btnImp = Ui.boton("Imprimir Acta", true);
         btnImp.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
         btnImp.addActionListener(e -> {
@@ -755,6 +783,8 @@ public class VistaControlCajaChicaPanel extends JPanel {
         });
         JButton btnCerrar = Ui.boton("Cerrar", false);
         btnCerrar.addActionListener(e -> dlg.dispose());
+
+        bot.add(btnExportar);
         bot.add(btnImp);
         bot.add(btnCerrar);
         p.add(bot, BorderLayout.SOUTH);

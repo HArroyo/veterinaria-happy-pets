@@ -53,16 +53,16 @@ import happypets.ui.Ui;
 public class VistaAsistenciasPermisosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = new Color(248, 250, 252);
-    private static final Color COLOR_CARD = Color.WHITE;
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_TEXTO_TITULO = new Color(15, 23, 42);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
-    private static final Color COLOR_AZUL = new Color(2, 132, 199);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
+    private static final Color COLOR_FONDO = Ui.FONDO;
+    private static final Color COLOR_CARD = Ui.FONDO_CARD;
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
+    private static final Color COLOR_AZUL = Ui.TURQUESA;
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
     private static final Color COLOR_AMBAR = new Color(245, 158, 11);
-    private static final Color COLOR_ROJO = new Color(239, 68, 68);
-    private static final Color COLOR_MORADO = new Color(126, 34, 206);
+    private static final Color COLOR_ROJO = Ui.COLOR_PELIGRO;
+    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -161,7 +161,30 @@ public class VistaAsistenciasPermisosPanel extends JPanel {
         panelBotones.setOpaque(false);
 
         JButton btnExportar = Ui.botonSecundario("Exportar Reporte", Iconos.crearIconoDocumento(14, COLOR_TEXTO_MUTED));
-        btnExportar.addActionListener(e -> JOptionPane.showMessageDialog(this, "Exportando reporte de asistencias del día en formato Excel / PDF.", "Reporte Diario", JOptionPane.INFORMATION_MESSAGE));
+        btnExportar.addActionListener(e -> {
+            String[] cols = new String[]{"Colaborador", "Rol / Cargo", "Turno", "Entrada", "Salida", "Estado", "Observación"};
+            List<Object[]> filas = new java.util.ArrayList<>();
+            if (listaAsistenciasFiltradas != null) {
+                for (RegistroAsistencia a : listaAsistenciasFiltradas) {
+                    filas.add(new Object[]{
+                        a.getNombreColaborador(), a.getRol(), a.getTurno(),
+                        a.getHoraEntradaReal() != null ? a.getHoraEntradaReal() : "-",
+                        a.getHoraSalidaReal() != null ? a.getHoraSalidaReal() : "-",
+                        a.getEstado(), a.getNotaJustificacion() != null ? a.getNotaJustificacion() : "-"
+                    });
+                }
+            }
+            Ui.mostrarVisorReporte(
+                SwingUtilities.getWindowAncestor(this),
+                "PARTE DIARIO DE ASISTENCIAS Y CONTROL DE PERSONAL",
+                "Fecha: " + LocalDate.now() + " | Sede Central Happy Pets",
+                "RECURSOS HUMANOS · GESTIÓN DE TURNOS",
+                cols,
+                filas,
+                "REGISTRO OFICIAL DE CONTROL DE ASISTENCIAS",
+                "Parte_Asistencia_Diario"
+            );
+        });
 
         JButton btnPaseLista = Ui.botonPrimario("+ Pase de Lista Rápido", Iconos.crearIconoAsistencia(16, Color.WHITE));
         btnPaseLista.setBackground(COLOR_MORADO);

@@ -31,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -53,10 +54,10 @@ import happypets.ui.Ui;
 public class VistaLaboratorioImagenesPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -173,7 +174,7 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         lblKpiImagenes = new JLabel("2", SwingConstants.LEFT);
         lblKpiCompletados = new JLabel("4", SwingConstants.LEFT);
 
-        fila.add(crearCardKpi(lblKpiTotalOrdenes, "ÓRDENES DIAGNÓSTICAS", new Color(224, 242, 254), COLOR_AZUL_PRIMARIO, Iconos.crearIconoFactura(20, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiTotalOrdenes, "ÓRDENES DIAGNÓSTICAS", Ui.TURQUESA_SUAVE, COLOR_AZUL_PRIMARIO, Iconos.crearIconoFactura(20, COLOR_AZUL_PRIMARIO)));
         fila.add(crearCardKpi(lblKpiLaboratorio, "LABORATORIO CLÍNICO", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoMicroscopio(20, new Color(147, 51, 234))));
         fila.add(crearCardKpi(lblKpiImagenes, "RAYOS X Y ECOGRAFÍAS", new Color(254, 243, 199), new Color(217, 119, 6), Iconos.crearIconoRx(20, new Color(217, 119, 6))));
         fila.add(crearCardKpi(lblKpiCompletados, "RESULTADOS EMITIDOS", new Color(220, 252, 231), new Color(22, 163, 74), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
@@ -587,8 +588,7 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         };
 
         tablaHistorial = new JTable(modeloHistorial);
-        Ui.formatearTabla(tablaHistorial);
-        tablaHistorial.setRowHeight(28);
+        Ui.formatearTabla(tablaHistorial, new int[]{0, 1, 4, 5, 6}, new int[]{});
 
         tablaHistorial.getColumnModel().getColumn(0).setPreferredWidth(75);
         tablaHistorial.getColumnModel().getColumn(1).setPreferredWidth(75);
@@ -673,7 +673,7 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -821,28 +821,22 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         }
         OrdenLaboratorio o = listaActual.get(row);
 
-        String reporte = "╔════════════════════════════════════════════════════════════════╗\n" +
-                         "║      VETERINARIA HAPPY PETS · INFORME DIAGNÓSTICO CLÍNICO      ║\n" +
-                         "║           Laboratorio Veterinario & Imagenología               ║\n" +
-                         "╠════════════════════════════════════════════════════════════════╣\n" +
-                         " Código Orden: " + o.getIdOrden() + "  |  Categoría: " + o.getCategoria() + "\n" +
-                         " Fecha Solicitud: " + o.getFechaSolicitudFormateada() + "  |  Fecha Emisión: " + o.getFechaResultadoFormateada() + "\n" +
-                         " Paciente: " + o.getNombreMascota() + " (" + o.getEspecieRaza() + ")\n" +
-                         " Tutor: " + o.getNombreTutor() + "  |  Tel: " + o.getTelefonoTutor() + "\n" +
-                         " Solicitante: " + o.getVeterinarioSolicitante() + "  |  Prioridad: " + o.getPrioridad() + "\n" +
-                         " Examen: " + o.getTipoEstudio() + "\n" +
-                         "────────────────────────────────────────────────────────────────\n" +
-                         " RESULTADOS ANALÍTICOS / INFORME TÉCNICO:\n" +
-                         (o.getInformeDetallado() != null && !o.getInformeDetallado().isEmpty() ? o.getInformeDetallado() + "\n\n" : "") +
-                         o.getResultadoValores() + "\n\n" +
-                         "────────────────────────────────────────────────────────────────\n" +
-                         " CONCLUSIONES E INTERPRETACIÓN MÉDICA:\n" +
-                         o.getConclusionesRecomendaciones() + "\n\n" +
-                         " Especialista Responsable: " + o.getResponsableProcesamiento() + "\n" +
-                         " Estado Oficial: " + o.getEstado() + "\n" +
-                         "╚════════════════════════════════════════════════════════════════╝";
+        String[][] datos = new String[][]{
+            {"1", "Examen Solicitado", o.getTipoEstudio(), o.getCategoria(), o.getPrioridad()},
+            {"2", "Resultados y Valores", o.getResultadoValores(), "Especialista: " + o.getResponsableProcesamiento(), o.getEstado()},
+            {"3", "Conclusiones Médicas", o.getConclusionesRecomendaciones(), "Fecha: " + o.getFechaResultadoFormateada(), "Validado"}
+        };
 
-        JOptionPane.showMessageDialog(this, reporte, "Reporte Diagnóstico Oficial - " + o.getIdOrden(), JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "INFORME DIAGNÓSTICO CLÍNICO Y LABORATORIO",
+            "Paciente: " + o.getNombreMascota() + " (" + o.getEspecieRaza() + ") | Tutor: " + o.getNombreTutor(),
+            "Código Orden: " + o.getIdOrden() + " | Solicitante: " + o.getVeterinarioSolicitante(),
+            new String[]{"N°", "Sección", "Hallazgos / Parámetros", "Responsable / Control", "Estado"},
+            datos,
+            "INFORME DIAGNÓSTICO CERTIFICADO · HAPPY PETS",
+            "InformeLab_" + o.getIdOrden()
+        );
     }
 
     private static class PacienteItem {

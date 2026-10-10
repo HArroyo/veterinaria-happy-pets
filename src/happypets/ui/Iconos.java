@@ -1787,6 +1787,56 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Icono de Descarga / Download / Guardar archivo.
+     */
+    public static Icon crearIconoDescargar(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.1);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Flecha hacia abajo
+        int midX = (int)(s * 0.50);
+        int topY = (int)(s * 0.15);
+        int botY = (int)(s * 0.62);
+        g.drawLine(midX, topY, midX, botY);
+        g.drawLine((int)(s * 0.28), (int)(s * 0.44), midX, botY);
+        g.drawLine((int)(s * 0.72), (int)(s * 0.44), midX, botY);
+
+        // Bandeja inferior
+        g.drawLine((int)(s * 0.20), (int)(s * 0.68), (int)(s * 0.20), (int)(s * 0.85));
+        g.drawLine((int)(s * 0.20), (int)(s * 0.85), (int)(s * 0.80), (int)(s * 0.85));
+        g.drawLine((int)(s * 0.80), (int)(s * 0.85), (int)(s * 0.80), (int)(s * 0.68));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
+    /**
+     * Icono de Disquete / Guardar.
+     */
+    public static Icon crearIconoGuardar(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double s = size;
+        float stroke = (float) Math.max(1.5, s * 0.1);
+        g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Cuerpo del disquete
+        g.draw(new RoundRectangle2D.Double(s * 0.15, s * 0.15, s * 0.70, s * 0.70, s * 0.15, s * 0.15));
+        // Ventanilla superior
+        g.draw(new RoundRectangle2D.Double(s * 0.30, s * 0.15, s * 0.40, s * 0.30, 2, 2));
+        // Etiqueta inferior
+        g.draw(new RoundRectangle2D.Double(s * 0.25, s * 0.55, s * 0.50, s * 0.30, 2, 2));
+
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }

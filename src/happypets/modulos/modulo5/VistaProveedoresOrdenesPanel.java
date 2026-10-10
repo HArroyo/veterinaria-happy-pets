@@ -39,6 +39,7 @@ import happypets.data.RepositorioVeterinaria;
 import happypets.model.OrdenCompra;
 import happypets.model.ProveedorFarmacia;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 5.3: Proveedores y Órdenes de Compra.
@@ -51,8 +52,8 @@ import happypets.ui.Iconos;
 public class VistaProveedoresOrdenesPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
     private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
     private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
@@ -150,11 +151,11 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
 
         JLabel badgeCompras = new JLabel(" Abastecimiento & Compras Farmacéuticas ", SwingConstants.CENTER);
         badgeCompras.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeCompras.setForeground(new Color(2, 132, 199));
+        badgeCompras.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeCompras.setOpaque(true);
-        badgeCompras.setBackground(new Color(224, 242, 254));
+        badgeCompras.setBackground(Ui.TURQUESA_SUAVE);
         badgeCompras.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(186, 230, 253), 1, true),
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
         der.add(badgeCompras);
@@ -482,15 +483,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         };
 
         tablaProveedores = new JTable(modeloProveedores);
-        tablaProveedores.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaProveedores.setRowHeight(26);
-        tablaProveedores.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaProveedores.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaProveedores.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaProveedores.setSelectionBackground(new Color(224, 242, 254));
-        tablaProveedores.setSelectionForeground(new Color(3, 105, 161));
-        tablaProveedores.setShowGrid(false);
-        tablaProveedores.setIntercellSpacing(new Dimension(0, 0));
+        Ui.formatearTabla(tablaProveedores, new int[]{0, 3, 5}, new int[]{});
 
         tablaProveedores.getColumnModel().getColumn(0).setPreferredWidth(90);
         tablaProveedores.getColumnModel().getColumn(1).setPreferredWidth(170);
@@ -526,15 +519,7 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
         };
 
         tablaOrdenes = new JTable(modeloOrdenes);
-        tablaOrdenes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaOrdenes.setRowHeight(26);
-        tablaOrdenes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaOrdenes.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaOrdenes.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaOrdenes.setSelectionBackground(new Color(224, 242, 254));
-        tablaOrdenes.setSelectionForeground(new Color(3, 105, 161));
-        tablaOrdenes.setShowGrid(false);
-        tablaOrdenes.setIntercellSpacing(new Dimension(0, 0));
+        Ui.formatearTabla(tablaOrdenes, new int[]{0, 2, 3, 6}, new int[]{5});
 
         tablaOrdenes.getColumnModel().getColumn(0).setPreferredWidth(75);
         tablaOrdenes.getColumnModel().getColumn(1).setPreferredWidth(160);
@@ -553,11 +538,11 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 String st = value != null ? value.toString() : "";
                 if (st.contains("Recibida")) {
-                    l.setForeground(new Color(16, 185, 129));
+                    l.setForeground(Ui.COLOR_EXITO);
                     l.setBackground(new Color(209, 250, 229));
                 } else if (st.contains("Enviada")) {
-                    l.setForeground(new Color(2, 132, 199));
-                    l.setBackground(new Color(224, 242, 254));
+                    l.setForeground(Ui.TURQUESA_OSCURO);
+                    l.setBackground(Ui.TURQUESA_SUAVE);
                 } else {
                     l.setForeground(new Color(245, 158, 11));
                     l.setBackground(new Color(254, 243, 199));
@@ -624,13 +609,13 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 if (!primario) {
-                    g2.setColor(COLOR_BORDE);
+                    g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
                 super.paintComponent(g2);
@@ -858,13 +843,13 @@ public class VistaProveedoresOrdenesPanel extends JPanel {
                 "   Responsable de Compras                  Administración Central\n" +
                 "     Happy Pets Farmacia                     Firma Autorizada\n";
 
-        JTextArea ta = new JTextArea(doc);
-        ta.setFont(new Font("Consolas", Font.PLAIN, 11));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(560, 360));
-
-        JOptionPane.showMessageDialog(this, sp, "Orden de Compra Oficial (Impresión)", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Orden de Compra - " + oc.getIdOrden(),
+                "COMPRA OFICIAL · PROVEEDOR: " + oc.getNombreProveedor(),
+                doc,
+                "OrdenCompra_" + oc.getIdOrden()
+        );
     }
 
     private void limpiarFormProveedor() {

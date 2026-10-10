@@ -38,6 +38,7 @@ import happypets.data.RepositorioVeterinaria;
 import happypets.model.AjusteMerma;
 import happypets.model.ProductoFarmacia;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 5.4: Ajustes y Mermas.
@@ -50,8 +51,8 @@ import happypets.ui.Iconos;
 public class VistaAjustesMermasPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
     private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
     private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
@@ -140,11 +141,11 @@ public class VistaAjustesMermasPanel extends JPanel {
 
         JLabel badgeAuditoria = new JLabel(" Protocolo de Descarte Sanitario & Farmacovigilancia ", SwingConstants.CENTER);
         badgeAuditoria.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeAuditoria.setForeground(new Color(2, 132, 199));
+        badgeAuditoria.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeAuditoria.setOpaque(true);
-        badgeAuditoria.setBackground(new Color(224, 242, 254));
+        badgeAuditoria.setBackground(Ui.TURQUESA_SUAVE);
         badgeAuditoria.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(186, 230, 253), 1, true),
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
         der.add(badgeAuditoria);
@@ -460,15 +461,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         };
 
         tablaAjustes = new JTable(modeloAjustes);
-        tablaAjustes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaAjustes.setRowHeight(26);
-        tablaAjustes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaAjustes.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaAjustes.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaAjustes.setSelectionBackground(new Color(224, 242, 254));
-        tablaAjustes.setSelectionForeground(new Color(3, 105, 161));
-        tablaAjustes.setShowGrid(false);
-        tablaAjustes.setIntercellSpacing(new Dimension(0, 0));
+        Ui.formatearTabla(tablaAjustes, new int[]{0, 1, 3, 4, 8}, new int[]{5, 6});
 
         tablaAjustes.getColumnModel().getColumn(0).setPreferredWidth(65);
         tablaAjustes.getColumnModel().getColumn(1).setPreferredWidth(70);
@@ -487,7 +480,7 @@ public class VistaAjustesMermasPanel extends JPanel {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
-                l.setForeground(new Color(16, 185, 129));
+                l.setForeground(Ui.COLOR_EXITO);
                 l.setBackground(new Color(209, 250, 229));
                 l.setOpaque(true);
                 return l;
@@ -547,13 +540,13 @@ public class VistaAjustesMermasPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 if (!primario) {
-                    g2.setColor(COLOR_BORDE);
+                    g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
                 super.paintComponent(g2);
@@ -719,13 +712,13 @@ public class VistaAjustesMermasPanel extends JPanel {
                 "    Regente Farmacéutico                    Director Médico Veterinario\n" +
                 "  CQVP Matrícula Nº 4120                     Colegio Médico Veterinario\n";
 
-        JTextArea ta = new JTextArea(acta);
-        ta.setFont(new Font("Consolas", Font.PLAIN, 11));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(560, 360));
-
-        JOptionPane.showMessageDialog(this, sp, "Acta Oficial de Destrucción Sanitaria", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Acta de Destrucción Sanitaria - " + a.getIdAjuste(),
+                "BAJA DE FÁRMACOS Y MERMAS · " + a.getNombreProducto(),
+                acta,
+                "Acta_Destruccion_" + a.getIdAjuste()
+        );
     }
 
     private void limpiarFormulario() {

@@ -11,6 +11,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -33,10 +36,11 @@ import happypets.model.ConfiguracionModuloIA;
 import happypets.model.DiagnosticoSistema;
 import happypets.model.TicketSoporte;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 10.4: Módulo de IA y Soporte Técnico.
- * Basado fielmente en el wireframe 'MODULO IA.pdf'.
+ * Estandarizado con la paleta institucional Turquesa Clínico Original y visor de reportes A4.
  */
 public class VistaModuloIASoportePanel extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -54,7 +58,7 @@ public class VistaModuloIASoportePanel extends JPanel {
 
     public VistaModuloIASoportePanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252));
+        setBackground(Ui.FONDO);
         inicializarUI();
         cargarDatos();
     }
@@ -62,7 +66,7 @@ public class VistaModuloIASoportePanel extends JPanel {
     private void inicializarUI() {
         JPanel contenedor = new JPanel();
         contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setBackground(new Color(248, 250, 252));
+        contenedor.setBackground(Ui.FONDO);
         contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
 
         // 1. Tarjeta: "Módulo de IA HappyPets"
@@ -80,37 +84,37 @@ public class VistaModuloIASoportePanel extends JPanel {
         JScrollPane scroll = new JScrollPane(contenedor);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(14);
-        scroll.getViewport().setBackground(new Color(248, 250, 252));
+        scroll.getViewport().setBackground(Ui.FONDO);
         add(scroll, BorderLayout.CENTER);
     }
 
     private JPanel crearTarjetaModuloIA() {
         JPanel card = new JPanel(new BorderLayout(0, 16));
-        card.setBackground(Color.WHITE);
+        card.setBackground(Ui.FONDO_CARD);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(20, 24, 20, 24)
         ));
 
         // Cabecera: Título "Módulo de IA HappyPets" y Badge "Habilitado"
         JPanel head = new JPanel(new BorderLayout());
-        head.setBackground(Color.WHITE);
+        head.setBackground(Ui.FONDO_CARD);
 
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        izq.setBackground(Color.WHITE);
-        izq.add(new JLabel(Iconos.crearIconoRobot(24, new Color(15, 23, 42))));
+        izq.setBackground(Ui.FONDO_CARD);
+        izq.add(new JLabel(Iconos.crearIconoRobot(24, Ui.TURQUESA_PROFUNDO)));
         JLabel lblTit = new JLabel("Módulo de IA HappyPets");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lblTit.setForeground(new Color(15, 23, 42));
+        lblTit.setForeground(Ui.TEXTO_TITULO);
         izq.add(lblTit);
 
         JLabel badgeHabilitado = new JLabel("Habilitado");
         badgeHabilitado.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        badgeHabilitado.setForeground(new Color(30, 41, 59));
-        badgeHabilitado.setBackground(new Color(241, 245, 249));
+        badgeHabilitado.setForeground(Ui.TURQUESA_PROFUNDO);
+        badgeHabilitado.setBackground(Ui.TURQUESA_SUAVE);
         badgeHabilitado.setOpaque(true);
         badgeHabilitado.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1),
                 BorderFactory.createEmptyBorder(4, 12, 4, 12)
         ));
 
@@ -120,15 +124,15 @@ public class VistaModuloIASoportePanel extends JPanel {
         // Subtítulo
         JPanel cuerpo = new JPanel();
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
-        cuerpo.setBackground(Color.WHITE);
+        cuerpo.setBackground(Ui.FONDO_CARD);
 
         JLabel lblSub = new JLabel("Configura los asistentes inteligentes para triaje clínico, diagnóstico sugerido y respuesta rápida al cliente.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSub.setForeground(new Color(100, 116, 139));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
         cuerpo.add(lblSub);
         cuerpo.add(Box.createVerticalStrut(14));
 
-        // Switches interactivos (3 items del wireframe)
+        // Switches interactivos
         chkPreTriaje = new JCheckBox();
         chkDiagnostico = new JCheckBox();
         chkVacunas = new JCheckBox();
@@ -142,22 +146,13 @@ public class VistaModuloIASoportePanel extends JPanel {
 
         // Pie de la tarjeta: Modelo actual + Botón Ajustes de Prompts
         JPanel pie = new JPanel(new BorderLayout());
-        pie.setBackground(Color.WHITE);
+        pie.setBackground(Ui.FONDO_CARD);
 
         lblModeloActual = new JLabel("Modelo actual:  HappyPet-Core-v1.8");
         lblModeloActual.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblModeloActual.setForeground(new Color(71, 85, 105));
+        lblModeloActual.setForeground(Ui.TURQUESA_OSCURO);
 
-        JButton btnPrompts = new JButton("Ajustes de Prompts");
-        btnPrompts.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnPrompts.setForeground(new Color(30, 41, 59));
-        btnPrompts.setBackground(new Color(241, 245, 249));
-        btnPrompts.setFocusPainted(false);
-        btnPrompts.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnPrompts.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(6, 14, 6, 14)
-        ));
+        JButton btnPrompts = Ui.botonSecundario("Ajustes de Prompts", null);
         btnPrompts.addActionListener(e -> abrirAjustesPrompts());
 
         pie.add(lblModeloActual, BorderLayout.WEST);
@@ -171,29 +166,29 @@ public class VistaModuloIASoportePanel extends JPanel {
 
     private JPanel crearFilaSwitch(String titulo, String subtitulo, JCheckBox chk) {
         JPanel fila = new JPanel(new BorderLayout(14, 0));
-        fila.setBackground(new Color(248, 250, 252));
+        fila.setBackground(Ui.FONDO);
         fila.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(10, 16, 10, 16)
         ));
 
         JPanel textos = new JPanel();
         textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
-        textos.setBackground(new Color(248, 250, 252));
+        textos.setBackground(Ui.FONDO);
 
         JLabel lTit = new JLabel(titulo);
         lTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lTit.setForeground(new Color(15, 23, 42));
+        lTit.setForeground(Ui.TEXTO_TITULO);
 
         JLabel lSub = new JLabel(subtitulo);
         lSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lSub.setForeground(new Color(100, 116, 139));
+        lSub.setForeground(Ui.TEXTO_MUTED);
 
         textos.add(lTit);
         textos.add(Box.createVerticalStrut(2));
         textos.add(lSub);
 
-        chk.setBackground(new Color(248, 250, 252));
+        chk.setBackground(Ui.FONDO);
         chk.setFocusPainted(false);
         chk.setCursor(new Cursor(Cursor.HAND_CURSOR));
         chk.addActionListener(e -> guardarConfiguracionIA());
@@ -205,60 +200,64 @@ public class VistaModuloIASoportePanel extends JPanel {
 
     private JPanel crearTarjetaConsolaIA() {
         JPanel card = new JPanel(new BorderLayout(0, 14));
-        card.setBackground(Color.WHITE);
+        card.setBackground(Ui.FONDO_CARD);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(18, 24, 18, 24)
         ));
 
+        JPanel head = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        head.setBackground(Ui.FONDO_CARD);
+        head.add(new JLabel(Iconos.crearIconoRobot(22, Ui.TURQUESA_OSCURO)));
         JLabel lblTit = new JLabel("Consola Interactiva de Triaje Clínico con IA");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTit.setForeground(new Color(15, 23, 42));
-        card.add(lblTit, BorderLayout.NORTH);
+        lblTit.setForeground(Ui.TEXTO_TITULO);
+        head.add(lblTit);
+        card.add(head, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(Color.WHITE);
+        form.setBackground(Ui.FONDO_CARD);
         GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(4, 4, 4, 4);
+        g.insets = new Insets(6, 6, 6, 6);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JComboBox<String> cbEspecie = new JComboBox<>(new String[]{"Canino", "Felino", "Conejo", "Ave Exótica"});
-        JTextField txtRaza = new JTextField("Golden Retriever");
-        JTextField txtEdad = new JTextField("48"); // 48 meses
-        JTextField txtSintomas = new JTextField("Tos seca nocturna recurrente, arcadas post ejercicio, letargo moderado.");
+        JComboBox<String> cbEspecie = Ui.combo(new String[]{"Canino", "Felino", "Conejo", "Ave Exótica"});
+        JTextField txtRaza = Ui.campoTexto("Golden Retriever", 14);
+        JTextField txtEdad = Ui.campoTexto("48", 6); // 48 meses
+        JTextField txtSintomas = Ui.campoTexto("Tos seca nocturna recurrente, arcadas post ejercicio, letargo moderado.", 30);
 
-        g.gridx = 0; g.gridy = 0; g.weightx = 0.25;
-        form.add(new JLabel("Especie:"), g);
-        g.gridx = 1; g.gridy = 0; g.weightx = 0.25;
+        g.gridx = 0; g.gridy = 0; g.weightx = 0.15;
+        form.add(Ui.crearLabelFormulario("Especie:"), g);
+        g.gridx = 1; g.gridy = 0; g.weightx = 0.35;
         form.add(cbEspecie, g);
 
-        g.gridx = 2; g.gridy = 0; g.weightx = 0.25;
-        form.add(new JLabel("Raza:"), g);
-        g.gridx = 3; g.gridy = 0; g.weightx = 0.25;
+        g.gridx = 2; g.gridy = 0; g.weightx = 0.15;
+        form.add(Ui.crearLabelFormulario("Raza:"), g);
+        g.gridx = 3; g.gridy = 0; g.weightx = 0.35;
         form.add(txtRaza, g);
 
-        g.gridx = 0; g.gridy = 1;
-        form.add(new JLabel("Edad (meses):"), g);
-        g.gridx = 1; g.gridy = 1;
+        g.gridx = 0; g.gridy = 1; g.weightx = 0.15;
+        form.add(Ui.crearLabelFormulario("Edad (meses):"), g);
+        g.gridx = 1; g.gridy = 1; g.weightx = 0.35;
         form.add(txtEdad, g);
 
-        g.gridx = 2; g.gridy = 1;
-        form.add(new JLabel("Signos / Síntomas:"), g);
-        g.gridx = 3; g.gridy = 1;
+        g.gridx = 2; g.gridy = 1; g.weightx = 0.15;
+        form.add(Ui.crearLabelFormulario("Signos / Síntomas:"), g);
+        g.gridx = 3; g.gridy = 1; g.weightx = 0.35;
         form.add(txtSintomas, g);
 
         JTextArea txtResultado = new JTextArea(7, 40);
         txtResultado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtResultado.setBackground(new Color(248, 250, 252));
+        txtResultado.setBackground(Ui.FONDO);
+        txtResultado.setForeground(Ui.TEXTO_REGULAR);
         txtResultado.setEditable(false);
-        txtResultado.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        txtResultado.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
         txtResultado.setText("Presione 'Ejecutar Diagnóstico IA' para procesar el caso clínico.");
 
-        JButton btnEjecutar = new JButton("⚡  Ejecutar Diagnóstico IA");
-        btnEjecutar.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnEjecutar.setForeground(Color.WHITE);
-        btnEjecutar.setBackground(new Color(15, 23, 42));
-        btnEjecutar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnEjecutar = Ui.botonPrimario("⚡ Ejecutar Diagnóstico IA", null);
         btnEjecutar.addActionListener(e -> {
             int edadM = 24;
             try {
@@ -276,39 +275,93 @@ public class VistaModuloIASoportePanel extends JPanel {
             txtResultado.setCaretPosition(0);
         });
 
+        JButton btnExportar = Ui.botonSecundario("📄 Exportar Ficha IA", null);
+        btnExportar.addActionListener(e -> {
+            exportarFichaDiagnostica(
+                    (String) cbEspecie.getSelectedItem(),
+                    txtRaza.getText().trim(),
+                    txtEdad.getText().trim(),
+                    txtSintomas.getText().trim(),
+                    txtResultado.getText().trim()
+            );
+        });
+
+        JPanel pnlAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        pnlAcciones.setBackground(Ui.FONDO_CARD);
+        pnlAcciones.add(btnExportar);
+        pnlAcciones.add(btnEjecutar);
+
         JPanel pnlCentro = new JPanel(new BorderLayout(0, 10));
-        pnlCentro.setBackground(Color.WHITE);
+        pnlCentro.setBackground(Ui.FONDO_CARD);
         pnlCentro.add(form, BorderLayout.NORTH);
         pnlCentro.add(new JScrollPane(txtResultado), BorderLayout.CENTER);
-        pnlCentro.add(btnEjecutar, BorderLayout.SOUTH);
+        pnlCentro.add(pnlAcciones, BorderLayout.SOUTH);
 
         card.add(pnlCentro, BorderLayout.CENTER);
         return card;
     }
 
+    private void exportarFichaDiagnostica(String especie, String raza, String edad, String sintomas, String resultado) {
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>FICHA CLÍNICA DE TRIAJE Y DIAGNÓSTICO PREDICTIVO IA</h2>");
+        html.append("<p><strong>Fecha de Evaluación:</strong> ").append(LocalDate.now()).append(" | <strong>Modelo IA:</strong> HappyPet-Core-v1.8</p>");
+        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:12px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th align='left'>Parámetro Clínico</th><th align='left'>Dato Evaluado</th><th align='left'>Sugerencia Asistente IA</th></tr>");
+        html.append("<tr><td><b>Especie Animal:</b></td><td>").append(especie).append("</td><td>Protocolo biológico validado</td></tr>");
+        html.append("<tr><td><b>Raza Declarada:</b></td><td>").append(raza.isEmpty() ? "No especificada" : raza).append("</td><td>Ponderación biométrica de factores de riesgo</td></tr>");
+        html.append("<tr><td><b>Edad Cronológica:</b></td><td>").append(edad).append(" meses</td><td>Segmentación etaria pediátrica/adulta calculada</td></tr>");
+        html.append("<tr><td><b>Sintomatología Reportada:</b></td><td>").append(sintomas.isEmpty() ? "Sin síntomas" : sintomas).append("</td><td>Indexación y correlación de patologías clínicas</td></tr>");
+        html.append("<tr><td><b>Dictamen Predictivo IA:</b></td><td colspan='2' style='background-color:#E0F7FA; color:#006064;'><b>").append(resultado.isEmpty() ? "Pendiente" : resultado.replace("\n", "<br/>")).append("</b></td></tr>");
+        html.append("</table>");
+        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento de pre-triaje asistido por IA para soporte clínico del médico veterinario oficial.</p>");
+        html.append("</body></html>");
+
+        StringBuilder csv = new StringBuilder("PARAMETRO,VALOR,EVALUACION_IA\n");
+        csv.append("\"Especie Animal\",\"").append(especie).append("\",\"Protocolo validado\"\n");
+        csv.append("\"Raza\",\"").append(raza).append("\",\"Ponderacion biometrica\"\n");
+        csv.append("\"Edad Cronologica\",\"").append(edad).append(" meses\",\"Segmentacion etaria\"\n");
+        csv.append("\"Sintomatologia\",\"").append(sintomas.replace("\"", "'")).append("\",\"Correlacion clinica\"\n");
+        csv.append("\"Dictamen Preliminar\",\"").append(resultado.replace("\"", "'").replace("\n", " | ")).append("\",\"Dictamen asistido\"\n");
+
+        Ui.mostrarVisorReporte(
+                SwingUtilities.getWindowAncestor(this),
+                "Ficha Diagnóstica y Triaje IA",
+                "Ficha Clínica de Triaje y Diagnóstico Predictivo IA",
+                html.toString(),
+                csv.toString()
+        );
+    }
+
     private JPanel crearTarjetaSoporteTecnico() {
         JPanel card = new JPanel(new BorderLayout(0, 16));
-        card.setBackground(Color.WHITE);
+        card.setBackground(Ui.FONDO_CARD);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(20, 24, 20, 24)
         ));
 
         // Cabecera: Título con Auriculares y Estado: Normal
         JPanel head = new JPanel(new BorderLayout());
-        head.setBackground(Color.WHITE);
+        head.setBackground(Ui.FONDO_CARD);
 
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        izq.setBackground(Color.WHITE);
-        izq.add(new JLabel(Iconos.crearIconoAuriculares(24, new Color(15, 23, 42))));
+        izq.setBackground(Ui.FONDO_CARD);
+        izq.add(new JLabel(Iconos.crearIconoAuriculares(24, Ui.TURQUESA_PROFUNDO)));
         JLabel lblTit = new JLabel("Soporte Técnico y Diagnóstico");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lblTit.setForeground(new Color(15, 23, 42));
+        lblTit.setForeground(Ui.TEXTO_TITULO);
         izq.add(lblTit);
 
         JLabel lblEstadoNormal = new JLabel("Estado: Normal");
         lblEstadoNormal.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblEstadoNormal.setForeground(new Color(30, 41, 59));
+        lblEstadoNormal.setForeground(Ui.TURQUESA_PROFUNDO);
+        lblEstadoNormal.setBackground(Ui.TURQUESA_SUAVE);
+        lblEstadoNormal.setOpaque(true);
+        lblEstadoNormal.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1),
+                BorderFactory.createEmptyBorder(4, 12, 4, 12)
+        ));
 
         head.add(izq, BorderLayout.WEST);
         head.add(lblEstadoNormal, BorderLayout.EAST);
@@ -316,20 +369,20 @@ public class VistaModuloIASoportePanel extends JPanel {
 
         // Grid con métricas de salud
         JPanel metricas = new JPanel(new GridLayout(3, 2, 10, 8));
-        metricas.setBackground(Color.WHITE);
+        metricas.setBackground(Ui.FONDO_CARD);
         metricas.setBorder(BorderFactory.createEmptyBorder(4, 4, 12, 4));
 
         lblEstadoBD = new JLabel("En línea (0.12 ms)");
         lblEstadoBD.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblEstadoBD.setForeground(new Color(34, 197, 94)); // Verde
+        lblEstadoBD.setForeground(Ui.TURQUESA_OSCURO);
 
         lblUltimoRespaldo = new JLabel("Hoy, 03:00 AM");
         lblUltimoRespaldo.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblUltimoRespaldo.setForeground(new Color(15, 23, 42));
+        lblUltimoRespaldo.setForeground(Ui.TEXTO_TITULO);
 
         lblTicketsPendientes = new JLabel("0 pendientes");
         lblTicketsPendientes.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTicketsPendientes.setForeground(new Color(15, 23, 42));
+        lblTicketsPendientes.setForeground(Ui.TEXTO_TITULO);
 
         metricas.add(crearLabelMetrica("Estado de Base de Datos:"));
         metricas.add(lblEstadoBD);
@@ -342,30 +395,12 @@ public class VistaModuloIASoportePanel extends JPanel {
 
         // Botones inferiores: [Ver Logs Sistema] y [🎫 Crear Ticket]
         JPanel botones = new JPanel(new GridLayout(1, 2, 12, 0));
-        botones.setBackground(Color.WHITE);
+        botones.setBackground(Ui.FONDO_CARD);
 
-        JButton btnLogs = new JButton("Ver Logs Sistema");
-        btnLogs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnLogs.setForeground(new Color(51, 65, 85));
-        btnLogs.setBackground(new Color(241, 245, 249));
-        btnLogs.setFocusPainted(false);
-        btnLogs.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLogs.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(8, 14, 8, 14)
-        ));
+        JButton btnLogs = Ui.botonSecundario("Ver Logs Sistema", null);
         btnLogs.addActionListener(e -> abrirLogsSistema());
 
-        JButton btnTicket = new JButton("🎫  Crear Ticket");
-        btnTicket.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnTicket.setForeground(new Color(51, 65, 85));
-        btnTicket.setBackground(new Color(241, 245, 249));
-        btnTicket.setFocusPainted(false);
-        btnTicket.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnTicket.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(8, 14, 8, 14)
-        ));
+        JButton btnTicket = Ui.botonPrimario("🎫 Crear Ticket", null);
         btnTicket.addActionListener(e -> abrirCrearTicket());
 
         botones.add(btnLogs);
@@ -378,7 +413,7 @@ public class VistaModuloIASoportePanel extends JPanel {
     private JLabel crearLabelMetrica(String text) {
         JLabel l = new JLabel(text);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        l.setForeground(new Color(71, 85, 105));
+        l.setForeground(Ui.TEXTO_MUTED);
         return l;
     }
 
@@ -412,28 +447,32 @@ public class VistaModuloIASoportePanel extends JPanel {
     private void abrirAjustesPrompts() {
         ConfiguracionModuloIA ia = repo.getConfiguracionModuloIA();
         JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ajustes de Prompts de IA", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(580, 420);
+        dlg.setSize(620, 440);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
         JPanel pnl = new JPanel(new BorderLayout(0, 10));
-        pnl.setBackground(Color.WHITE);
+        pnl.setBackground(Ui.FONDO_CARD);
         pnl.setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
 
-        pnl.add(new JLabel("Prompt del Sistema para Triaje y Diagnóstico Clínico:"), BorderLayout.NORTH);
+        JLabel lblTit = Ui.crearLabelFormulario("Prompt del Sistema para Triaje y Diagnóstico Clínico:");
+        pnl.add(lblTit, BorderLayout.NORTH);
 
         JTextArea txtPrompt = new JTextArea(ia.getPromptSistema(), 10, 40);
         txtPrompt.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtPrompt.setLineWrap(true);
         txtPrompt.setWrapStyleWord(true);
+        txtPrompt.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_INPUT, 1),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        ));
         pnl.add(new JScrollPane(txtPrompt), BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        JButton btnCerrar = new JButton("Cancelar");
+        bot.setBackground(Ui.FONDO_CARD);
+        JButton btnCerrar = Ui.botonSecundario("Cancelar", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
-        JButton btnGuardar = new JButton("Guardar Prompt");
-        btnGuardar.setBackground(new Color(15, 23, 42));
-        btnGuardar.setForeground(Color.WHITE);
+        JButton btnGuardar = Ui.botonPrimario("Guardar Prompt", null);
         btnGuardar.addActionListener(e -> {
             ia.setPromptSistema(txtPrompt.getText().trim());
             repo.guardarConfiguracionModuloIA(ia);
@@ -451,7 +490,7 @@ public class VistaModuloIASoportePanel extends JPanel {
     private void abrirLogsSistema() {
         DiagnosticoSistema diag = repo.getDiagnosticoSistema();
         JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Logs del Servidor y Diagnóstico", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(680, 460);
+        dlg.setSize(720, 480);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
@@ -469,16 +508,51 @@ public class VistaModuloIASoportePanel extends JPanel {
         for (String log : diag.getLogsServidor()) {
             sb.append(log).append("\n");
         }
-        sb.append("[INFO] ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+        sb.append("[INFO] ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .append(" - Telemetría de salud de hardware: CPU: 12%, RAM: ").append(diag.getMemoriaUsadaMB()).append(" MB, Disco Libre: ").append(diag.getEspacioDiscoLibreGB()).append(" GB\n");
         txtLogs.setText(sb.toString());
 
         pnl.add(new JScrollPane(txtLogs), BorderLayout.CENTER);
 
-        JButton btnCerrar = new JButton("Cerrar Consola");
+        JButton btnExportar = Ui.botonSecundario("📄 Exportar Telemetría", null);
+        btnExportar.addActionListener(e -> {
+            StringBuilder html = new StringBuilder();
+            html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+            html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>REPORTE TÉCNICO DE TELEMETRÍA Y ESTADO DEL SISTEMA</h2>");
+            html.append("<p><strong>Fecha de Emisión:</strong> ").append(LocalDate.now()).append(" | <strong>Entorno:</strong> Servidor Local / Cloud Híbrido</p>");
+            html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:12px;'>");
+            html.append("<tr style='background-color:#006064; color:white;'><th align='left'>Métrica de Infraestructura</th><th align='left'>Valor Actual</th><th align='left'>Diagnóstico Operativo</th></tr>");
+            html.append("<tr><td><b>Base de Datos Local:</b></td><td>").append(diag.getEstadoBaseDatos()).append("</td><td>Conexión estable e íntegra</td></tr>");
+            html.append("<tr><td><b>Último Respaldo Cloud:</b></td><td>").append(diag.getUltimoRespaldoCloud()).append("</td><td>Snapshot sincronizado</td></tr>");
+            html.append("<tr><td><b>Memoria JVM en Uso:</b></td><td>").append(diag.getMemoriaUsadaMB()).append(" MB</td><td>Consumo eficiente dentro del umbral</td></tr>");
+            html.append("<tr><td><b>Espacio en Disco Libre:</b></td><td>").append(diag.getEspacioDiscoLibreGB()).append(" GB</td><td>Capacidad adecuada</td></tr>");
+            html.append("<tr><td><b>Tickets de Soporte Abiertos:</b></td><td>").append(diag.getTicketsPendientes()).append(" pendientes</td><td>Mesa de ayuda activa</td></tr>");
+            html.append("</table>");
+            html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Reporte técnico generado por el subsistema de diagnóstico y telemetría de Happy Pets ERP.</p>");
+            html.append("</body></html>");
+
+            StringBuilder csv = new StringBuilder("METRICA,VALOR,DIAGNOSTICO\n");
+            csv.append("\"Base de Datos\",\"").append(diag.getEstadoBaseDatos()).append("\",\"Conexion estable\"\n");
+            csv.append("\"Ultimo Respaldo\",\"").append(diag.getUltimoRespaldoCloud()).append("\",\"Snapshot sincronizado\"\n");
+            csv.append("\"Memoria JVM\",\"").append(diag.getMemoriaUsadaMB()).append(" MB\",\"Consumo normal\"\n");
+            csv.append("\"Espacio en Disco\",\"").append(diag.getEspacioDiscoLibreGB()).append(" GB\",\"Capacidad adecuada\"\n");
+            csv.append("\"Tickets Pendientes\",").append(diag.getTicketsPendientes()).append(",\"Mesa de ayuda\"\n");
+
+            Ui.mostrarVisorReporte(
+                    dlg,
+                    "Telemetría y Diagnóstico del Servidor",
+                    "Reporte Técnico de Telemetría y Salud del Sistema",
+                    html.toString(),
+                    csv.toString()
+            );
+        });
+
+        JButton btnCerrar = Ui.botonSecundario("Cerrar Consola", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         bot.setBackground(new Color(15, 23, 42));
+        bot.add(btnExportar);
         bot.add(btnCerrar);
 
         dlg.add(pnl, BorderLayout.CENTER);
@@ -488,50 +562,52 @@ public class VistaModuloIASoportePanel extends JPanel {
 
     private void abrirCrearTicket() {
         JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Crear Ticket de Soporte Técnico", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(480, 420);
+        dlg.setSize(520, 440);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
         JPanel pnl = new JPanel(new GridBagLayout());
-        pnl.setBackground(Color.WHITE);
+        pnl.setBackground(Ui.FONDO_CARD);
         pnl.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
         GridBagConstraints g = new GridBagConstraints();
         g.insets = new Insets(6, 6, 6, 6);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField txtAsunto = new JTextField();
-        JComboBox<String> cbCat = new JComboBox<>(new String[]{"Integraciones y APIs", "Base de Datos", "Facturación Electrónica", "Hardware e Impresoras POS", "Otro"});
-        JComboBox<String> cbPrio = new JComboBox<>(new String[]{"Alta", "Media", "Baja"});
+        JTextField txtAsunto = Ui.campoTexto("", 20);
+        JComboBox<String> cbCat = Ui.combo(new String[]{"Integraciones y APIs", "Base de Datos", "Facturación Electrónica", "Hardware e Impresoras POS", "Otro"});
+        JComboBox<String> cbPrio = Ui.combo(new String[]{"Alta", "Media", "Baja"});
         JTextArea txtDesc = new JTextArea(4, 20);
         txtDesc.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtDesc.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225)));
+        txtDesc.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_INPUT, 1),
+                BorderFactory.createEmptyBorder(6, 6, 6, 6)
+        ));
 
         g.gridx = 0; g.gridy = 0; g.weightx = 0.35;
-        pnl.add(new JLabel("Asunto del Ticket:"), g);
+        pnl.add(Ui.crearLabelFormulario("Asunto del Ticket:"), g);
         g.gridx = 1; g.gridy = 0; g.weightx = 0.65;
         pnl.add(txtAsunto, g);
 
         g.gridx = 0; g.gridy = 1;
-        pnl.add(new JLabel("Categoría:"), g);
+        pnl.add(Ui.crearLabelFormulario("Categoría:"), g);
         g.gridx = 1; g.gridy = 1;
         pnl.add(cbCat, g);
 
         g.gridx = 0; g.gridy = 2;
-        pnl.add(new JLabel("Prioridad:"), g);
+        pnl.add(Ui.crearLabelFormulario("Prioridad:"), g);
         g.gridx = 1; g.gridy = 2;
         pnl.add(cbPrio, g);
 
         g.gridx = 0; g.gridy = 3;
-        pnl.add(new JLabel("Descripción:"), g);
+        pnl.add(Ui.crearLabelFormulario("Descripción:"), g);
         g.gridx = 1; g.gridy = 3;
         pnl.add(new JScrollPane(txtDesc), g);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        JButton btnCan = new JButton("Cancelar");
+        bot.setBackground(Ui.FONDO_CARD);
+        JButton btnCan = Ui.botonSecundario("Cancelar", null);
         btnCan.addActionListener(e -> dlg.dispose());
-        JButton btnCrear = new JButton("Enviar Ticket");
-        btnCrear.setBackground(new Color(15, 23, 42));
-        btnCrear.setForeground(Color.WHITE);
+        JButton btnCrear = Ui.botonPrimario("Enviar Ticket", null);
         btnCrear.addActionListener(e -> {
             String asunto = txtAsunto.getText().trim();
             if (asunto.isEmpty()) {
@@ -540,7 +616,7 @@ public class VistaModuloIASoportePanel extends JPanel {
             }
             TicketSoporte t = new TicketSoporte(
                     null, asunto, (String) cbCat.getSelectedItem(), (String) cbPrio.getSelectedItem(),
-                    "Abierto", "admin_user", java.time.LocalDateTime.now(), txtDesc.getText().trim(),
+                    "Abierto", "admin_user", LocalDateTime.now(), txtDesc.getText().trim(),
                     "Ticket encolado en cola técnica de HappyPets L1."
             );
             repo.crearTicketSoporte(t);

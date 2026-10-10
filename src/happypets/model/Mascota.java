@@ -57,6 +57,10 @@ public class Mascota {
     public String getRaza() { return raza; }
     public void setRaza(String raza) { this.raza = raza; }
 
+    public String getEspecieRaza() {
+        return (especie != null ? especie : "") + " / " + (raza != null ? raza : "");
+    }
+
     public String getEdadTexto() {
         if (edadTexto != null && !edadTexto.trim().isEmpty()) {
             return edadTexto;

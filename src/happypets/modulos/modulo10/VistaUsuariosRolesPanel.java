@@ -32,11 +32,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import java.time.LocalDate;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.RolPermiso;
 import happypets.model.Usuario;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 10.2: Usuarios Activos, Roles y Permisos.
@@ -109,7 +111,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         izq.setBackground(Color.WHITE);
 
-        JLabel lblIcono = new JLabel(Iconos.crearIconoUsuario(24, new Color(30, 41, 59)));
+        JLabel lblIcono = new JLabel(Iconos.crearIconoUsuario(24, Ui.TURQUESA_PROFUNDO));
         JLabel lblTitulo = new JLabel("Usuarios Activos y Asignación de Roles");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTitulo.setForeground(new Color(15, 23, 42));
@@ -118,30 +120,22 @@ public class VistaUsuariosRolesPanel extends JPanel {
         izq.add(lblTitulo);
         p.add(izq, BorderLayout.WEST);
 
-        // Botones de Cabecera: [Gestionar Roles] y [+ Nuevo Usuario]
+        // Botones de Cabecera: [Exportar Lista], [Gestionar Roles] y [+ Nuevo Usuario]
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setBackground(Color.WHITE);
 
-        JButton btnGestionarRoles = new JButton("Gestionar Roles");
-        btnGestionarRoles.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnGestionarRoles.setForeground(new Color(51, 65, 85));
-        btnGestionarRoles.setBackground(new Color(241, 245, 249));
-        btnGestionarRoles.setFocusPainted(false);
-        btnGestionarRoles.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnGestionarRoles.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
+        JButton btnExportar = Ui.botonSecundario("Exportar Lista", Iconos.crearIconoExportar(13, Ui.TURQUESA_PROFUNDO));
+        btnExportar.setPreferredSize(new Dimension(140, 34));
+        btnExportar.addActionListener(e -> exportarDirectorioUsuarios());
+        der.add(btnExportar);
+
+        JButton btnGestionarRoles = Ui.botonSecundario("Gestionar Roles", null);
+        btnGestionarRoles.setPreferredSize(new Dimension(135, 34));
         btnGestionarRoles.addActionListener(e -> abrirDialogoGestionRoles());
         der.add(btnGestionarRoles);
 
-        JButton btnNuevoUsuario = new JButton("+ Nuevo Usuario");
-        btnNuevoUsuario.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnNuevoUsuario.setForeground(Color.WHITE);
-        btnNuevoUsuario.setBackground(new Color(15, 23, 42));
-        btnNuevoUsuario.setFocusPainted(false);
-        btnNuevoUsuario.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnNuevoUsuario.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        JButton btnNuevoUsuario = Ui.botonPrimario("+ Nuevo Usuario", null);
+        btnNuevoUsuario.setPreferredSize(new Dimension(145, 34));
         btnNuevoUsuario.addActionListener(e -> abrirDialogoUsuario(null));
         der.add(btnNuevoUsuario);
 
@@ -161,8 +155,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         izq.setBackground(new Color(248, 250, 252));
         JLabel lblLupa = new JLabel("🔍");
-        txtBuscar = new JTextField(20);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtBuscar = Ui.campoTexto("", 20);
         txtBuscar.setPreferredSize(new Dimension(240, 32));
         txtBuscar.setToolTipText("Buscar por nombre, usuario, correo o especialidad...");
         txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
@@ -177,21 +170,16 @@ public class VistaUsuariosRolesPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setBackground(new Color(248, 250, 252));
 
-        cbFiltroRol = new JComboBox<>(new String[]{"Rol: Todos", "Administrador", "Veterinario Titular", "Recepcionista", "Auxiliar Veterinario", "Contador / Auditor"});
-        cbFiltroRol.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cbFiltroRol.setBackground(Color.WHITE);
+        cbFiltroRol = Ui.combo(new String[]{"Rol: Todos", "Administrador", "Veterinario Titular", "Recepcionista", "Auxiliar Veterinario", "Contador / Auditor"});
+        cbFiltroRol.setPreferredSize(new Dimension(160, 32));
         cbFiltroRol.addActionListener(e -> { paginaActual = 1; recargarTabla(); });
 
-        cbFiltroEstado = new JComboBox<>(new String[]{"Estado: Todos", "Activo", "Inactivo"});
-        cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cbFiltroEstado.setBackground(Color.WHITE);
+        cbFiltroEstado = Ui.combo(new String[]{"Estado: Todos", "Activo", "Inactivo"});
+        cbFiltroEstado.setPreferredSize(new Dimension(130, 32));
         cbFiltroEstado.addActionListener(e -> { paginaActual = 1; recargarTabla(); });
 
-        JButton btnLimpiar = new JButton("Limpiar");
-        btnLimpiar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnLimpiar.setBackground(Color.WHITE);
-        btnLimpiar.setFocusPainted(false);
-        btnLimpiar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnLimpiar = Ui.botonSecundario("Limpiar", null);
+        btnLimpiar.setPreferredSize(new Dimension(85, 32));
         btnLimpiar.addActionListener(e -> {
             txtBuscar.setText("");
             cbFiltroRol.setSelectedIndex(0);
@@ -220,15 +208,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         };
 
         tablaUsuarios = new JTable(modeloTabla);
-        tablaUsuarios.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        tablaUsuarios.setRowHeight(52);
-        tablaUsuarios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tablaUsuarios.setShowVerticalLines(false);
-        tablaUsuarios.setGridColor(new Color(241, 245, 249));
-        tablaUsuarios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaUsuarios.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaUsuarios.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaUsuarios.getTableHeader().setPreferredSize(new Dimension(10, 38));
+        Ui.formatearTabla(tablaUsuarios, new int[]{3}, new int[]{});
 
         // Renderers estilizados
         tablaUsuarios.getColumnModel().getColumn(0).setPreferredWidth(260);
@@ -380,9 +360,9 @@ public class VistaUsuariosRolesPanel extends JPanel {
         btnSiguiente.setEnabled(paginaActual < maxPags);
 
         // Estilo activo para el botón de página actual
-        btnPagina1.setBackground(paginaActual == 1 ? new Color(15, 23, 42) : Color.WHITE);
+        btnPagina1.setBackground(paginaActual == 1 ? Ui.TURQUESA_PROFUNDO : Color.WHITE);
         btnPagina1.setForeground(paginaActual == 1 ? Color.WHITE : new Color(71, 85, 105));
-        btnPagina2.setBackground(paginaActual == 2 ? new Color(15, 23, 42) : Color.WHITE);
+        btnPagina2.setBackground(paginaActual == 2 ? Ui.TURQUESA_PROFUNDO : Color.WHITE);
         btnPagina2.setForeground(paginaActual == 2 ? Color.WHITE : new Color(71, 85, 105));
     }
 
@@ -401,7 +381,7 @@ public class VistaUsuariosRolesPanel extends JPanel {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
             JPanel p = new JPanel();
             p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-            p.setBackground(isSelected ? new Color(241, 245, 249) : Color.WHITE);
+            p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
             p.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
 
             if (value instanceof Usuario) {
@@ -425,21 +405,24 @@ public class VistaUsuariosRolesPanel extends JPanel {
     private static class RolCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 12));
-            p.setBackground(isSelected ? new Color(241, 245, 249) : Color.WHITE);
+            p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
 
             String rol = value != null ? value.toString() : "";
             JLabel badge = new JLabel(rol);
             badge.setFont(new Font("Segoe UI", Font.PLAIN, 12));
             badge.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                    BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                     BorderFactory.createEmptyBorder(4, 10, 4, 10)
             ));
             badge.setOpaque(true);
-            badge.setBackground(new Color(248, 250, 252));
-            badge.setForeground(new Color(30, 41, 59));
 
             if ("Administrador".equalsIgnoreCase(rol)) {
+                badge.setBackground(Ui.TURQUESA_SUAVE);
+                badge.setForeground(Ui.TURQUESA_PROFUNDO);
                 badge.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            } else {
+                badge.setBackground(new Color(248, 250, 252));
+                badge.setForeground(new Color(30, 41, 59));
             }
             p.add(badge);
             return p;
@@ -449,14 +432,14 @@ public class VistaUsuariosRolesPanel extends JPanel {
     private static class EstadoCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 16));
-            p.setBackground(isSelected ? new Color(241, 245, 249) : Color.WHITE);
+            p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
 
             String estado = value != null ? value.toString() : "Activo";
             boolean activo = "Activo".equalsIgnoreCase(estado);
 
             JLabel lbl = new JLabel("● " + estado);
             lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
-            lbl.setForeground(activo ? new Color(34, 197, 94) : new Color(148, 163, 184)); // Verde o Gris
+            lbl.setForeground(activo ? Ui.TURQUESA_OSCURO : new Color(148, 163, 184));
             p.add(lbl);
             return p;
         }
@@ -465,23 +448,23 @@ public class VistaUsuariosRolesPanel extends JPanel {
     private static class AccionesCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 10));
-            p.setBackground(isSelected ? new Color(241, 245, 249) : Color.WHITE);
+            p.setBackground(isSelected ? Ui.TURQUESA_SUAVE : Color.WHITE);
 
             JButton btnPermisos = new JButton("Permisos");
             btnPermisos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnPermisos.setBackground(new Color(241, 245, 249));
-            btnPermisos.setForeground(new Color(51, 65, 85));
+            btnPermisos.setForeground(Ui.TURQUESA_PROFUNDO);
             btnPermisos.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                    BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                     BorderFactory.createEmptyBorder(3, 8, 3, 8)
             ));
 
             JButton btnEditar = new JButton("Editar");
             btnEditar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnEditar.setBackground(new Color(241, 245, 249));
-            btnEditar.setForeground(new Color(51, 65, 85));
+            btnEditar.setForeground(Ui.TURQUESA_PROFUNDO);
             btnEditar.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                    BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                     BorderFactory.createEmptyBorder(3, 8, 3, 8)
             ));
 
@@ -505,17 +488,17 @@ public class VistaUsuariosRolesPanel extends JPanel {
         g.insets = new Insets(6, 6, 6, 6);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField txtNom = new JTextField(uExistente != null ? uExistente.getNombreCompleto() : "");
-        JTextField txtUser = new JTextField(uExistente != null ? uExistente.getUsername() : "");
+        JTextField txtNom = Ui.campoTexto(uExistente != null ? uExistente.getNombreCompleto() : "", 15);
+        JTextField txtUser = Ui.campoTexto(uExistente != null ? uExistente.getUsername() : "", 15);
         if (uExistente != null) txtUser.setEditable(false);
-        JTextField txtMail = new JTextField(uExistente != null ? uExistente.getCorreo() : "");
-        JTextField txtPass = new JTextField(uExistente != null ? uExistente.getPassword() : "123456");
+        JTextField txtMail = Ui.campoTexto(uExistente != null ? uExistente.getCorreo() : "", 15);
+        JTextField txtPass = Ui.campoTexto(uExistente != null ? uExistente.getPassword() : "123456", 15);
 
-        JComboBox<String> cbRol = new JComboBox<>(new String[]{"Administrador", "Veterinario Titular", "Recepcionista", "Auxiliar Veterinario", "Contador / Auditor"});
+        JComboBox<String> cbRol = Ui.combo(new String[]{"Administrador", "Veterinario Titular", "Recepcionista", "Auxiliar Veterinario", "Contador / Auditor"});
         if (uExistente != null) cbRol.setSelectedItem(uExistente.getRol());
 
-        JTextField txtArea = new JTextField(uExistente != null ? uExistente.getEspecialidadArea() : "Clínica General");
-        JComboBox<String> cbEst = new JComboBox<>(new String[]{"Activo", "Inactivo"});
+        JTextField txtArea = Ui.campoTexto(uExistente != null ? uExistente.getEspecialidadArea() : "Clínica General", 15);
+        JComboBox<String> cbEst = Ui.combo(new String[]{"Activo", "Inactivo"});
         if (uExistente != null) cbEst.setSelectedItem(uExistente.getEstado());
 
         int fila = 0;
@@ -529,11 +512,9 @@ public class VistaUsuariosRolesPanel extends JPanel {
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         bot.setBackground(new Color(248, 250, 252));
-        JButton btnCan = new JButton("Cancelar");
+        JButton btnCan = Ui.botonSecundario("Cancelar", null);
         btnCan.addActionListener(e -> dlg.dispose());
-        JButton btnOk = new JButton("Guardar Colaborador");
-        btnOk.setBackground(new Color(15, 23, 42));
-        btnOk.setForeground(Color.WHITE);
+        JButton btnOk = Ui.botonPrimario("Guardar Colaborador", null);
         btnOk.addActionListener(e -> {
             String nom = txtNom.getText().trim();
             String user = txtUser.getText().trim();
@@ -581,14 +562,13 @@ public class VistaUsuariosRolesPanel extends JPanel {
         lblTit.setForeground(new Color(15, 23, 42));
         pnl.add(lblTit, BorderLayout.NORTH);
 
-        JComboBox<String> cbRoles = new JComboBox<>(new String[]{
+        JComboBox<String> cbRoles = Ui.combo(new String[]{
                 "Administrador (Nivel Total)",
                 "Veterinario Titular (Nivel Médico)",
                 "Recepcionista (Nivel Operativo)",
                 "Auxiliar Veterinario (Nivel Asistencial)",
                 "Contador / Auditor (Nivel Financiero)"
         });
-        cbRoles.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 
         JPanel pnlSel = new JPanel(new BorderLayout(10, 0));
         pnlSel.setBackground(Color.WHITE);
@@ -624,11 +604,11 @@ public class VistaUsuariosRolesPanel extends JPanel {
         cbRoles.addActionListener(e -> {
             int sel = cbRoles.getSelectedIndex();
             for (int i = 0; i < checks.length; i++) {
-                if (sel == 0) checks[i].setSelected(true); // Admin tiene todo
-                else if (sel == 1) checks[i].setSelected(i <= 4 || i == 7); // Vet
-                else if (sel == 2) checks[i].setSelected(i == 0 || i == 1 || i == 5); // Recep
-                else if (sel == 3) checks[i].setSelected(i == 0 || i == 3 || i == 4); // Aux
-                else if (sel == 4) checks[i].setSelected(i == 5 || i == 7 || i == 8); // Contador
+                if (sel == 0) checks[i].setSelected(true);
+                else if (sel == 1) checks[i].setSelected(i <= 4 || i == 7);
+                else if (sel == 2) checks[i].setSelected(i == 0 || i == 1 || i == 5);
+                else if (sel == 3) checks[i].setSelected(i == 0 || i == 3 || i == 4);
+                else if (sel == 4) checks[i].setSelected(i == 5 || i == 7 || i == 8);
             }
         });
 
@@ -639,11 +619,9 @@ public class VistaUsuariosRolesPanel extends JPanel {
         pnl.add(centro, BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        JButton btnCerrar = new JButton("Cerrar");
+        JButton btnCerrar = Ui.botonSecundario("Cerrar", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
-        JButton btnGuardar = new JButton("Guardar Privilegios");
-        btnGuardar.setBackground(new Color(15, 23, 42));
-        btnGuardar.setForeground(Color.WHITE);
+        JButton btnGuardar = Ui.botonPrimario("Guardar Privilegios", null);
         btnGuardar.addActionListener(e -> {
             JOptionPane.showMessageDialog(dlg, "✓ Matriz de privilegios para '" + cbRoles.getSelectedItem() + "' actualizada correctamente.", "Roles Guardados", JOptionPane.INFORMATION_MESSAGE);
             dlg.dispose();
@@ -667,6 +645,49 @@ public class VistaUsuariosRolesPanel extends JPanel {
                         + "Para personalizar módulos individuales, use el botón [Gestionar Roles].",
                 "Permisos de " + u.getUsername(),
                 JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    private void exportarDirectorioUsuarios() {
+        List<Usuario> us = repo.getUsuariosSistema();
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
+        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>DIRECTORIO DE USUARIOS Y ROLES ERP</h2>");
+        html.append("<p><strong>Fecha:</strong> ").append(LocalDate.now()).append(" | <strong>Total Colaboradores:</strong> ").append(us.size()).append("</p>");
+        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:11px;'>");
+        html.append("<tr style='background-color:#006064; color:white;'><th>Nombre Completo</th><th>Usuario</th><th>Correo</th><th>Rol</th><th>Área</th><th>Estado</th></tr>");
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("Nombre Completo,Usuario,Correo,Rol,Area,Estado\n");
+
+        for (Usuario u : us) {
+            html.append("<tr>")
+                .append("<td><b>").append(u.getNombreCompleto()).append("</b></td>")
+                .append("<td>").append(u.getUsername()).append("</td>")
+                .append("<td>").append(u.getCorreo()).append("</td>")
+                .append("<td>").append(u.getRol()).append("</td>")
+                .append("<td>").append(u.getEspecialidadArea()).append("</td>")
+                .append("<td align='center'>").append(u.getEstado()).append("</td>")
+                .append("</tr>");
+
+            csv.append("\"").append(u.getNombreCompleto()).append("\",\"")
+               .append(u.getUsername()).append("\",\"")
+               .append(u.getCorreo()).append("\",\"")
+               .append(u.getRol()).append("\",\"")
+               .append(u.getEspecialidadArea()).append("\",\"")
+               .append(u.getEstado()).append("\"\n");
+        }
+
+        html.append("</table>");
+        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento de nómina institucional expedido por Veterinaria Happy Pets ERP.</p>");
+        html.append("</body></html>");
+
+        Ui.mostrarVisorReporte(
+            SwingUtilities.getWindowAncestor(this),
+            "Directorio de Usuarios",
+            "Directorio Oficial de Colaboradores y Roles",
+            html.toString(),
+            csv.toString()
         );
     }
 }

@@ -49,10 +49,10 @@ import happypets.ui.Ui;
 public class VistaSalaEsperaTriajePanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -249,7 +249,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         fila.add(crearCardKpi(lblKpiEnEspera, "PACIENTES EN SALA", new Color(254, 243, 199), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
 
         lblKpiEnConsulta = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiEnConsulta, "EN CONSULTORIO", new Color(224, 242, 254), Iconos.crearIconoEstetoscopio(20, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiEnConsulta, "EN CONSULTORIO", Ui.TURQUESA_SUAVE, Iconos.crearIconoEstetoscopio(20, COLOR_AZUL_PRIMARIO)));
 
         lblKpiTiempoMedio = new JLabel("11 min");
         fila.add(crearCardKpi(lblKpiTiempoMedio, "TIEMPO PROMEDIO ESPERA", new Color(220, 252, 231), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
@@ -515,9 +515,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         };
 
         tablaMonitor = new JTable(modeloMonitor);
-        Ui.formatearTabla(tablaMonitor);
-        tablaMonitor.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaMonitor.setRowHeight(26);
+        Ui.formatearTabla(tablaMonitor, new int[]{0, 1, 3, 5, 6}, new int[]{});
 
         tablaMonitor.getColumnModel().getColumn(3).setCellRenderer(new BadgeTriajeRenderer());
         tablaMonitor.getColumnModel().getColumn(6).setCellRenderer(new BadgeEstadoTriajeRenderer());
@@ -593,7 +591,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
                 if (esPrimario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }

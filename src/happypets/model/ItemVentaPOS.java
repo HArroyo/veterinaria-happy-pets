@@ -30,6 +30,10 @@ public class ItemVentaPOS {
         return descripcion;
     }
 
+    public String getNombre() {
+        return descripcion;
+    }
+
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }

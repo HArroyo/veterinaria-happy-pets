@@ -32,6 +32,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -54,10 +55,10 @@ import happypets.ui.Ui;
 public class VistaCirugiasQuirofanoPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -176,7 +177,7 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
         lblKpiEnProcedimiento = new JLabel("1", SwingConstants.LEFT);
         lblKpiEnRecuperacion = new JLabel("1", SwingConstants.LEFT);
 
-        fila.add(crearCardKpi(lblKpiQuirofanosActivos, "QUIRÓFANOS HABILITADOS", new Color(224, 242, 254), COLOR_AZUL_PRIMARIO, Iconos.crearIconoBisturi(20, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiQuirofanosActivos, "QUIRÓFANOS HABILITADOS", Ui.TURQUESA_SUAVE, COLOR_AZUL_PRIMARIO, Iconos.crearIconoBisturi(20, COLOR_AZUL_PRIMARIO)));
         fila.add(crearCardKpi(lblKpiCirugiasHoy, "CIRUGÍAS PROGRAMADAS", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoCalendario(20, new Color(147, 51, 234))));
         fila.add(crearCardKpi(lblKpiEnProcedimiento, "EN INTERVENCIÓN ACTIVA", new Color(254, 243, 199), new Color(217, 119, 6), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
         fila.add(crearCardKpi(lblKpiEnRecuperacion, "EN RECUPERACIÓN / ALTA", new Color(220, 252, 231), new Color(22, 163, 74), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
@@ -276,8 +277,7 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
         };
 
         tablaQuirofano = new JTable(modeloQuirofano);
-        Ui.formatearTabla(tablaQuirofano);
-        tablaQuirofano.setRowHeight(32);
+        Ui.formatearTabla(tablaQuirofano, new int[]{0, 1, 5, 8}, new int[]{});
 
         tablaQuirofano.getColumnModel().getColumn(0).setPreferredWidth(75);
         tablaQuirofano.getColumnModel().getColumn(1).setPreferredWidth(130);
@@ -596,7 +596,7 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -775,30 +775,22 @@ public class VistaCirugiasQuirofanoPanel extends JPanel {
         }
         RegistroCirugia c = listaActual.get(row);
 
-        String acta = "╔════════════════════════════════════════════════════════════════╗\n" +
-                      "║       VETERINARIA HAPPY PETS · PROTOCOLO QUIRÚRGICO            ║\n" +
-                      "║            Centro Quirúrgico Veterinario Avanzado              ║\n" +
-                      "╠════════════════════════════════════════════════════════════════╣\n" +
-                      " Código Cirugía: " + c.getIdCirugia() + "    Fecha: " + c.getFechaFormateada() + "\n" +
-                      " Paciente: " + c.getNombreMascota() + " (" + c.getEspecieRaza() + ")\n" +
-                      " Tutor: " + c.getNombreTutor() + "  |  Tel: " + c.getTelefonoTutor() + "\n" +
-                      " Procedimiento: " + c.getProcedimiento() + "\n" +
-                      " Quirófano: " + c.getQuirofano() + "\n" +
-                      "────────────────────────────────────────────────────────────────\n" +
-                      " EQUIPO QUIRÚRGICO Y ANESTESIA:\n" +
-                      " • Cirujano: " + c.getCirujanoPrincipal() + "\n" +
-                      " • Anestesista: " + c.getPersonalApoyo() + "\n" +
-                      " • Protocolo Anestésico: " + c.getTipoAnestesia() + "\n" +
-                      " • Insumos / Fármacos: " + c.getMedicamentosInsumos() + "\n" +
-                      " • Horario Operatorio: " + c.getHoraInicioFormateada() + " a " + c.getHoraFinFormateada() + "\n" +
-                      "────────────────────────────────────────────────────────────────\n" +
-                      " SEGUIMIENTO POSTOPERATORIO:\n" +
-                      " • Estado al alta: " + c.getEstadoGeneralAlta() + "\n" +
-                      " • Cuidados tutor: " + c.getIndicacionesPostop() + "\n" +
-                      " • Fecha de retiro de puntos: " + c.getFechaRetiroPuntosFormateada() + "\n" +
-                      "╚════════════════════════════════════════════════════════════════╝";
+        String[][] datos = new String[][]{
+            {"1", "Procedimiento Realizado", c.getProcedimiento(), c.getQuirofano(), c.getHoraInicioFormateada() + " a " + c.getHoraFinFormateada()},
+            {"2", "Equipo Médico", "Cirujano: " + c.getCirujanoPrincipal(), "Anestesista: " + c.getPersonalApoyo(), c.getTipoAnestesia()},
+            {"3", "Postoperatorio y Alta", c.getEstadoGeneralAlta(), "Retiro puntos: " + c.getFechaRetiroPuntosFormateada(), c.getIndicacionesPostop()}
+        };
 
-        JOptionPane.showMessageDialog(this, acta, "Protocolo Quirúrgico Impreso - Happy Pets", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "ACTA QUIRÚRGICA Y PROTOCOLO OPERATORIO",
+            "Paciente: " + c.getNombreMascota() + " (" + c.getEspecieRaza() + ") | Tutor: " + c.getNombreTutor() + " | Fecha: " + c.getFechaFormateada(),
+            "Código Cirugía: " + c.getIdCirugia() + " | Sala: " + c.getQuirofano(),
+            new String[]{"Fase", "Etapa Operatoria", "Detalle Clínico", "Personal / Control", "Observaciones"},
+            datos,
+            "PROCEDIMIENTO QUIRÚRGICO CERTIFICADO · HAPPY PETS",
+            "ActaQuirogurgica_" + c.getIdCirugia()
+        );
     }
 
     private static class PacienteItem {

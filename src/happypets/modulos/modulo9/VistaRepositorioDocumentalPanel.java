@@ -75,9 +75,9 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
 
     private JPanel crearCabeceraSuperior() {
         JPanel cab = new JPanel(new BorderLayout(16, 8));
-        cab.setBackground(new Color(30, 41, 59));
+        cab.setBackground(Ui.TURQUESA_PROFUNDO);
         cab.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(15, 23, 42), 1),
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
                 BorderFactory.createEmptyBorder(14, 20, 14, 20)
         ));
 
@@ -92,16 +92,19 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
 
         JLabel lblSub = new JLabel("Almacenamiento institucional, gestión de expedientes firmados y custodia digital.");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblSub.setForeground(new Color(148, 163, 184));
+        lblSub.setForeground(Ui.TURQUESA_SUAVE);
         pnlTit.add(lblSub);
 
         cab.add(pnlTit, BorderLayout.WEST);
 
         JPanel pnlUsr = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         pnlUsr.setOpaque(false);
-        JLabel lblUsr = new JLabel("Usuario: Admin 👤");
-        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblUsr.setForeground(new Color(226, 232, 240));
+        JLabel lblUsr = new JLabel("  Usuario: Admin  ");
+        lblUsr.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblUsr.setOpaque(true);
+        lblUsr.setBackground(Ui.TURQUESA_SUAVE);
+        lblUsr.setForeground(Ui.TURQUESA_PROFUNDO);
+        lblUsr.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
         pnlUsr.add(lblUsr);
 
         cab.add(pnlUsr, BorderLayout.EAST);
@@ -132,15 +135,13 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
         izq.add(new JLabel(Iconos.crearIconoBuscar(14, new Color(100, 116, 139))));
         izq.add(txtBuscar);
 
-        comboFiltroTipo = new JComboBox<>(new String[]{
+        comboFiltroTipo = Ui.combo(new String[]{
                 "Filtrar: Todos ▼",
                 "PDF",
                 "DOCX",
                 "XLSX"
         });
-        comboFiltroTipo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboFiltroTipo.setPreferredSize(new Dimension(140, 32));
-        comboFiltroTipo.setBackground(Color.WHITE);
         comboFiltroTipo.addActionListener(e -> cargarDatosDocumentos());
         izq.add(comboFiltroTipo);
 
@@ -173,25 +174,11 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
         };
 
         tablaDocumentos = new JTable(modeloDocumentos);
-        tablaDocumentos.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaDocumentos.setRowHeight(38);
-        tablaDocumentos.setGridColor(new Color(241, 245, 249));
-        tablaDocumentos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaDocumentos.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaDocumentos.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaDocumentos.setSelectionBackground(new Color(240, 249, 255));
-        tablaDocumentos.setSelectionForeground(new Color(15, 23, 42));
-
-        DefaultTableCellRenderer centroRenderer = new DefaultTableCellRenderer();
-        centroRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-        tablaDocumentos.getColumnModel().getColumn(0).setCellRenderer(centroRenderer);
+        Ui.formatearTabla(tablaDocumentos, new int[]{0, 3, 4, 5}, new int[]{});
         tablaDocumentos.getColumnModel().getColumn(0).setPreferredWidth(80);
         tablaDocumentos.getColumnModel().getColumn(1).setPreferredWidth(210);
         tablaDocumentos.getColumnModel().getColumn(2).setPreferredWidth(140);
-        tablaDocumentos.getColumnModel().getColumn(3).setCellRenderer(centroRenderer);
         tablaDocumentos.getColumnModel().getColumn(3).setPreferredWidth(90);
-        tablaDocumentos.getColumnModel().getColumn(4).setCellRenderer(centroRenderer);
         tablaDocumentos.getColumnModel().getColumn(4).setPreferredWidth(140);
         tablaDocumentos.getColumnModel().getColumn(5).setPreferredWidth(130);
 
@@ -208,8 +195,8 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
                     l.setBackground(new Color(254, 226, 226));
                     l.setForeground(new Color(220, 38, 38));
                 } else if ("DOCX".equalsIgnoreCase(tipo)) {
-                    l.setBackground(new Color(224, 242, 254));
-                    l.setForeground(new Color(3, 105, 161));
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
                 } else if ("XLSX".equalsIgnoreCase(tipo)) {
                     l.setBackground(new Color(236, 253, 245));
                     l.setForeground(new Color(16, 185, 129));
@@ -228,7 +215,7 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(table, "Descargar / Ver", isSelected, hasFocus, row, col);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
-                l.setForeground(new Color(2, 132, 199));
+                l.setForeground(Ui.TURQUESA_PROFUNDO);
                 l.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 return l;
             }
@@ -246,7 +233,7 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
         });
 
         JScrollPane scroll = new JScrollPane(tablaDocumentos);
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(241, 245, 249), 1));
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
         card.add(scroll, BorderLayout.CENTER);
 
         // Pie de tabla
@@ -296,31 +283,35 @@ public class VistaRepositorioDocumentalPanel extends JPanel {
         if (fila < 0 || fila >= documentosActuales.size()) return;
         DocumentoRepositorio d = documentosActuales.get(fila);
 
-        String msg = "EXPEDIENTE DIGITAL DEL REPOSITORIO\n\n"
-                + "• Archivo: " + d.getNombreArchivo() + "\n"
-                + "• Tipo de Formato: " + d.getTipoExtension() + "\n"
-                + "• Categoría: " + d.getCategoria() + "\n"
-                + "• Peso: " + d.getTamanoLegible() + "\n"
-                + "• Fecha y Hora de Carga: " + d.getFechaCargaFormateada() + "\n"
-                + "• Usuario Custodio: " + d.getUsuarioCarga() + "\n"
-                + "• Ubicación en Servidor: " + d.getRutaArchivo() + "\n\n"
-                + "¿Desea descargar una copia o previsualizar el documento?";
+        String[][] meta = new String[][]{
+            {"Nombre del Archivo", d.getNombreArchivo()},
+            {"Tipo / Extensión", d.getTipoExtension()},
+            {"Categoría Documental", d.getCategoria()},
+            {"Tamaño en Memoria", d.getTamanoLegible()},
+            {"Fecha de Carga", d.getFechaCargaFormateada()},
+            {"Usuario Custodio", d.getUsuarioCarga()}
+        };
+        String[][] datos = new String[][]{
+            {"1", d.getNombreArchivo(), d.getTipoExtension(), d.getCategoria(), d.getTamanoLegible(), d.getFechaCargaFormateada(), d.getUsuarioCarga(), "Vigente y Custodiado"}
+        };
 
-        int opt = JOptionPane.showOptionDialog(this, msg, "Documento - " + d.getNombreArchivo(),
-                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                null, new String[]{"Descargar Copia", "Cerrar"}, "Descargar Copia");
+        repo.registrarLogAuditoria(new happypets.model.LogAuditoria(
+                "#EV-" + (1043 + repo.getLogsAuditoria().size()),
+                "Descarga/Vista de " + d.getNombreArchivo(),
+                "admin_user", LocalDateTime.now(), "127.0.0.1", "ÉXITO",
+                "Visualización interactiva y descarga en memoria desde el Repositorio Documental"
+        ));
 
-        if (opt == 0) {
-            repo.registrarLogAuditoria(new happypets.model.LogAuditoria(
-                    "#EV-" + (1043 + repo.getLogsAuditoria().size()),
-                    "Descarga de " + d.getNombreArchivo(),
-                    "admin_user", LocalDateTime.now(), "127.0.0.1", "ÉXITO",
-                    "Descarga completada del documento digital desde el Repositorio Documental"
-            ));
-            JOptionPane.showMessageDialog(this,
-                    "Archivo " + d.getNombreArchivo() + " descargado exitosamente.\nGuardado temporalmente en carpeta de descargas de usuario.",
-                    "Descarga Exitosa", JOptionPane.INFORMATION_MESSAGE);
-        }
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "EXPEDIENTE DIGITAL REPOSITORIO",
+            d.getNombreArchivo(),
+            meta,
+            new String[]{"N°", "Nombre Archivo", "Tipo", "Categoría", "Tamaño", "Fecha Carga", "Custodio", "Estado"},
+            datos,
+            "Custodia digital certificada en memoria Happy Pets.",
+            "Expediente_" + d.getNombreArchivo().replace(".", "_")
+        );
     }
 
     private void mostrarModalSubirArchivo() {

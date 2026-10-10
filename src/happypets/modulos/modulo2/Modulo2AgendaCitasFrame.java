@@ -46,10 +46,11 @@ public class Modulo2AgendaCitasFrame extends JFrame {
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabs.setBackground(Color.WHITE);
 
-        tabs.addTab("Agendamiento de Citas", Iconos.crearIconoCalendario(16, new Color(2, 132, 199)), vistaAgendamiento);
-        tabs.addTab("Calendario Global", Iconos.crearIconoReloj(16, new Color(2, 132, 199)), vistaCalendario);
-        tabs.addTab("Gestión de Recordatorios", Iconos.crearIconoWhatsApp(16, new Color(22, 163, 74)), vistaRecordatorios);
-        tabs.addTab("Sala de Espera y Triaje", Iconos.crearIconoAlertaTriaje(16, new Color(220, 38, 38)), vistaSalaEspera);
+        setIconImage(happypets.ui.Ui.icono());
+        tabs.addTab("Agendamiento de Citas", Iconos.crearIconoCalendario(16, happypets.ui.Ui.TURQUESA), vistaAgendamiento);
+        tabs.addTab("Calendario Global", Iconos.crearIconoReloj(16, happypets.ui.Ui.TURQUESA_OSCURO), vistaCalendario);
+        tabs.addTab("Gestión de Recordatorios", Iconos.crearIconoWhatsApp(16, happypets.ui.Ui.COLOR_EXITO), vistaRecordatorios);
+        tabs.addTab("Sala de Espera y Triaje", Iconos.crearIconoAlertaTriaje(16, happypets.ui.Ui.COLOR_PELIGRO), vistaSalaEspera);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {
             tabs.setSelectedIndex(pestanaInicial);

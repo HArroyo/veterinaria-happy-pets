@@ -43,15 +43,15 @@ import happypets.ui.Ui;
 public class VistaPersonalApoyoPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = new Color(248, 250, 252);
-    private static final Color COLOR_CARD = Color.WHITE;
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_TEXTO_TITULO = new Color(15, 23, 42);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
-    private static final Color COLOR_AZUL = new Color(2, 132, 199);
-    private static final Color COLOR_TEAL = new Color(13, 148, 136);
-    private static final Color COLOR_MORADO = new Color(126, 34, 206);
-    private static final Color COLOR_VERDE = new Color(16, 185, 129);
+    private static final Color COLOR_FONDO = Ui.FONDO;
+    private static final Color COLOR_CARD = Ui.FONDO_CARD;
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
+    private static final Color COLOR_AZUL = Ui.TURQUESA;
+    private static final Color COLOR_TEAL = Ui.TURQUESA_OSCURO;
+    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
+    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -552,6 +552,23 @@ public class VistaPersonalApoyoPanel extends JPanel {
         JButton btnCerrar = Ui.botonSecundario("Cerrar", null);
         btnCerrar.addActionListener(e -> dlg.dispose());
 
+        JButton btnExportar = Ui.botonSecundario("Descargar Ficha PDF", Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
+        btnExportar.addActionListener(e -> {
+            String textoFicha = "FICHA TÉCNICA DEL COLABORADOR ASISTENCIAL\n" +
+                    "CLÍNICA VETERINARIA HAPPY PETS S.A.C.\n" +
+                    "=========================================================================\n\n" +
+                    "NOMBRE COMPLETO     : " + p.getNombreCompleto() + "\n" +
+                    "CARGO / ROL         : " + p.getCargo() + " (" + p.getCategoria() + ")\n" +
+                    "ÁREA ASIGNADA       : " + p.getAreaAsignada() + "\n" +
+                    "TURNO LABORAL       : " + p.getTurno() + "\n" +
+                    "ESTADO ACTUAL       : " + p.getEstado() + "\n" +
+                    "CONTACTO            : " + p.getTelefono() + " | Ext: " + p.getExtensionInterna() + "\n" +
+                    "CORREO              : " + p.getEmail() + "\n\n" +
+                    "CERTIFICACIONES Y COMPETENCIAS:\n" + p.getCertificaciones() + "\n";
+            Ui.mostrarVisorReporte(dlg, "Ficha Colaborador - " + p.getNombreCompleto(), "PERSONAL ASISTENCIAL HAPPY PETS", textoFicha, "FichaPersonal_" + p.getId());
+        });
+
+        bot.add(btnExportar);
         bot.add(btnGuardar);
         bot.add(btnCerrar);
         panel.add(bot, BorderLayout.SOUTH);

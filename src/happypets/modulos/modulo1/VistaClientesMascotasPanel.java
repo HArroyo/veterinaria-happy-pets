@@ -48,10 +48,10 @@ import happypets.ui.Ui;
 public class VistaClientesMascotasPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
     private Cliente clienteActual;
@@ -399,7 +399,7 @@ public class VistaClientesMascotasPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -492,10 +492,7 @@ public class VistaClientesMascotasPanel extends JPanel {
         };
 
         tablaMascotas = new JTable(modeloMascotas);
-        Ui.formatearTabla(tablaMascotas);
-        tablaMascotas.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaMascotas.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaMascotas.setRowHeight(26);
+        Ui.formatearTabla(tablaMascotas, new int[]{0, 3, 4, 5}, new int[]{});
 
         tablaMascotas.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {

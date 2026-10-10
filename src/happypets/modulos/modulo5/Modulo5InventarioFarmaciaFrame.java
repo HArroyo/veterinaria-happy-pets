@@ -48,10 +48,11 @@ public class Modulo5InventarioFarmaciaFrame extends JFrame {
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabs.setBackground(Color.WHITE);
 
-        tabs.addTab("Catálogo de Productos y Fármacos", Iconos.crearIconoPildora(16, new Color(34, 197, 94)), vistaCatalogo);
-        tabs.addTab("Control de Stock y Lotes", Iconos.crearIconoCajaAlmacen(16, new Color(14, 165, 233)), vistaStock);
-        tabs.addTab("Proveedores y Órdenes de Compra", Iconos.crearIconoCamionProveedor(16, new Color(245, 158, 11)), vistaProveedores);
-        tabs.addTab("Ajustes y Mermas", Iconos.crearIconoAlertaMerma(16, new Color(220, 38, 38)), vistaAjustes);
+        setIconImage(happypets.ui.Ui.icono());
+        tabs.addTab("Catálogo de Productos y Fármacos", Iconos.crearIconoPildora(16, happypets.ui.Ui.TURQUESA), vistaCatalogo);
+        tabs.addTab("Control de Stock y Lotes", Iconos.crearIconoCajaAlmacen(16, happypets.ui.Ui.TURQUESA_OSCURO), vistaStock);
+        tabs.addTab("Proveedores y Órdenes de Compra", Iconos.crearIconoCamionProveedor(16, happypets.ui.Ui.TURQUESA_PROFUNDO), vistaProveedores);
+        tabs.addTab("Ajustes y Mermas", Iconos.crearIconoAlertaMerma(16, happypets.ui.Ui.COLOR_PELIGRO), vistaAjustes);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {
             tabs.setSelectedIndex(pestanaInicial);

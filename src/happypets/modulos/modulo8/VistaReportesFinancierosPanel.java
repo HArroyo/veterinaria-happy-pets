@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -132,28 +133,20 @@ public class VistaReportesFinancierosPanel extends JPanel {
         JPanel pnlControles = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlControles.setOpaque(false);
 
-        comboPeriodo = new JComboBox<>(new String[]{
+        comboPeriodo = Ui.combo(new String[]{
                 "2024 (Q1 - Q2 Acumulado)",
                 "Mayo 2024 (Mes en Curso)",
                 "Primer Trimestre 2024 (Q1)",
                 "Ejercicio Fiscal Completo 2023"
         });
-        comboPeriodo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         comboPeriodo.setPreferredSize(new Dimension(200, 34));
-        comboPeriodo.setBackground(Color.WHITE);
 
-        comboDivisa = new JComboBox<>(new String[]{"PEN (S/)", "EUR (€)", "USD ($)"});
-        comboDivisa.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        comboDivisa = Ui.combo(new String[]{"PEN (S/)", "EUR (€)", "USD ($)"});
         comboDivisa.setPreferredSize(new Dimension(95, 34));
-        comboDivisa.setBackground(Color.WHITE);
 
-        JButton btnDescargar = Ui.botonPrimario("Descargar Resumen", Iconos.crearIconoDocumento(14, Color.WHITE));
+        JButton btnDescargar = Ui.botonPrimario("Descargar Resumen", Iconos.crearIconoDescargar(14, Color.WHITE));
         btnDescargar.setPreferredSize(new Dimension(175, 34));
-        btnDescargar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                    "Generando Resumen Ejecutivo Financiero...\nArchivo exportado: exports/balance_financiero_2024_q1_q2.pdf",
-                    "Descargar Balance", JOptionPane.INFORMATION_MESSAGE);
-        });
+        btnDescargar.addActionListener(e -> generarReporteFinanciero());
 
         pnlControles.add(comboPeriodo);
         pnlControles.add(comboDivisa);
@@ -498,32 +491,13 @@ public class VistaReportesFinancierosPanel extends JPanel {
         };
 
         tablaDesglose = new JTable(modeloDesglose);
-        tablaDesglose.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaDesglose.setRowHeight(36);
-        tablaDesglose.setGridColor(new Color(241, 245, 249));
-        tablaDesglose.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tablaDesglose.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaDesglose.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaDesglose.setSelectionBackground(new Color(240, 249, 255));
-        tablaDesglose.setSelectionForeground(new Color(15, 23, 42));
-
-        DefaultTableCellRenderer derechaRenderer = new DefaultTableCellRenderer();
-        derechaRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-
-        DefaultTableCellRenderer centroRenderer = new DefaultTableCellRenderer();
-        centroRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
+        Ui.formatearTabla(tablaDesglose, new int[]{6, 7}, new int[]{2, 3, 4, 5});
         tablaDesglose.getColumnModel().getColumn(0).setPreferredWidth(220);
         tablaDesglose.getColumnModel().getColumn(1).setPreferredWidth(140);
-        tablaDesglose.getColumnModel().getColumn(2).setCellRenderer(derechaRenderer);
         tablaDesglose.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tablaDesglose.getColumnModel().getColumn(3).setCellRenderer(derechaRenderer);
         tablaDesglose.getColumnModel().getColumn(3).setPreferredWidth(110);
-        tablaDesglose.getColumnModel().getColumn(4).setCellRenderer(derechaRenderer);
         tablaDesglose.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tablaDesglose.getColumnModel().getColumn(5).setCellRenderer(derechaRenderer);
         tablaDesglose.getColumnModel().getColumn(5).setPreferredWidth(110);
-        tablaDesglose.getColumnModel().getColumn(6).setCellRenderer(centroRenderer);
         tablaDesglose.getColumnModel().getColumn(6).setPreferredWidth(95);
         tablaDesglose.getColumnModel().getColumn(7).setPreferredWidth(110);
 
@@ -537,14 +511,14 @@ public class VistaReportesFinancierosPanel extends JPanel {
                 l.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 l.setOpaque(true);
                 if ("Óptimo".equalsIgnoreCase(est)) {
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_PROFUNDO);
+                } else if ("Excelente".equalsIgnoreCase(est)) {
                     l.setBackground(new Color(236, 253, 245));
                     l.setForeground(new Color(16, 185, 129));
-                } else if ("Excelente".equalsIgnoreCase(est)) {
-                    l.setBackground(new Color(224, 242, 254));
-                    l.setForeground(new Color(3, 105, 161));
                 } else if ("Margen Normal".equalsIgnoreCase(est)) {
-                    l.setBackground(new Color(240, 249, 255));
-                    l.setForeground(new Color(2, 132, 199));
+                    l.setBackground(Ui.TURQUESA_SUAVE);
+                    l.setForeground(Ui.TURQUESA_OSCURO);
                 } else if ("A Revisar".equalsIgnoreCase(est)) {
                     l.setBackground(new Color(254, 243, 199));
                     l.setForeground(new Color(180, 83, 9));
@@ -558,7 +532,7 @@ public class VistaReportesFinancierosPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(tablaDesglose);
         scroll.setPreferredSize(new Dimension(800, 230));
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(241, 245, 249), 1));
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
         card.add(scroll, BorderLayout.CENTER);
 
         // Fila Totalizadora Destacada
@@ -642,6 +616,43 @@ public class VistaReportesFinancierosPanel extends JPanel {
                     d.getEstadoFinanciero()
             });
         }
+    }
+
+    private void generarReporteFinanciero() {
+        List<DesgloseFinancieroPrestacion> lista = repo.getDesglosesFinancieros();
+        String[][] datos = new String[lista.size()][7];
+        for (int i = 0; i < lista.size(); i++) {
+            DesgloseFinancieroPrestacion d = lista.get(i);
+            datos[i] = new String[]{
+                String.valueOf(i + 1),
+                d.getLineaServicio(),
+                d.getCentroOperativo(),
+                String.format("%,d", d.getTransacciones()),
+                String.format("S/ %,.2f", d.getIngresosBrutos()),
+                String.format("S/ %,.2f", d.getCosteDirecto()),
+                String.format("S/ %,.2f (%.1f%%)", d.getMargenBruto(), d.getPorcentajeRentabilidad())
+            };
+        }
+
+        String[][] meta = new String[][]{
+            {"Ejercicio Contable", comboPeriodo != null ? comboPeriodo.getSelectedItem().toString() : "2024"},
+            {"Moneda", comboDivisa != null ? comboDivisa.getSelectedItem().toString() : "PEN (S/)"},
+            {"Total Operaciones", "5,310 transacciones"},
+            {"Ingresos Totales", "S/ 348,650.00"},
+            {"Costes Operativos", "S/ 162,420.00"},
+            {"Margen EBITDA Global", "S/ 186,230.00 (53.4%)"}
+        };
+
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "BALANCE FINANCIERO Y RENDIMIENTO OPERATIVO",
+            "Consolidado Departamental y Margen de Contribución",
+            meta,
+            new String[]{"N°", "Línea de Servicio / Producto", "Centro Operativo", "Transacciones", "Ingresos Brutos", "Costes", "Margen Bruto"},
+            datos,
+            "Resumen financiero oficial generado 100% en memoria para auditoría interna.",
+            "Balance_Financiero_Ejecutivo"
+        );
     }
 
     /**

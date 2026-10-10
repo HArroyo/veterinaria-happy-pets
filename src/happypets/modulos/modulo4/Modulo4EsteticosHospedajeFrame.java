@@ -48,10 +48,11 @@ public class Modulo4EsteticosHospedajeFrame extends JFrame {
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabs.setBackground(Color.WHITE);
 
-        tabs.addTab("Grooming y Peluquería", Iconos.crearIconoTijeras(16, new Color(236, 72, 153)), vistaGrooming);
-        tabs.addTab("Hospitalización", Iconos.crearIconoCamaHospital(16, new Color(220, 38, 38)), vistaHospitalizacion);
-        tabs.addTab("Hotel / Guardería", Iconos.crearIconoCasaMascota(16, new Color(14, 165, 233)), vistaHotel);
-        tabs.addTab("Adopciones y Rescates", Iconos.crearIconoCorazonMascota(16, new Color(16, 185, 129)), vistaAdopciones);
+        setIconImage(happypets.ui.Ui.icono());
+        tabs.addTab("Grooming y Peluquería", Iconos.crearIconoTijeras(16, happypets.ui.Ui.TURQUESA), vistaGrooming);
+        tabs.addTab("Hospitalización", Iconos.crearIconoCamaHospital(16, happypets.ui.Ui.COLOR_PELIGRO), vistaHospitalizacion);
+        tabs.addTab("Hotel / Guardería", Iconos.crearIconoCasaMascota(16, happypets.ui.Ui.TURQUESA_OSCURO), vistaHotel);
+        tabs.addTab("Adopciones y Rescates", Iconos.crearIconoCorazonMascota(16, happypets.ui.Ui.TURQUESA_PROFUNDO), vistaAdopciones);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {
             tabs.setSelectedIndex(pestanaInicial);

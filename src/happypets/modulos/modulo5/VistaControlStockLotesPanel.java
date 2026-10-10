@@ -39,6 +39,7 @@ import happypets.data.RepositorioVeterinaria;
 import happypets.model.LoteMovimientoStock;
 import happypets.model.ProductoFarmacia;
 import happypets.ui.Iconos;
+import happypets.ui.Ui;
 
 /**
  * Submódulo 5.2: Control de Stock y Lotes (Kardex).
@@ -51,8 +52,8 @@ import happypets.ui.Iconos;
 public class VistaControlStockLotesPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = new Color(226, 232, 240);
-    private static final Color COLOR_AZUL_PRIMARIO = new Color(2, 132, 199);
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
+    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
     private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
     private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
@@ -142,11 +143,11 @@ public class VistaControlStockLotesPanel extends JPanel {
 
         JLabel badgeFefo = new JLabel(" Política FEFO: Primero en Vencer, Primero en Salir ", SwingConstants.CENTER);
         badgeFefo.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeFefo.setForeground(new Color(2, 132, 199));
+        badgeFefo.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeFefo.setOpaque(true);
-        badgeFefo.setBackground(new Color(224, 242, 254));
+        badgeFefo.setBackground(Ui.TURQUESA_SUAVE);
         badgeFefo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(186, 230, 253), 1, true),
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
         der.add(badgeFefo);
@@ -452,15 +453,7 @@ public class VistaControlStockLotesPanel extends JPanel {
         };
 
         tablaMovimientos = new JTable(modeloMovimientos);
-        tablaMovimientos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tablaMovimientos.setRowHeight(26);
-        tablaMovimientos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
-        tablaMovimientos.getTableHeader().setBackground(new Color(248, 250, 252));
-        tablaMovimientos.getTableHeader().setForeground(new Color(71, 85, 105));
-        tablaMovimientos.setSelectionBackground(new Color(224, 242, 254));
-        tablaMovimientos.setSelectionForeground(new Color(3, 105, 161));
-        tablaMovimientos.setShowGrid(false);
-        tablaMovimientos.setIntercellSpacing(new Dimension(0, 0));
+        Ui.formatearTabla(tablaMovimientos, new int[]{0, 2, 3, 6, 7}, new int[]{4, 5});
 
         tablaMovimientos.getColumnModel().getColumn(0).setPreferredWidth(65);
         tablaMovimientos.getColumnModel().getColumn(1).setPreferredWidth(140);
@@ -480,9 +473,9 @@ public class VistaControlStockLotesPanel extends JPanel {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 String st = value != null ? value.toString() : "";
                 if (st.toLowerCase().contains("ingreso") || st.contains("+")) {
-                    l.setForeground(new Color(16, 185, 129));
+                    l.setForeground(Ui.COLOR_EXITO);
                 } else {
-                    l.setForeground(new Color(2, 132, 199));
+                    l.setForeground(Ui.TURQUESA_OSCURO);
                 }
                 return l;
             }
@@ -546,13 +539,13 @@ public class VistaControlStockLotesPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (primario) {
-                    g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 if (!primario) {
-                    g2.setColor(COLOR_BORDE);
+                    g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
                 super.paintComponent(g2);
@@ -707,13 +700,13 @@ public class VistaControlStockLotesPanel extends JPanel {
             ));
         }
 
-        JTextArea ta = new JTextArea(sb.toString());
-        ta.setFont(new Font("Consolas", Font.PLAIN, 11));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(650, 320));
-
-        JOptionPane.showMessageDialog(this, sp, "Consolidado de Stock por Producto", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Consolidado de Stock de Farmacia",
+                "CLÍNICA HAPPY PETS · INVENTARIO Y SALDOS AL DÍA",
+                sb.toString(),
+                "Consolidado_Stock"
+        );
     }
 
     private void imprimirKardexFisico() {
@@ -741,13 +734,13 @@ public class VistaControlStockLotesPanel extends JPanel {
         sb.append(" Dra. Elena Ruiz (Regente)                  Director Médico Happy Pets\n");
         sb.append(" CQVP Matrícula Nº 4120                     Colegio Médico Veterinario\n");
 
-        JTextArea ta = new JTextArea(sb.toString());
-        ta.setFont(new Font("Consolas", Font.PLAIN, 11));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(680, 360));
-
-        JOptionPane.showMessageDialog(this, sp, "Reporte Oficial de Kardex Físico", JOptionPane.INFORMATION_MESSAGE);
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Kardex Físico y Movimientos de Lotes",
+                "HAPPY PETS VETERINARIA · SERVICIO FARMACÉUTICO",
+                sb.toString(),
+                "Kardex_Lotes"
+        );
     }
 
     private void limpiarFormulario() {

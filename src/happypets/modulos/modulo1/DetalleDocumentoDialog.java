@@ -108,8 +108,25 @@ public class DetalleDocumentoDialog extends JDialog {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 10));
         footer.setBackground(Ui.FONDO);
 
-        JButton btnDescargar = Ui.boton("Descargar PDF", true);
-        btnDescargar.addActionListener(e -> descargarPdf(documento));
+        JButton btnDescargar = Ui.boton("Visualizar / Exportar PDF", true);
+        btnDescargar.setBackground(Ui.TURQUESA);
+        btnDescargar.addActionListener(e -> {
+            String tipo = documento != null ? documento.getTipo() : "Documento Veterinario";
+            String[][] datos = new String[][]{
+                {"1", tipo, mascota != null ? mascota.getNombre() : "N/D", cliente != null ? cliente.getNombreCompleto() : "N/D", documento != null ? documento.getFechaActualizacionFormateada() : "-"},
+                {"2", "Dictamen Clínico", documento != null ? documento.getDescripcion() : "Conforme", "Dr. R. Mendoza (CMVP 8492)", "Vigente"}
+            };
+            Ui.mostrarVisorReporte(
+                (JFrame) getParent(),
+                tipo.toUpperCase(),
+                "Paciente: " + (mascota != null ? mascota.getNombre() + " (" + mascota.getCodigo() + ")" : "N/D") + " | Propietario: " + (cliente != null ? cliente.getNombreCompleto() : "N/D"),
+                "Fecha Emisión: " + (documento != null ? documento.getFechaActualizacionFormateada() : "-") + " | Estado: Certificación Oficial Aprobada",
+                new String[]{"N°", "Concepto", "Paciente / Detalle", "Responsable", "Estado"},
+                datos,
+                "DOCUMENTO OFICIAL DIGITAL VETERINARIA HAPPY PETS S.A.C.",
+                "Certificado_" + (mascota != null ? mascota.getNombre() : "Paciente")
+            );
+        });
 
         JButton btnCerrar = Ui.boton("Cerrar", false);
         btnCerrar.addActionListener(e -> dispose());
@@ -143,9 +160,30 @@ public class DetalleDocumentoDialog extends JDialog {
         chooser.setSelectedFile(new java.io.File(nombreSugerido));
         int res = chooser.showSaveDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
-            JOptionPane.showMessageDialog(null,
-                    "Documento generado exitosamente en:\n" + chooser.getSelectedFile().getAbsolutePath(),
-                    "Descarga Completada", JOptionPane.INFORMATION_MESSAGE);
+            java.io.File f = chooser.getSelectedFile();
+            try {
+                String[][] meta = new String[][]{
+                    {"Tipo de Documento", documento != null ? documento.getTipo() : "Certificado Oficial"},
+                    {"Institución", "Veterinaria Happy Pets S.A.C. · Lima Perú"},
+                    {"Estado", "Vigente y Certificado"}
+                };
+                java.util.List<Object[]> filas = new java.util.ArrayList<>();
+                filas.add(new Object[]{"1", documento != null ? documento.getTipo() : "Documento", "Oficial", "Vigente"});
+                happypets.ui.GeneradorDocumentos.generarPDF(
+                    documento != null ? documento.getTipo() : "Certificado",
+                    "Certificado Oficial de Salud y Vacunación",
+                    meta,
+                    new String[]{"N°", "Tipo", "Categoría", "Estado"},
+                    filas,
+                    "DOCUMENTO VÁLIDO Y CERTIFICADO",
+                    f
+                );
+                JOptionPane.showMessageDialog(null,
+                        "Documento PDF oficial generado exitosamente en:\n" + f.getAbsolutePath(),
+                        "Descarga Exitosa", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error al generar archivo PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

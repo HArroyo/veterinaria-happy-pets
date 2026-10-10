@@ -53,23 +53,23 @@ public class Modulo10ConfiguracionSoporteFrame extends JFrame {
         tabs.setBackground(Color.WHITE);
 
         tabs.addTab("Vista Completa (Dashboard)",
-                Iconos.crearIconoDashboard(16, new Color(15, 23, 42)),
+                Iconos.crearIconoDashboard(16, Ui.TURQUESA_PROFUNDO),
                 vistaDashboard);
 
         tabs.addTab("Parámetros Generales",
-                Iconos.crearIconoConfiguracion(16, new Color(59, 130, 246)),
+                Iconos.crearIconoConfiguracion(16, Ui.TURQUESA_OSCURO),
                 vistaParametros);
 
         tabs.addTab("Usuarios, Roles y Permisos",
-                Iconos.crearIconoUsuario(16, new Color(16, 185, 129)),
+                Iconos.crearIconoUsuario(16, Ui.TURQUESA_MEDIO),
                 vistaUsuarios);
 
         tabs.addTab("Integraciones Externas",
-                Iconos.crearIconoEnchufe(16, new Color(245, 158, 11)),
+                Iconos.crearIconoEnchufe(16, Ui.TURQUESA),
                 vistaIntegraciones);
 
         tabs.addTab("Módulo de IA y Soporte",
-                Iconos.crearIconoRobot(16, new Color(139, 92, 246)),
+                Iconos.crearIconoRobot(16, Ui.TURQUESA_OSCURO),
                 vistaIASoporte);
 
         if (pestanaInicial >= 0 && pestanaInicial < tabs.getTabCount()) {
