@@ -202,7 +202,7 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
 
         txtBuscar = new JTextField(12);
         txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtBuscar.setPreferredSize(new Dimension(140, 26));
+        txtBuscar.setPreferredSize(new Dimension(140, 28));
         txtBuscar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
                 new EmptyBorder(2, 6, 2, 6)
@@ -212,9 +212,9 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
 
         JButton btnBuscar = Ui.boton("Buscar", false);
         btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnBuscar.setPreferredSize(new Dimension(btnBuscar.getPreferredSize().width, 26));
-        btnBuscar.setIcon(Iconos.crearIconoBuscar(12, COLOR_AZUL_PRIMARIO));
-        btnBuscar.setIconTextGap(4);
+        btnBuscar.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
+        btnBuscar.setIconTextGap(6);
+        btnBuscar.setPreferredSize(new Dimension(92, 28));
 
         java.awt.event.ActionListener accionBuscar = e -> buscarClienteOMascota();
         btnBuscar.addActionListener(accionBuscar);

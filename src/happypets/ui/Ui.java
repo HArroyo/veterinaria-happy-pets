@@ -209,6 +209,12 @@ public final class Ui {
                 super.paintComponent(g);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, Math.max(d.height, 28));
+            }
         };
         boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
         boton.setForeground(textoColor);
@@ -218,7 +224,7 @@ public final class Ui {
         boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         boton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(bordeColor, 1),
-                new EmptyBorder(7, 14, 7, 14)
+                new EmptyBorder(5, 12, 5, 12)
         ));
         return boton;
     }
@@ -271,6 +277,12 @@ public final class Ui {
                 super.paintComponent(g);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, Math.max(d.height, 28));
+            }
         };
         b.setFont(new Font("Segoe UI", Font.BOLD, 12));
         b.setForeground(Color.WHITE);
@@ -280,7 +292,7 @@ public final class Ui {
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(220, 38, 38), 1),
-                new EmptyBorder(7, 14, 7, 14)
+                new EmptyBorder(5, 12, 5, 12)
         ));
         if (icono != null) {
             b.setIcon(icono);
@@ -311,6 +323,12 @@ public final class Ui {
                 super.paintComponent(g);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, Math.max(d.height, 28));
+            }
         };
         b.setFont(new Font("Segoe UI", Font.BOLD, 12));
         b.setForeground(Color.WHITE);
@@ -320,7 +338,7 @@ public final class Ui {
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(5, 150, 105), 1),
-                new EmptyBorder(7, 14, 7, 14)
+                new EmptyBorder(5, 12, 5, 12)
         ));
         if (icono != null) {
             b.setIcon(icono);

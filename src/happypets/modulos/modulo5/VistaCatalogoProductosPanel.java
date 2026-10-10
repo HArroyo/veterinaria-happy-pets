@@ -655,6 +655,12 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 super.paintComponent(g2);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, 28);
+            }
         };
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
@@ -663,7 +669,6 @@ public class VistaCatalogoProductosPanel extends JPanel {
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 28));
         btn.addActionListener(e -> accion.run());
         return btn;
     }

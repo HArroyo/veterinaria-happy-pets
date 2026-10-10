@@ -518,11 +518,14 @@ public class VistaConsultasMedicasPanel extends JPanel {
 
         txtBuscarConsulta = new JTextField(16);
         txtBuscarConsulta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtBuscarConsulta.setPreferredSize(new Dimension(180, 26));
+        txtBuscarConsulta.setPreferredSize(new Dimension(180, 28));
         txtBuscarConsulta.putClientProperty("JTextField.placeholderText", "Buscar paciente o diagnóstico...");
         txtBuscarConsulta.addActionListener(e -> recargarDatos());
 
         JButton btnBuscar = crearBotonWeb("Buscar", false, () -> recargarDatos());
+        btnBuscar.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
+        btnBuscar.setIconTextGap(6);
+        btnBuscar.setPreferredSize(new Dimension(92, 28));
         searchBox.add(txtBuscarConsulta);
         searchBox.add(btnBuscar);
         top.add(searchBox, BorderLayout.EAST);
@@ -642,6 +645,12 @@ public class VistaConsultasMedicasPanel extends JPanel {
                 super.paintComponent(g2);
                 g2.dispose();
             }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 16, 28);
+            }
         };
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
@@ -650,7 +659,6 @@ public class VistaConsultasMedicasPanel extends JPanel {
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 28));
         btn.addActionListener(e -> accion.run());
         return btn;
     }
