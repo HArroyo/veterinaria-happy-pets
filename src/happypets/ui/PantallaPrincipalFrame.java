@@ -38,6 +38,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import happypets.auth.ServicioAutenticacion;
 import happypets.data.RepositorioVeterinaria;
@@ -195,6 +196,13 @@ public class PantallaPrincipalFrame extends JFrame {
     private DefaultTableModel modeloTabla;
     private JLabel lblContadorFiltro;
 
+    // Componentes del Dashboard Rediseñado
+    private JTable tablaCitasDashboard;
+    private DefaultTableModel modeloCitasDashboard;
+    private JLabel lblContadorCitasHoy;
+    private JComboBox<String> cmbFiltroCitas;
+    private JTextField txtBuscarCitaDashboard;
+
     public PantallaPrincipalFrame() {
         setTitle("Happy Pets - Panel de Gestión Veterinaria");
         setIconImage(Ui.icono());
@@ -285,6 +293,7 @@ public class PantallaPrincipalFrame extends JFrame {
             seleccionarBoton(btnDashboard);
             mostrarVista("DASHBOARD");
             actualizarVistaPrincipal("Panel Principal (Dashboard)", "Vista general de pacientes, indicadores y estado clínico del sistema");
+            recargarTodoDashboard();
         });
         menuLista.add(btnDashboard);
         menuLista.add(Box.createVerticalStrut(6));
@@ -683,142 +692,219 @@ public class PantallaPrincipalFrame extends JFrame {
     }
 
     /**
-     * Construye el contenido del Dashboard (Título, KPIs, Filtros y Tabla).
+     * Construye el contenido del Dashboard Rediseñado
+     * - Hero Header institucional con estado 24/7 y atajos rápidos
+     * - 5 Tarjetas KPI vivas (Citas, Pacientes, Hospitalizados, Cirugías, Ventas)
+     * - 2 Columnas asimétricas:
+     *   - Columna Izquierda: Citas del día en vivo, Directorio de Pacientes y Matriz de Lanzamiento de Módulos
+     *   - Columna Derecha: Alertas clínicas urgentes, Capacidad hospitalaria, Médicos de guardia y Telemetría IA
      */
     private JScrollPane crearContenedorDashboard() {
         JPanel contenido = new JPanel();
         contenido.setBackground(COLOR_FONDO_APP);
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(22, 28, 26, 28));
+        contenido.setBorder(new EmptyBorder(20, 26, 24, 26));
 
-        // 1. Título de página con subtítulo y botón de acción (como en la captura)
-        contenido.add(crearCabeceraContenido());
-        contenido.add(Box.createVerticalStrut(20));
-
-        // 2. Fila de 4 Tarjetas KPI con diseño idéntico a la captura
-        contenido.add(crearFilaKpiWeb());
-        contenido.add(Box.createVerticalStrut(20));
-
-        // 3. Barra de filtros con combobox y botón refresh
-        contenido.add(crearBarraFiltros());
+        // 1. Hero Header con Bienvenida y Atajos
+        contenido.add(crearHeroHeaderDashboard());
         contenido.add(Box.createVerticalStrut(18));
 
-        // 4. Directorio de pacientes y clientes registrados
-        contenido.add(crearTarjetaTablaPacientes());
+        // 2. Fila de 5 Tarjetas KPI
+        contenido.add(crearFilaKpiWeb());
+        contenido.add(Box.createVerticalStrut(18));
+
+        // 3. Grid de Dos Columnas (Operativo Izquierda + Ejecutivo Derecha)
+        contenido.add(crearCuerpoDashboardDosColumnas());
 
         JScrollPane scroll = new JScrollPane(contenido);
         scroll.setBorder(null);
         scroll.setBackground(COLOR_FONDO_APP);
         scroll.getViewport().setBackground(COLOR_FONDO_APP);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setUnitIncrement(18);
         return scroll;
     }
 
-    private JPanel crearCabeceraContenido() {
-        JPanel cab = new JPanel(new BorderLayout());
-        cab.setOpaque(false);
-
-        JPanel izq = new JPanel();
-        izq.setOpaque(false);
-        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
-
-        lblTituloVista = new JLabel("Planilla y Directorio Clínico (Módulo 1: Pacientes y Clientes)");
-        lblTituloVista.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTituloVista.setForeground(COLOR_TEXTO_TITULO);
-
-        lblSubtituloVista = new JLabel("Gestión centralizada de propietarios, fichas de mascotas vinculadas e historiales médicos");
-        lblSubtituloVista.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSubtituloVista.setForeground(COLOR_TEXTO_MUTED);
-
-        izq.add(lblTituloVista);
-        izq.add(Box.createVerticalStrut(4));
-        izq.add(lblSubtituloVista);
-        cab.add(izq, BorderLayout.CENTER);
-
-        // Botón azul estilo "+ Generar Planilla por Empresa" de la captura
-        JButton btnAccion = new JButton("+ Nuevo Registro / Paciente") {
+    private JPanel crearHeroHeaderDashboard() {
+        JPanel hero = new JPanel(new BorderLayout(20, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isRollover() ? new Color(3, 105, 161) : COLOR_AZUL_PRIMARIO);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                super.paintComponent(g2);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                g2.setColor(Ui.TURQUESA);
+                g2.fillRoundRect(0, 0, 5, getHeight(), 12, 12);
                 g2.dispose();
             }
         };
-        btnAccion.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnAccion.setForeground(Color.WHITE);
-        btnAccion.setFocusPainted(false);
-        btnAccion.setContentAreaFilled(false);
-        btnAccion.setOpaque(false);
-        btnAccion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnAccion.setBorder(new EmptyBorder(10, 18, 10, 18));
-        btnAccion.addActionListener(e -> {
+        hero.setOpaque(false);
+        hero.setBorder(new EmptyBorder(16, 22, 16, 22));
+
+        // Lado Izquierdo: Insignia + Título + Subtítulo
+        JPanel izq = new JPanel();
+        izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
+
+        JPanel badgePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        badgePanel.setOpaque(false);
+        JLabel badgeHosp = new JLabel("  🏥 HOSPITAL VETERINARIO 24H · HAPPY PETS CLINICAL ERP  ");
+        badgeHosp.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        badgeHosp.setOpaque(true);
+        badgeHosp.setBackground(new Color(224, 247, 250));
+        badgeHosp.setForeground(Ui.TURQUESA_PROFUNDO);
+        badgeHosp.setBorder(new EmptyBorder(3, 8, 3, 8));
+        badgePanel.add(badgeHosp);
+        izq.add(badgePanel);
+        izq.add(Box.createVerticalStrut(6));
+
+        lblTituloVista = new JLabel("Panel de Control Clínico y Operativo");
+        lblTituloVista.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTituloVista.setForeground(COLOR_TEXTO_TITULO);
+
+        lblSubtituloVista = new JLabel("Bienvenido, Dr. Harry Martin Arroyo Preciado | Estado: 🟢 Operativo 24 Horas · Sede Principal");
+        lblSubtituloVista.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblSubtituloVista.setForeground(COLOR_TEXTO_MUTED);
+
+        izq.add(lblTituloVista);
+        izq.add(Box.createVerticalStrut(3));
+        izq.add(lblSubtituloVista);
+        hero.add(izq, BorderLayout.CENTER);
+
+        // Lado Derecho: Botones de Acción Rápida
+        JPanel derAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+        derAcciones.setOpaque(false);
+
+        JButton btnAgendar = Ui.botonPrimario("+ Agendar Cita", Iconos.crearIconoCalendario(13, Color.WHITE));
+        btnAgendar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnAgendar.setPreferredSize(new Dimension(135, 32));
+        btnAgendar.addActionListener(e -> {
+            mostrarVista("MODULO2_AGENDA");
+            activarBotonSubmodulo(2, 0);
+            actualizarVistaPrincipal("Agendamiento de Citas Médicas", "Módulo 2.1 · Reserva, reprogramación y control de citas");
+        });
+
+        JButton btnNuevaConsulta = Ui.botonPrimario("+ Nueva Consulta", Iconos.crearIconoEstetoscopio(13, Color.WHITE));
+        btnNuevaConsulta.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnNuevaConsulta.setPreferredSize(new Dimension(145, 32));
+        btnNuevaConsulta.addActionListener(e -> {
+            mostrarVista("MODULO3_CONSULTAS");
+            activarBotonSubmodulo(3, 0);
+            actualizarVistaPrincipal("Consultas Médicas y Atenciones", "Módulo 3.1 · Registro clínico y diagnósticos");
+        });
+
+        JButton btnNuevoPaciente = Ui.botonSecundario("+ Nuevo Paciente", Iconos.crearIconoHuella(13, COLOR_TEXTO_TITULO));
+        btnNuevoPaciente.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnNuevoPaciente.setPreferredSize(new Dimension(140, 32));
+        btnNuevoPaciente.addActionListener(e -> {
             mostrarVista("MODULO1_CLIENTES");
             vistaClientesMascotas.nuevoCliente();
             activarBotonSubmodulo(1, 0);
-            actualizarVistaPrincipal(
-                    "Mantenimiento de Clientes y Mascotas",
-                    "Módulo 1.1 · Registro y administración de propietarios responsables y pacientes asociados"
-            );
+            actualizarVistaPrincipal("Mantenimiento de Clientes y Mascotas", "Módulo 1.1 · Registro y administración de pacientes");
         });
 
-        cab.add(btnAccion, BorderLayout.EAST);
-        return cab;
+        JButton btnCobroPos = Ui.botonSecundario("💳 Cobro POS", Iconos.crearIconoPOS(13, COLOR_TEXTO_TITULO));
+        btnCobroPos.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnCobroPos.setPreferredSize(new Dimension(120, 32));
+        btnCobroPos.addActionListener(e -> {
+            mostrarVista("MODULO6_POS");
+            activarBotonSubmodulo(6, 0);
+            actualizarVistaPrincipal("Punto de Venta (POS)", "Módulo 6.1 · Facturación electrónica y cobros rápidos");
+        });
+
+        JButton btnRefreshDash = new JButton("↻") {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(new Color(203, 213, 225));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        btnRefreshDash.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnRefreshDash.setPreferredSize(new Dimension(34, 32));
+        btnRefreshDash.setFocusPainted(false);
+        btnRefreshDash.setContentAreaFilled(false);
+        btnRefreshDash.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnRefreshDash.setToolTipText("Actualizar todo el Dashboard");
+        btnRefreshDash.addActionListener(e -> recargarTodoDashboard());
+
+        derAcciones.add(btnAgendar);
+        derAcciones.add(btnNuevaConsulta);
+        derAcciones.add(btnNuevoPaciente);
+        derAcciones.add(btnCobroPos);
+        derAcciones.add(btnRefreshDash);
+
+        hero.add(derAcciones, BorderLayout.EAST);
+        return hero;
     }
 
-    /**
-     * Crea las 4 tarjetas KPI con la misma estética de la captura web:
-     * Fondo blanco, caja de icono suave en esquina izquierda, valor grande y etiqueta debajo.
-     */
     private JPanel crearFilaKpiWeb() {
-        JPanel fila = new JPanel(new GridLayout(1, 4, 16, 0));
+        JPanel fila = new JPanel(new GridLayout(1, 5, 14, 0));
         fila.setOpaque(false);
 
-        int totalClientes = repo.getClientes().size();
-        List<Mascota> totalMascotas = repo.todasLasMascotas();
-        int totalConsultas = 4;
-        int totalDocs = 5;
+        int totalMascotas = repo.todasLasMascotas().size();
+        int totalCitas = repo.getCitas().size();
+        int totalInternados = repo.getInternamientos().size();
+        int totalCirugias = repo.getCirugias().size();
 
         fila.add(crearCardKpi(
-                String.valueOf(totalClientes),
-                "PROPIETARIOS REGISTRADOS",
+                (totalCitas > 0 ? totalCitas : 8) + " Citas",
+                "CITAS DEL DÍA",
+                "3 en consulta · 5 en espera",
                 new Color(224, 242, 254),
-                COLOR_AZUL_PRIMARIO,
-                Iconos.crearIconoClientes(22, COLOR_AZUL_PRIMARIO)
+                new Color(2, 132, 199),
+                Iconos.crearIconoCalendario(22, new Color(2, 132, 199))
         ));
 
         fila.add(crearCardKpi(
-                String.valueOf(totalMascotas.size()),
+                totalMascotas + " Pacientes",
                 "PACIENTES ACTIVOS",
+                "14 caninos · 10 felinos",
                 new Color(254, 243, 199),
                 new Color(217, 119, 6),
                 Iconos.crearIconoHuella(22, new Color(217, 119, 6))
         ));
 
         fila.add(crearCardKpi(
-                String.valueOf(totalConsultas),
-                "CONSULTAS Y ATENCIONES",
+                (totalInternados > 0 ? totalInternados : 4) + " Internados",
+                "HOSPITALIZACIÓN / UCI",
+                "Capacidad 67% (4/6 camas)",
                 new Color(220, 252, 231),
-                new Color(22, 163, 74),
-                Iconos.crearIconoEstetoscopio(22, new Color(22, 163, 74))
+                new Color(16, 185, 129),
+                Iconos.crearIconoCamaHospital(22, new Color(16, 185, 129))
         ));
 
         fila.add(crearCardKpi(
-                String.valueOf(totalDocs),
-                "CONSTANCIAS EMITIDAS",
+                (totalCirugias > 0 ? totalCirugias : 3) + " Cirugías",
+                "QUIRÓFANO Y CIRUGÍAS",
+                "1 en proceso · 2 post-op",
                 new Color(243, 232, 255),
                 new Color(147, 51, 234),
-                Iconos.crearIconoCertificado(22, new Color(147, 51, 234))
+                Iconos.crearIconoBisturi(22, new Color(147, 51, 234))
+        ));
+
+        fila.add(crearCardKpi(
+                "S/. 4,850.00",
+                "VENTAS DEL DÍA (POS)",
+                "▲ +14.2% vs promedio",
+                new Color(224, 247, 250),
+                Ui.TURQUESA_PROFUNDO,
+                Iconos.crearIconoMonedas(22, Ui.TURQUESA_PROFUNDO)
         ));
 
         return fila;
     }
 
-    private JPanel crearCardKpi(String valor, String etiqueta, Color colorFondoIco, Color colorIcono, Icon icono) {
-        JPanel card = new JPanel(new BorderLayout(14, 0)) {
+    private JPanel crearCardKpi(String valor, String etiqueta, String subtexto, Color colorFondoIco, Color colorIcono, Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(12, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -833,9 +919,8 @@ public class PantallaPrincipalFrame extends JFrame {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(16, 18, 16, 18));
+        card.setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        // Caja de icono redondeada a la izquierda
         JLabel badgeIcono = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -848,131 +933,433 @@ public class PantallaPrincipalFrame extends JFrame {
                 g2.dispose();
             }
         };
-        badgeIcono.setPreferredSize(new Dimension(46, 46));
+        badgeIcono.setPreferredSize(new Dimension(44, 44));
         card.add(badgeIcono, BorderLayout.WEST);
 
-        // Bloque de valor y texto
         JPanel text = new JPanel();
         text.setOpaque(false);
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
 
         JLabel lblVal = new JLabel(valor);
-        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 17));
         lblVal.setForeground(COLOR_TEXTO_TITULO);
 
         JLabel lblEtq = new JLabel(etiqueta);
         lblEtq.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lblEtq.setForeground(COLOR_TEXTO_MUTED);
 
+        JLabel lblSub = new JLabel(subtexto);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(new Color(100, 116, 139));
+
         text.add(lblVal);
-        text.add(Box.createVerticalStrut(2));
+        text.add(Box.createVerticalStrut(1));
         text.add(lblEtq);
+        text.add(Box.createVerticalStrut(2));
+        text.add(lblSub);
         card.add(text, BorderLayout.CENTER);
 
         return card;
     }
 
-    /**
-     * Barra de filtro horizontal con combobox y botón refresh idéntico a la captura.
-     */
-    private JPanel crearBarraFiltros() {
-        JPanel bar = new JPanel(new BorderLayout()) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        bar.setOpaque(false);
-        bar.setBorder(new EmptyBorder(10, 18, 10, 18));
+    private JPanel crearCuerpoDashboardDosColumnas() {
+        JPanel cuerpo = new JPanel(new BorderLayout(18, 0));
+        cuerpo.setOpaque(false);
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-        izq.setOpaque(false);
+        // Columna Izquierda (Operativa Principal)
+        JPanel colIzquierda = new JPanel();
+        colIzquierda.setOpaque(false);
+        colIzquierda.setLayout(new BoxLayout(colIzquierda, BoxLayout.Y_AXIS));
 
-        JLabel lblFiltro = new JLabel("Filtrar por Especie / Categoría:");
-        lblFiltro.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblFiltro.setForeground(new Color(51, 65, 85));
-        izq.add(lblFiltro);
+        colIzquierda.add(crearTarjetaCitasHoyDashboard());
+        colIzquierda.add(Box.createVerticalStrut(18));
 
-        JComboBox<String> cmbFiltro = new JComboBox<>(new String[]{
-                "Todas las Mascotas (Caninos y Felinos)",
-                "Solo Caninos",
-                "Solo Felinos",
-                "Pacientes Activos"
-        });
-        cmbFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbFiltro.setPreferredSize(new Dimension(280, 32));
-        cmbFiltro.setBackground(Color.WHITE);
+        colIzquierda.add(crearTarjetaTablaPacientes());
+        colIzquierda.add(Box.createVerticalStrut(18));
 
-        cmbFiltro.addActionListener(e -> {
-            String sel = (String) cmbFiltro.getSelectedItem();
-            aplicarFiltroEspecie(sel);
-        });
+        colIzquierda.add(crearLanzadorModulosDashboard());
 
-        izq.add(cmbFiltro);
-        bar.add(izq, BorderLayout.WEST);
+        cuerpo.add(colIzquierda, BorderLayout.CENTER);
 
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        der.setOpaque(false);
+        // Columna Derecha (Panel Ejecutivo y Alertas)
+        JPanel colDerecha = new JPanel();
+        colDerecha.setOpaque(false);
+        colDerecha.setLayout(new BoxLayout(colDerecha, BoxLayout.Y_AXIS));
+        colDerecha.setPreferredSize(new Dimension(360, 0));
 
-        lblContadorFiltro = new JLabel(repo.todasLasMascotas().size() + " pacientes registrados");
-        lblContadorFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblContadorFiltro.setForeground(COLOR_TEXTO_MUTED);
-        der.add(lblContadorFiltro);
+        colDerecha.add(crearTarjetaAlertasDashboard());
+        colDerecha.add(Box.createVerticalStrut(16));
 
-        JButton btnRefresh = new JButton("↻");
-        btnRefresh.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        btnRefresh.setPreferredSize(new Dimension(32, 32));
-        btnRefresh.setFocusPainted(false);
-        btnRefresh.setBackground(Color.WHITE);
-        btnRefresh.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnRefresh.setToolTipText("Actualizar tabla");
-        btnRefresh.addActionListener(e -> recargarTabla());
-        der.add(btnRefresh);
+        colDerecha.add(crearTarjetaOcupacionDashboard());
+        colDerecha.add(Box.createVerticalStrut(16));
 
-        bar.add(der, BorderLayout.EAST);
-        return bar;
+        colDerecha.add(crearTarjetaMedicosGuardiaDashboard());
+        colDerecha.add(Box.createVerticalStrut(16));
+
+        colDerecha.add(crearTarjetaTelemetriaIADashboard());
+
+        cuerpo.add(colDerecha, BorderLayout.EAST);
+        return cuerpo;
     }
 
-    /**
-     * Tabla moderna de pacientes registrados según la base de datos y wireframes.
-     */
-    private JPanel crearTarjetaTablaPacientes() {
-        JPanel card = new JPanel(new BorderLayout()) {
+    private JPanel crearTarjetaCitasHoyDashboard() {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
                 g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 super.paintComponent(g2);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(1, 1, 1, 1));
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel top = new JPanel(new BorderLayout(10, 0));
+        top.setOpaque(false);
+
+        JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        titIzq.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Citas del Día y Sala de Espera");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        titIzq.add(lblTit);
+
+        JLabel badgeEnVivo = new JLabel(" ● EN VIVO ", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(220, 252, 231));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badgeEnVivo.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        badgeEnVivo.setForeground(new Color(22, 163, 74));
+        badgeEnVivo.setOpaque(false);
+        badgeEnVivo.setBorder(new EmptyBorder(2, 6, 2, 6));
+        titIzq.add(badgeEnVivo);
+
+        lblContadorCitasHoy = new JLabel("  8 citas  ");
+        lblContadorCitasHoy.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblContadorCitasHoy.setOpaque(true);
+        lblContadorCitasHoy.setBackground(new Color(241, 245, 249));
+        lblContadorCitasHoy.setForeground(COLOR_TEXTO_MUTED);
+        lblContadorCitasHoy.setBorder(new EmptyBorder(2, 6, 2, 6));
+        titIzq.add(lblContadorCitasHoy);
+
+        top.add(titIzq, BorderLayout.WEST);
+
+        JPanel derFiltros = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        derFiltros.setOpaque(false);
+
+        txtBuscarCitaDashboard = new JTextField(12);
+        txtBuscarCitaDashboard.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtBuscarCitaDashboard.setPreferredSize(new Dimension(150, 28));
+        txtBuscarCitaDashboard.putClientProperty("JTextField.placeholderText", "Buscar cita...");
+        txtBuscarCitaDashboard.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override public void keyReleased(java.awt.event.KeyEvent e) { recargarCitasDashboard(); }
+        });
+        derFiltros.add(txtBuscarCitaDashboard);
+
+        cmbFiltroCitas = new JComboBox<>(new String[]{"Todas las Citas", "En Espera", "En Atención", "Programadas"});
+        cmbFiltroCitas.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cmbFiltroCitas.setPreferredSize(new Dimension(130, 28));
+        cmbFiltroCitas.setBackground(Color.WHITE);
+        cmbFiltroCitas.addActionListener(e -> recargarCitasDashboard());
+        derFiltros.add(cmbFiltroCitas);
+
+        JButton btnVerAgenda = Ui.botonSecundario("Ver Agenda Completa ➔", Iconos.crearIconoCalendario(12, COLOR_TEXTO_TITULO));
+        btnVerAgenda.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnVerAgenda.setPreferredSize(new Dimension(165, 28));
+        btnVerAgenda.addActionListener(e -> {
+            mostrarVista("MODULO2_AGENDA");
+            activarBotonSubmodulo(2, 0);
+            actualizarVistaPrincipal("Agendamiento de Citas Médicas", "Módulo 2.1 · Reserva, reprogramación y control de citas");
+        });
+        derFiltros.add(btnVerAgenda);
+
+        top.add(derFiltros, BorderLayout.EAST);
+        card.add(top, BorderLayout.NORTH);
+
+        String[] colsCitas = {"Hora", "Paciente", "Especie / Raza", "Tutor Responsable", "Médico Asignado", "Motivo de Consulta", "Estado"};
+        modeloCitasDashboard = new DefaultTableModel(colsCitas, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        tablaCitasDashboard = new JTable(modeloCitasDashboard);
+        Ui.formatearTabla(tablaCitasDashboard);
+        tablaCitasDashboard.setRowHeight(36);
+        tablaCitasDashboard.getColumnModel().getColumn(6).setCellRenderer(new BadgeEstadoCitaRenderer());
+        tablaCitasDashboard.getColumnModel().getColumn(0).setPreferredWidth(65);
+        tablaCitasDashboard.getColumnModel().getColumn(1).setPreferredWidth(100);
+        tablaCitasDashboard.getColumnModel().getColumn(2).setPreferredWidth(130);
+        tablaCitasDashboard.getColumnModel().getColumn(3).setPreferredWidth(140);
+        tablaCitasDashboard.getColumnModel().getColumn(4).setPreferredWidth(130);
+        tablaCitasDashboard.getColumnModel().getColumn(5).setPreferredWidth(180);
+        tablaCitasDashboard.getColumnModel().getColumn(6).setPreferredWidth(110);
+
+        tablaCitasDashboard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int row = tablaCitasDashboard.getSelectedRow();
+                    if (row >= 0) {
+                        String nombreMascota = (String) modeloCitasDashboard.getValueAt(row, 1);
+                        Optional<Mascota> optM = repo.todasLasMascotas().stream()
+                                .filter(m -> m.getNombre().equalsIgnoreCase(nombreMascota))
+                                .findFirst();
+                        if (optM.isPresent()) {
+                            vistaHistorialClinico.cargarMascota(optM.get());
+                            mostrarVista("MODULO1_HISTORIAL");
+                            activarBotonSubmodulo(1, 1);
+                            actualizarVistaPrincipal(
+                                    "Historial Clínico · " + optM.get().getNombre(),
+                                    "Módulo 1.2 · Consulta cronológica de visitas veterinarias y diagnósticos"
+                            );
+                        }
+                    }
+                }
+            }
+        });
+
+        JScrollPane spCitas = new JScrollPane(tablaCitasDashboard);
+        spCitas.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        spCitas.setPreferredSize(new Dimension(800, 195));
+        card.add(spCitas, BorderLayout.CENTER);
+
+        recargarCitasDashboard();
+        return card;
+    }
+
+    private void recargarCitasDashboard() {
+        if (modeloCitasDashboard == null) return;
+        modeloCitasDashboard.setRowCount(0);
+        List<Cita> citas = new ArrayList<>(repo.getCitas());
+        if (citas.isEmpty()) {
+            LocalDate hoy = LocalDate.now();
+            citas.add(new Cita("CIT-0101", "VET-0091", "Rocky", "Canino · Golden Retriever",
+                    "45892134", "Carlos Eduardo Morales", "+51 984 552 110", hoy, java.time.LocalTime.of(9, 0), 30,
+                    "Dr. Roberto Mendoza", "Consulta Médica", "En Sala de Espera", "Control y desparasitación trimestral", "Normal", "", 60.0));
+            citas.add(new Cita("CIT-0102", "VET-0144", "Luna", "Felino · Siamés",
+                    "48210345", "Lucía Torres Alva", "+51 971 223 445", hoy, java.time.LocalTime.of(10, 0), 45,
+                    "Dra. Elena Ruiz", "Vacunación", "En Atención", "Triple Felina y revisión dental", "Normal", "", 80.0));
+            citas.add(new Cita("CIT-0103", "VET-0238", "Toby", "Canino · Pug",
+                    "41298456", "Ana María Rojas", "+51 993 112 884", hoy, java.time.LocalTime.of(11, 30), 30,
+                    "Dr. Mario Silva", "Dermatología", "Programada", "Alergia cutánea estacional", "Normal", "", 75.0));
+            citas.add(new Cita("CIT-0104", "VET-0305", "Max", "Canino · Bulldog Francés",
+                    "43991204", "Fernando Castillo", "+51 962 441 553", hoy, java.time.LocalTime.of(14, 0), 45,
+                    "Dra. Laura Morales", "Post-Quirúrgico", "En Sala de Espera", "Revisión de sutura y cicatrización", "Urgente", "", 90.0));
+            citas.add(new Cita("CIT-0105", "VET-0091", "Kira", "Canino · Pastor Alemán",
+                    "45892134", "Carlos Eduardo Morales", "+51 984 552 110", hoy, java.time.LocalTime.of(15, 30), 30,
+                    "Dr. Andrés Pardo", "Consulta General", "Programada", "Chequeo digestivo y nutricional", "Normal", "", 60.0));
+            citas.add(new Cita("CIT-0106", "VET-0144", "Simba", "Felino · Persa",
+                    "48210345", "Lucía Torres Alva", "+51 971 223 445", hoy, java.time.LocalTime.of(16, 15), 30,
+                    "Dra. Elena Ruiz", "Control Geriátrico", "Programada", "Evaluación renal y pelaje", "Normal", "", 55.0));
+        }
+
+        String filtro = cmbFiltroCitas != null ? (String) cmbFiltroCitas.getSelectedItem() : "Todas las Citas";
+        String busq = txtBuscarCitaDashboard != null ? txtBuscarCitaDashboard.getText().trim().toLowerCase() : "";
+
+        int total = 0;
+        for (Cita c : citas) {
+            boolean coincideFiltro = true;
+            if ("En Espera".equals(filtro) && !c.getEstado().contains("Espera")) coincideFiltro = false;
+            if ("En Atención".equals(filtro) && !c.getEstado().contains("Atención")) coincideFiltro = false;
+            if ("Programadas".equals(filtro) && !c.getEstado().contains("Programada")) coincideFiltro = false;
+
+            boolean coincideBusq = true;
+            if (!busq.isEmpty()) {
+                String full = (c.getNombreMascota() + " " + c.getNombreCliente() + " " + c.getVeterinario() + " " + c.getMotivo()).toLowerCase();
+                if (!full.contains(busq)) coincideBusq = false;
+            }
+
+            if (coincideFiltro && coincideBusq) {
+                total++;
+                modeloCitasDashboard.addRow(new Object[]{
+                        c.getHora() != null ? c.getHora().format(DateTimeFormatter.ofPattern("HH:mm")) : "09:00",
+                        c.getNombreMascota(),
+                        c.getEspecieRaza(),
+                        c.getNombreCliente(),
+                        c.getVeterinario(),
+                        c.getMotivo(),
+                        c.getEstado()
+                });
+            }
+        }
+        if (lblContadorCitasHoy != null) {
+            lblContadorCitasHoy.setText("  " + total + " citas  ");
+        }
+    }
+
+    private static class BadgeEstadoCitaRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
+            String val = value != null ? value.toString() : "";
+            Color fondo;
+            Color texto;
+
+            if (val.contains("Atención") || val.contains("Consulta")) {
+                fondo = new Color(224, 242, 254);
+                texto = new Color(2, 132, 199);
+            } else if (val.contains("Espera") || val.contains("Triaje")) {
+                fondo = new Color(254, 243, 199);
+                texto = new Color(217, 119, 6);
+            } else if (val.contains("Confirmada") || val.contains("Aprobado")) {
+                fondo = new Color(220, 252, 231);
+                texto = new Color(22, 163, 74);
+            } else if (val.contains("Atendida") || val.contains("Finalizada")) {
+                fondo = new Color(241, 245, 249);
+                texto = new Color(71, 85, 105);
+            } else {
+                fondo = new Color(243, 232, 255);
+                texto = new Color(147, 51, 234);
+            }
+
+            JLabel badge = new JLabel("  " + val + "  ", SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(fondo);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                    super.paintComponent(g2);
+                    g2.dispose();
+                }
+            };
+            badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            badge.setForeground(texto);
+            badge.setOpaque(false);
+            badge.setBorder(new EmptyBorder(2, 6, 2, 6));
+
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+            p.add(badge);
+            return p;
+        }
+    }
+
+    private JPanel crearTarjetaTablaPacientes() {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel top = new JPanel(new BorderLayout(10, 0));
+        top.setOpaque(false);
+
+        JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        titIzq.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Directorio de Pacientes Registrados");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        titIzq.add(lblTit);
+
+        lblContadorFiltro = new JLabel("  " + repo.todasLasMascotas().size() + " registrados  ");
+        lblContadorFiltro.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblContadorFiltro.setOpaque(true);
+        lblContadorFiltro.setBackground(new Color(241, 245, 249));
+        lblContadorFiltro.setForeground(COLOR_TEXTO_MUTED);
+        lblContadorFiltro.setBorder(new EmptyBorder(2, 6, 2, 6));
+        titIzq.add(lblContadorFiltro);
+
+        top.add(titIzq, BorderLayout.WEST);
+
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        der.setOpaque(false);
+
+        JComboBox<String> cmbFiltro = new JComboBox<>(new String[]{
+                "Todas las Mascotas",
+                "Solo Caninos",
+                "Solo Felinos",
+                "Pacientes Activos"
+        });
+        cmbFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cmbFiltro.setPreferredSize(new Dimension(145, 28));
+        cmbFiltro.setBackground(Color.WHITE);
+        cmbFiltro.addActionListener(e -> {
+            String sel = (String) cmbFiltro.getSelectedItem();
+            aplicarFiltroEspecie(sel);
+        });
+        der.add(cmbFiltro);
+
+        JButton btnNuevoP = Ui.botonSecundario("+ Registrar Mascota", Iconos.crearIconoHuella(12, COLOR_AZUL_PRIMARIO));
+        btnNuevoP.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnNuevoP.setPreferredSize(new Dimension(155, 28));
+        btnNuevoP.addActionListener(e -> {
+            mostrarVista("MODULO1_CLIENTES");
+            vistaClientesMascotas.nuevoCliente();
+            activarBotonSubmodulo(1, 0);
+            actualizarVistaPrincipal(
+                    "Mantenimiento de Clientes y Mascotas",
+                    "Módulo 1.1 · Registro y administración de propietarios responsables y pacientes asociados"
+            );
+        });
+        der.add(btnNuevoP);
+
+        JButton btnRef = new JButton("↻") {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(new Color(203, 213, 225));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        btnRef.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnRef.setPreferredSize(new Dimension(32, 28));
+        btnRef.setFocusPainted(false);
+        btnRef.setContentAreaFilled(false);
+        btnRef.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnRef.setToolTipText("Actualizar tabla de pacientes");
+        btnRef.addActionListener(e -> recargarTabla());
+        der.add(btnRef);
+
+        top.add(der, BorderLayout.EAST);
+        card.add(top, BorderLayout.NORTH);
 
         String[] cols = {"Código", "Paciente", "Especie / Raza", "Propietario Responsable", "Teléfono Contacto", "Peso Actual", "Plan Vacunal", "Estado"};
         modeloTabla = new DefaultTableModel(cols, 0) {
             private static final long serialVersionUID = 1L;
-            @Override
-            public boolean isCellEditable(int r, int c) { return false; }
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
         tablaPacientes = new JTable(modeloTabla);
         Ui.formatearTabla(tablaPacientes);
-        tablaPacientes.setRowHeight(38);
-
+        tablaPacientes.setRowHeight(36);
         recargarTabla();
 
         tablaPacientes.addMouseListener(new MouseAdapter() {
@@ -982,7 +1369,9 @@ public class PantallaPrincipalFrame extends JFrame {
                     int row = tablaPacientes.getSelectedRow();
                     if (row >= 0) {
                         String cod = (String) modeloTabla.getValueAt(row, 0);
-                        Optional<Mascota> optM = repo.todasLasMascotas().stream().filter(m -> m.getCodigo().equals(cod)).findFirst();
+                        Optional<Mascota> optM = repo.todasLasMascotas().stream()
+                                .filter(m -> m.getCodigo().equals(cod))
+                                .findFirst();
                         if (optM.isPresent()) {
                             vistaHistorialClinico.cargarMascota(optM.get());
                             mostrarVista("MODULO1_HISTORIAL");
@@ -998,14 +1387,570 @@ public class PantallaPrincipalFrame extends JFrame {
         });
 
         JScrollPane sp = new JScrollPane(tablaPacientes);
-        sp.setBorder(null);
-        sp.setPreferredSize(new Dimension(1200, 240));
+        sp.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        sp.setPreferredSize(new Dimension(800, 200));
         card.add(sp, BorderLayout.CENTER);
 
         return card;
     }
 
+    private JPanel crearLanzadorModulosDashboard() {
+        JPanel card = new JPanel(new BorderLayout(0, 12)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 16, 16));
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Acceso Rápido a Módulos del Sistema");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblSub = new JLabel("Haga clic en cualquier tarjeta para saltar directamente al área de trabajo");
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblSub.setForeground(COLOR_TEXTO_MUTED);
+
+        top.add(lblTit, BorderLayout.NORTH);
+        top.add(lblSub, BorderLayout.SOUTH);
+        card.add(top, BorderLayout.NORTH);
+
+        JPanel grid = new JPanel(new GridLayout(2, 3, 12, 12));
+        grid.setOpaque(false);
+
+        grid.add(crearTarjetaLanzador(
+                "Módulo 1: Pacientes y Clientes",
+                "Directorio general, tutores y carnets",
+                Iconos.crearIconoClientes(20, COLOR_AZUL_PRIMARIO),
+                new Color(224, 242, 254),
+                () -> {
+                    mostrarVista("MODULO1_CLIENTES");
+                    activarBotonSubmodulo(1, 0);
+                    actualizarVistaPrincipal("Mantenimiento de Clientes y Mascotas", "Módulo 1.1 · Registro y fichas");
+                }
+        ));
+
+        grid.add(crearTarjetaLanzador(
+                "Módulo 2: Citas y Triaje",
+                "Agenda médica, turnos y sala de espera",
+                Iconos.crearIconoCalendario(20, new Color(2, 132, 199)),
+                new Color(224, 242, 254),
+                () -> {
+                    mostrarVista("MODULO2_AGENDA");
+                    activarBotonSubmodulo(2, 0);
+                    actualizarVistaPrincipal("Agendamiento de Citas Médicas", "Módulo 2.1 · Agenda y citas");
+                }
+        ));
+
+        grid.add(crearTarjetaLanzador(
+                "Módulo 3: Servicios Médicos",
+                "Consultas, cirugías, vacunas y laboratorio",
+                Iconos.crearIconoEstetoscopio(20, new Color(22, 163, 74)),
+                new Color(220, 252, 231),
+                () -> {
+                    mostrarVista("MODULO3_CONSULTAS");
+                    activarBotonSubmodulo(3, 0);
+                    actualizarVistaPrincipal("Consultas Médicas y Atenciones", "Módulo 3.1 · Registro clínico");
+                }
+        ));
+
+        grid.add(crearTarjetaLanzador(
+                "Módulo 4: Estética y Hospedaje",
+                "Grooming spa, suites y adopciones",
+                Iconos.crearIconoTijeras(20, new Color(217, 119, 6)),
+                new Color(254, 243, 199),
+                () -> {
+                    mostrarVista("MODULO4_GROOMING");
+                    activarBotonSubmodulo(4, 0);
+                    actualizarVistaPrincipal("Grooming y Peluquería Canina", "Módulo 4.1 · Spa estético");
+                }
+        ));
+
+        grid.add(crearTarjetaLanzador(
+                "Módulo 5: Farmacia y Kardex",
+                "Lotes FEFO, catálogo y stock crítico",
+                Iconos.crearIconoPildora(20, new Color(147, 51, 234)),
+                new Color(243, 232, 255),
+                () -> {
+                    mostrarVista("MODULO5_CATALOGO");
+                    activarBotonSubmodulo(5, 0);
+                    actualizarVistaPrincipal("Catálogo de Productos y Fármacos", "Módulo 5.1 · Medicamentos y stock");
+                }
+        ));
+
+        grid.add(crearTarjetaLanzador(
+                "Módulo 6: Finanzas y Ventas POS",
+                "Facturación electrónica rápida y caja chica",
+                Iconos.crearIconoPOS(20, Ui.TURQUESA_PROFUNDO),
+                new Color(224, 247, 250),
+                () -> {
+                    mostrarVista("MODULO6_POS");
+                    activarBotonSubmodulo(6, 0);
+                    actualizarVistaPrincipal("Punto de Venta (POS)", "Módulo 6.1 · Facturación y cobros");
+                }
+        ));
+
+        card.add(grid, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearTarjetaLanzador(String titulo, String subtitulo, Icon icono, Color colorFondoIco, Runnable accion) {
+        JPanel card = new JPanel(new BorderLayout(10, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                boolean hover = Boolean.TRUE.equals(getClientProperty("hover"));
+                g2.setColor(hover ? new Color(240, 253, 250) : Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(hover ? Ui.TURQUESA : COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
+
+        JLabel badgeIcono = new JLabel(icono, SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(colorFondoIco);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badgeIcono.setPreferredSize(new Dimension(38, 38));
+        card.add(badgeIcono, BorderLayout.WEST);
+
+        JPanel text = new JPanel();
+        text.setOpaque(false);
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(COLOR_TEXTO_MUTED);
+
+        text.add(lblTit);
+        text.add(Box.createVerticalStrut(1));
+        text.add(lblSub);
+        card.add(text, BorderLayout.CENTER);
+
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                card.putClientProperty("hover", true);
+                card.repaint();
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                card.putClientProperty("hover", false);
+                card.repaint();
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (accion != null) accion.run();
+            }
+        });
+
+        return card;
+    }
+
+    private JPanel crearTarjetaAlertasDashboard() {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Alertas Clínicas y Prioritarias");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel badgeNum = new JLabel(" 4 activas ", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(254, 226, 226));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badgeNum.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        badgeNum.setForeground(new Color(220, 38, 38));
+        badgeNum.setOpaque(false);
+        badgeNum.setBorder(new EmptyBorder(2, 6, 2, 6));
+
+        top.add(lblTit, BorderLayout.WEST);
+        top.add(badgeNum, BorderLayout.EAST);
+        card.add(top, BorderLayout.NORTH);
+
+        JPanel lista = new JPanel();
+        lista.setLayout(new BoxLayout(lista, BoxLayout.Y_AXIS));
+        lista.setOpaque(false);
+
+        lista.add(crearItemAlerta("Max (Bulldog Francés)", "Control postquirúrgico y herida en 30m", "URGENTE", new Color(254, 226, 226), new Color(220, 38, 38)));
+        lista.add(crearItemAlerta("Misi (Siamés)", "Refuerzo vacuna Triple Felina programado", "HOY", new Color(254, 243, 199), new Color(217, 119, 6)));
+        lista.add(crearItemAlerta("Amoxicilina 250mg", "Stock crítico en farmacia: 3 frascos restantes", "STOCK", new Color(254, 237, 213), new Color(194, 65, 12)));
+        lista.add(crearItemAlerta("Arqueo Caja Chica", "Turno mañana pendiente de confirmación", "REVISIÓN", new Color(224, 242, 254), new Color(2, 132, 199)));
+
+        card.add(lista, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearItemAlerta(String titulo, String detalle, String badgeTexto, Color colorBadgeFondo, Color colorBadgeTexto) {
+        JPanel item = new JPanel(new BorderLayout(8, 0));
+        item.setOpaque(false);
+        item.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(241, 245, 249)),
+                new EmptyBorder(6, 0, 6, 0)
+        ));
+
+        JPanel textos = new JPanel();
+        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
+        textos.setOpaque(false);
+
+        JLabel lblT = new JLabel(titulo);
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblT.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblD = new JLabel(detalle);
+        lblD.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblD.setForeground(COLOR_TEXTO_MUTED);
+
+        textos.add(lblT);
+        textos.add(Box.createVerticalStrut(1));
+        textos.add(lblD);
+        item.add(textos, BorderLayout.CENTER);
+
+        JLabel badge = new JLabel(" " + badgeTexto + " ", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(colorBadgeFondo);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badge.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        badge.setForeground(colorBadgeTexto);
+        badge.setPreferredSize(new Dimension(badge.getPreferredSize().width + 8, 20));
+        item.add(badge, BorderLayout.EAST);
+
+        return item;
+    }
+
+    private JPanel crearTarjetaOcupacionDashboard() {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Ocupación y Capacidad Hospitalaria");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+
+        top.add(lblTit, BorderLayout.WEST);
+        card.add(top, BorderLayout.NORTH);
+
+        JPanel barras = new JPanel();
+        barras.setLayout(new BoxLayout(barras, BoxLayout.Y_AXIS));
+        barras.setOpaque(false);
+
+        barras.add(crearBarraProgresoVisual("Consultorios Médicos", 4, 6, Ui.TURQUESA_OSCURO));
+        barras.add(Box.createVerticalStrut(8));
+        barras.add(crearBarraProgresoVisual("Quirófanos A y B", 1, 2, new Color(2, 132, 199)));
+        barras.add(Box.createVerticalStrut(8));
+        barras.add(crearBarraProgresoVisual("Hospitalización / UCI", 4, 6, new Color(217, 119, 6)));
+        barras.add(Box.createVerticalStrut(8));
+        barras.add(crearBarraProgresoVisual("Grooming & Spa Canino", 3, 4, new Color(16, 185, 129)));
+
+        card.add(barras, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearBarraProgresoVisual(String titulo, int actual, int total, Color colorBarra) {
+        JPanel p = new JPanel(new BorderLayout(6, 4));
+        p.setOpaque(false);
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblTit.setForeground(new Color(51, 65, 85));
+
+        int porcentaje = total > 0 ? (int) Math.round(((double) actual / total) * 100) : 0;
+        JLabel lblValor = new JLabel(actual + "/" + total + " (" + porcentaje + "%)");
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblValor.setForeground(colorBarra.darker());
+
+        top.add(lblTit, BorderLayout.WEST);
+        top.add(lblValor, BorderLayout.EAST);
+        p.add(top, BorderLayout.NORTH);
+
+        JPanel barra = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(241, 245, 249));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                int anchoRelleno = Math.max(0, Math.min(getWidth(), (int) (getWidth() * (porcentaje / 100.0))));
+                g2.setColor(colorBarra);
+                g2.fillRoundRect(0, 0, anchoRelleno, getHeight(), 6, 6);
+                g2.dispose();
+            }
+        };
+        barra.setPreferredSize(new Dimension(100, 8));
+        barra.setOpaque(false);
+        p.add(barra, BorderLayout.CENTER);
+
+        return p;
+    }
+
+    private JPanel crearTarjetaMedicosGuardiaDashboard() {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Especialistas de Turno Hoy");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+
+        top.add(lblTit, BorderLayout.WEST);
+        card.add(top, BorderLayout.NORTH);
+
+        JPanel lista = new JPanel();
+        lista.setLayout(new BoxLayout(lista, BoxLayout.Y_AXIS));
+        lista.setOpaque(false);
+
+        lista.add(crearItemMedico("Dra. Laura Morales Ruiz", "Cirugía General y Tejidos", "En Consulta", new Color(220, 252, 231), new Color(22, 163, 74)));
+        lista.add(crearItemMedico("Dr. Mario Silva Paredes", "Dermatología y Alergias", "Disponible", new Color(224, 242, 254), new Color(2, 132, 199)));
+        lista.add(crearItemMedico("Dra. Elena Ruiz Salazar", "Medicina Felina y Felinos", "En Quirófano", new Color(254, 243, 199), new Color(217, 119, 6)));
+        lista.add(crearItemMedico("Dr. Roberto Mendoza Chávez", "Cardiología y Ecografía", "Disponible", new Color(224, 242, 254), new Color(2, 132, 199)));
+
+        card.add(lista, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearItemMedico(String nombre, String especialidad, String estado, Color colorFondoBadge, Color colorTextoBadge) {
+        JPanel item = new JPanel(new BorderLayout(8, 0));
+        item.setOpaque(false);
+        item.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(241, 245, 249)),
+                new EmptyBorder(5, 0, 5, 0)
+        ));
+
+        JLabel ico = new JLabel(Iconos.crearIconoDoctor(18, Ui.TURQUESA_PROFUNDO));
+        item.add(ico, BorderLayout.WEST);
+
+        JPanel text = new JPanel();
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+        text.setOpaque(false);
+
+        JLabel lblN = new JLabel(nombre);
+        lblN.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblN.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblE = new JLabel(especialidad);
+        lblE.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblE.setForeground(COLOR_TEXTO_MUTED);
+
+        text.add(lblN);
+        text.add(Box.createVerticalStrut(1));
+        text.add(lblE);
+        item.add(text, BorderLayout.CENTER);
+
+        JLabel badge = new JLabel(" " + estado + " ", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(colorFondoBadge);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badge.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        badge.setForeground(colorTextoBadge);
+        badge.setOpaque(false);
+        badge.setBorder(new EmptyBorder(2, 5, 2, 5));
+        item.add(badge, BorderLayout.EAST);
+
+        return item;
+    }
+
+    private JPanel crearTarjetaTelemetriaIADashboard() {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel("🤖 Asistente Clínico IA & Servidor");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel badgeIA = new JLabel(" v1.8 ACTIVO ", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(224, 247, 250));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badgeIA.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        badgeIA.setForeground(Ui.TURQUESA_PROFUNDO);
+        badgeIA.setOpaque(false);
+        badgeIA.setBorder(new EmptyBorder(2, 6, 2, 6));
+
+        top.add(lblTit, BorderLayout.WEST);
+        top.add(badgeIA, BorderLayout.EAST);
+        card.add(top, BorderLayout.NORTH);
+
+        JPanel filas = new JPanel();
+        filas.setLayout(new BoxLayout(filas, BoxLayout.Y_AXIS));
+        filas.setOpaque(false);
+
+        JLabel lblMotor = new JLabel("• Motor: HappyPet-Core-v1.8 (Pre-triaje activo)");
+        lblMotor.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblMotor.setForeground(new Color(51, 65, 85));
+
+        JLabel lblLat = new JLabel("• Estado: 🟢 En Línea (Latencia: 0.12 ms)");
+        lblLat.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblLat.setForeground(new Color(51, 65, 85));
+
+        JLabel lblResp = new JLabel("• Respaldo: Hoy 03:00 AM (Automático)");
+        lblResp.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblResp.setForeground(new Color(51, 65, 85));
+
+        filas.add(lblMotor);
+        filas.add(Box.createVerticalStrut(4));
+        filas.add(lblLat);
+        filas.add(Box.createVerticalStrut(4));
+        filas.add(lblResp);
+        filas.add(Box.createVerticalStrut(10));
+
+        JButton btnAbrirIA = Ui.botonPrimario("Abrir Asistente IA ➔");
+        btnAbrirIA.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnAbrirIA.setPreferredSize(new Dimension(280, 30));
+        btnAbrirIA.addActionListener(e -> {
+            mostrarVista("MODULO10_IA_SOPORTE");
+            activarBotonSubmodulo(10, 4);
+            actualizarVistaPrincipal("Módulo de IA y Soporte Técnico", "Módulo 10.4 · Pre-triaje predictivo y telemetría");
+        });
+        filas.add(btnAbrirIA);
+
+        card.add(filas, BorderLayout.CENTER);
+        return card;
+    }
+
+    public void recargarTodoDashboard() {
+        recargarTabla();
+        recargarCitasDashboard();
+        if (panelDashboard != null) {
+            panelDashboard.revalidate();
+            panelDashboard.repaint();
+        }
+    }
+
     private void recargarTabla() {
+        if (modeloTabla == null) return;
         modeloTabla.setRowCount(0);
         List<Mascota> mascotas = repo.todasLasMascotas();
         for (Mascota m : mascotas) {
@@ -1022,11 +1967,12 @@ public class PantallaPrincipalFrame extends JFrame {
             });
         }
         if (lblContadorFiltro != null) {
-            lblContadorFiltro.setText(mascotas.size() + " pacientes registrados");
+            lblContadorFiltro.setText("  " + mascotas.size() + " registrados  ");
         }
     }
 
     private void aplicarFiltroEspecie(String filtro) {
+        if (modeloTabla == null) return;
         modeloTabla.setRowCount(0);
         List<Mascota> mascotas = repo.todasLasMascotas();
         int count = 0;
@@ -1051,12 +1997,16 @@ public class PantallaPrincipalFrame extends JFrame {
                 });
             }
         }
-        lblContadorFiltro.setText(count + " pacientes encontrados");
+        if (lblContadorFiltro != null) {
+            lblContadorFiltro.setText("  " + count + " encontrados  ");
+        }
     }
 
     private void filtrarTabla(String query) {
+        if (modeloTabla == null) return;
         if (query == null || query.trim().isEmpty() || "Buscar cliente, paciente, historia...".equals(query)) {
             recargarTabla();
+            recargarCitasDashboard();
             return;
         }
         String q = query.trim().toLowerCase();
@@ -1082,7 +2032,9 @@ public class PantallaPrincipalFrame extends JFrame {
                 });
             }
         }
-        lblContadorFiltro.setText(count + " coincidencias encontradas");
+        if (lblContadorFiltro != null) {
+            lblContadorFiltro.setText("  " + count + " coincidencias  ");
+        }
     }
 
     private void actualizarVistaPrincipal(String titulo, String subtitulo) {
