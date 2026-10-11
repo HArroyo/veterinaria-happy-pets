@@ -1477,6 +1477,26 @@ public class RepositorioVeterinaria {
         }
     }
 
+    public boolean eliminarServicioGrooming(String idGrooming) {
+        if (idGrooming == null) return false;
+        return serviciosGrooming.removeIf(g -> idGrooming.equalsIgnoreCase(g.getIdGrooming()));
+    }
+
+    public boolean eliminarInternamiento(String idInternamiento) {
+        if (idInternamiento == null) return false;
+        return internamientos.removeIf(h -> idInternamiento.equalsIgnoreCase(h.getIdInternamiento()));
+    }
+
+    public boolean eliminarReservaHospedaje(String idReserva) {
+        if (idReserva == null) return false;
+        return reservasHospedaje.removeIf(r -> idReserva.equalsIgnoreCase(r.getIdReserva()));
+    }
+
+    public boolean eliminarMascotaAdopcion(String idMascotaAdopcion) {
+        if (idMascotaAdopcion == null) return false;
+        return mascotasAdopcion.removeIf(m -> idMascotaAdopcion.equalsIgnoreCase(m.getIdMascotaAdopcion()));
+    }
+
     // ==========================================
     // MÉTODOS DEL MÓDULO 5: INVENTARIO Y FARMACIA
     // ==========================================

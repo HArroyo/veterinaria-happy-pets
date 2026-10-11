@@ -12,8 +12,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,42 +21,34 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
-import happypets.model.Cliente;
-import happypets.model.Mascota;
 import happypets.model.ReservaHospedaje;
 import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
  * Submódulo 4.3: Hotel y Guardería Canina y Felina.
- * Diseñado según el wireframe oficial y especificaciones ERP Happy Pets:
- * - Control de ocupación de suites individuales climatizadas.
- * - Registro de estadías, noches automáticas y check-in / check-out.
- * - Plan de alimentación personalizado y cronograma de paseos recreativos.
- * - Reportes diarios a tutores vía WhatsApp y generación de contrato de hospedaje.
+ * Arquitectura Master-Detail (58% / 42%) moderna, sin scrollbars horizontales ni espacio en blanco.
+ * Incluye Live Hub de suites climatizadas, gestión de nutrición, contratos de hospedaje y control de check-out.
  */
 public class VistaHotelGuarderiaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -67,56 +58,55 @@ public class VistaHotelGuarderiaPanel extends JPanel {
     private JLabel lblKpiCheckoutHoy;
     private JLabel lblKpiFacturacionNoches;
 
-    // Formulario de Check-in
-    private JComboBox<PacienteItem> cbPaciente;
-    private JTextField txtTutor;
-    private JTextField txtEmergencia;
-    private JComboBox<String> cbSuite;
-    private JTextField txtFechaIngreso;
-    private JTextField txtFechaSalida;
-    private JTextField txtCostoNoche;
-    private JTextField txtDieta;
-    private JComboBox<String> cbPaseos;
-    private JCheckBox chkBanoSalida;
-    private JTextField txtMedicacion;
-
-    // Tabla de Huéspedes
+    // Master Table
     private JTable tablaHospedaje;
     private DefaultTableModel modeloHospedaje;
-    private JLabel lblContadorHospedaje;
-    private JComboBox<String> cbFiltroEstado;
-    private List<ReservaHospedaje> listaActual;
+    private JTextField txtBuscar;
+    private String filtroEstado = "TODOS";
+    private List<ReservaHospedaje> listaFiltrada = new ArrayList<>();
+    private ReservaHospedaje reservaSeleccionada = null;
+
+    // Live Detail Hub
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
+    private JLabel lblHubAvatar;
+    private JLabel lblHubNombreMascota;
+    private JLabel lblHubSubtituloMascota;
+    private JLabel lblHubBadgeSuite;
+    private JLabel lblHubNoches;
+    private JLabel lblHubTarifaNoche;
+    private JLabel lblHubTotal;
+    private JLabel lblHubBanoSalida;
+    private JLabel lblHubTutor;
+    private JLabel lblHubEmergencia;
+    private JLabel lblHubFechasEstadia;
+    private JLabel lblHubDieta;
+    private JLabel lblHubPaseos;
+    private JTextArea txtHubMedicacion;
 
     public VistaHotelGuarderiaPanel() {
         setLayout(new BorderLayout());
-        setOpaque(false);
+        setBackground(new Color(248, 250, 252));
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 16, 6, 16));
 
-        // 1. Cabecera
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(8));
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearFilaKpis());
+        panelSuperior.add(Box.createVerticalStrut(8));
 
-        // 2. Fila de KPIs
-        contenido.add(crearFilaKpis());
-        contenido.add(Box.createVerticalStrut(10));
+        add(panelSuperior, BorderLayout.NORTH);
 
-        // 3. Doble Columna: Formulario de Hospedaje y Monitor de Huéspedes
-        contenido.add(crearDobleColumna());
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetail());
+        splitPane.setResizeWeight(0.58);
+        splitPane.setDividerSize(6);
+        splitPane.setBorder(new EmptyBorder(0, 16, 12, 16));
+        splitPane.setOpaque(false);
 
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.add(contenido, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(wrapper);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        add(scroll, BorderLayout.CENTER);
+        add(splitPane, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -131,11 +121,11 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         JLabel titulo = new JLabel("Hotel & Guardería Canina / Felina");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        titulo.setForeground(COLOR_TEXTO_TITULO);
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
         JLabel subtitulo = new JLabel("Módulo 4.3 · Suites climatizadas, estancias prolongadas, nutrición personalizada, paseos y check-out");
         subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        subtitulo.setForeground(COLOR_TEXTO_MUTED);
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
         izq.add(titulo);
         izq.add(Box.createVerticalStrut(2));
@@ -145,7 +135,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
-        JLabel badgeCapacidad = new JLabel(" Capacidad Total: 8 Suites Climatizadas ", SwingConstants.CENTER);
+        JLabel badgeCapacidad = new JLabel(" Capacidad: 8 Suites Climatizadas ", SwingConstants.CENTER);
         badgeCapacidad.setFont(new Font("Segoe UI", Font.BOLD, 11));
         badgeCapacidad.setForeground(Ui.TURQUESA_PROFUNDO);
         badgeCapacidad.setOpaque(true);
@@ -156,327 +146,149 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         ));
         der.add(badgeCapacidad);
 
+        JButton btnNuevo = crearBotonAccion("Registrar Check-In", Iconos.crearIconoCasaMascota(14, Color.WHITE), true);
+        btnNuevo.addActionListener(e -> abrirModalNuevoCheckin());
+        btnNuevo.setPreferredSize(new Dimension(175, 32));
+        der.add(btnNuevo);
+
+        JButton btnRefrescar = crearBotonAccion("Actualizar", false);
+        btnRefrescar.addActionListener(e -> recargarDatos());
+        btnRefrescar.setPreferredSize(new Dimension(100, 32));
+        der.add(btnRefrescar);
+
         cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
     private JPanel crearFilaKpis() {
-        JPanel kpis = new JPanel(new GridLayout(1, 4, 10, 0));
-        kpis.setOpaque(false);
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
 
         lblKpiOcupadas = new JLabel("0", SwingConstants.LEFT);
         lblKpiCheckinHoy = new JLabel("0", SwingConstants.LEFT);
         lblKpiCheckoutHoy = new JLabel("0", SwingConstants.LEFT);
         lblKpiFacturacionNoches = new JLabel("S/. 0", SwingConstants.LEFT);
 
-        kpis.add(crearTarjetaKpi("Suites Ocupadas Hoy", lblKpiOcupadas, "Disponibles: 8 - Total", new Color(14, 165, 233), Iconos.crearIconoCasaMascota(18, new Color(14, 165, 233))));
-        kpis.add(crearTarjetaKpi("Check-ins Agendados", lblKpiCheckinHoy, "Ingresos registrados", new Color(16, 185, 129), Iconos.crearIconoCheck(16, new Color(16, 185, 129))));
-        kpis.add(crearTarjetaKpi("Check-outs Previstos", lblKpiCheckoutHoy, "Retiros hoy con tutor", new Color(245, 158, 11), Iconos.crearIconoReloj(16, new Color(245, 158, 11))));
-        kpis.add(crearTarjetaKpi("Facturación Estimada", lblKpiFacturacionNoches, "Estancias en curso", new Color(99, 102, 241), Iconos.crearIconoDocumento(16, new Color(99, 102, 241))));
+        fila.add(crearCardKpi(lblKpiOcupadas, "SUITES OCUPADAS HOY", Ui.TURQUESA_SUAVE, Ui.TURQUESA, Iconos.crearIconoCasaMascota(20, Ui.TURQUESA)));
+        fila.add(crearCardKpi(lblKpiCheckinHoy, "CHECK-INS AGENDADOS", new Color(220, 252, 231), Ui.COLOR_EXITO, Iconos.crearIconoCheck(20, Ui.COLOR_EXITO)));
+        fila.add(crearCardKpi(lblKpiCheckoutHoy, "CHECK-OUTS PREVISTOS", new Color(254, 243, 199), new Color(217, 119, 6), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
+        fila.add(crearCardKpi(lblKpiFacturacionNoches, "FACTURACIÓN ESTANCIAS", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoFactura(20, new Color(147, 51, 234))));
 
-        return kpis;
+        return fila;
     }
 
-    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color colorAcento, Icon icono) {
-        JPanel card = new JPanel(new BorderLayout(8, 4)) {
+    private JPanel crearCardKpi(JLabel lblValor, String etiqueta, Color colorFondoIco, Color colorIco, Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(8, 12, 8, 12));
 
-        JPanel izq = new JPanel();
-        izq.setOpaque(false);
-        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
+        JLabel iconBox = new JLabel(icono, SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(colorFondoIco);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        iconBox.setPreferredSize(new Dimension(36, 36));
+        card.add(iconBox, BorderLayout.WEST);
 
-        JLabel t = new JLabel(titulo);
-        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        t.setForeground(COLOR_TEXTO_MUTED);
+        JPanel centro = new JPanel();
+        centro.setOpaque(false);
+        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblValor.setForeground(COLOR_TEXTO_TITULO);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel sub = new JLabel(subtitulo);
-        sub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        sub.setForeground(COLOR_TEXTO_MUTED);
+        JLabel lblSub = new JLabel(etiqueta);
+        lblSub.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
 
-        izq.add(t);
-        izq.add(Box.createVerticalStrut(2));
-        izq.add(lblValor);
-        izq.add(Box.createVerticalStrut(1));
-        izq.add(sub);
+        centro.add(lblValor);
+        centro.add(lblSub);
+        card.add(centro, BorderLayout.CENTER);
 
-        card.add(izq, BorderLayout.CENTER);
+        return card;
+    }
 
-        if (icono != null) {
-            JLabel lblIcono = new JLabel(icono);
-            lblIcono.setVerticalAlignment(SwingConstants.TOP);
-            card.add(lblIcono, BorderLayout.EAST);
+    private JPanel crearPanelMaster() {
+        JPanel panel = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // Buscador y Filtros Pills
+        JPanel topFiltros = new JPanel();
+        topFiltros.setOpaque(false);
+        topFiltros.setLayout(new BoxLayout(topFiltros, BoxLayout.Y_AXIS));
+
+        JPanel filaBuscar = new JPanel(new BorderLayout(8, 0));
+        filaBuscar.setOpaque(false);
+
+        JLabel lblLupa = new JLabel("Buscar:");
+        lblLupa.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblLupa.setForeground(Ui.TEXTO_MUTED);
+        filaBuscar.add(lblLupa, BorderLayout.WEST);
+
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.setPreferredSize(new Dimension(0, 28));
+        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(2, 8, 2, 8)
+        ));
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarYActualizarTabla(); }
+            public void removeUpdate(DocumentEvent e) { filtrarYActualizarTabla(); }
+            public void changedUpdate(DocumentEvent e) { filtrarYActualizarTabla(); }
+        });
+        filaBuscar.add(txtBuscar, BorderLayout.CENTER);
+        topFiltros.add(filaBuscar);
+        topFiltros.add(Box.createVerticalStrut(8));
+
+        // Pills de Estado
+        JPanel filaPills = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        filaPills.setOpaque(false);
+
+        String[] estados = {"TODOS", "En Estadía / Hospedado", "Confirmada", "Finalizada / Check-out"};
+        for (String est : estados) {
+            JButton btnPill = crearBotonPill(est);
+            filaPills.add(btnPill);
         }
+        topFiltros.add(filaPills);
+        panel.add(topFiltros, BorderLayout.NORTH);
 
-        return card;
-    }
-
-    private JPanel crearDobleColumna() {
-        JPanel fila = new JPanel(new BorderLayout(14, 0));
-        fila.setOpaque(false);
-
-        // Columna Izquierda: Formulario Check-in (ancho 410px aprox)
-        JPanel colIzquierda = crearPanelFormularioHospedaje();
-        colIzquierda.setPreferredSize(new Dimension(420, 560));
-        fila.add(colIzquierda, BorderLayout.WEST);
-
-        // Columna Derecha: Monitor de Huéspedes
-        JPanel colDerecha = crearPanelMonitorHuespedes();
-        fila.add(colDerecha, BorderLayout.CENTER);
-
-        return fila;
-    }
-
-    private JPanel crearPanelFormularioHospedaje() {
-        JPanel card = new JPanel(new BorderLayout()) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-
-        // Título del formulario
-        JLabel lblTitulo = new JLabel("Registrar Check-in / Nueva Reserva");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTitulo.setForeground(COLOR_TEXTO_TITULO);
-        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(lblTitulo);
-
-        JLabel lblSub = new JLabel("Asignación de suite individual, dieta y plan de cuidados");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(lblSub);
-        form.add(Box.createVerticalStrut(10));
-
-        // 1. Huésped / Paciente
-        form.add(crearEtiquetaCampo("Paciente Huésped:"));
-        cbPaciente = new JComboBox<>();
-        estilizarControl(cbPaciente);
-        cbPaciente.addActionListener(e -> autocompletarTutor());
-        form.add(cbPaciente);
-        form.add(Box.createVerticalStrut(6));
-
-        // 2. Tutor & Teléfono Emergencia (en grid)
-        JPanel gridTutor = new JPanel(new GridLayout(1, 2, 8, 0));
-        gridTutor.setOpaque(false);
-        gridTutor.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridTutor.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pTutor = new JPanel();
-        pTutor.setOpaque(false);
-        pTutor.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pTutor.setLayout(new BoxLayout(pTutor, BoxLayout.Y_AXIS));
-        pTutor.add(crearEtiquetaCampo("Tutor Responsable:"));
-        txtTutor = new JTextField();
-        estilizarControl(txtTutor);
-        txtTutor.setEditable(false);
-        pTutor.add(txtTutor);
-        gridTutor.add(pTutor);
-
-        JPanel pEmerg = new JPanel();
-        pEmerg.setOpaque(false);
-        pEmerg.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pEmerg.setLayout(new BoxLayout(pEmerg, BoxLayout.Y_AXIS));
-        pEmerg.add(crearEtiquetaCampo("Tel. Emergencia:"));
-        txtEmergencia = new JTextField("+51 984 552 110");
-        estilizarControl(txtEmergencia);
-        pEmerg.add(txtEmergencia);
-        gridTutor.add(pEmerg);
-
-        form.add(gridTutor);
-        form.add(Box.createVerticalStrut(6));
-
-        // 3. Suite Asignada
-        form.add(crearEtiquetaCampo("Suite Climatizada:"));
-        cbSuite = new JComboBox<>(new String[]{
-                "Suite 01 Canina (Grande - Jardín)",
-                "Suite 02 Canina (Grande - Climatizada)",
-                "Suite 03 Canina (Mediana - Interior)",
-                "Suite 04 Canina (Mediana - Interior)",
-                "Suite 05 Felina (Torre Rascador A)",
-                "Suite 06 Felina (Torre Rascador B)",
-                "Suite 07 Felina (Suite Tranquila)",
-                "Suite 08 VIP Mixta (Cámaras 24h)"
-        });
-        estilizarControl(cbSuite);
-        form.add(cbSuite);
-        form.add(Box.createVerticalStrut(6));
-
-        // 4. Fechas Ingreso / Salida y Costo por Noche
-        JPanel gridFechas = new JPanel(new GridLayout(1, 3, 6, 0));
-        gridFechas.setOpaque(false);
-        gridFechas.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridFechas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pIn = new JPanel();
-        pIn.setOpaque(false);
-        pIn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pIn.setLayout(new BoxLayout(pIn, BoxLayout.Y_AXIS));
-        pIn.add(crearEtiquetaCampo("Check-In:"));
-        txtFechaIngreso = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        estilizarControl(txtFechaIngreso);
-        pIn.add(txtFechaIngreso);
-        gridFechas.add(pIn);
-
-        JPanel pOut = new JPanel();
-        pOut.setOpaque(false);
-        pOut.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pOut.setLayout(new BoxLayout(pOut, BoxLayout.Y_AXIS));
-        pOut.add(crearEtiquetaCampo("Check-Out:"));
-        txtFechaSalida = new JTextField(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        estilizarControl(txtFechaSalida);
-        pOut.add(txtFechaSalida);
-        gridFechas.add(pOut);
-
-        JPanel pCosto = new JPanel();
-        pCosto.setOpaque(false);
-        pCosto.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCosto.setLayout(new BoxLayout(pCosto, BoxLayout.Y_AXIS));
-        pCosto.add(crearEtiquetaCampo("Tarifa Noche S/.:"));
-        txtCostoNoche = new JTextField("55.00");
-        estilizarControl(txtCostoNoche);
-        pCosto.add(txtCostoNoche);
-        gridFechas.add(pCosto);
-
-        form.add(gridFechas);
-        form.add(Box.createVerticalStrut(6));
-
-        // 5. Alimentación y Paseos
-        form.add(crearEtiquetaCampo("Dieta / Alimentación Específica:"));
-        txtDieta = new JTextField("Ración ProPlan Adulto 150g 2v/día (Tutor trae alimento)");
-        estilizarControl(txtDieta);
-        form.add(txtDieta);
-        form.add(Box.createVerticalStrut(6));
-
-        form.add(crearEtiquetaCampo("Plan de Paseos y Socialización:"));
-        cbPaseos = new JComboBox<>(new String[]{
-                "3 Paseos al día · Parque interno y socialización",
-                "2 Paseos al día · Paseo individual con correa",
-                "Guardería Diurna · Juegos libres supervisados",
-                "Zona Felina · Estimulación con juguetes y rascador"
-        });
-        estilizarControl(cbPaseos);
-        form.add(cbPaseos);
-        form.add(Box.createVerticalStrut(6));
-
-        // 6. Medicación y Baño de Salida
-        form.add(crearEtiquetaCampo("Medicación Especial / Cuidados:"));
-        txtMedicacion = new JTextField("Ninguna medicación requerida");
-        estilizarControl(txtMedicacion);
-        form.add(txtMedicacion);
-        form.add(Box.createVerticalStrut(6));
-
-        chkBanoSalida = new JCheckBox("Incluir Baño y Deslanado de Salida (+ S/. 35.00)");
-        chkBanoSalida.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        chkBanoSalida.setForeground(Ui.TURQUESA_OSCURO);
-        chkBanoSalida.setOpaque(false);
-        chkBanoSalida.setSelected(true);
-        chkBanoSalida.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(chkBanoSalida);
-        form.add(Box.createVerticalStrut(12));
-
-        // Botones de acción
-        JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pBotones.setOpaque(false);
-        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-
-        JButton btnLimpiar = crearBoton("Limpiar", false, this::limpiarFormulario);
-        JButton btnRegistrar = crearBoton("Registrar Estadía", true, this::registrarEstadia);
-
-        pBotones.add(btnLimpiar);
-        pBotones.add(btnRegistrar);
-        form.add(pBotones);
-
-        card.add(form, BorderLayout.CENTER);
-        return card;
-    }
-
-    private JPanel crearPanelMonitorHuespedes() {
-        JPanel card = new JPanel(new BorderLayout(0, 8)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        // Cabecera de la tabla con filtro
-        JPanel top = new JPanel(new BorderLayout(8, 0));
-        top.setOpaque(false);
-
-        JPanel izq = new JPanel();
-        izq.setOpaque(false);
-        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
-
-        JLabel lblTit = new JLabel("Huéspedes en Hospedaje & Control de Estadías");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-
-        lblContadorHospedaje = new JLabel("0 reservas activas");
-        lblContadorHospedaje.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblContadorHospedaje.setForeground(COLOR_TEXTO_MUTED);
-
-        izq.add(lblTit);
-        izq.add(Box.createVerticalStrut(1));
-        izq.add(lblContadorHospedaje);
-        top.add(izq, BorderLayout.CENTER);
-
-        JPanel derFiltro = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        derFiltro.setOpaque(false);
-
-        JLabel lblFiltro = new JLabel("Estado:");
-        lblFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblFiltro.setForeground(COLOR_TEXTO_MUTED);
-        derFiltro.add(lblFiltro);
-
-        cbFiltroEstado = new JComboBox<>(new String[]{"Todos", "En Estadía / Hospedado", "Confirmada", "Finalizada / Check-out"});
-        estilizarControl(cbFiltroEstado);
-        cbFiltroEstado.addActionListener(e -> filtrarTabla());
-        derFiltro.add(cbFiltroEstado);
-
-        top.add(derFiltro, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
-
-        // Tabla
-        String[] columnas = {"ID", "Suite", "Huésped", "Tutor", "Ingreso", "Salida", "Noches", "Costo Total", "Estado"};
+        // Tabla Master
+        String[] columnas = {"ID", "Suite", "Huésped", "Tutor", "Ingreso", "Salida", "Noches", "Total S/.", "Estado"};
         modeloHospedaje = new DefaultTableModel(columnas, 0) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -484,149 +296,327 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         };
 
         tablaHospedaje = new JTable(modeloHospedaje);
-        Ui.formatearTabla(tablaHospedaje, new int[]{0, 4, 5, 6, 8}, new int[]{7});
+        tablaHospedaje.setRowHeight(48);
+        tablaHospedaje.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaHospedaje.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaHospedaje.setShowVerticalLines(false);
+        tablaHospedaje.setGridColor(new Color(241, 245, 249));
+        tablaHospedaje.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaHospedaje.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaHospedaje.getTableHeader().setForeground(Ui.TEXTO_MUTED);
 
         tablaHospedaje.getColumnModel().getColumn(0).setPreferredWidth(65);
-        tablaHospedaje.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tablaHospedaje.getColumnModel().getColumn(2).setPreferredWidth(90);
-        tablaHospedaje.getColumnModel().getColumn(3).setPreferredWidth(110);
-        tablaHospedaje.getColumnModel().getColumn(4).setPreferredWidth(75);
-        tablaHospedaje.getColumnModel().getColumn(5).setPreferredWidth(75);
+        tablaHospedaje.getColumnModel().getColumn(1).setPreferredWidth(125);
+        tablaHospedaje.getColumnModel().getColumn(2).setPreferredWidth(110);
+        tablaHospedaje.getColumnModel().getColumn(3).setPreferredWidth(95);
+        tablaHospedaje.getColumnModel().getColumn(4).setPreferredWidth(70);
+        tablaHospedaje.getColumnModel().getColumn(5).setPreferredWidth(70);
         tablaHospedaje.getColumnModel().getColumn(6).setPreferredWidth(45);
-        tablaHospedaje.getColumnModel().getColumn(7).setPreferredWidth(75);
-        tablaHospedaje.getColumnModel().getColumn(8).setPreferredWidth(125);
+        tablaHospedaje.getColumnModel().getColumn(7).setPreferredWidth(70);
+        tablaHospedaje.getColumnModel().getColumn(8).setPreferredWidth(115);
 
-        // Renderizador de Estado con Badges
-        tablaHospedaje.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                l.setHorizontalAlignment(SwingConstants.CENTER);
-                String st = value != null ? value.toString() : "";
-                if (st.contains("En Estadía") || st.contains("Hospedado")) {
-                    l.setForeground(Ui.TURQUESA_PROFUNDO);
-                    l.setBackground(Ui.TURQUESA_SUAVE);
-                } else if (st.contains("Confirmada")) {
-                    l.setForeground(new Color(245, 158, 11));
-                    l.setBackground(new Color(254, 243, 199));
+        tablaHospedaje.getColumnModel().getColumn(2).setCellRenderer(new PacienteMonogramaRenderer());
+        tablaHospedaje.getColumnModel().getColumn(8).setCellRenderer(new BadgeEstadoHospedajeRenderer());
+
+        tablaHospedaje.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaHospedaje.getSelectedRow();
+                if (r >= 0 && r < listaFiltrada.size()) {
+                    mostrarDetalleEnHub(listaFiltrada.get(r));
                 } else {
-                    l.setForeground(Ui.COLOR_EXITO);
-                    l.setBackground(new Color(209, 250, 229));
+                    mostrarDetalleEnHub(null);
                 }
-                l.setOpaque(true);
-                return l;
             }
         });
 
-        JScrollPane scrollTabla = new JScrollPane(tablaHospedaje);
-        scrollTabla.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        scrollTabla.getViewport().setBackground(Color.WHITE);
-        card.add(scrollTabla, BorderLayout.CENTER);
+        JScrollPane sp = new JScrollPane(tablaHospedaje);
+        sp.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        sp.getViewport().setBackground(Color.WHITE);
+        panel.add(sp, BorderLayout.CENTER);
 
-        // Barra inferior de acciones rápidas
-        JPanel pAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pAcciones.setOpaque(false);
-
-        JButton btnWhatsapp = crearBoton("Reporte Diario WhatsApp", false, this::enviarReporteWhatsapp);
-        btnWhatsapp.setIcon(Iconos.crearIconoMensaje(14, new Color(16, 185, 129)));
-
-        JButton btnContrato = crearBoton("Contrato Hospedaje", false, this::mostrarContratoHospedaje);
-        btnContrato.setIcon(Iconos.crearIconoDocumento(14, COLOR_AZUL_PRIMARIO));
-
-        JButton btnCheckout = crearBoton("Registrar Check-Out", true, this::realizarCheckout);
-        btnCheckout.setIcon(Iconos.crearIconoCheck(14, Color.WHITE));
-
-        pAcciones.add(btnWhatsapp);
-        pAcciones.add(btnContrato);
-        pAcciones.add(btnCheckout);
-
-        card.add(pAcciones, BorderLayout.SOUTH);
-        return card;
+        return panel;
     }
 
-    private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto, SwingConstants.LEFT);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        l.setForeground(new Color(71, 85, 105));
-        l.setBorder(new EmptyBorder(0, 0, 2, 0));
-        l.setHorizontalAlignment(SwingConstants.LEFT);
-        l.setAlignmentX(Component.LEFT_ALIGNMENT);
-        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
-        return l;
+    private JButton crearBotonPill(String estado) {
+        JButton btn = new JButton(estado);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(4, 8, 4, 8));
+
+        actualizarEstiloPill(btn, estado.equalsIgnoreCase(filtroEstado));
+
+        btn.addActionListener(e -> {
+            filtroEstado = estado;
+            Component[] comps = btn.getParent().getComponents();
+            for (Component c : comps) {
+                if (c instanceof JButton b) {
+                    actualizarEstiloPill(b, b.getText().equalsIgnoreCase(filtroEstado));
+                }
+            }
+            filtrarYActualizarTabla();
+        });
+
+        return btn;
     }
 
-    private void estilizarControl(Component c) {
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
-        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
-        if (c instanceof javax.swing.JComponent jc) {
-            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
-        }
-        if (c instanceof JTextField) {
-            ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(COLOR_BORDE, 1, true),
-                    new EmptyBorder(2, 6, 2, 6)
-            ));
-        } else if (c instanceof JComboBox) {
-            c.setBackground(Color.WHITE);
+    private void actualizarEstiloPill(JButton btn, boolean seleccionado) {
+        if (seleccionado) {
+            btn.setBackground(Ui.TURQUESA);
+            btn.setForeground(Color.WHITE);
+            btn.setOpaque(true);
+        } else {
+            btn.setBackground(new Color(241, 245, 249));
+            btn.setForeground(new Color(71, 85, 105));
+            btn.setOpaque(true);
         }
     }
 
-    private JButton crearBoton(String texto, boolean primario, Runnable accion) {
-        JButton btn = new JButton(texto) {
+    private JPanel crearPanelDetail() {
+        JPanel card = new JPanel(new BorderLayout()) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (primario) {
-                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
-                } else {
-                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
-                }
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                if (!primario) {
-                    g2.setColor(Ui.BORDE_SUAVE);
-                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
-                }
-                super.paintComponent(g2);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g);
                 g2.dispose();
             }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(12, 14, 12, 14));
 
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("<html><center>Seleccione un huésped para ver los detalles de su suite climatizada,<br>su dieta asignada, cronograma de recreación y emitir contrato.</center></html>", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        panelHubDetalle = new JPanel(new BorderLayout(0, 10));
+        panelHubDetalle.setOpaque(false);
+
+        // 1. Cabecera del Hub
+        JPanel topHub = new JPanel(new BorderLayout(10, 0));
+        topHub.setOpaque(false);
+
+        lblHubAvatar = new JLabel() {
+            private static final long serialVersionUID = 1L;
             @Override
-            public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                return new Dimension(d.width + 16, 28);
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int size = Math.min(getWidth(), getHeight()) - 2;
+                g2.setColor(Ui.TURQUESA_SUAVE);
+                g2.fillOval(1, 1, size, size);
+                g2.setColor(Ui.TURQUESA);
+                g2.drawOval(1, 1, size, size);
+                super.paintComponent(g);
+                g2.dispose();
             }
         };
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-        btn.addActionListener(e -> accion.run());
-        return btn;
+        lblHubAvatar.setPreferredSize(new Dimension(54, 54));
+        lblHubAvatar.setHorizontalAlignment(SwingConstants.CENTER);
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setForeground(Ui.TURQUESA);
+        topHub.add(lblHubAvatar, BorderLayout.WEST);
+
+        JPanel centroTit = new JPanel();
+        centroTit.setOpaque(false);
+        centroTit.setLayout(new BoxLayout(centroTit, BoxLayout.Y_AXIS));
+
+        lblHubNombreMascota = new JLabel("Nombre Huésped");
+        lblHubNombreMascota.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblHubNombreMascota.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubSubtituloMascota = new JLabel("Especie · Raza · Código");
+        lblHubSubtituloMascota.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblHubSubtituloMascota.setForeground(Ui.TEXTO_MUTED);
+
+        centroTit.add(lblHubNombreMascota);
+        centroTit.add(Box.createVerticalStrut(2));
+        centroTit.add(lblHubSubtituloMascota);
+        topHub.add(centroTit, BorderLayout.CENTER);
+
+        lblHubBadgeSuite = new JLabel("SUITE 01", SwingConstants.CENTER);
+        lblHubBadgeSuite.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubBadgeSuite.setOpaque(true);
+        lblHubBadgeSuite.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(4, 10, 4, 10)
+        ));
+        topHub.add(lblHubBadgeSuite, BorderLayout.EAST);
+        panelHubDetalle.add(topHub, BorderLayout.NORTH);
+
+        // 2. Contenido Central Estructurado
+        ScrollablePanel hubBody = new ScrollablePanel();
+        hubBody.setLayout(new BoxLayout(hubBody, BoxLayout.Y_AXIS));
+        hubBody.setOpaque(false);
+
+        // 2x2 Telemetría de Estadía
+        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridMetricas.setOpaque(false);
+        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+
+        lblHubNoches = new JLabel("-", SwingConstants.CENTER);
+        lblHubTarifaNoche = new JLabel("-", SwingConstants.CENTER);
+        lblHubTotal = new JLabel("-", SwingConstants.CENTER);
+        lblHubBanoSalida = new JLabel("-", SwingConstants.CENTER);
+
+        gridMetricas.add(crearCajaMetrica("NOCHES DE ESTADÍA", lblHubNoches, Ui.TURQUESA_OSCURO));
+        gridMetricas.add(crearCajaMetrica("TARIFA POR NOCHE", lblHubTarifaNoche, Ui.TEXTO_TITULO));
+        gridMetricas.add(crearCajaMetrica("TOTAL LIQUIDACIÓN", lblHubTotal, new Color(22, 163, 74)));
+        gridMetricas.add(crearCajaMetrica("BAÑO DE SALIDA", lblHubBanoSalida, new Color(147, 51, 234)));
+        hubBody.add(gridMetricas);
+        hubBody.add(Box.createVerticalStrut(10));
+
+        // Tutor & Cronograma
+        lblHubTutor = new JLabel("-");
+        lblHubTutor.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblHubTutor.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubEmergencia = new JLabel("-");
+        lblHubEmergencia.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubEmergencia.setForeground(new Color(2, 132, 199));
+
+        lblHubFechasEstadia = new JLabel("-");
+        lblHubFechasEstadia.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblHubFechasEstadia.setForeground(Ui.TURQUESA_PROFUNDO);
+
+        JPanel secTutor = crearSeccionCard("TUTOR & CRONOGRAMA DE ESTANCIA");
+        secTutor.add(crearItemLinea("Tutor Responsable:", lblHubTutor));
+        secTutor.add(crearItemLinea("Teléfono Emergencia 24H:", lblHubEmergencia));
+        secTutor.add(crearItemLinea("Fechas Check-In / Out:", lblHubFechasEstadia));
+        hubBody.add(secTutor);
+        hubBody.add(Box.createVerticalStrut(8));
+
+        // Nutrición & Dieta
+        lblHubDieta = new JLabel("-");
+        lblHubDieta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubDieta.setForeground(Ui.TEXTO_TITULO);
+        JPanel secDieta = crearSeccionCard("PLAN DE NUTRICIÓN & DIETA SUPERVISADA");
+        secDieta.add(lblHubDieta);
+        hubBody.add(secDieta);
+        hubBody.add(Box.createVerticalStrut(8));
+
+        // Recreación y Paseos
+        lblHubPaseos = new JLabel("-");
+        lblHubPaseos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubPaseos.setForeground(Ui.TEXTO_TITULO);
+        JPanel secPaseos = crearSeccionCard("CRONOGRAMA DE PASEOS & RECREACIÓN");
+        secPaseos.add(lblHubPaseos);
+        hubBody.add(secPaseos);
+        hubBody.add(Box.createVerticalStrut(8));
+
+        // Medicación & Cuidados Particulares
+        txtHubMedicacion = new JTextArea(2, 20);
+        txtHubMedicacion.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtHubMedicacion.setLineWrap(true);
+        txtHubMedicacion.setWrapStyleWord(true);
+        txtHubMedicacion.setEditable(false);
+        txtHubMedicacion.setOpaque(false);
+        JPanel secMed = crearSeccionCard("MEDICACIÓN ESPECIAL & CUIDADOS");
+        secMed.add(txtHubMedicacion);
+        hubBody.add(secMed);
+
+        JScrollPane spHub = new JScrollPane(hubBody);
+        spHub.setBorder(null);
+        spHub.setOpaque(false);
+        spHub.getViewport().setOpaque(false);
+        spHub.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        spHub.getVerticalScrollBar().setUnitIncrement(16);
+        panelHubDetalle.add(spHub, BorderLayout.CENTER);
+
+        // 3. Barra Inferior de Acciones Rápidas
+        JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
+        barraAcciones.setOpaque(false);
+
+        JButton btnCheckout = crearBotonAccion("Registrar Check-Out", Iconos.crearIconoCheck(14, Color.WHITE), true);
+        btnCheckout.addActionListener(e -> realizarCheckout());
+
+        JButton btnContrato = crearBotonAccion("Contrato Hospedaje", Iconos.crearIconoDocumento(14, new Color(37, 99, 235)), false);
+        btnContrato.addActionListener(e -> mostrarContratoHospedaje());
+
+        JButton btnWhatsapp = crearBotonAccion("WhatsApp Reporte", Iconos.crearIconoWhatsApp(14, new Color(37, 211, 102)), false);
+        btnWhatsapp.addActionListener(e -> enviarReporteWhatsapp());
+
+        JButton btnEditar = crearBotonAccion("Editar Estadía", Iconos.crearIconoLapiz(14, new Color(100, 116, 139)), false);
+        btnEditar.addActionListener(e -> abrirModalEditar());
+
+        barraAcciones.add(btnCheckout);
+        barraAcciones.add(btnContrato);
+        barraAcciones.add(btnWhatsapp);
+        barraAcciones.add(btnEditar);
+
+        panelHubDetalle.add(barraAcciones, BorderLayout.SOUTH);
+
+        card.add(panelHubVacio, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearCajaMetrica(String etiqueta, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+        JLabel lblEt = new JLabel(etiqueta);
+        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblEt.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(colorValor);
+
+        c.add(lblEt);
+        c.add(Box.createVerticalStrut(2));
+        c.add(lblValor);
+        return c;
+    }
+
+    private JPanel crearSeccionCard(String titulo) {
+        JPanel sec = new JPanel();
+        sec.setOpaque(false);
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(8, 10, 8, 10)
+        ));
+        sec.setBackground(Color.WHITE);
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_OSCURO);
+        sec.add(t);
+        sec.add(Box.createVerticalStrut(4));
+        return sec;
+    }
+
+    private JPanel crearItemLinea(String label, Component valor) {
+        JPanel p = new JPanel(new BorderLayout(6, 0));
+        p.setOpaque(false);
+        JLabel l = new JLabel(label);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        l.setForeground(Ui.TEXTO_MUTED);
+        p.add(l, BorderLayout.WEST);
+        p.add(valor, BorderLayout.CENTER);
+        return p;
     }
 
     public void recargarDatos() {
-        if (cbPaciente.getItemCount() == 0) {
-            for (Mascota m : repo.todasLasMascotas()) {
-                cbPaciente.addItem(new PacienteItem(m));
-            }
-            autocompletarTutor();
-        }
+        filtrarYActualizarTabla();
 
-        listaActual = repo.getReservasHospedaje();
-        filtrarTabla();
-
-        // KPIs
-        long ocupadas = listaActual.stream().filter(r -> r.getEstado().contains("En Estadía") || r.getEstado().contains("Hospedado")).count();
-        long inHoy = listaActual.stream().filter(r -> r.getFechaCheckIn().equals(LocalDate.now())).count();
-        long outHoy = listaActual.stream().filter(r -> r.getFechaCheckOut().equals(LocalDate.now())).count();
-        double facturacion = listaActual.stream().mapToDouble(ReservaHospedaje::getCostoTotal).sum();
+        List<ReservaHospedaje> todas = repo.getReservasHospedaje();
+        long ocupadas = todas.stream().filter(r -> r.getEstado().contains("En Estadía") || r.getEstado().contains("Hospedado")).count();
+        long inHoy = todas.stream().filter(r -> r.getFechaCheckIn().equals(LocalDate.now())).count();
+        long outHoy = todas.stream().filter(r -> r.getFechaCheckOut().equals(LocalDate.now())).count();
+        double facturacion = todas.stream().mapToDouble(ReservaHospedaje::getCostoTotal).sum();
 
         lblKpiOcupadas.setText(String.valueOf(ocupadas));
         lblKpiCheckinHoy.setText(String.valueOf(inHoy));
@@ -634,157 +624,222 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         lblKpiFacturacionNoches.setText("S/. " + String.format("%.0f", facturacion));
     }
 
-    private void filtrarTabla() {
-        if (listaActual == null) return;
-        modeloHospedaje.setRowCount(0);
-        String filtro = cbFiltroEstado != null ? (String) cbFiltroEstado.getSelectedItem() : "Todos";
+    private void filtrarYActualizarTabla() {
+        List<ReservaHospedaje> todas = repo.getReservasHospedaje();
+        String txt = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
 
-        int cont = 0;
-        for (ReservaHospedaje r : listaActual) {
-            if (!"Todos".equalsIgnoreCase(filtro)) {
-                if (!r.getEstado().equalsIgnoreCase(filtro)) continue;
+        listaFiltrada.clear();
+        for (ReservaHospedaje r : todas) {
+            boolean coincideEstado = "TODOS".equalsIgnoreCase(filtroEstado) || r.getEstado().equalsIgnoreCase(filtroEstado);
+            if (!coincideEstado) continue;
+
+            if (!txt.isEmpty()) {
+                boolean coincideTexto = r.getNombreMascota().toLowerCase().contains(txt) ||
+                        r.getNumeroSuite().toLowerCase().contains(txt) ||
+                        r.getNombreTutor().toLowerCase().contains(txt) ||
+                        r.getIdReserva().toLowerCase().contains(txt);
+                if (!coincideTexto) continue;
             }
-            cont++;
+
+            listaFiltrada.add(r);
+        }
+
+        modeloHospedaje.setRowCount(0);
+        for (ReservaHospedaje r : listaFiltrada) {
             modeloHospedaje.addRow(new Object[]{
                     r.getIdReserva(),
                     r.getNumeroSuite(),
-                    r.getNombreMascota(),
+                    r.getNombreMascota() + " (" + r.getEspecieRaza() + ")",
                     r.getNombreTutor(),
                     r.getFechaCheckInFormateada(),
                     r.getFechaCheckOutFormateada(),
                     r.getNumeroNoches(),
-                    "S/. " + String.format("%.2f", r.getCostoTotal()),
+                    String.format("%.2f", r.getCostoTotal()),
                     r.getEstado()
             });
         }
-        lblContadorHospedaje.setText(cont + " reservas mostradas");
-    }
 
-    private void autocompletarTutor() {
-        PacienteItem item = (PacienteItem) cbPaciente.getSelectedItem();
-        if (item != null && item.mascota != null) {
-            repo.getClienteDeMascota(item.mascota.getCodigo()).ifPresent(c -> {
-                txtTutor.setText(c.getNombreCompleto());
-                txtEmergencia.setText(c.getTelefonoPrincipal());
-            });
+        if (!listaFiltrada.isEmpty()) {
+            tablaHospedaje.setRowSelectionInterval(0, 0);
+            mostrarDetalleEnHub(listaFiltrada.get(0));
+        } else {
+            mostrarDetalleEnHub(null);
         }
     }
 
-    private void registrarEstadia() {
-        PacienteItem pi = (PacienteItem) cbPaciente.getSelectedItem();
-        if (pi == null || pi.mascota == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione una mascota para el hospedaje.", "Atención", JOptionPane.WARNING_MESSAGE);
+    private void mostrarDetalleEnHub(ReservaHospedaje r) {
+        reservaSeleccionada = r;
+        JPanel contenedorPadre = (JPanel) panelHubVacio.getParent();
+        if (contenedorPadre == null) return;
+
+        if (r == null) {
+            contenedorPadre.removeAll();
+            contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
+            contenedorPadre.revalidate();
+            contenedorPadre.repaint();
             return;
         }
 
-        LocalDate fechaIn = LocalDate.now();
-        LocalDate fechaOut = LocalDate.now().plusDays(2);
-        try {
-            fechaIn = LocalDate.parse(txtFechaIngreso.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            fechaOut = LocalDate.parse(txtFechaSalida.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Formato de fechas incorrecto. Use dd/MM/yyyy.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+        contenedorPadre.removeAll();
+        contenedorPadre.add(panelHubDetalle, BorderLayout.CENTER);
+
+        String inicial = !r.getNombreMascota().isEmpty() ? r.getNombreMascota().substring(0, 1).toUpperCase() : "M";
+        lblHubAvatar.setText(inicial);
+        lblHubNombreMascota.setText(r.getNombreMascota());
+        lblHubSubtituloMascota.setText(r.getEspecieRaza() + " · Código: " + r.getCodigoMascota());
+
+        lblHubBadgeSuite.setText(r.getNumeroSuite());
+        configurarBadgeSuite(lblHubBadgeSuite, r.getEstado());
+
+        lblHubNoches.setText(r.getNumeroNoches() + " noches");
+        lblHubTarifaNoche.setText(String.format("S/. %.2f", r.getCostoNoche()));
+        lblHubTotal.setText(String.format("S/. %.2f", r.getCostoTotal()));
+        lblHubBanoSalida.setText(r.isBanoSalida() ? "INCLUIDO (SI)" : "NO");
+
+        lblHubTutor.setText(r.getNombreTutor());
+        lblHubEmergencia.setText(r.getTelefonoEmergencia());
+        lblHubFechasEstadia.setText(r.getFechaCheckInFormateada() + "  hasta  " + r.getFechaCheckOutFormateada());
+
+        lblHubDieta.setText(r.getTipoAlimentacion().isEmpty() ? "Ración estándar balanceada" : r.getTipoAlimentacion());
+        lblHubPaseos.setText(r.getPlanPaseos().isEmpty() ? "Recreación supervisada" : r.getPlanPaseos());
+        txtHubMedicacion.setText(r.getMedicacionEspecial().isEmpty() ? "Ninguna medicación requerida." : r.getMedicacionEspecial());
+
+        contenedorPadre.revalidate();
+        contenedorPadre.repaint();
+    }
+
+    private void configurarBadgeSuite(JLabel lbl, String estado) {
+        if (estado.contains("En Estadía") || estado.contains("Hospedado")) {
+            lbl.setBackground(Ui.TURQUESA_SUAVE);
+            lbl.setForeground(Ui.TURQUESA_PROFUNDO);
+        } else if (estado.contains("Confirmada")) {
+            lbl.setBackground(new Color(254, 243, 199));
+            lbl.setForeground(new Color(217, 119, 6));
+        } else {
+            lbl.setBackground(new Color(220, 252, 231));
+            lbl.setForeground(new Color(22, 163, 74));
+        }
+    }
+
+    private void abrirModalNuevoCheckin() {
+        FormularioHotelHospedajeDialog dlg = new FormularioHotelHospedajeDialog(javax.swing.SwingUtilities.getWindowAncestor(this));
+        dlg.setVisible(true);
+        if (dlg.isGuardado()) {
+            recargarDatos();
+        }
+    }
+
+    private void abrirModalEditar() {
+        if (reservaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione una reserva para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int noches = (int) ChronoUnit.DAYS.between(fechaIn, fechaOut);
-        if (noches <= 0) noches = 1;
-
-        double tarifaNoche = 55.0;
-        try {
-            tarifaNoche = Double.parseDouble(txtCostoNoche.getText().trim());
-        } catch (Exception ignored) {}
-
-        double costoTotal = (noches * tarifaNoche) + (chkBanoSalida.isSelected() ? 35.0 : 0.0);
-
-        ReservaHospedaje r = new ReservaHospedaje(
+        String[] opciones = {"Editar Estadía", "Cancelar Reserva (Eliminar)", "Cerrar"};
+        int sel = JOptionPane.showOptionDialog(this,
+                "¿Qué acción desea realizar sobre la reserva de " + reservaSeleccionada.getNombreMascota() + " (" + reservaSeleccionada.getNumeroSuite() + ")?",
+                "Gestión de Reserva de Hotel",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
                 null,
-                (String) cbSuite.getSelectedItem(),
-                pi.mascota.getCodigo(),
-                pi.mascota.getNombre(),
-                pi.mascota.getEspecie() + " · " + pi.mascota.getRaza(),
-                txtTutor.getText().trim(),
-                txtEmergencia.getText().trim(),
-                txtEmergencia.getText().trim(),
-                fechaIn,
-                fechaOut,
-                noches,
-                txtDieta.getText().trim(),
-                (String) cbPaseos.getSelectedItem(),
-                chkBanoSalida.isSelected(),
-                txtMedicacion.getText().trim(),
-                tarifaNoche,
-                costoTotal,
-                "En Estadía / Hospedado"
-        );
+                opciones,
+                opciones[0]);
 
-        repo.guardarReservaHospedaje(r);
-        recargarDatos();
-
-        JOptionPane.showMessageDialog(this,
-                "¡Check-in realizado con éxito!\n\n" +
-                        "Suite asignada: " + r.getNumeroSuite() + "\n" +
-                        "Huésped: " + r.getNombreMascota() + "\n" +
-                        "Estadía: " + r.getNumeroNoches() + " noches (" + r.getFechaCheckInFormateada() + " al " + r.getFechaCheckOutFormateada() + ")\n" +
-                        "Total Estimado: S/. " + String.format("%.2f", r.getCostoTotal()),
-                "Check-in Confirmado", JOptionPane.INFORMATION_MESSAGE);
+        if (sel == 0) {
+            FormularioHotelHospedajeDialog dlg = new FormularioHotelHospedajeDialog(javax.swing.SwingUtilities.getWindowAncestor(this), reservaSeleccionada);
+            dlg.setVisible(true);
+            if (dlg.isGuardado()) {
+                recargarDatos();
+            }
+        } else if (sel == 1) {
+            int conf = JOptionPane.showConfirmDialog(this,
+                    "¿Desea cancelar y eliminar la reserva " + reservaSeleccionada.getIdReserva() + "?",
+                    "Confirmar Cancelación", JOptionPane.YES_NO_OPTION);
+            if (conf == JOptionPane.YES_OPTION) {
+                repo.eliminarReservaHospedaje(reservaSeleccionada.getIdReserva());
+                recargarDatos();
+            }
+        }
     }
 
     private void realizarCheckout() {
-        int fila = tablaHospedaje.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un huésped de la tabla para registrar su Check-out.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        if (reservaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un huésped para registrar Check-Out.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String idReserva = (String) modeloHospedaje.getValueAt(fila, 0);
-        Optional<ReservaHospedaje> opt = repo.getReservasHospedaje().stream().filter(r -> r.getIdReserva().equalsIgnoreCase(idReserva)).findFirst();
-        if (!opt.isPresent()) return;
-
-        ReservaHospedaje r = opt.get();
-        if ("Finalizada / Check-out".equalsIgnoreCase(r.getEstado())) {
+        if ("Finalizada / Check-out".equalsIgnoreCase(reservaSeleccionada.getEstado())) {
             JOptionPane.showMessageDialog(this, "Esta reserva ya fue finalizada anteriormente.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         int conf = JOptionPane.showConfirmDialog(this,
-                "¿Desea confirmar el Check-out de " + r.getNombreMascota() + "?\n\n" +
-                        "Suite: " + r.getNumeroSuite() + "\n" +
-                        "Tutor: " + r.getNombreTutor() + "\n" +
-                        "Total a liquidar: S/. " + String.format("%.2f", r.getCostoTotal()) + "\n" +
-                        (r.isBanoSalida() ? "✓ Baño de salida completado e incluido" : "Sin baño de salida"),
-                "Confirmar Check-out", JOptionPane.YES_NO_OPTION);
+                "¿Desea confirmar el Check-out de " + reservaSeleccionada.getNombreMascota() + "?\n\n" +
+                "Suite: " + reservaSeleccionada.getNumeroSuite() + "\n" +
+                "Tutor: " + reservaSeleccionada.getNombreTutor() + "\n" +
+                "Total liquidación: S/. " + String.format("%.2f", reservaSeleccionada.getCostoTotal()) + "\n" +
+                (reservaSeleccionada.isBanoSalida() ? "[OK] Baño de salida completado e incluido" : "Sin baño de salida"),
+                "Confirmar Check-Out", JOptionPane.YES_NO_OPTION);
 
         if (conf == JOptionPane.YES_OPTION) {
-            repo.actualizarEstadoHospedaje(r.getIdReserva(), "Finalizada / Check-out");
+            repo.actualizarEstadoHospedaje(reservaSeleccionada.getIdReserva(), "Finalizada / Check-out");
             recargarDatos();
-            JOptionPane.showMessageDialog(this, "Check-out completado. La suite " + r.getNumeroSuite() + " ahora está disponible para desinfección y nuevos ingresos.", "Check-out Exitoso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Check-out completado con éxito.\nLa " + reservaSeleccionada.getNumeroSuite() + " ahora está disponible para desinfección y nuevos ingresos.",
+                    "Check-Out Exitoso", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    private void enviarReporteWhatsapp() {
-        int fila = tablaHospedaje.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un huésped para generar el reporte de bienestar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+    private void mostrarContratoHospedaje() {
+        if (reservaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione una reserva para visualizar el contrato.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String idReserva = (String) modeloHospedaje.getValueAt(fila, 0);
-        Optional<ReservaHospedaje> opt = repo.getReservasHospedaje().stream().filter(r -> r.getIdReserva().equalsIgnoreCase(idReserva)).findFirst();
-        if (!opt.isPresent()) return;
+        String contrato = "CONTRATO DE PRESTACIÓN DE SERVICIOS DE HOSPEDAJE Y CUIDADO INTEGRAL\n" +
+                "CLÍNICA VETERINARIA & HOTEL HAPPY PETS S.A.C.\n" +
+                "=========================================================================\n\n" +
+                "CÓDIGO DE RESERVA: " + reservaSeleccionada.getIdReserva() + "\n" +
+                "FECHA DE INGRESO : " + reservaSeleccionada.getFechaCheckInFormateada() + "  |  FECHA DE SALIDA: " + reservaSeleccionada.getFechaCheckOutFormateada() + "\n" +
+                "SUITE ASIGNADA   : " + reservaSeleccionada.getNumeroSuite() + "\n" +
+                "HUÉSPED          : " + reservaSeleccionada.getNombreMascota() + " (" + reservaSeleccionada.getEspecieRaza() + ")\n" +
+                "TUTOR TITULAR    : " + reservaSeleccionada.getNombreTutor() + "  |  TEL. CONTACTO: " + reservaSeleccionada.getTelefonoTutor() + "\n" +
+                "TEL. EMERGENCIA  : " + reservaSeleccionada.getTelefonoEmergencia() + "\n\n" +
+                "CLÁUSULAS GENERALES:\n" +
+                "1. ALIMENTACIÓN Y SALUD: Se suministrará la dieta (" + reservaSeleccionada.getTipoAlimentacion() + ").\n" +
+                "2. PASEOS: Se ejecutará el cronograma (" + reservaSeleccionada.getPlanPaseos() + ") en áreas cercadas y seguras.\n" +
+                "3. AUTORIZACIÓN MÉDICA: En caso de urgencia, el tutor autoriza la atención médica veterinaria inmediata.\n" +
+                "4. BAÑO DE SALIDA: " + (reservaSeleccionada.isBanoSalida() ? "INCLUIDO Y PROGRAMADO PREVIO A ENTREGA." : "NO SOLICITADO POR EL TUTOR.") + "\n" +
+                "5. TARIFA: S/. " + String.format("%.2f", reservaSeleccionada.getCostoNoche()) + " por noche. TOTAL ACORDADO: S/. " + String.format("%.2f", reservaSeleccionada.getCostoTotal()) + ".\n\n" +
+                "__________________________             __________________________\n" +
+                "     Firma del Tutor                        Administración Happy Pets\n" +
+                "  DNI: _________________                     Hotel Canino & Felino\n";
 
-        ReservaHospedaje r = opt.get();
-        String reporte = "🐾 *HAPPY PETS HOTEL & RESORT* 🏨\n" +
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Contrato de Hospedaje - " + reservaSeleccionada.getIdReserva(),
+                "CONTRATO DE PRESTACIÓN DE SERVICIOS DE HOSPEDAJE",
+                contrato,
+                "Contrato_Hospedaje_" + reservaSeleccionada.getIdReserva()
+        );
+    }
+
+    private void enviarReporteWhatsapp() {
+        if (reservaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un huésped para generar reporte de bienestar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String reporte = "HAPPY PETS HOTEL & RESORT\n" +
                 "====================================\n" +
-                "¡Hola *" + r.getNombreTutor() + "*! Te enviamos el reporte diario de tu consentido:\n\n" +
-                "🐶 *Huésped:* " + r.getNombreMascota() + " (" + r.getEspecieRaza() + ")\n" +
-                "🏡 *Suite:* " + r.getNumeroSuite() + "\n" +
-                "🥗 *Alimentación:* " + r.getTipoAlimentacion() + " (Ración completa consumida ✓)\n" +
-                "🎾 *Recreación:* " + r.getPlanPaseos() + " (Comportamiento sociable y alegre)\n" +
-                "💊 *Atención Médica:* " + r.getMedicacionEspecial() + "\n" +
-                "📅 *Estadía:* " + r.getFechaCheckInFormateada() + " al " + r.getFechaCheckOutFormateada() + "\n\n" +
-                "✨ *Estado:* Se encuentra tranquilo, muy bien adaptado y recibiendo mucho cariño de nuestro equipo.\n" +
-                "📸 *Fotos y videos:* Enviados adjuntos al chat.\n" +
+                "¡Hola " + reservaSeleccionada.getNombreTutor() + "! Le enviamos el reporte diario de su consentido:\n\n" +
+                "Huésped: " + reservaSeleccionada.getNombreMascota() + " (" + reservaSeleccionada.getEspecieRaza() + ")\n" +
+                "Suite: " + reservaSeleccionada.getNumeroSuite() + "\n" +
+                "Alimentación: " + reservaSeleccionada.getTipoAlimentacion() + " (Ración completa consumida)\n" +
+                "Recreación: " + reservaSeleccionada.getPlanPaseos() + " (Comportamiento sociable y alegre)\n" +
+                "Atención Médica: " + reservaSeleccionada.getMedicacionEspecial() + "\n" +
+                "Estadía: " + reservaSeleccionada.getFechaCheckInFormateada() + " al " + reservaSeleccionada.getFechaCheckOutFormateada() + "\n\n" +
+                "Estado: Se encuentra tranquilo, muy bien adaptado y recibiendo mucho cariño de nuestro equipo.\n" +
                 "====================================\n" +
                 "Clínica & Hotel Happy Pets · Vigilancia y Cuidados 24/7";
 
@@ -799,66 +854,120 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         JOptionPane.showMessageDialog(this, sp, "Reporte Diario de Estadía para WhatsApp", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void mostrarContratoHospedaje() {
-        int fila = tablaHospedaje.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un huésped para visualizar su Contrato de Hospedaje.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String idReserva = (String) modeloHospedaje.getValueAt(fila, 0);
-        Optional<ReservaHospedaje> opt = repo.getReservasHospedaje().stream().filter(r -> r.getIdReserva().equalsIgnoreCase(idReserva)).findFirst();
-        if (!opt.isPresent()) return;
-
-        ReservaHospedaje r = opt.get();
-        String contrato = "CONTRATO DE PRESTACIÓN DE SERVICIOS DE HOSPEDAJE Y CUIDADO INTEGRAL\n" +
-                "CLÍNICA VETERINARIA & HOTEL HAPPY PETS S.A.C.\n" +
-                "=========================================================================\n\n" +
-                "CÓDIGO DE RESERVA: " + r.getIdReserva() + "\n" +
-                "FECHA DE INGRESO : " + r.getFechaCheckInFormateada() + "  |  FECHA DE SALIDA PREVISTA: " + r.getFechaCheckOutFormateada() + "\n" +
-                "SUITE ASIGNADA   : " + r.getNumeroSuite() + "\n" +
-                "HUÉSPED          : " + r.getNombreMascota() + " (" + r.getEspecieRaza() + ")\n" +
-                "TUTOR TITULAR    : " + r.getNombreTutor() + "  |  TEL. CONTACTO: " + r.getTelefonoTutor() + "\n" +
-                "TEL. EMERGENCIA  : " + r.getTelefonoEmergencia() + "\n\n" +
-                "CLÁUSULAS GENERALES:\n" +
-                "1. ALIMENTACIÓN Y SALUD: El establecimiento se compromete a suministrar la dieta indicada (" + r.getTipoAlimentacion() + ").\n" +
-                "2. PASEOS: Se ejecutará el cronograma (" + r.getPlanPaseos() + ") en áreas cercadas y seguras.\n" +
-                "3. AUTORIZACIÓN MÉDICA: En caso de urgencia o descompensación, el tutor autoriza al equipo de guardia veterinaria a prestar atención médica inmediata.\n" +
-                "4. BAÑO DE SALIDA: " + (r.isBanoSalida() ? "INCLUIDO Y PROGRAMADO PREVIO A ENTREGA." : "NO SOLICITADO POR EL TUTOR.") + "\n" +
-                "5. TARIFA: S/. " + String.format("%.2f", r.getCostoNoche()) + " por noche. COSTO TOTAL ACORDADO: S/. " + String.format("%.2f", r.getCostoTotal()) + ".\n\n" +
-                "__________________________             __________________________\n" +
-                "     Firma del Tutor                        Administración Happy Pets\n" +
-                "  DNI: _________________                     Hotel Canino & Felino\n";
-
-        Ui.mostrarVisorReporte(
-                javax.swing.SwingUtilities.getWindowAncestor(this),
-                "Contrato de Hospedaje - " + r.getIdReserva(),
-                "CONTRATO DE PRESTACIÓN DE SERVICIOS DE HOSPEDAJE",
-                contrato,
-                "Contrato_Hospedaje_" + r.getIdReserva()
-        );
+    private JButton crearBotonAccion(String texto, boolean primario) {
+        return crearBotonAccion(texto, null, primario);
     }
 
-    private void limpiarFormulario() {
-        txtDieta.setText("Ración balanceada 2v/día");
-        txtMedicacion.setText("Ninguna");
-        chkBanoSalida.setSelected(false);
-        txtFechaIngreso.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        txtFechaSalida.setText(LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    private JButton crearBotonAccion(String texto, Icon icono, boolean primario) {
+        JButton btn = new JButton(texto) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
+                if (esPrimario) {
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                if (!esPrimario) {
+                    g2.setColor(Ui.BORDE_SUAVE);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                }
+                super.paintComponent(g);
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                return new Dimension(d.width + 12, 30);
+            }
+        };
+        if (icono != null) {
+            btn.setIcon(icono);
+            btn.setIconTextGap(6);
+        }
+        btn.putClientProperty("primario", primario);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
+        return btn;
     }
 
-    // Helper para Combo de Paciente
-    private static class PacienteItem {
-        final Mascota mascota;
-
-        PacienteItem(Mascota m) {
-            this.mascota = m;
-        }
-
+    private static class PacienteMonogramaRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
         @Override
-        public String toString() {
-            if (mascota == null) return "Seleccione...";
-            return mascota.getCodigo() + " - " + mascota.getNombre() + " (" + mascota.getEspecie() + " · " + mascota.getRaza() + ")";
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+            String text = value != null ? value.toString() : "";
+            String inicial = !text.isEmpty() ? text.substring(0, 1).toUpperCase() : "M";
+
+            JLabel avatar = new JLabel(inicial, SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    int s = Math.min(getWidth(), getHeight()) - 2;
+                    g2.setColor(Ui.TURQUESA_SUAVE);
+                    g2.fillOval(1, 1, s, s);
+                    g2.setColor(Ui.TURQUESA);
+                    g2.drawOval(1, 1, s, s);
+                    super.paintComponent(g);
+                    g2.dispose();
+                }
+            };
+            avatar.setPreferredSize(new Dimension(28, 28));
+            avatar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            avatar.setForeground(Ui.TURQUESA);
+
+            JLabel lblNombre = new JLabel(text);
+            lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+            p.add(avatar);
+            p.add(lblNombre);
+            return p;
         }
+    }
+
+    private static class BadgeEstadoHospedajeRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            lbl.setHorizontalAlignment(SwingConstants.CENTER);
+            lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            String st = String.valueOf(value);
+            if (!isSelected) {
+                if (st.contains("En Estadía") || st.contains("Hospedado")) {
+                    lbl.setForeground(Ui.TURQUESA_PROFUNDO);
+                } else if (st.contains("Confirmada")) {
+                    lbl.setForeground(new Color(217, 119, 6));
+                } else {
+                    lbl.setForeground(new Color(22, 163, 74));
+                }
+            }
+            return lbl;
+        }
+    }
+
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }
