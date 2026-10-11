@@ -7,1117 +7,887 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.awt.geom.Ellipse2D;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
-import happypets.model.Cliente;
 import happypets.model.ItemVentaPOS;
-import happypets.model.Mascota;
-import happypets.model.ProductoFarmacia;
 import happypets.model.VentaPOS;
 import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 6.1: Punto de Venta (POS).
- * Basado estrictamente en el wireframe oficial PUNTO DE VENTA POS.pdf y mejorado:
- * - Catálogo visual de productos clínicos, biológicos, alimentos y servicios veterinarios.
- * - Filtros rápidos: Todas, Consultas, Vacunas, Alimentos, Otros, Farmacia.
- * - Carrito en vivo "Venta actual" con cálculo inmediato de Subtotal, Descuento %, IGV y Total.
- * - Métodos de pago: Efectivo (con cálculo de vuelto), Yape/Plin, Tarjeta Débito/Crédito y Transferencia.
- * - Vinculación directa con Clientes y Pacientes de la Veterinaria.
- * - Botones de acción oficial: [Cotización] e [Imprimir / Procesar Venta] con emisión de ticket.
+ * Submódulo 6.1: Punto de Venta (POS) y Comprobantes Electrónicos.
+ * Arquitectura Master-Detail (58% / 42%) - Opción A Recomendada:
+ * - Master Table: Registro maestro de ventas del día, comprobantes electrónicos, métodos de pago y estados.
+ * - Live Sale Hub: Telemetría 2x2, desglose de ítems, datos fiscales SUNAT y acciones 1-click.
  */
 public class VistaPuntoVentaPOSPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_PRIMARIO = Ui.TURQUESA; // Estandarizado al Turquesa Clínico Original
-    private static final Color COLOR_PRIMARIO_OSCURO = Ui.TURQUESA_OSCURO;
-    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
-    private static final Color COLOR_FONDO_CARD = Color.WHITE;
-
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
-    // Catálogo en memoria (productos + servicios veterinarios)
-    private final List<CatalogoItem> catalogoCompleto = new ArrayList<>();
-    private final List<CatalogoItem> catalogoFiltrado = new ArrayList<>();
+    // KPIs
+    private JLabel lblKpiRecaudadoHoy;
+    private JLabel lblKpiComprobantes;
+    private JLabel lblKpiTicketPromedio;
+    private JLabel lblKpiDigitales;
 
-    // Estado de la venta actual
-    private final List<ItemVentaPOS> itemsVenta = new ArrayList<>();
-    private String categoriaFiltroActual = "Todas";
-
-    // Componentes del Catálogo (Izquierda)
+    // Tabla Maestra (Izquierda - 58%)
+    private JTable tablaVentas;
+    private DefaultTableModel modeloVentas;
     private JTextField txtBuscar;
-    private JPanel panelGridProductos;
-    private JLabel lblContadorItems;
+    private String filtroTipoSeleccionado = "TODAS";
+    private final List<VentaPOS> listaVentasFiltrada = new ArrayList<>();
 
-    // Componentes del Carrito (Derecha)
-    private JTable tablaVenta;
-    private DefaultTableModel modeloVenta;
-    private JLabel lblSubtotal;
-    private JSpinner spinDescuento;
-    private JLabel lblMontoDescuento;
-    private JLabel lblTotal;
-    private JTextField txtCliente;
-    private JComboBox<String> cbTipoComprobante;
-    private JComboBox<String> cbMascota;
-    private String metodoPagoSeleccionado = "Efectivo";
-    private JButton btnPagoEfectivo;
-    private JButton btnPagoYape;
-    private JButton btnPagoTarjeta;
-    private JButton btnPagoTransferencia;
-    private JTextField txtMontoRecibido;
-    private JLabel lblVuelto;
-    private JPanel panelEfectivoExtra;
+    // Live Sale Hub (Derecha - 42%)
+    private JPanel panelHubContenido;
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
+
+    private JLabel lblHubAvatar;
+    private JLabel lblHubTitulo;
+    private JLabel lblHubSubtitulo;
+    private JLabel lblHubChipEstado;
+
+    // Telemetría 2x2
+    private JLabel lblHubTotalCobrado;
+    private JLabel lblHubSubtotalNeto;
+    private JLabel lblHubIgvFiscal;
+    private JLabel lblHubDescuento;
+
+    // Secciones del Hub
+    private JTextArea txtHubItemsDetalle;
+    private JLabel lblHubClienteDni;
+    private JLabel lblHubMascota;
+    private JLabel lblHubMetodoPago;
+    private JLabel lblHubCajeroFecha;
+
+    private VentaPOS ventaSeleccionada;
 
     public VistaPuntoVentaPOSPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        cargarCatalogoMaestro();
+        JPanel panelContenido = new JPanel();
+        panelContenido.setOpaque(false);
+        panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
+        panelContenido.setBorder(new EmptyBorder(12, 18, 14, 18));
 
-        JPanel contenedor = new JPanel(new BorderLayout(14, 0));
-        contenedor.setOpaque(false);
-        contenedor.setBorder(new EmptyBorder(12, 16, 14, 16));
+        // 1. Cabecera Principal
+        panelContenido.add(crearCabeceraVista());
+        panelContenido.add(Box.createVerticalStrut(10));
 
-        // Cabecera superior institucional del POS
-        contenedor.add(crearCabeceraPOS(), BorderLayout.NORTH);
+        // 2. Fila de KPIs
+        panelContenido.add(crearFilaKpis());
+        panelContenido.add(Box.createVerticalStrut(12));
 
-        // Panel dividido: Catálogo a la izquierda, Carrito a la derecha
-        JPanel split = new JPanel(new GridLayout(1, 2, 14, 0));
-        split.setOpaque(false);
+        // 3. Contenedor Master-Detail (58% / 42%)
+        panelContenido.add(crearSplitMasterDetail());
 
-        split.add(crearColumnaCatalogo());
-        split.add(crearColumnaVentaActual());
+        add(panelContenido, BorderLayout.CENTER);
 
-        contenedor.add(split, BorderLayout.CENTER);
-        add(contenedor, BorderLayout.CENTER);
-
-        filtrarCatalogo();
-        recalcularVenta();
+        recargarDatos();
     }
 
-    private void cargarCatalogoMaestro() {
-        catalogoCompleto.clear();
-
-        // 1. Servicios Clínicos y Preventivos
-        catalogoCompleto.add(new CatalogoItem("SERV-001", "Consulta Médica General", "Consultas", 50.0, 999, true));
-        catalogoCompleto.add(new CatalogoItem("SERV-002", "Consulta Especializada / Derma", "Consultas", 80.0, 999, true));
-        catalogoCompleto.add(new CatalogoItem("SERV-003", "Vacuna Antirrábica + Cartilla", "Vacunas", 45.0, 50, false));
-        catalogoCompleto.add(new CatalogoItem("SERV-004", "Vacuna Séxtuple Canina Nobivac", "Vacunas", 60.0, 30, false));
-        catalogoCompleto.add(new CatalogoItem("SERV-005", "Triple Felina Nobivac Tricat", "Vacunas", 55.0, 25, false));
-        catalogoCompleto.add(new CatalogoItem("SERV-006", "Baño y Corte de Raza (Grooming)", "Otros", 45.0, 999, true));
-        catalogoCompleto.add(new CatalogoItem("SERV-007", "Baño Medicado Dermatológico", "Otros", 55.0, 999, true));
-        catalogoCompleto.add(new CatalogoItem("SERV-008", "Profilaxis Dental por Ultrasonido", "Consultas", 120.0, 999, true));
-        catalogoCompleto.add(new CatalogoItem("SERV-009", "Hemograma Completo Automatizado", "Consultas", 65.0, 999, true));
-        catalogoCompleto.add(new CatalogoItem("SERV-010", "Día de Guardería / Hotel Canino", "Otros", 40.0, 999, true));
-
-        // 2. Alimentos balanceados clínicos
-        catalogoCompleto.add(new CatalogoItem("ALIM-001", "Royal Canin Gastrointestinal 2kg", "Alimentos", 98.0, 12, false));
-        catalogoCompleto.add(new CatalogoItem("ALIM-002", "Hills Science Diet Adult Canine 3kg", "Alimentos", 125.0, 8, false));
-        catalogoCompleto.add(new CatalogoItem("ALIM-003", "Pro Plan Urinary Feline 1.5kg", "Alimentos", 85.0, 15, false));
-        catalogoCompleto.add(new CatalogoItem("ALIM-004", "Lata Recovery Royal Canin 195g", "Alimentos", 24.0, 20, false));
-
-        // 3. Medicamentos y Antiparasitarios de Farmacia
-        for (ProductoFarmacia p : repo.getProductosFarmacia()) {
-            String cat = p.getCategoria().contains("Alimento") ? "Alimentos" :
-                         p.getCategoria().contains("Vacuna") ? "Vacunas" : "Otros";
-            catalogoCompleto.add(new CatalogoItem(p.getCodigo(), p.getNombre(), cat, p.getPrecioVenta(), p.getStockActual(), false));
-        }
-    }
-
-    private JPanel crearCabeceraPOS() {
+    private JPanel crearCabeceraVista() {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setBorder(new EmptyBorder(0, 0, 10, 0));
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel izq = new JPanel();
         izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel lblBadge = new JLabel(Iconos.crearIconoPOS(22, COLOR_PRIMARIO));
-        izq.add(lblBadge);
+        JLabel titulo = new JLabel("Punto de Venta (POS) & Comprobantes Electrónicos");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JPanel titulos = new JPanel();
-        titulos.setOpaque(false);
-        titulos.setLayout(new BoxLayout(titulos, BoxLayout.Y_AXIS));
+        JLabel subtitulo = new JLabel("Módulo 6.1 · Emisión de comprobantes, cobros en caja, servicios y conciliación retail");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblTit = new JLabel("Punto de Venta (POS) - Caja Central Happy Pets");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblSub = new JLabel("Facturación rápida, venta de fármacos, servicios clínicos y control de cobros");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-
-        titulos.add(lblTit);
-        titulos.add(lblSub);
-        izq.add(titulos);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
         cab.add(izq, BorderLayout.WEST);
 
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
-        JButton btnHistorial = Ui.boton("Ver Ventas del Día", false);
-        btnHistorial.setIcon(Iconos.crearIconoFactura(14, new Color(71, 85, 105)));
-        btnHistorial.addActionListener(e -> mostrarHistorialVentas());
-        der.add(btnHistorial);
+        JLabel chipCaja = new JLabel("  Caja Central · En Línea  ") {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(240, 253, 250));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.setColor(Ui.TURQUESA_MEDIO);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        chipCaja.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        chipCaja.setForeground(Ui.TURQUESA_PROFUNDO);
+        chipCaja.setBorder(new EmptyBorder(4, 10, 4, 10));
+        der.add(chipCaja);
+
+        JButton btnNuevaVenta = Ui.boton("+ Nueva Venta POS / Cobro", true);
+        btnNuevaVenta.setIcon(Iconos.crearIconoPOS(14, Color.WHITE));
+        btnNuevaVenta.addActionListener(e -> abrirDialogoNuevaVenta());
+        der.add(btnNuevaVenta);
+
+        JButton btnActualizar = Ui.boton("Actualizar", false);
+        btnActualizar.addActionListener(e -> recargarDatos());
+        der.add(btnActualizar);
 
         cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
-    /**
-     * Columna izquierda: Buscador, filtros de categorías y rejilla de productos.
-     */
-    private JPanel crearColumnaCatalogo() {
-        JPanel col = new JPanel(new BorderLayout(0, 8));
-        col.setOpaque(false);
+    private JPanel crearFilaKpis() {
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        // Barra de búsqueda con icono
-        JPanel panelSearch = new JPanel(new BorderLayout(8, 0));
-        panelSearch.setBackground(Color.WHITE);
-        panelSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(6, 10, 6, 10)
-        ));
+        lblKpiRecaudadoHoy = new JLabel("S/. 0.00");
+        lblKpiComprobantes = new JLabel("0");
+        lblKpiTicketPromedio = new JLabel("S/. 0.00");
+        lblKpiDigitales = new JLabel("0%");
 
-        JLabel icoBuscar = new JLabel(Iconos.crearIconoBuscar(16, COLOR_TEXTO_MUTED));
-        panelSearch.add(icoBuscar, BorderLayout.WEST);
+        fila.add(crearCardKpi("Recaudación Hoy (PVP)", lblKpiRecaudadoHoy, "Ingresos netos en caja", Iconos.crearIconoMonedas(22, Ui.TURQUESA)));
+        fila.add(crearCardKpi("Comprobantes Emitidos", lblKpiComprobantes, "Boletas, facturas y tickets", Iconos.crearIconoFactura(22, Ui.TURQUESA_OSCURO)));
+        fila.add(crearCardKpi("Ticket Promedio", lblKpiTicketPromedio, "Valor medio por operación", Iconos.crearIconoGraficoBarras(22, Ui.COLOR_EXITO)));
+        fila.add(crearCardKpi("Ventas Digitales", lblKpiDigitales, "Yape / Tarjeta / Transferencia", Iconos.crearIconoPOS(22, new Color(139, 92, 246))));
 
-        txtBuscar = new JTextField();
-        txtBuscar.setBorder(null);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtBuscar.setToolTipText("Buscar producto o servicio por código o nombre...");
-        txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
-                filtrarCatalogo();
-            }
-        });
-        panelSearch.add(txtBuscar, BorderLayout.CENTER);
-
-        JButton btnBorrar = new JButton("✕");
-        btnBorrar.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnBorrar.setForeground(COLOR_TEXTO_MUTED);
-        btnBorrar.setBorder(null);
-        btnBorrar.setContentAreaFilled(false);
-        btnBorrar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnBorrar.addActionListener(e -> {
-            txtBuscar.setText("");
-            filtrarCatalogo();
-        });
-        panelSearch.add(btnBorrar, BorderLayout.EAST);
-
-        // Barra de Filtros Pills (Todas, Consultas, Vacunas, Alimentos, Otros)
-        JPanel panelFiltros = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        panelFiltros.setOpaque(false);
-
-        String[] categorias = {"Todas", "Consultas", "Vacunas", "Alimentos", "Otros"};
-        ButtonGroup bg = new ButtonGroup();
-
-        for (String cat : categorias) {
-            JButton btnCat = crearPillCategoria(cat);
-            bg.add(btnCat);
-            panelFiltros.add(btnCat);
-        }
-
-        JPanel topCat = new JPanel(new BorderLayout(0, 6));
-        topCat.setOpaque(false);
-        topCat.add(panelSearch, BorderLayout.NORTH);
-        topCat.add(panelFiltros, BorderLayout.SOUTH);
-
-        col.add(topCat, BorderLayout.NORTH);
-
-        // Rejilla de productos interactiva dentro de scroll
-        panelGridProductos = new JPanel(new GridLayout(0, 2, 10, 10));
-        panelGridProductos.setOpaque(false);
-
-        JScrollPane scrollGrid = new JScrollPane(panelGridProductos);
-        scrollGrid.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        scrollGrid.getViewport().setBackground(new Color(248, 250, 252));
-        scrollGrid.getVerticalScrollBar().setUnitIncrement(16);
-
-        col.add(scrollGrid, BorderLayout.CENTER);
-
-        // Barra de pie con contador
-        JPanel pieCat = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
-        pieCat.setOpaque(false);
-        lblContadorItems = new JLabel("Mostrando items...");
-        lblContadorItems.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblContadorItems.setForeground(COLOR_TEXTO_MUTED);
-        pieCat.add(lblContadorItems);
-        col.add(pieCat, BorderLayout.SOUTH);
-
-        return col;
+        return fila;
     }
 
-    private JButton crearPillCategoria(String nombre) {
-        JButton btn = new JButton(nombre) {
+    private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                boolean activo = nombre.equalsIgnoreCase(categoriaFiltroActual);
-                if (activo) {
-                    g2.setColor(COLOR_PRIMARIO);
-                } else if (getModel().isRollover()) {
-                    g2.setColor(new Color(254, 215, 170));
-                } else {
-                    g2.setColor(Color.WHITE);
-                }
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
-                g2.setColor(activo ? COLOR_PRIMARIO_OSCURO : COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setForeground(nombre.equalsIgnoreCase(categoriaFiltroActual) ? Color.WHITE : COLOR_TEXTO_TITULO);
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-
-        btn.addActionListener(e -> {
-            categoriaFiltroActual = nombre;
-            // Refrescar estilo de todos los botones hermanos
-            Component[] comps = btn.getParent().getComponents();
-            for (Component c : comps) {
-                if (c instanceof JButton) {
-                    JButton b = (JButton) c;
-                    b.setForeground(b.getText().equalsIgnoreCase(categoriaFiltroActual) ? Color.WHITE : COLOR_TEXTO_TITULO);
-                    b.repaint();
-                }
-            }
-            filtrarCatalogo();
-        });
-
-        return btn;
-    }
-
-    private void filtrarCatalogo() {
-        catalogoFiltrado.clear();
-        String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
-
-        for (CatalogoItem it : catalogoCompleto) {
-            boolean coincideCat = "Todas".equalsIgnoreCase(categoriaFiltroActual) ||
-                                  it.categoria.equalsIgnoreCase(categoriaFiltroActual);
-            boolean coincideTexto = query.isEmpty() ||
-                                    it.nombre.toLowerCase().contains(query) ||
-                                    it.codigo.toLowerCase().contains(query);
-
-            if (coincideCat && coincideTexto) {
-                catalogoFiltrado.add(it);
-            }
-        }
-
-        renderizarGridProductos();
-    }
-
-    private void renderizarGridProductos() {
-        panelGridProductos.removeAll();
-
-        if (catalogoFiltrado.isEmpty()) {
-            JPanel vacio = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 40));
-            vacio.setOpaque(false);
-            JLabel lblVacio = new JLabel("No se encontraron productos o servicios.");
-            lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 13));
-            lblVacio.setForeground(COLOR_TEXTO_MUTED);
-            vacio.add(lblVacio);
-            panelGridProductos.add(vacio);
-        } else {
-            for (CatalogoItem item : catalogoFiltrado) {
-                panelGridProductos.add(crearCardProducto(item));
-            }
-        }
-
-        if (lblContadorItems != null) {
-            lblContadorItems.setText("Mostrando " + catalogoFiltrado.size() + " de " + catalogoCompleto.size() + " ítems disponibles");
-        }
-
-        panelGridProductos.revalidate();
-        panelGridProductos.repaint();
-    }
-
-    private JPanel crearCardProducto(CatalogoItem item) {
-        JPanel card = new JPanel(new BorderLayout(8, 6)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(COLOR_FONDO_CARD);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                g2.dispose();
-                super.paintComponent(g);
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(10, 12, 10, 12));
-        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
-        // Top: Icono de categoría y badge de stock/servicio
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
 
-        Icon ico = "Consultas".equalsIgnoreCase(item.categoria) ? Iconos.crearIconoEstetoscopio(16, new Color(14, 165, 233)) :
-                   "Vacunas".equalsIgnoreCase(item.categoria) ? Iconos.crearIconoJeringa(16, new Color(16, 185, 129)) :
-                   "Alimentos".equalsIgnoreCase(item.categoria) ? Iconos.crearIconoHuella(16, new Color(245, 158, 11)) :
-                   Iconos.crearIconoPildora(16, COLOR_PRIMARIO);
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblIco = new JLabel(ico);
-        top.add(lblIco, BorderLayout.WEST);
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel badgeStock = new JLabel(item.esServicio ? "Servicio Clínico" : "Stock: " + item.stock);
-        badgeStock.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        badgeStock.setForeground(item.esServicio ? new Color(14, 165, 233) :
-                                item.stock <= 5 ? new Color(220, 38, 38) : new Color(22, 101, 52));
-        top.add(badgeStock, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
 
-        // Centro: Nombre del producto / servicio
-        JLabel lblNombre = new JLabel("<html><body style='width: 130px; font-weight:600; color:#1e293b; line-height:1.2;'>" +
-                item.nombre + "</body></html>");
-        lblNombre.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        card.add(lblNombre, BorderLayout.CENTER);
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblSub);
 
-        // Bottom: Precio y Botón Agregar
-        JPanel bot = new JPanel(new BorderLayout());
-        bot.setOpaque(false);
-
-        JLabel lblPrecio = new JLabel("S/ " + String.format("%.2f", item.precio));
-        lblPrecio.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblPrecio.setForeground(COLOR_PRIMARIO);
-        bot.add(lblPrecio, BorderLayout.WEST);
-
-        JButton btnAdd = new JButton("+ Agregar");
-        btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnAdd.setForeground(Color.WHITE);
-        btnAdd.setBackground(COLOR_PRIMARIO);
-        btnAdd.setFocusPainted(false);
-        btnAdd.setBorder(new EmptyBorder(4, 8, 4, 8));
-        btnAdd.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnAdd.addActionListener(e -> agregarItemAVenta(item));
-        bot.add(btnAdd, BorderLayout.EAST);
-
-        card.add(bot, BorderLayout.SOUTH);
-
-        // Clic en toda la tarjeta también agrega
-        card.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                agregarItemAVenta(item);
-            }
-        });
+        card.add(texto, BorderLayout.CENTER);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            card.add(lblIco, BorderLayout.EAST);
+        }
 
         return card;
     }
 
-    /**
-     * Columna derecha: Venta actual (Carrito), Totales, Métodos de Pago y Acciones.
-     */
-    private JPanel crearColumnaVentaActual() {
-        JPanel col = new JPanel(new BorderLayout(0, 10));
-        col.setOpaque(false);
+    private JPanel crearSplitMasterDetail() {
+        JPanel split = new JPanel(new GridBagLayout());
+        split.setOpaque(false);
 
-        // Cabecera "Venta actual" con botón Limpiar
-        JPanel cabVenta = new JPanel(new BorderLayout());
-        cabVenta.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
-        JPanel titCart = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        titCart.setOpaque(false);
-        JLabel icoCart = new JLabel(Iconos.crearIconoFactura(16, COLOR_PRIMARIO));
-        JLabel lblTitVenta = new JLabel("Venta actual");
-        lblTitVenta.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTitVenta.setForeground(COLOR_TEXTO_TITULO);
-        titCart.add(icoCart);
-        titCart.add(lblTitVenta);
-        cabVenta.add(titCart, BorderLayout.WEST);
+        // 58% Tabla Maestra Izquierda
+        gbc.gridx = 0;
+        gbc.weightx = 0.58;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 12);
+        split.add(crearPanelMasterTable(), gbc);
 
-        JButton btnLimpiar = Ui.boton("Limpiar Carrito", false);
-        btnLimpiar.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnLimpiar.setForeground(new Color(220, 38, 38));
-        btnLimpiar.addActionListener(e -> limpiarVenta());
-        cabVenta.add(btnLimpiar, BorderLayout.EAST);
+        // 42% Live Hub Derecha
+        gbc.gridx = 1;
+        gbc.weightx = 0.42;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 0);
+        split.add(crearPanelLiveHub(), gbc);
 
-        // Bloque superior: Cliente, Mascota y Tipo de Comprobante
-        JPanel panelCliente = new JPanel(new GridLayout(2, 2, 8, 6));
-        panelCliente.setOpaque(false);
-        panelCliente.setBorder(new EmptyBorder(4, 0, 6, 0));
+        return split;
+    }
 
-        JPanel pCli = new JPanel(new BorderLayout(4, 0));
-        pCli.setOpaque(false);
-        JLabel lblLCli = new JLabel("Cliente: ");
-        lblLCli.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        pCli.add(lblLCli, BorderLayout.WEST);
-        txtCliente = new JTextField("Carlos Eduardo Morales Soto");
-        txtCliente.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        pCli.add(txtCliente, BorderLayout.CENTER);
-        panelCliente.add(pCli);
-
-        JPanel pComp = new JPanel(new BorderLayout(4, 0));
-        pComp.setOpaque(false);
-        JLabel lblLComp = new JLabel("Comprobante: ");
-        lblLComp.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        pComp.add(lblLComp, BorderLayout.WEST);
-        cbTipoComprobante = new JComboBox<>(new String[]{"Boleta Electrónica", "Factura Electrónica", "Ticket POS"});
-        cbTipoComprobante.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        pComp.add(cbTipoComprobante, BorderLayout.CENTER);
-        panelCliente.add(pComp);
-
-        JPanel pMasc = new JPanel(new BorderLayout(4, 0));
-        pMasc.setOpaque(false);
-        JLabel lblLMasc = new JLabel("Paciente / Mascota: ");
-        lblLMasc.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        pMasc.add(lblLMasc, BorderLayout.WEST);
-        cbMascota = new JComboBox<>(new String[]{"Rocky (Golden Retriever)", "Luna (Siamés)", "Toby (Pug)", "Sin Mascota Asociada"});
-        cbMascota.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        pMasc.add(cbMascota, BorderLayout.CENTER);
-        panelCliente.add(pMasc);
-
-        JPanel pCaj = new JPanel(new BorderLayout(4, 0));
-        pCaj.setOpaque(false);
-        JLabel lblLCaj = new JLabel("Cajero / Resp.: ");
-        lblLCaj.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        pCaj.add(lblLCaj, BorderLayout.WEST);
-        JLabel lblNombreCajero = new JLabel("Joanna Corrales / Harry Arroyo");
-        lblNombreCajero.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblNombreCajero.setForeground(COLOR_TEXTO_MUTED);
-        pCaj.add(lblNombreCajero, BorderLayout.CENTER);
-        panelCliente.add(pCaj);
-
-        JPanel topContenedor = new JPanel(new BorderLayout());
-        topContenedor.setOpaque(false);
-        topContenedor.add(cabVenta, BorderLayout.NORTH);
-        topContenedor.add(panelCliente, BorderLayout.SOUTH);
-        col.add(topContenedor, BorderLayout.NORTH);
-
-        // Tabla de ítems del Carrito
-        String[] columnas = {"Producto", "Cant.", "P. unit.", "Subtotal", "Acción"};
-        modeloVenta = new DefaultTableModel(columnas, 0) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        tablaVenta = new JTable(modeloVenta);
-        Ui.formatearTabla(tablaVenta, new int[]{1, 4}, new int[]{2, 3});
-        tablaVenta.getColumnModel().getColumn(0).setPreferredWidth(160);
-        tablaVenta.getColumnModel().getColumn(1).setPreferredWidth(45);
-        tablaVenta.getColumnModel().getColumn(2).setPreferredWidth(65);
-        tablaVenta.getColumnModel().getColumn(3).setPreferredWidth(65);
-        tablaVenta.getColumnModel().getColumn(4).setPreferredWidth(55);
-
-        // Doble clic o acción para modificar cantidad o eliminar
-        tablaVenta.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                int row = tablaVenta.getSelectedRow();
-                int colIdx = tablaVenta.getSelectedColumn();
-                if (row >= 0 && colIdx == 4) {
-                    eliminarItemDeVenta(row);
-                }
-            }
-        });
-
-        JScrollPane scrollTabla = new JScrollPane(tablaVenta);
-        scrollTabla.setPreferredSize(new Dimension(0, 180));
-        scrollTabla.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        col.add(scrollTabla, BorderLayout.CENTER);
-
-        // Sección Inferior: Totales, Métodos de Pago y Botones oficiales
-        JPanel panelInferior = new JPanel();
-        panelInferior.setLayout(new BoxLayout(panelInferior, BoxLayout.Y_AXIS));
-        panelInferior.setOpaque(false);
-        panelInferior.setBorder(new EmptyBorder(8, 0, 0, 0));
-
-        // Cuadro de Resumen Numérico (Subtotal, Descuento, Total)
-        JPanel boxTotales = new JPanel(new GridLayout(3, 2, 10, 4));
-        boxTotales.setBackground(Color.WHITE);
-        boxTotales.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(8, 14, 8, 14)
-        ));
-
-        // Subtotal
-        JLabel lblSubTit = new JLabel("Subtotal:");
-        lblSubTit.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSubtotal = new JLabel("S/ 0.00", SwingConstants.RIGHT);
-        lblSubtotal.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        boxTotales.add(lblSubTit);
-        boxTotales.add(lblSubtotal);
-
-        // Descuento %
-        JPanel pDesc = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-        pDesc.setOpaque(false);
-        pDesc.add(new JLabel("Descuento (%):"));
-        spinDescuento = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 100.0, 1.0));
-        spinDescuento.setPreferredSize(new Dimension(65, 24));
-        spinDescuento.addChangeListener(e -> recalcularVenta());
-        pDesc.add(spinDescuento);
-
-        lblMontoDescuento = new JLabel("- S/ 0.00", SwingConstants.RIGHT);
-        lblMontoDescuento.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblMontoDescuento.setForeground(new Color(220, 38, 38));
-        boxTotales.add(pDesc);
-        boxTotales.add(lblMontoDescuento);
-
-        // Total Final Destacado
-        JLabel lblTotTit = new JLabel("Total a Pagar:");
-        lblTotTit.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblTotTit.setForeground(COLOR_TEXTO_TITULO);
-        lblTotal = new JLabel("S/ 0.00", SwingConstants.RIGHT);
-        lblTotal.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lblTotal.setForeground(COLOR_PRIMARIO);
-        boxTotales.add(lblTotTit);
-        boxTotales.add(lblTotal);
-
-        panelInferior.add(boxTotales);
-        panelInferior.add(Box.createVerticalStrut(8));
-
-        // Selector de Métodos de Pago (Botones Toggle)
-        JPanel panelMetodos = new JPanel(new GridLayout(1, 4, 6, 0));
-        panelMetodos.setOpaque(false);
-
-        btnPagoEfectivo = crearBotonMetodoPago("Efectivo", Iconos.crearIconoMonedas(14, Color.WHITE), true);
-        btnPagoYape = crearBotonMetodoPago("Yape/Plin", Iconos.crearIconoQr(14, COLOR_TEXTO_TITULO), false);
-        btnPagoTarjeta = crearBotonMetodoPago("Tarjeta", Iconos.crearIconoTarjeta(14, COLOR_TEXTO_TITULO), false);
-        btnPagoTransferencia = crearBotonMetodoPago("Transferencia", Iconos.crearIconoFactura(14, COLOR_TEXTO_TITULO), false);
-
-        panelMetodos.add(btnPagoEfectivo);
-        panelMetodos.add(btnPagoYape);
-        panelMetodos.add(btnPagoTarjeta);
-        panelMetodos.add(btnPagoTransferencia);
-
-        panelInferior.add(panelMetodos);
-        panelInferior.add(Box.createVerticalStrut(6));
-
-        // Panel condicional para Efectivo: Monto Recibido y Vuelto
-        panelEfectivoExtra = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
-        panelEfectivoExtra.setOpaque(false);
-
-        JLabel lblMRec = new JLabel("Monto Recibido S/:");
-        lblMRec.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        txtMontoRecibido = new JTextField("0.00", 6);
-        txtMontoRecibido.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        txtMontoRecibido.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
-                recalcularVuelto();
-            }
-        });
-
-        lblVuelto = new JLabel("Vuelto: S/ 0.00");
-        lblVuelto.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblVuelto.setForeground(COLOR_VERDE);
-
-        panelEfectivoExtra.add(lblMRec);
-        panelEfectivoExtra.add(txtMontoRecibido);
-        panelEfectivoExtra.add(lblVuelto);
-        panelInferior.add(panelEfectivoExtra);
-        panelInferior.add(Box.createVerticalStrut(8));
-
-        // Botones de Acción Oficiales del Wireframe: [Cotización] e [Imprimir]
-        JPanel panelAcciones = new JPanel(new GridLayout(1, 2, 10, 0));
-        panelAcciones.setOpaque(false);
-
-        JButton btnCotizacion = new JButton(" Cotización") {
+    private JPanel crearPanelMasterTable() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(new Color(148, 163, 184));
+                g2.setColor(Ui.BORDE_SUAVE);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
-                super.paintComponent(g);
             }
         };
-        btnCotizacion.setIcon(Iconos.crearIconoDocumento(16, new Color(71, 85, 105)));
-        btnCotizacion.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnCotizacion.setForeground(new Color(51, 65, 85));
-        btnCotizacion.setPreferredSize(new Dimension(0, 38));
-        btnCotizacion.setFocusPainted(false);
-        btnCotizacion.setContentAreaFilled(false);
-        btnCotizacion.setOpaque(false);
-        btnCotizacion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnCotizacion.addActionListener(e -> procesarVenta(true));
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(12, 14, 12, 14));
 
-        JButton btnImprimir = new JButton(" Imprimir / Cobrar") {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (getModel().isPressed()) {
-                    g2.setColor(COLOR_PRIMARIO_OSCURO.darker());
-                } else if (getModel().isRollover()) {
-                    g2.setColor(COLOR_PRIMARIO_OSCURO);
-                } else {
-                    g2.setColor(COLOR_PRIMARIO);
-                }
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        btnImprimir.setIcon(Iconos.crearIconoImprimir(16, Color.WHITE));
-        btnImprimir.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnImprimir.setForeground(Color.WHITE);
-        btnImprimir.setPreferredSize(new Dimension(0, 38));
-        btnImprimir.setFocusPainted(false);
-        btnImprimir.setContentAreaFilled(false);
-        btnImprimir.setOpaque(false);
-        btnImprimir.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnImprimir.addActionListener(e -> procesarVenta(false));
+        // Filtros y Buscador
+        JPanel cabFiltros = new JPanel();
+        cabFiltros.setOpaque(false);
+        cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
 
-        panelAcciones.add(btnCotizacion);
-        panelAcciones.add(btnImprimir);
+        JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
+        barraBuscar.setOpaque(false);
 
-        panelInferior.add(panelAcciones);
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        barraBuscar.add(lblBuscar, BorderLayout.WEST);
 
-        col.add(panelInferior, BorderLayout.SOUTH);
-        return col;
-    }
-
-    private JButton crearBotonMetodoPago(String metodo, Icon ico, boolean activoInicial) {
-        JButton btn = new JButton(metodo) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                boolean activo = metodo.equalsIgnoreCase(metodoPagoSeleccionado);
-                if (activo) {
-                    g2.setColor(COLOR_PRIMARIO);
-                } else if (getModel().isRollover()) {
-                    g2.setColor(new Color(254, 243, 199));
-                } else {
-                    g2.setColor(Color.WHITE);
-                }
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                g2.setColor(activo ? COLOR_PRIMARIO_OSCURO : COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        btn.setIcon(ico);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btn.setForeground(activoInicial ? Color.WHITE : COLOR_TEXTO_TITULO);
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(0, 32));
-
-        btn.addActionListener(e -> {
-            metodoPagoSeleccionado = metodo;
-            panelEfectivoExtra.setVisible("Efectivo".equalsIgnoreCase(metodo));
-
-            // Actualizar estilo visual de los 4 botones
-            actualizarBotonesMetodos();
-            recalcularVuelto();
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar por N° comprobante, cliente, mascota o método de pago...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarVentas(); }
+            public void removeUpdate(DocumentEvent e) { filtrarVentas(); }
+            public void changedUpdate(DocumentEvent e) { filtrarVentas(); }
         });
+        barraBuscar.add(txtBuscar, BorderLayout.CENTER);
+        cabFiltros.add(barraBuscar);
+        cabFiltros.add(Box.createVerticalStrut(8));
 
-        return btn;
-    }
+        // Pills de Filtro
+        JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pills.setOpaque(false);
 
-    private void actualizarBotonesMetodos() {
-        JButton[] btns = {btnPagoEfectivo, btnPagoYape, btnPagoTarjeta, btnPagoTransferencia};
-        for (JButton b : btns) {
-            boolean act = b.getText().equalsIgnoreCase(metodoPagoSeleccionado);
-            b.setForeground(act ? Color.WHITE : COLOR_TEXTO_TITULO);
-            b.repaint();
-        }
-    }
+        String[] tipos = {"TODAS", "Boleta", "Factura", "Ticket", "Cotización", "Pagada", "Anulada"};
+        for (String t : tipos) {
+            JButton btnPill = new JButton(t);
+            btnPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            btnPill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btnPill.setBorder(new EmptyBorder(4, 10, 4, 10));
+            btnPill.setFocusPainted(false);
 
-    private void agregarItemAVenta(CatalogoItem item) {
-        // Verificar si ya existe en la lista
-        boolean encontrado = false;
-        for (ItemVentaPOS v : itemsVenta) {
-            if (v.getCodigo().equalsIgnoreCase(item.codigo)) {
-                v.incrementarCantidad(1);
-                encontrado = true;
-                break;
+            if (t.equals(filtroTipoSeleccionado)) {
+                btnPill.setBackground(Ui.TURQUESA);
+                btnPill.setForeground(Color.WHITE);
+            } else {
+                btnPill.setBackground(new Color(241, 245, 249));
+                btnPill.setForeground(Ui.TEXTO_MUTED);
             }
-        }
-        if (!encontrado) {
-            itemsVenta.add(new ItemVentaPOS(item.codigo, item.nombre, item.categoria, 1, item.precio));
-        }
 
-        actualizarTablaVenta();
-        recalcularVenta();
-    }
-
-    private void eliminarItemDeVenta(int row) {
-        if (row >= 0 && row < itemsVenta.size()) {
-            itemsVenta.remove(row);
-            actualizarTablaVenta();
-            recalcularVenta();
-        }
-    }
-
-    private void limpiarVenta() {
-        if (itemsVenta.isEmpty()) return;
-        int r = JOptionPane.showConfirmDialog(this, "¿Desea vaciar todos los ítems de la venta actual?",
-                "Limpiar Venta", JOptionPane.YES_NO_OPTION);
-        if (r == JOptionPane.YES_OPTION) {
-            itemsVenta.clear();
-            actualizarTablaVenta();
-            recalcularVenta();
-        }
-    }
-
-    private void actualizarTablaVenta() {
-        modeloVenta.setRowCount(0);
-        for (ItemVentaPOS it : itemsVenta) {
-            modeloVenta.addRow(new Object[]{
-                    it.getDescripcion(),
-                    it.getCantidad(),
-                    String.format("%.2f", it.getPrecioUnitario()),
-                    String.format("%.2f", it.getSubtotal()),
-                    "✕ Quitar"
+            btnPill.addActionListener(e -> {
+                filtroTipoSeleccionado = t;
+                for (Component c : pills.getComponents()) {
+                    if (c instanceof JButton) {
+                        JButton b = (JButton) c;
+                        if (b.getText().equals(filtroTipoSeleccionado)) {
+                            b.setBackground(Ui.TURQUESA);
+                            b.setForeground(Color.WHITE);
+                        } else {
+                            b.setBackground(new Color(241, 245, 249));
+                            b.setForeground(Ui.TEXTO_MUTED);
+                        }
+                    }
+                }
+                filtrarVentas();
             });
+            pills.add(btnPill);
         }
-    }
+        cabFiltros.add(pills);
+        master.add(cabFiltros, BorderLayout.NORTH);
 
-    private void recalcularVenta() {
-        double sub = 0.0;
-        for (ItemVentaPOS it : itemsVenta) {
-            sub += it.getSubtotal();
-        }
+        // Tabla
+        String[] cols = {"N° Comprobante", "Tipo", "Cliente / Paciente", "Método", "Total (S/.)", "Estado"};
+        modeloVentas = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
 
-        double descPorc = ((Number) spinDescuento.getValue()).doubleValue();
-        double descMonto = sub * (descPorc / 100.0);
-        double total = Math.max(0.0, sub - descMonto);
+        tablaVentas = new JTable(modeloVentas);
+        tablaVentas.setRowHeight(48);
+        tablaVentas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaVentas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaVentas.setShowVerticalLines(false);
+        tablaVentas.setGridColor(new Color(241, 245, 249));
+        tablaVentas.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaVentas.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaVentas.getTableHeader().setForeground(Ui.TEXTO_MUTED);
 
-        lblSubtotal.setText("S/ " + String.format("%.2f", sub));
-        lblMontoDescuento.setText("- S/ " + String.format("%.2f", descMonto));
-        lblTotal.setText("S/ " + String.format("%.2f", total));
+        tablaVentas.getColumnModel().getColumn(0).setPreferredWidth(110);
+        tablaVentas.getColumnModel().getColumn(1).setPreferredWidth(100);
+        tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(180);
+        tablaVentas.getColumnModel().getColumn(3).setPreferredWidth(90);
+        tablaVentas.getColumnModel().getColumn(4).setPreferredWidth(85);
+        tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(90);
 
-        if ("Efectivo".equalsIgnoreCase(metodoPagoSeleccionado)) {
-            if (txtMontoRecibido.getText().trim().equals("0.00") || txtMontoRecibido.getText().trim().isEmpty()) {
-                txtMontoRecibido.setText(String.format("%.2f", total));
+        // Monograma en columna 0
+        tablaVentas.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String num = value != null ? value.toString() : "";
+                String letra = num.startsWith("B") ? "B" : num.startsWith("F") ? "F" : "T";
+
+                JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(new Color(224, 242, 254));
+                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.setColor(new Color(186, 230, 253));
+                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(30, 30));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(new Color(2, 132, 199));
+
+                JLabel lblNum = new JLabel(num);
+                lblNum.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblNum.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+                cell.add(avatar);
+                cell.add(lblNum);
+                return cell;
             }
-        }
-        recalcularVuelto();
-    }
+        });
 
-    private void recalcularVuelto() {
-        try {
-            double total = Double.parseDouble(lblTotal.getText().replace("S/", "").replace(",", "").trim());
-            double recibido = Double.parseDouble(txtMontoRecibido.getText().replace("S/", "").replace(",", "").trim());
-            double vuelto = Math.max(0.0, recibido - total);
-            lblVuelto.setText("Vuelto: S/ " + String.format("%.2f", vuelto));
-        } catch (Exception ex) {
-            lblVuelto.setText("Vuelto: S/ 0.00");
-        }
-    }
-
-    /**
-     * Procesa la venta o cotización y muestra el diálogo con vista previa del ticket.
-     */
-    private void procesarVenta(boolean esCotizacion) {
-        if (itemsVenta.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "El carrito de venta está vacío. Por favor seleccione al menos un producto o servicio.",
-                    "Venta Vacía", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String cliente = txtCliente.getText().trim();
-        if (cliente.isEmpty()) {
-            cliente = "Cliente Varios";
-        }
-
-        double total = Double.parseDouble(lblTotal.getText().replace("S/", "").replace(",", "").trim());
-        double recibido = total;
-        if ("Efectivo".equalsIgnoreCase(metodoPagoSeleccionado)) {
-            try {
-                recibido = Double.parseDouble(txtMontoRecibido.getText().trim());
-                if (!esCotizacion && recibido < total) {
-                    JOptionPane.showMessageDialog(this,
-                            "El monto recibido (S/ " + String.format("%.2f", recibido) + ") es menor al total a pagar (S/ " + String.format("%.2f", total) + ").",
-                            "Pago Insuficiente", JOptionPane.WARNING_MESSAGE);
-                    return;
+        // Alineación y Render de Estado (Columna 5)
+        tablaVentas.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setHorizontalAlignment(SwingConstants.CENTER);
+                String estado = value != null ? value.toString() : "";
+                if ("Pagada".equalsIgnoreCase(estado)) {
+                    l.setForeground(Ui.COLOR_EXITO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                } else if ("Cotización".equalsIgnoreCase(estado)) {
+                    l.setForeground(new Color(217, 119, 6));
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                } else {
+                    l.setForeground(Ui.COLOR_PELIGRO);
+                    l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
                 }
-            } catch (Exception e) {
-                recibido = total;
+                return l;
             }
-        }
-
-        double descPorc = ((Number) spinDescuento.getValue()).doubleValue();
-        String tipoComp = esCotizacion ? "Cotización" : (String) cbTipoComprobante.getSelectedItem();
-        String mascota = (String) cbMascota.getSelectedItem();
-
-        VentaPOS venta = new VentaPOS(
-                null, null, tipoComp, LocalDateTime.now(), cliente, "-",
-                mascota, itemsVenta, descPorc, metodoPagoSeleccionado, recibido,
-                esCotizacion ? "Cotización" : "Pagada", "Joanna Corrales"
-        );
-
-        if (!esCotizacion) {
-            repo.guardarVentaPOS(venta);
-            // Si el pago es en efectivo, ofrecer alimentar la caja chica de inmediato
-            if ("Efectivo".equalsIgnoreCase(metodoPagoSeleccionado)) {
-                repo.guardarMovimientoCajaChica(new happypets.model.MovimientoCajaChica(
-                        null, java.time.LocalDate.now(), "Ingreso",
-                        "Cobro POS " + venta.getNumeroComprobante() + " - " + cliente,
-                        venta.getTotal(), "Joanna Corrales", venta.getNumeroComprobante()
-                ));
-            }
-        }
-
-        // Mostrar comprobante impreso en ventana modal estilizada
-        mostrarModalTicket(venta, esCotizacion);
-
-        // Limpiar para la siguiente venta
-        itemsVenta.clear();
-        actualizarTablaVenta();
-        spinDescuento.setValue(0.0);
-        recalcularVenta();
-        cargarCatalogoMaestro();
-        filtrarCatalogo();
-    }
-
-    private void mostrarModalTicket(VentaPOS venta, boolean esCotizacion) {
-        JDialog dlg = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this),
-                esCotizacion ? "Cotización / Proforma Oficial" : "Comprobante Electrónico Emitido", true);
-        dlg.setSize(440, 640);
-        dlg.setLocationRelativeTo(this);
-        dlg.setLayout(new BorderLayout());
-
-        JPanel p = new JPanel(new BorderLayout(0, 12));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(16, 20, 16, 20));
-
-        // Vista de texto / ticket con formato térmico profesional
-        JTextArea txtTicket = new JTextArea();
-        txtTicket.setFont(new Font("Consolas", Font.PLAIN, 12));
-        txtTicket.setEditable(false);
-        txtTicket.setBackground(new Color(254, 254, 254));
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("========================================\n");
-        sb.append("       VETERINARIA HAPPY PETS S.A.C.    \n");
-        sb.append("        RUC: 20608912345 · LIMA - PERÚ  \n");
-        sb.append("       Av. San Borja Sur 482 · San Borja\n");
-        sb.append("       Central: (01) 432-9980 / 984-552-110\n");
-        sb.append("========================================\n");
-        sb.append(esCotizacion ? "     *** PROFORMA / COTIZACIÓN ***\n" :
-                                 "   " + venta.getTipoComprobante().toUpperCase() + "\n");
-        sb.append("N° Comprobante: ").append(venta.getNumeroComprobante()).append("\n");
-        sb.append("Fecha y Hora  : ").append(venta.getFechaHoraTexto()).append("\n");
-        sb.append("Cajero Resp.  : ").append(venta.getCajero()).append("\n");
-        sb.append("----------------------------------------\n");
-        sb.append("Cliente : ").append(venta.getClienteNombre()).append("\n");
-        sb.append("Paciente: ").append(venta.getMascotaNombre()).append("\n");
-        sb.append("Método  : ").append(venta.getMetodoPago()).append("\n");
-        sb.append("----------------------------------------\n");
-        sb.append(String.format("%-18s %4s %7s %8s\n", "DESCRIPCIÓN", "CANT", "P.UNT", "TOTAL"));
-        sb.append("----------------------------------------\n");
-
-        for (ItemVentaPOS it : venta.getItems()) {
-            String desc = it.getDescripcion().length() > 18 ?
-                    it.getDescripcion().substring(0, 16) + ".." : it.getDescripcion();
-            sb.append(String.format("%-18s %4d %7.2f %8.2f\n",
-                    desc, it.getCantidad(), it.getPrecioUnitario(), it.getSubtotal()));
-        }
-
-        sb.append("----------------------------------------\n");
-        sb.append(String.format("%-26s S/ %8.2f\n", "SUBTOTAL:", venta.getSubtotal()));
-        if (venta.getPorcentajeDescuento() > 0) {
-            sb.append(String.format("%-26s S/ -%7.2f\n", "DSCTO (" + (int)venta.getPorcentajeDescuento() + "%):", venta.getMontoDescuento()));
-        }
-        sb.append(String.format("%-26s S/ %8.2f\n", "IGV (18% INCLUIDO):", venta.getIgv()));
-        sb.append(String.format("%-26s S/ %8.2f\n", "TOTAL FINAL A PAGAR:", venta.getTotal()));
-        sb.append("----------------------------------------\n");
-
-        if ("Efectivo".equalsIgnoreCase(venta.getMetodoPago()) && !esCotizacion) {
-            sb.append(String.format("%-26s S/ %8.2f\n", "IMPORTE RECIBIDO:", venta.getMontoRecibido()));
-            sb.append(String.format("%-26s S/ %8.2f\n", "VUELTO ENTREGADO:", venta.getVuelto()));
-            sb.append("----------------------------------------\n");
-        }
-
-        sb.append("\n  [ QR ELECTRÓNICO SUNAT VALIDADO ]  \n");
-        sb.append("      Consulte su comprobante en:\n");
-        sb.append("       www.veterinariahappypets.pe/cpe   \n");
-        sb.append("  ¡Gracias por confiar en Happy Pets!  \n");
-        sb.append("========================================\n");
-
-        txtTicket.setText(sb.toString());
-
-        JScrollPane sc = new JScrollPane(txtTicket);
-        sc.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        p.add(sc, BorderLayout.CENTER);
-
-        // Botones de acción del modal
-        JPanel botDlg = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        botDlg.setOpaque(false);
-
-        JButton btnExportar = Ui.boton("Descargar PDF / Excel", false);
-        btnExportar.setIcon(Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
-        btnExportar.addActionListener(e -> {
-            List<Object[]> filasItems = new ArrayList<>();
-            for (ItemVentaPOS it : venta.getItems()) {
-                filasItems.add(new Object[]{it.getCodigo(), it.getDescripcion(), it.getCantidad(), String.format("S/ %.2f", it.getPrecioUnitario()), String.format("S/ %.2f", it.getSubtotal())});
-            }
-            Ui.mostrarVisorReporte(dlg,
-                    venta.getTipoComprobante() + " " + venta.getNumeroComprobante(),
-                    "Comprobante Electrónico Oficial Happy Pets ERP",
-                    new String[][]{
-                            {"Cliente", venta.getClienteNombre()},
-                            {"DNI / RUC", venta.getClienteDocumento()},
-                            {"Paciente", venta.getMascotaNombre()},
-                            {"Método de Pago", venta.getMetodoPago()},
-                            {"Fecha y Hora", venta.getFechaHoraTexto()},
-                            {"Cajero", venta.getCajero()}
-                    },
-                    new String[]{"Código", "Descripción", "Cantidad", "Precio Unit.", "Subtotal"},
-                    filasItems,
-                    "Subtotal: S/ " + String.format("%.2f", venta.getSubtotal()) + " | IGV (18%): S/ " + String.format("%.2f", venta.getIgv()) + " | TOTAL: S/ " + String.format("%.2f", venta.getTotal()),
-                    "comprobante_pos_" + venta.getNumeroComprobante()
-            );
         });
 
-        JButton btnPrint = Ui.boton("Imprimir en Ticketera Térmica (80mm)", true);
-        btnPrint.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
-        btnPrint.addActionListener(e -> {
-            JOptionPane.showMessageDialog(dlg,
-                    "Enviando documento térmico a impresora POS predeterminada...\nImpresión completada con éxito.",
-                    "Impresión Exitosa", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
+        tablaVentas.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaVentas.getSelectedRow();
+                if (r >= 0 && r < listaVentasFiltrada.size()) {
+                    mostrarDetalleVenta(listaVentasFiltrada.get(r));
+                } else {
+                    mostrarDetalleVenta(null);
+                }
+            }
         });
 
-        JButton btnCerrar = Ui.boton("Cerrar", false);
-        btnCerrar.addActionListener(e -> dlg.dispose());
+        JScrollPane scroll = new JScrollPane(tablaVentas);
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        master.add(scroll, BorderLayout.CENTER);
 
-        botDlg.add(btnExportar);
-        botDlg.add(btnPrint);
-        botDlg.add(btnCerrar);
-        p.add(botDlg, BorderLayout.SOUTH);
-
-        dlg.add(p);
-        dlg.setVisible(true);
+        return master;
     }
 
-    private void mostrarHistorialVentas() {
-        JDialog dlg = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this),
-                "Historial de Ventas POS del Día", true);
-        dlg.setSize(840, 520);
-        dlg.setLocationRelativeTo(this);
-        dlg.setLayout(new BorderLayout());
+    private JPanel crearPanelLiveHub() {
+        panelHubContenido = new JPanel(new BorderLayout());
+        panelHubContenido.setOpaque(false);
 
-        JPanel p = new JPanel(new BorderLayout(0, 10));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(14, 18, 14, 18));
+        // Panel Hub Vacío
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione una venta del registro para consultar el Live Sale Hub", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
-        JLabel lblTit = new JLabel("Transacciones Registradas en Caja Central");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-        p.add(lblTit, BorderLayout.NORTH);
+        // Panel Detalle Activo
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
 
-        String[] cols = {"N° Comp.", "Tipo", "Fecha/Hora", "Cliente", "Mascota", "Método", "Total (S/)", "Estado"};
-        DefaultTableModel mod = new DefaultTableModel(cols, 0);
+        // 1. Cabecera del Hub
+        JPanel cabHub = new JPanel(new BorderLayout(10, 0));
+        cabHub.setOpaque(false);
+
+        lblHubAvatar = new JLabel("V", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int diametro = Math.min(getWidth(), getHeight()) - 2;
+                if (diametro > 0) {
+                    g2.setColor(new Color(240, 253, 250));
+                    g2.fill(new Ellipse2D.Double(1, 1, diametro, diametro));
+                    g2.setColor(Ui.TURQUESA);
+                    g2.draw(new Ellipse2D.Double(1, 1, diametro, diametro));
+                }
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
+        cabHub.add(lblHubAvatar, BorderLayout.WEST);
+
+        JPanel titulosHub = new JPanel();
+        titulosHub.setOpaque(false);
+        titulosHub.setLayout(new BoxLayout(titulosHub, BoxLayout.Y_AXIS));
+
+        lblHubTitulo = new JLabel("B001-000414");
+        lblHubTitulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblHubTitulo.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubSubtitulo = new JLabel("Boleta Electrónica · Carlos Mendoza Silva");
+        lblHubSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubSubtitulo.setForeground(Ui.TEXTO_MUTED);
+
+        titulosHub.add(lblHubTitulo);
+        titulosHub.add(Box.createVerticalStrut(2));
+        titulosHub.add(lblHubSubtitulo);
+        cabHub.add(titulosHub, BorderLayout.CENTER);
+
+        lblHubChipEstado = new JLabel("  Pagada  ");
+        lblHubChipEstado.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubChipEstado.setForeground(Ui.COLOR_EXITO);
+        lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(187, 247, 208), 1),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+        cabHub.add(lblHubChipEstado, BorderLayout.EAST);
+        panelHubDetalle.add(cabHub, BorderLayout.NORTH);
+
+        // 2. Centro con Telemetría 2x2 y Especificaciones
+        JPanel centroHub = new JPanel();
+        centroHub.setOpaque(false);
+        centroHub.setLayout(new BoxLayout(centroHub, BoxLayout.Y_AXIS));
+
+        // Telemetría 2x2
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridTelemetria.setOpaque(false);
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 115));
+
+        lblHubTotalCobrado = new JLabel("S/. 0.00");
+        lblHubSubtotalNeto = new JLabel("S/. 0.00");
+        lblHubIgvFiscal = new JLabel("S/. 0.00");
+        lblHubDescuento = new JLabel("0%");
+
+        gridTelemetria.add(crearCardMiniTelemetria("TOTAL COBRADO", lblHubTotalCobrado, Ui.TURQUESA_OSCURO));
+        gridTelemetria.add(crearCardMiniTelemetria("SUBTOTAL NETO", lblHubSubtotalNeto, Ui.TEXTO_TITULO));
+        gridTelemetria.add(crearCardMiniTelemetria("IGV FISCAL (18%)", lblHubIgvFiscal, Ui.TEXTO_MUTED));
+        gridTelemetria.add(crearCardMiniTelemetria("DESCUENTO %", lblHubDescuento, Ui.COLOR_PELIGRO));
+
+        centroHub.add(gridTelemetria);
+        centroHub.add(Box.createVerticalStrut(8));
+
+        // Secciones Detalladas
+        centroHub.add(crearSeccionTitulo("DESGLOSE DE ÍTEMS ADQUIRIDOS"));
+        txtHubItemsDetalle = new JTextArea(4, 20);
+        txtHubItemsDetalle.setFont(new Font("Consolas", Font.PLAIN, 11));
+        txtHubItemsDetalle.setEditable(false);
+        txtHubItemsDetalle.setBackground(new Color(248, 250, 252));
+        txtHubItemsDetalle.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+        centroHub.add(txtHubItemsDetalle);
+        centroHub.add(Box.createVerticalStrut(8));
+
+        centroHub.add(crearSeccionTitulo("DATOS FISCALES & PACIENTE"));
+        JPanel pnlFiscal = new JPanel(new GridLayout(2, 2, 6, 4));
+        pnlFiscal.setOpaque(false);
+
+        lblHubClienteDni = new JLabel("Cliente: -");
+        lblHubClienteDni.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+
+        lblHubMascota = new JLabel("Paciente: -");
+        lblHubMascota.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+
+        lblHubMetodoPago = new JLabel("Pago: -");
+        lblHubMetodoPago.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+
+        lblHubCajeroFecha = new JLabel("Fecha: -");
+        lblHubCajeroFecha.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+
+        pnlFiscal.add(lblHubClienteDni);
+        pnlFiscal.add(lblHubMascota);
+        pnlFiscal.add(lblHubMetodoPago);
+        pnlFiscal.add(lblHubCajeroFecha);
+        centroHub.add(pnlFiscal);
+
+        panelHubDetalle.add(centroHub, BorderLayout.CENTER);
+
+        // 3. Footer con 4 Botones de Acción 1-click
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+
+        JButton btnImprimirTicket = Ui.boton("Ticket Térmico (80mm)", true);
+        btnImprimirTicket.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
+        btnImprimirTicket.addActionListener(e -> imprimirTicketTermico());
+
+        JButton btnReporteOficial = Ui.boton("Comprobante Oficial PDF", false);
+        btnReporteOficial.setIcon(Iconos.crearIconoFactura(14, Ui.TEXTO_TITULO));
+        btnReporteOficial.addActionListener(e -> emitirReporteOficialPDF());
+
+        JButton btnEnviarWhatsApp = Ui.boton("Enviar WhatsApp", false);
+        btnEnviarWhatsApp.setIcon(Iconos.crearIconoMensaje(14, Ui.COLOR_EXITO));
+        btnEnviarWhatsApp.addActionListener(e -> enviarWhatsAppCliente());
+
+        JButton btnAnularVenta = Ui.boton("Anular Venta POS", false);
+        btnAnularVenta.setIcon(Iconos.crearIconoAlertaMerma(14, Ui.COLOR_PELIGRO));
+        btnAnularVenta.addActionListener(e -> anularVentaSeleccionada());
+
+        gridAcciones.add(btnImprimirTicket);
+        gridAcciones.add(btnReporteOficial);
+        gridAcciones.add(btnEnviarWhatsApp);
+        gridAcciones.add(btnAnularVenta);
+
+        panelHubDetalle.add(gridAcciones, BorderLayout.SOUTH);
+
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        return panelHubContenido;
+    }
+
+    private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel(new BorderLayout());
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(colorValor);
+
+        c.add(t, BorderLayout.NORTH);
+        c.add(lblValor, BorderLayout.CENTER);
+        return c;
+    }
+
+    private JPanel crearSeccionTitulo(String titulo) {
+        JPanel s = new JPanel(new BorderLayout(6, 0));
+        s.setOpaque(false);
+        JLabel l = new JLabel(titulo);
+        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setForeground(Ui.TURQUESA_PROFUNDO);
+        s.add(l, BorderLayout.WEST);
+        s.add(new JSeparator(), BorderLayout.CENTER);
+        s.setBorder(new EmptyBorder(4, 0, 4, 0));
+        return s;
+    }
+
+    public void recargarDatos() {
+        actualizarKpis();
+        filtrarVentas();
+    }
+
+    private void actualizarKpis() {
         List<VentaPOS> ventas = repo.getVentasPOS();
+        double totalRecaudado = 0.0;
+        int cantidadValidas = 0;
+        int ventasDigitales = 0;
 
         for (VentaPOS v : ventas) {
-            mod.addRow(new Object[]{
+            if (!"Anulada".equalsIgnoreCase(v.getEstado())) {
+                totalRecaudado += v.getTotal();
+                cantidadValidas++;
+                if (!"Efectivo".equalsIgnoreCase(v.getMetodoPago())) {
+                    ventasDigitales++;
+                }
+            }
+        }
+
+        lblKpiRecaudadoHoy.setText(String.format("S/. %.2f", totalRecaudado));
+        lblKpiComprobantes.setText(String.valueOf(ventas.size()));
+
+        double promedio = cantidadValidas > 0 ? (totalRecaudado / cantidadValidas) : 0.0;
+        lblKpiTicketPromedio.setText(String.format("S/. %.2f", promedio));
+
+        double pctDigital = cantidadValidas > 0 ? ((ventasDigitales * 100.0) / cantidadValidas) : 0.0;
+        lblKpiDigitales.setText(String.format("%.0f%%", pctDigital));
+    }
+
+    private void filtrarVentas() {
+        String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+        List<VentaPOS> todas = repo.getVentasPOS();
+        listaVentasFiltrada.clear();
+
+        for (VentaPOS v : todas) {
+            boolean coincideTipo = true;
+            if (!"TODAS".equals(filtroTipoSeleccionado)) {
+                if ("Boleta".equals(filtroTipoSeleccionado)) {
+                    coincideTipo = v.getTipoComprobante().toLowerCase().contains("boleta");
+                } else if ("Factura".equals(filtroTipoSeleccionado)) {
+                    coincideTipo = v.getTipoComprobante().toLowerCase().contains("factura");
+                } else if ("Ticket".equals(filtroTipoSeleccionado)) {
+                    coincideTipo = v.getTipoComprobante().toLowerCase().contains("ticket");
+                } else if ("Cotización".equals(filtroTipoSeleccionado)) {
+                    coincideTipo = "Cotización".equalsIgnoreCase(v.getEstado()) || v.getTipoComprobante().toLowerCase().contains("cotiz");
+                } else if ("Pagada".equals(filtroTipoSeleccionado)) {
+                    coincideTipo = "Pagada".equalsIgnoreCase(v.getEstado());
+                } else if ("Anulada".equals(filtroTipoSeleccionado)) {
+                    coincideTipo = "Anulada".equalsIgnoreCase(v.getEstado());
+                }
+            }
+            if (!coincideTipo) continue;
+
+            if (!query.isEmpty()) {
+                boolean match = v.getNumeroComprobante().toLowerCase().contains(query)
+                        || v.getClienteNombre().toLowerCase().contains(query)
+                        || v.getMascotaNombre().toLowerCase().contains(query)
+                        || v.getMetodoPago().toLowerCase().contains(query);
+                if (!match) continue;
+            }
+
+            listaVentasFiltrada.add(v);
+        }
+
+        modeloVentas.setRowCount(0);
+        for (VentaPOS v : listaVentasFiltrada) {
+            modeloVentas.addRow(new Object[]{
                     v.getNumeroComprobante(),
                     v.getTipoComprobante(),
-                    v.getFechaHoraTexto(),
-                    v.getClienteNombre(),
-                    v.getMascotaNombre(),
+                    v.getClienteNombre() + " (" + v.getMascotaNombre() + ")",
                     v.getMetodoPago(),
                     String.format("%.2f", v.getTotal()),
                     v.getEstado()
             });
         }
 
-        JTable tab = new JTable(mod);
-        Ui.formatearTabla(tab, new int[]{0, 1, 2, 5, 7}, new int[]{6});
+        if (!listaVentasFiltrada.isEmpty()) {
+            tablaVentas.setRowSelectionInterval(0, 0);
+            mostrarDetalleVenta(listaVentasFiltrada.get(0));
+        } else {
+            mostrarDetalleVenta(null);
+        }
+    }
 
-        p.add(new JScrollPane(tab), BorderLayout.CENTER);
+    private void mostrarDetalleVenta(VentaPOS v) {
+        this.ventaSeleccionada = v;
+        panelHubContenido.removeAll();
 
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        bot.setOpaque(false);
-        JButton btnCerrar = Ui.boton("Cerrar", true);
-        btnCerrar.addActionListener(e -> dlg.dispose());
-        bot.add(btnCerrar);
-        p.add(bot, BorderLayout.SOUTH);
+        if (v == null) {
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+            panelHubContenido.revalidate();
+            panelHubContenido.repaint();
+            return;
+        }
 
-        dlg.add(p);
+        // Configurar datos en Hub
+        String num = v.getNumeroComprobante();
+        lblHubAvatar.setText(num.startsWith("B") ? "B" : num.startsWith("F") ? "F" : "T");
+        lblHubTitulo.setText(num);
+        lblHubSubtitulo.setText(v.getTipoComprobante() + " · " + v.getClienteNombre());
+        lblHubChipEstado.setText("  " + v.getEstado() + "  ");
+
+        if ("Pagada".equalsIgnoreCase(v.getEstado())) {
+            lblHubChipEstado.setForeground(Ui.COLOR_EXITO);
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(187, 247, 208), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        } else if ("Cotización".equalsIgnoreCase(v.getEstado())) {
+            lblHubChipEstado.setForeground(new Color(217, 119, 6));
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(254, 215, 170), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        } else {
+            lblHubChipEstado.setForeground(Ui.COLOR_PELIGRO);
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(254, 202, 202), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        }
+
+        lblHubTotalCobrado.setText(String.format("S/. %.2f", v.getTotal()));
+        lblHubSubtotalNeto.setText(String.format("S/. %.2f", v.getSubtotal()));
+        lblHubIgvFiscal.setText(String.format("S/. %.2f", v.getIgv()));
+        lblHubDescuento.setText(String.format("%.0f%%", v.getPorcentajeDescuento()));
+
+        StringBuilder sbItems = new StringBuilder();
+        for (ItemVentaPOS it : v.getItems()) {
+            sbItems.append(String.format("%-2d x %-26s S/ %6.2f\n", it.getCantidad(), it.getDescripcion(), it.getSubtotal()));
+        }
+        txtHubItemsDetalle.setText(sbItems.toString());
+
+        lblHubClienteDni.setText("Cliente: " + v.getClienteNombre() + " (Doc: " + v.getClienteDocumento() + ")");
+        lblHubMascota.setText("Paciente: " + v.getMascotaNombre());
+        lblHubMetodoPago.setText("Pago: " + v.getMetodoPago() + (v.getVuelto() > 0 ? " (Vuelto: S/ " + String.format("%.2f", v.getVuelto()) + ")" : ""));
+        lblHubCajeroFecha.setText("Cajero: " + v.getCajero() + " | Fecha: " + v.getFechaHoraTexto());
+
+        panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
+    }
+
+    private void abrirDialogoNuevaVenta() {
+        Frame parent = (Frame) SwingUtilities.getWindowAncestor(this);
+        FormularioVentaPOSDialog dlg = new FormularioVentaPOSDialog(parent);
         dlg.setVisible(true);
+        if (dlg.isConfirmado()) {
+            recargarDatos();
+        }
     }
 
-    public void recargarDatos() {
-        cargarCatalogoMaestro();
-        filtrarCatalogo();
+    private void imprimirTicketTermico() {
+        if (ventaSeleccionada == null) return;
+        JOptionPane.showMessageDialog(this,
+                "Enviando documento térmico a impresora POS de 80mm...\n" +
+                        "Comprobante: " + ventaSeleccionada.getNumeroComprobante() + "\n" +
+                        "Total: S/. " + String.format("%.2f", ventaSeleccionada.getTotal()) + "\n" +
+                        "Corte automático activado y ticket emitido correctamente.",
+                "Impresión Exitosa", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Modelo interno auxiliar para la grilla de productos / servicios.
-     */
-    private static class CatalogoItem {
-        final String codigo;
-        final String nombre;
-        final String categoria;
-        final double precio;
-        final int stock;
-        final boolean esServicio;
+    private void emitirReporteOficialPDF() {
+        if (ventaSeleccionada == null) return;
 
-        CatalogoItem(String codigo, String nombre, String categoria, double precio, int stock, boolean esServicio) {
-            this.codigo = codigo;
-            this.nombre = nombre;
-            this.categoria = categoria;
-            this.precio = precio;
-            this.stock = stock;
-            this.esServicio = esServicio;
+        List<Object[]> filas = new ArrayList<>();
+        for (ItemVentaPOS it : ventaSeleccionada.getItems()) {
+            filas.add(new Object[]{
+                    it.getCodigo(),
+                    it.getDescripcion(),
+                    it.getCategoria(),
+                    it.getCantidad(),
+                    String.format("S/ %.2f", it.getPrecioUnitario()),
+                    String.format("S/ %.2f", it.getSubtotal())
+            });
+        }
+
+        Ui.mostrarVisorReporte(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                ventaSeleccionada.getTipoComprobante() + " " + ventaSeleccionada.getNumeroComprobante(),
+                "Comprobante Electrónico Oficial Happy Pets ERP",
+                new String[][]{
+                        {"Comprobante", ventaSeleccionada.getNumeroComprobante()},
+                        {"Tipo", ventaSeleccionada.getTipoComprobante()},
+                        {"Cliente", ventaSeleccionada.getClienteNombre()},
+                        {"DNI / RUC", ventaSeleccionada.getClienteDocumento()},
+                        {"Paciente", ventaSeleccionada.getMascotaNombre()},
+                        {"Método de Pago", ventaSeleccionada.getMetodoPago()},
+                        {"Fecha de Emisión", ventaSeleccionada.getFechaHoraTexto()},
+                        {"Cajero / Turno", ventaSeleccionada.getCajero()}
+                },
+                new String[]{"Código", "Descripción del Ítem", "Categoría", "Cant.", "P. Unit.", "Subtotal"},
+                filas,
+                "Subtotal: S/ " + String.format("%.2f", ventaSeleccionada.getSubtotal())
+                        + " | Descuento: S/ " + String.format("%.2f", ventaSeleccionada.getMontoDescuento())
+                        + " | IGV (18%): S/ " + String.format("%.2f", ventaSeleccionada.getIgv())
+                        + " | TOTAL: S/ " + String.format("%.2f", ventaSeleccionada.getTotal()),
+                "comprobante_" + ventaSeleccionada.getNumeroComprobante()
+        );
+    }
+
+    private void enviarWhatsAppCliente() {
+        if (ventaSeleccionada == null) return;
+        JOptionPane.showMessageDialog(this,
+                "Enviando comprobante electrónico por WhatsApp API:\n" +
+                        "Destinatario: " + ventaSeleccionada.getClienteNombre() + "\n" +
+                        "Mensaje: ¡Hola! Su comprobante " + ventaSeleccionada.getNumeroComprobante() +
+                        " por S/. " + String.format("%.2f", ventaSeleccionada.getTotal()) +
+                        " está listo para descarga digital.",
+                "WhatsApp API - Notificación Enviada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void anularVentaSeleccionada() {
+        if (ventaSeleccionada == null) return;
+        if ("Anulada".equalsIgnoreCase(ventaSeleccionada.getEstado())) {
+            JOptionPane.showMessageDialog(this, "Esta venta ya se encuentra anulada.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int opt = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de anular el comprobante " + ventaSeleccionada.getNumeroComprobante() + "?\n" +
+                        "Esta acción restituirá las unidades al stock en Kardex y registrará el evento de auditoría.",
+                "Confirmar Anulación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (opt == JOptionPane.YES_OPTION) {
+            repo.anularVentaPOS(ventaSeleccionada.getIdVenta());
+            recargarDatos();
         }
     }
 }

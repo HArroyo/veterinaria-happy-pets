@@ -7,30 +7,37 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.awt.geom.Ellipse2D;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -41,90 +48,75 @@ import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 6.2: Cuentas por Cobrar y Cuentas por Pagar.
- * Basado exactamente en los dos wireframes oficiales:
- * - CUENTAS POR COBRAR.pdf (Clientes, Concepto, Monto, Vence, Estado, Botones Agregar/Modificar/Eliminar/Limpiar, Tabla y Total por cobrar)
- * - CUENTAS POR PAGAR.pdf (Proveedores, Concepto, Monto, Vence, Estado, Botones Agregar/Modificar/Eliminar/Limpiar, Tabla y Total pendiente)
- * Incluye KPIs de liquidez, registro rápido de amortizaciones y enlace contable con Caja Chica y Egresos.
+ * Submódulo 6.2: Cuentas por Cobrar y Cuentas por Pagar (Gestión de Liquidez).
+ * Arquitectura Master-Detail (58% / 42%) - Opción A Recomendada:
+ * - Master Table: Cartera integral unificada de créditos a clientes y pasivos con laboratorios/proveedores.
+ * - Live Credit/Debt Hub: Telemetría 2x2, plazos de mora, amortizaciones y acciones 1-click.
  */
 public class VistaCuentasCobrarPagarPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_PRIMARIO = Ui.TURQUESA; // Turquesa Clínico Original
-    private static final Color COLOR_AZUL = Ui.TURQUESA_OSCURO;
-    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
-    private static final Color COLOR_ROJO = Ui.COLOR_PELIGRO;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
-
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
-    // KPIs Generales
+    // KPIs
     private JLabel lblKpiCobrar;
     private JLabel lblKpiPagar;
     private JLabel lblKpiVencidas;
     private JLabel lblKpiBalance;
 
-    // Componentes: Cuentas por Cobrar
-    private JTextField txtClienteCobrar;
-    private JTextField txtConceptoCobrar;
-    private JTextField txtMontoCobrar;
-    private JTextField txtVenceCobrar;
-    private JComboBox<String> cboEstadoCobrar;
-    private JTable tablaCobrar;
-    private DefaultTableModel modeloCobrar;
-    private JLabel lblTotalPorCobrar;
-    private String idSeleccionadoCobrar = null;
+    // Tabla Maestra (Izquierda - 58%)
+    private JTable tablaCartera;
+    private DefaultTableModel modeloCartera;
+    private JTextField txtBuscar;
+    private String filtroTipoSeleccionado = "TODAS";
+    private final List<FilaCartera> listaCarteraFiltrada = new ArrayList<>();
 
-    // Componentes: Cuentas por Pagar
-    private JTextField txtProveedorPagar;
-    private JTextField txtConceptoPagar;
-    private JTextField txtMontoPagar;
-    private JTextField txtVencePagar;
-    private JComboBox<String> cboEstadoPagar;
-    private JTable tablaPagar;
-    private DefaultTableModel modeloPagar;
-    private JLabel lblTotalPorPagar;
-    private String idSeleccionadoPagar = null;
+    // Live Hub (Derecha - 42%)
+    private JPanel panelHubContenido;
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
 
-    private JTabbedPane tabSubmodulos;
+    private JLabel lblHubAvatar;
+    private JLabel lblHubTitulo;
+    private JLabel lblHubSubtitulo;
+    private JLabel lblHubChipEstado;
+
+    // Telemetría 2x2
+    private JLabel lblHubMontoOriginal;
+    private JLabel lblHubSaldoPendiente;
+    private JLabel lblHubTotalAbonado;
+    private JLabel lblHubDiasVence;
+
+    // Secciones de Detalle
+    private JLabel lblHubTitularTipo;
+    private JLabel lblHubDocumentoRef;
+    private JLabel lblHubConcepto;
+    private JLabel lblHubFechaEmisionVence;
+
+    private FilaCartera itemSeleccionado;
 
     public VistaCuentasCobrarPagarPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        JPanel panelContenido = new JPanel();
+        panelContenido.setOpaque(false);
+        panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
+        panelContenido.setBorder(new EmptyBorder(12, 18, 14, 18));
 
-        // 1. Cabecera institucional
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(10));
+        // 1. Cabecera Principal
+        panelContenido.add(crearCabeceraVista());
+        panelContenido.add(Box.createVerticalStrut(10));
 
-        // 2. Fila de KPIs de cartera y vencimientos
-        contenido.add(crearFilaKpis());
-        contenido.add(Box.createVerticalStrut(12));
+        // 2. Fila de KPIs
+        panelContenido.add(crearFilaKpis());
+        panelContenido.add(Box.createVerticalStrut(12));
 
-        // 3. Pestañas para Cuentas por Cobrar y Cuentas por Pagar (según los 2 Wireframes)
-        tabSubmodulos = new JTabbedPane();
-        tabSubmodulos.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tabSubmodulos.setBackground(Color.WHITE);
+        // 3. Contenedor Master-Detail (58% / 42%)
+        panelContenido.add(crearSplitMasterDetail());
 
-        tabSubmodulos.addTab(" Cuentas por Cobrar (Clientes)",
-                Iconos.crearIconoPOS(16, COLOR_VERDE),
-                crearPanelCuentasPorCobrar());
-
-        tabSubmodulos.addTab(" Cuentas por Pagar (Proveedores)",
-                Iconos.crearIconoFactura(16, COLOR_ROJO),
-                crearPanelCuentasPorPagar());
-
-        contenido.add(tabSubmodulos);
-
-        add(contenido, BorderLayout.CENTER);
+        add(panelContenido, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -133,29 +125,41 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel izq = new JPanel();
         izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel ico = new JLabel(Iconos.crearIconoCuentas(22, COLOR_PRIMARIO));
-        izq.add(ico);
+        JLabel titulo = new JLabel("Cuentas por Cobrar & Cuentas por Pagar");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JPanel titulos = new JPanel();
-        titulos.setOpaque(false);
-        titulos.setLayout(new BoxLayout(titulos, BoxLayout.Y_AXIS));
+        JLabel subtitulo = new JLabel("Módulo 6.2 · Control de cartera de crédito, vencimientos y obligaciones con proveedores");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblTit = new JLabel("Submódulo 6.2: Cuentas por Cobrar y Pagar");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblSub = new JLabel("Control de créditos a propietarios, obligaciones con proveedores de farmacia y amortizaciones");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-
-        titulos.add(lblTit);
-        titulos.add(lblSub);
-        izq.add(titulos);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
         cab.add(izq, BorderLayout.WEST);
 
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        der.setOpaque(false);
+
+        JButton btnNuevaCxC = Ui.boton("+ Por Cobrar (Cliente)", true);
+        btnNuevaCxC.setIcon(Iconos.crearIconoUsuario(14, Color.WHITE));
+        btnNuevaCxC.addActionListener(e -> abrirDialogoNuevaCxC());
+        der.add(btnNuevaCxC);
+
+        JButton btnNuevaCxP = Ui.boton("+ Por Pagar (Proveedor)", false);
+        btnNuevaCxP.setIcon(Iconos.crearIconoCamionProveedor(14, Ui.TEXTO_TITULO));
+        btnNuevaCxP.addActionListener(e -> abrirDialogoNuevaCxP());
+        der.add(btnNuevaCxP);
+
+        JButton btnActualizar = Ui.boton("Actualizar", false);
+        btnActualizar.addActionListener(e -> recargarDatos());
+        der.add(btnActualizar);
+
+        cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
@@ -164,744 +168,810 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         fila.setOpaque(false);
         fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        lblKpiCobrar = new JLabel("S/ 0.00");
-        lblKpiPagar = new JLabel("S/ 0.00");
-        lblKpiVencidas = new JLabel("0 cuentas");
-        lblKpiBalance = new JLabel("S/ 0.00");
+        lblKpiCobrar = new JLabel("S/. 0.00");
+        lblKpiPagar = new JLabel("S/. 0.00");
+        lblKpiVencidas = new JLabel("0");
+        lblKpiBalance = new JLabel("S/. 0.00");
 
-        fila.add(crearCardKpi("Por Cobrar (Activo)", lblKpiCobrar, COLOR_VERDE, "Créditos otorgados a clientes"));
-        fila.add(crearCardKpi("Por Pagar (Pasivo)", lblKpiPagar, COLOR_ROJO, "Deudas con distribuidores"));
-        fila.add(crearCardKpi("Cartera Vencida", lblKpiVencidas, new Color(245, 158, 11), "Expiradas fuera de plazo"));
-        fila.add(crearCardKpi("Balance Neto Cartera", lblKpiBalance, COLOR_AZUL, "Diferencial de liquidez"));
+        fila.add(crearCardKpi("Total por Cobrar (Clientes)", lblKpiCobrar, "Activo corriente exigible", Iconos.crearIconoCuentas(22, Ui.TURQUESA)));
+        fila.add(crearCardKpi("Total por Pagar (Proveedores)", lblKpiPagar, "Pasivo a corto plazo", Iconos.crearIconoCamionProveedor(22, Ui.TURQUESA_OSCURO)));
+        fila.add(crearCardKpi("Obligaciones Vencidas", lblKpiVencidas, "Alertas críticas de cobro/pago", Iconos.crearIconoAlertaMerma(22, Ui.COLOR_PELIGRO)));
+        fila.add(crearCardKpi("Balance Neto de Cartera", lblKpiBalance, "Por Cobrar - Por Pagar", Iconos.crearIconoMonedas(22, Ui.COLOR_EXITO)));
 
         return fila;
     }
 
-    private JPanel crearCardKpi(String titulo, JLabel lblValor, Color colorAcento, String subtitulo) {
-        JPanel card = new JPanel(new BorderLayout(4, 4)) {
+    private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                g2.setColor(colorAcento);
-                g2.fillRect(0, 0, 4, getHeight());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
-                super.paintComponent(g);
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(8, 12, 8, 12));
+        card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
-        JLabel lblT = new JLabel(titulo.toUpperCase());
-        lblT.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lblT.setForeground(COLOR_TEXTO_MUTED);
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblValor.setForeground(colorAcento);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblS = new JLabel(subtitulo);
-        lblS.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblS.setForeground(COLOR_TEXTO_MUTED);
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
 
-        card.add(lblT, BorderLayout.NORTH);
-        card.add(lblValor, BorderLayout.CENTER);
-        card.add(lblS, BorderLayout.SOUTH);
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblSub);
+
+        card.add(texto, BorderLayout.CENTER);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            card.add(lblIco, BorderLayout.EAST);
+        }
 
         return card;
     }
 
-    // =========================================================================
-    // PANEL 1: CUENTAS POR COBRAR (Fiel al wireframe CUENTAS POR COBRAR.pdf)
-    // =========================================================================
-    private JPanel crearPanelCuentasPorCobrar() {
-        JPanel p = new JPanel(new BorderLayout(0, 10));
-        p.setOpaque(false);
-        p.setBorder(new EmptyBorder(10, 10, 10, 10));
+    private JPanel crearSplitMasterDetail() {
+        JPanel split = new JPanel(new GridBagLayout());
+        split.setOpaque(false);
 
-        // Formulario del Wireframe:
-        // Cliente: txtCliente | Monto: txtMonto
-        // Concepto: txtConcepto | Vence: txtVence
-        //                         Estado: cboEstado: Pendiente
-        JPanel boxForm = new JPanel(new BorderLayout(0, 8));
-        boxForm.setBackground(Color.WHITE);
-        boxForm.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(10, 16, 12, 16)
-        ));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
-        JPanel gridCampos = new JPanel(new GridLayout(3, 2, 18, 8));
-        gridCampos.setOpaque(false);
+        // 58% Tabla Maestra Izquierda
+        gbc.gridx = 0;
+        gbc.weightx = 0.58;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 12);
+        split.add(crearPanelMasterTable(), gbc);
 
-        // Fila 1: Cliente y Monto
-        JPanel fCli = new JPanel(new BorderLayout(6, 0));
-        fCli.setOpaque(false);
-        JLabel lCli = new JLabel("Cliente:");
-        lCli.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lCli.setPreferredSize(new Dimension(80, 24));
-        txtClienteCobrar = new JTextField();
-        fCli.add(lCli, BorderLayout.WEST);
-        fCli.add(txtClienteCobrar, BorderLayout.CENTER);
+        // 42% Live Hub Derecha
+        gbc.gridx = 1;
+        gbc.weightx = 0.42;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 0);
+        split.add(crearPanelLiveHub(), gbc);
 
-        JPanel fMon = new JPanel(new BorderLayout(6, 0));
-        fMon.setOpaque(false);
-        JLabel lMon = new JLabel("Monto S/:");
-        lMon.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lMon.setPreferredSize(new Dimension(80, 24));
-        txtMontoCobrar = new JTextField();
-        fMon.add(lMon, BorderLayout.WEST);
-        fMon.add(txtMontoCobrar, BorderLayout.CENTER);
-
-        gridCampos.add(fCli);
-        gridCampos.add(fMon);
-
-        // Fila 2: Concepto y Vence
-        JPanel fCon = new JPanel(new BorderLayout(6, 0));
-        fCon.setOpaque(false);
-        JLabel lCon = new JLabel("Concepto:");
-        lCon.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lCon.setPreferredSize(new Dimension(80, 24));
-        txtConceptoCobrar = new JTextField();
-        fCon.add(lCon, BorderLayout.WEST);
-        fCon.add(txtConceptoCobrar, BorderLayout.CENTER);
-
-        JPanel fVen = new JPanel(new BorderLayout(6, 0));
-        fVen.setOpaque(false);
-        JLabel lVen = new JLabel("Vence:");
-        lVen.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lVen.setPreferredSize(new Dimension(80, 24));
-        txtVenceCobrar = new JTextField(LocalDate.now().plusDays(15).format(FORMATO_FECHA));
-        fVen.add(lVen, BorderLayout.WEST);
-        fVen.add(txtVenceCobrar, BorderLayout.CENTER);
-
-        gridCampos.add(fCon);
-        gridCampos.add(fVen);
-
-        // Fila 3: Espacio vacío y Estado
-        JPanel fEspacio = new JPanel();
-        fEspacio.setOpaque(false);
-
-        JPanel fEst = new JPanel(new BorderLayout(6, 0));
-        fEst.setOpaque(false);
-        JLabel lEst = new JLabel("Estado:");
-        lEst.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lEst.setPreferredSize(new Dimension(80, 24));
-        cboEstadoCobrar = new JComboBox<>(new String[]{"Pendiente", "Pagado", "Vencido", "Parcial"});
-        fEst.add(lEst, BorderLayout.WEST);
-        fEst.add(cboEstadoCobrar, BorderLayout.CENTER);
-
-        gridCampos.add(fEspacio);
-        gridCampos.add(fEst);
-
-        boxForm.add(gridCampos, BorderLayout.CENTER);
-
-        // Botones exactos del wireframe: [Agregar] [Modificar] [Eliminar] [Limpiar]
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 6));
-        panelBotones.setOpaque(false);
-
-        JButton btnAgregar = Ui.boton("Agregar", true);
-        btnAgregar.setPreferredSize(new Dimension(105, 32));
-        btnAgregar.addActionListener(e -> agregarCuentaCobrar());
-
-        JButton btnModificar = Ui.boton("Modificar", false);
-        btnModificar.setPreferredSize(new Dimension(105, 32));
-        btnModificar.addActionListener(e -> modificarCuentaCobrar());
-
-        JButton btnEliminar = Ui.boton("Eliminar", false);
-        btnEliminar.setPreferredSize(new Dimension(105, 32));
-        btnEliminar.setForeground(COLOR_ROJO);
-        btnEliminar.addActionListener(e -> eliminarCuentaCobrar());
-
-        JButton btnLimpiar = Ui.boton("Limpiar", false);
-        btnLimpiar.setPreferredSize(new Dimension(105, 32));
-        btnLimpiar.addActionListener(e -> limpiarFormCobrar());
-
-        JButton btnAbono = Ui.boton("Registrar Cobro / Abono", true);
-        btnAbono.setBackground(COLOR_VERDE);
-        btnAbono.setPreferredSize(new Dimension(180, 32));
-        btnAbono.addActionListener(e -> abrirDialogoAbonoCobrar());
-
-        panelBotones.add(btnAgregar);
-        panelBotones.add(btnModificar);
-        panelBotones.add(btnEliminar);
-        panelBotones.add(btnLimpiar);
-        panelBotones.add(btnAbono);
-
-        boxForm.add(panelBotones, BorderLayout.SOUTH);
-        p.add(boxForm, BorderLayout.NORTH);
-
-        // Tabla del Wireframe: Cliente | Concepto | Monto | Vencimiento | Estado
-        String[] cols = {"Cliente", "Concepto", "Monto", "Vencimiento", "Estado"};
-        modeloCobrar = new DefaultTableModel(cols, 0) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
-        };
-
-        tablaCobrar = new JTable(modeloCobrar);
-        Ui.formatearTabla(tablaCobrar, new int[]{3, 4}, new int[]{2});
-
-        tablaCobrar.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                seleccionarFilaCobrar();
-            }
-        });
-
-        // Renderer de colores para la columna Estado
-        tablaCobrar.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setHorizontalAlignment(SwingConstants.CENTER);
-                setFont(new Font("Segoe UI", Font.BOLD, 11));
-                String est = value != null ? value.toString() : "";
-                if ("Pagado".equalsIgnoreCase(est)) {
-                    setForeground(new Color(22, 101, 52));
-                } else if ("Vencido".equalsIgnoreCase(est)) {
-                    setForeground(new Color(185, 28, 28));
-                } else if ("Parcial".equalsIgnoreCase(est)) {
-                    setForeground(new Color(3, 105, 161));
-                } else {
-                    setForeground(new Color(180, 83, 9));
-                }
-                return c;
-            }
-        });
-
-        JScrollPane scrollTabla = new JScrollPane(tablaCobrar);
-        scrollTabla.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        p.add(scrollTabla, BorderLayout.CENTER);
-
-        // Footer exacto del Wireframe: "Total por cobrar: S/ 0.00"
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 6));
-        footer.setBackground(Color.WHITE);
-        footer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(6, 12, 6, 12)
-        ));
-
-        lblTotalPorCobrar = new JLabel("Total por cobrar: S/ 0.00");
-        lblTotalPorCobrar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblTotalPorCobrar.setForeground(COLOR_PRIMARIO);
-        footer.add(lblTotalPorCobrar);
-
-        p.add(footer, BorderLayout.SOUTH);
-
-        return p;
+        return split;
     }
 
-    // =========================================================================
-    // PANEL 2: CUENTAS POR PAGAR (Fiel al wireframe CUENTAS POR PAGAR.pdf)
-    // =========================================================================
-    private JPanel crearPanelCuentasPorPagar() {
-        JPanel p = new JPanel(new BorderLayout(0, 10));
-        p.setOpaque(false);
-        p.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-        // Formulario del Wireframe:
-        // Proveedor: txtProveedor | Monto: txtMonto
-        // Concepto: txtConcepto   | Vence: txtVence
-        //                           Estado: cboEstado: Pendiente
-        JPanel boxForm = new JPanel(new BorderLayout(0, 8));
-        boxForm.setBackground(Color.WHITE);
-        boxForm.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(10, 16, 12, 16)
-        ));
-
-        JPanel gridCampos = new JPanel(new GridLayout(3, 2, 18, 8));
-        gridCampos.setOpaque(false);
-
-        // Fila 1: Proveedor y Monto
-        JPanel fProv = new JPanel(new BorderLayout(6, 0));
-        fProv.setOpaque(false);
-        JLabel lProv = new JLabel("Proveedor:");
-        lProv.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lProv.setPreferredSize(new Dimension(80, 24));
-        txtProveedorPagar = new JTextField();
-        fProv.add(lProv, BorderLayout.WEST);
-        fProv.add(txtProveedorPagar, BorderLayout.CENTER);
-
-        JPanel fMon = new JPanel(new BorderLayout(6, 0));
-        fMon.setOpaque(false);
-        JLabel lMon = new JLabel("Monto S/:");
-        lMon.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lMon.setPreferredSize(new Dimension(80, 24));
-        txtMontoPagar = new JTextField();
-        fMon.add(lMon, BorderLayout.WEST);
-        fMon.add(txtMontoPagar, BorderLayout.CENTER);
-
-        gridCampos.add(fProv);
-        gridCampos.add(fMon);
-
-        // Fila 2: Concepto y Vence
-        JPanel fCon = new JPanel(new BorderLayout(6, 0));
-        fCon.setOpaque(false);
-        JLabel lCon = new JLabel("Concepto:");
-        lCon.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lCon.setPreferredSize(new Dimension(80, 24));
-        txtConceptoPagar = new JTextField();
-        fCon.add(lCon, BorderLayout.WEST);
-        fCon.add(txtConceptoPagar, BorderLayout.CENTER);
-
-        JPanel fVen = new JPanel(new BorderLayout(6, 0));
-        fVen.setOpaque(false);
-        JLabel lVen = new JLabel("Vence:");
-        lVen.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lVen.setPreferredSize(new Dimension(80, 24));
-        txtVencePagar = new JTextField(LocalDate.now().plusDays(20).format(FORMATO_FECHA));
-        fVen.add(lVen, BorderLayout.WEST);
-        fVen.add(txtVencePagar, BorderLayout.CENTER);
-
-        gridCampos.add(fCon);
-        gridCampos.add(fVen);
-
-        // Fila 3: Espacio vacío y Estado
-        JPanel fEspacio = new JPanel();
-        fEspacio.setOpaque(false);
-
-        JPanel fEst = new JPanel(new BorderLayout(6, 0));
-        fEst.setOpaque(false);
-        JLabel lEst = new JLabel("Estado:");
-        lEst.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lEst.setPreferredSize(new Dimension(80, 24));
-        cboEstadoPagar = new JComboBox<>(new String[]{"Pendiente", "Pagado", "Vencido", "Parcial"});
-        fEst.add(lEst, BorderLayout.WEST);
-        fEst.add(cboEstadoPagar, BorderLayout.CENTER);
-
-        gridCampos.add(fEspacio);
-        gridCampos.add(fEst);
-
-        boxForm.add(gridCampos, BorderLayout.CENTER);
-
-        // Botones exactos del wireframe: [Agregar] [Modificar] [Eliminar] [Limpiar]
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 6));
-        panelBotones.setOpaque(false);
-
-        JButton btnAgregar = Ui.boton("Agregar", true);
-        btnAgregar.setPreferredSize(new Dimension(105, 32));
-        btnAgregar.addActionListener(e -> agregarCuentaPagar());
-
-        JButton btnModificar = Ui.boton("Modificar", false);
-        btnModificar.setPreferredSize(new Dimension(105, 32));
-        btnModificar.addActionListener(e -> modificarCuentaPagar());
-
-        JButton btnEliminar = Ui.boton("Eliminar", false);
-        btnEliminar.setPreferredSize(new Dimension(105, 32));
-        btnEliminar.setForeground(COLOR_ROJO);
-        btnEliminar.addActionListener(e -> eliminarCuentaPagar());
-
-        JButton btnLimpiar = Ui.boton("Limpiar", false);
-        btnLimpiar.setPreferredSize(new Dimension(105, 32));
-        btnLimpiar.addActionListener(e -> limpiarFormPagar());
-
-        JButton btnPagar = Ui.boton("Registrar Pago a Proveedor", true);
-        btnPagar.setBackground(new Color(2, 132, 199));
-        btnPagar.setPreferredSize(new Dimension(195, 32));
-        btnPagar.addActionListener(e -> abrirDialogoPagoPagar());
-
-        panelBotones.add(btnAgregar);
-        panelBotones.add(btnModificar);
-        panelBotones.add(btnEliminar);
-        panelBotones.add(btnLimpiar);
-        panelBotones.add(btnPagar);
-
-        boxForm.add(panelBotones, BorderLayout.SOUTH);
-        p.add(boxForm, BorderLayout.NORTH);
-
-        // Tabla del Wireframe: Proveedor | Concepto | Monto | Vencimiento | Estado
-        String[] cols = {"Proveedor", "Concepto", "Monto", "Vencimiento", "Estado"};
-        modeloPagar = new DefaultTableModel(cols, 0) {
+    private JPanel crearPanelMasterTable() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
             }
         };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(12, 14, 12, 14));
 
-        tablaPagar = new JTable(modeloPagar);
-        Ui.formatearTabla(tablaPagar, new int[]{3, 4}, new int[]{2});
+        // Filtros y Buscador
+        JPanel cabFiltros = new JPanel();
+        cabFiltros.setOpaque(false);
+        cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
 
-        tablaPagar.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                seleccionarFilaPagar();
-            }
+        JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
+        barraBuscar.setOpaque(false);
+
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        barraBuscar.add(lblBuscar, BorderLayout.WEST);
+
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar por cliente, proveedor, concepto o comprobante...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarCartera(); }
+            public void removeUpdate(DocumentEvent e) { filtrarCartera(); }
+            public void changedUpdate(DocumentEvent e) { filtrarCartera(); }
         });
+        barraBuscar.add(txtBuscar, BorderLayout.CENTER);
+        cabFiltros.add(barraBuscar);
+        cabFiltros.add(Box.createVerticalStrut(8));
 
-        tablaPagar.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
+        // Pills de Filtro
+        JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pills.setOpaque(false);
+
+        String[] tipos = {"TODAS", "Por Cobrar", "Por Pagar", "Pendientes", "Parciales", "Pagadas", "Vencidas"};
+        for (String t : tipos) {
+            JButton btnPill = new JButton(t);
+            btnPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            btnPill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btnPill.setBorder(new EmptyBorder(4, 10, 4, 10));
+            btnPill.setFocusPainted(false);
+
+            if (t.equals(filtroTipoSeleccionado)) {
+                btnPill.setBackground(Ui.TURQUESA);
+                btnPill.setForeground(Color.WHITE);
+            } else {
+                btnPill.setBackground(new Color(241, 245, 249));
+                btnPill.setForeground(Ui.TEXTO_MUTED);
+            }
+
+            btnPill.addActionListener(e -> {
+                filtroTipoSeleccionado = t;
+                for (Component c : pills.getComponents()) {
+                    if (c instanceof JButton) {
+                        JButton b = (JButton) c;
+                        if (b.getText().equals(filtroTipoSeleccionado)) {
+                            b.setBackground(Ui.TURQUESA);
+                            b.setForeground(Color.WHITE);
+                        } else {
+                            b.setBackground(new Color(241, 245, 249));
+                            b.setForeground(Ui.TEXTO_MUTED);
+                        }
+                    }
+                }
+                filtrarCartera();
+            });
+            pills.add(btnPill);
+        }
+        cabFiltros.add(pills);
+        master.add(cabFiltros, BorderLayout.NORTH);
+
+        // Tabla
+        String[] cols = {"ID", "Tipo", "Titular", "Concepto", "Monto Orig.", "Saldo Pend.", "Vence", "Estado"};
+        modeloCartera = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        tablaCartera = new JTable(modeloCartera);
+        tablaCartera.setRowHeight(48);
+        tablaCartera.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaCartera.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaCartera.setShowVerticalLines(false);
+        tablaCartera.setGridColor(new Color(241, 245, 249));
+        tablaCartera.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaCartera.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaCartera.getTableHeader().setForeground(Ui.TEXTO_MUTED);
+
+        tablaCartera.getColumnModel().getColumn(0).setPreferredWidth(70);
+        tablaCartera.getColumnModel().getColumn(1).setPreferredWidth(75);
+        tablaCartera.getColumnModel().getColumn(2).setPreferredWidth(140);
+        tablaCartera.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tablaCartera.getColumnModel().getColumn(4).setPreferredWidth(75);
+        tablaCartera.getColumnModel().getColumn(5).setPreferredWidth(75);
+        tablaCartera.getColumnModel().getColumn(6).setPreferredWidth(80);
+        tablaCartera.getColumnModel().getColumn(7).setPreferredWidth(80);
+
+        // Monograma en columna 2 (Titular)
+        tablaCartera.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setHorizontalAlignment(SwingConstants.CENTER);
-                setFont(new Font("Segoe UI", Font.BOLD, 11));
-                String est = value != null ? value.toString() : "";
-                if ("Pagado".equalsIgnoreCase(est)) {
-                    setForeground(new Color(22, 101, 52));
-                } else if ("Vencido".equalsIgnoreCase(est)) {
-                    setForeground(new Color(185, 28, 28));
-                } else if ("Parcial".equalsIgnoreCase(est)) {
-                    setForeground(new Color(3, 105, 161));
-                } else {
-                    setForeground(new Color(180, 83, 9));
-                }
-                return c;
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String nombre = value != null ? value.toString() : "";
+                String letra = !nombre.isEmpty() ? nombre.substring(0, 1).toUpperCase() : "C";
+
+                JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(new Color(240, 253, 250));
+                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.setColor(new Color(153, 246, 228));
+                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(30, 30));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(Ui.TURQUESA_PROFUNDO);
+
+                JLabel lblNombre = new JLabel(nombre);
+                lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+                cell.add(avatar);
+                cell.add(lblNombre);
+                return cell;
             }
         });
 
-        JScrollPane scrollTabla = new JScrollPane(tablaPagar);
-        scrollTabla.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        p.add(scrollTabla, BorderLayout.CENTER);
+        // Render de Estado (Columna 7)
+        tablaCartera.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setHorizontalAlignment(SwingConstants.CENTER);
+                String estado = value != null ? value.toString() : "";
+                if ("Pagado".equalsIgnoreCase(estado)) {
+                    l.setForeground(Ui.COLOR_EXITO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                } else if ("Parcial".equalsIgnoreCase(estado)) {
+                    l.setForeground(Ui.TURQUESA_OSCURO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                } else if ("Vencido".equalsIgnoreCase(estado)) {
+                    l.setForeground(Ui.COLOR_PELIGRO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                } else {
+                    l.setForeground(new Color(217, 119, 6));
+                    l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+                }
+                return l;
+            }
+        });
 
-        // Footer exacto del Wireframe: "Total pendiente: S/ 0.00"
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 6));
-        footer.setBackground(Color.WHITE);
-        footer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(6, 12, 6, 12)
-        ));
+        tablaCartera.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaCartera.getSelectedRow();
+                if (r >= 0 && r < listaCarteraFiltrada.size()) {
+                    mostrarDetalleItem(listaCarteraFiltrada.get(r));
+                } else {
+                    mostrarDetalleItem(null);
+                }
+            }
+        });
 
-        lblTotalPorPagar = new JLabel("Total pendiente: S/ 0.00");
-        lblTotalPorPagar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblTotalPorPagar.setForeground(COLOR_ROJO);
-        footer.add(lblTotalPorPagar);
+        JScrollPane scroll = new JScrollPane(tablaCartera);
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        master.add(scroll, BorderLayout.CENTER);
 
-        p.add(footer, BorderLayout.SOUTH);
-
-        return p;
+        return master;
     }
 
-    // =========================================================================
-    // LÓGICA DE NEGOCIO: CARGA Y CRUD CUENTAS POR COBRAR
-    // =========================================================================
+    private JPanel crearPanelLiveHub() {
+        panelHubContenido = new JPanel(new BorderLayout());
+        panelHubContenido.setOpaque(false);
+
+        // Panel Hub Vacío
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione una cuenta para consultar el Live Credit Hub", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        // Panel Detalle Activo
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // 1. Cabecera del Hub
+        JPanel cabHub = new JPanel(new BorderLayout(10, 0));
+        cabHub.setOpaque(false);
+
+        lblHubAvatar = new JLabel("C", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int diametro = Math.min(getWidth(), getHeight()) - 2;
+                if (diametro > 0) {
+                    g2.setColor(new Color(240, 253, 250));
+                    g2.fill(new Ellipse2D.Double(1, 1, diametro, diametro));
+                    g2.setColor(Ui.TURQUESA);
+                    g2.draw(new Ellipse2D.Double(1, 1, diametro, diametro));
+                }
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
+        cabHub.add(lblHubAvatar, BorderLayout.WEST);
+
+        JPanel titulosHub = new JPanel();
+        titulosHub.setOpaque(false);
+        titulosHub.setLayout(new BoxLayout(titulosHub, BoxLayout.Y_AXIS));
+
+        lblHubTitulo = new JLabel("Titular de la Cuenta");
+        lblHubTitulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblHubTitulo.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubSubtitulo = new JLabel("CXC-001 · Cuenta por Cobrar");
+        lblHubSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubSubtitulo.setForeground(Ui.TEXTO_MUTED);
+
+        titulosHub.add(lblHubTitulo);
+        titulosHub.add(Box.createVerticalStrut(2));
+        titulosHub.add(lblHubSubtitulo);
+        cabHub.add(titulosHub, BorderLayout.CENTER);
+
+        lblHubChipEstado = new JLabel("  Pendiente  ");
+        lblHubChipEstado.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubChipEstado.setForeground(new Color(217, 119, 6));
+        lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(254, 215, 170), 1),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+        cabHub.add(lblHubChipEstado, BorderLayout.EAST);
+        panelHubDetalle.add(cabHub, BorderLayout.NORTH);
+
+        // 2. Centro con Telemetría 2x2 y Especificaciones
+        JPanel centroHub = new JPanel();
+        centroHub.setOpaque(false);
+        centroHub.setLayout(new BoxLayout(centroHub, BoxLayout.Y_AXIS));
+
+        // Telemetría 2x2
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridTelemetria.setOpaque(false);
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 115));
+
+        lblHubMontoOriginal = new JLabel("S/. 0.00");
+        lblHubSaldoPendiente = new JLabel("S/. 0.00");
+        lblHubTotalAbonado = new JLabel("S/. 0.00");
+        lblHubDiasVence = new JLabel("0 días");
+
+        gridTelemetria.add(crearCardMiniTelemetria("MONTO TOTAL", lblHubMontoOriginal, Ui.TEXTO_TITULO));
+        gridTelemetria.add(crearCardMiniTelemetria("SALDO PENDIENTE", lblHubSaldoPendiente, Ui.COLOR_PELIGRO));
+        gridTelemetria.add(crearCardMiniTelemetria("TOTAL AMORTIZADO", lblHubTotalAbonado, Ui.COLOR_EXITO));
+        gridTelemetria.add(crearCardMiniTelemetria("PLAZO / VENCIMIENTO", lblHubDiasVence, Ui.TURQUESA_OSCURO));
+
+        centroHub.add(gridTelemetria);
+        centroHub.add(Box.createVerticalStrut(8));
+
+        // Especificaciones
+        centroHub.add(crearSeccionTitulo("INFORMACIÓN DEL TITULAR & CONTACTO"));
+        lblHubTitularTipo = new JLabel("Titular: -");
+        lblHubTitularTipo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubDocumentoRef = new JLabel("Referencia / Teléfono: -");
+        lblHubDocumentoRef.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        centroHub.add(lblHubTitularTipo);
+        centroHub.add(lblHubDocumentoRef);
+        centroHub.add(Box.createVerticalStrut(8));
+
+        centroHub.add(crearSeccionTitulo("DETALLE DE LA PRESTACIÓN O COMPRA"));
+        lblHubConcepto = new JLabel("Concepto: -");
+        lblHubConcepto.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubFechaEmisionVence = new JLabel("Emisión: - | Vence: -");
+        lblHubFechaEmisionVence.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        centroHub.add(lblHubConcepto);
+        centroHub.add(lblHubFechaEmisionVence);
+
+        panelHubDetalle.add(centroHub, BorderLayout.CENTER);
+
+        // 3. Footer con 4 Botones de Acción 1-click
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+
+        JButton btnRegistrarPago = Ui.boton("Registrar Abono / Pago", true);
+        btnRegistrarPago.setIcon(Iconos.crearIconoMonedas(14, Color.WHITE));
+        btnRegistrarPago.addActionListener(e -> registrarAbonoPago());
+
+        JButton btnEstadoCuenta = Ui.boton("Estado de Cuenta PDF", false);
+        btnEstadoCuenta.setIcon(Iconos.crearIconoFactura(14, Ui.TEXTO_TITULO));
+        btnEstadoCuenta.addActionListener(e -> emitirEstadoCuentaPDF());
+
+        JButton btnWhatsApp = Ui.boton("Notificar WhatsApp", false);
+        btnWhatsApp.setIcon(Iconos.crearIconoMensaje(14, Ui.COLOR_EXITO));
+        btnWhatsApp.addActionListener(e -> notificarWhatsApp());
+
+        JButton btnModificar = Ui.boton("Editar / Anular", false);
+        btnModificar.setIcon(Iconos.crearIconoEditar(14, Ui.TEXTO_TITULO));
+        btnModificar.addActionListener(e -> editarOAnularCuenta());
+
+        gridAcciones.add(btnRegistrarPago);
+        gridAcciones.add(btnEstadoCuenta);
+        gridAcciones.add(btnWhatsApp);
+        gridAcciones.add(btnModificar);
+
+        panelHubDetalle.add(gridAcciones, BorderLayout.SOUTH);
+
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        return panelHubContenido;
+    }
+
+    private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel(new BorderLayout());
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(colorValor);
+
+        c.add(t, BorderLayout.NORTH);
+        c.add(lblValor, BorderLayout.CENTER);
+        return c;
+    }
+
+    private JPanel crearSeccionTitulo(String titulo) {
+        JPanel s = new JPanel(new BorderLayout(6, 0));
+        s.setOpaque(false);
+        JLabel l = new JLabel(titulo);
+        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setForeground(Ui.TURQUESA_PROFUNDO);
+        s.add(l, BorderLayout.WEST);
+        s.add(new JSeparator(), BorderLayout.CENTER);
+        s.setBorder(new EmptyBorder(4, 0, 4, 0));
+        return s;
+    }
+
     public void recargarDatos() {
-        // 1. Recargar Cuentas por Cobrar
-        modeloCobrar.setRowCount(0);
-        List<CuentaPorCobrar> listaCobrar = repo.getCuentasPorCobrar();
-        double totalCobrarPendiente = 0.0;
+        actualizarKpis();
+        filtrarCartera();
+    }
+
+    private void actualizarKpis() {
+        List<CuentaPorCobrar> cxcList = repo.getCuentasPorCobrar();
+        List<CuentaPorPagar> cxpList = repo.getCuentasPorPagar();
+
+        double totalCobrar = 0.0;
         int vencidas = 0;
-
-        for (CuentaPorCobrar c : listaCobrar) {
-            modeloCobrar.addRow(new Object[]{
-                    c.getCliente(),
-                    c.getConcepto(),
-                    String.format("%.2f", c.getMonto()),
-                    c.getFechaVenceTexto(),
-                    c.getEstado()
-            });
-            if (!"Pagado".equalsIgnoreCase(c.getEstado())) {
-                totalCobrarPendiente += c.getSaldo();
-            }
-            if ("Vencido".equalsIgnoreCase(c.getEstado())) {
+        for (CuentaPorCobrar c : cxcList) {
+            totalCobrar += c.getSaldo();
+            if ("Vencido".equalsIgnoreCase(c.getEstado()) || (c.getFechaVence() != null && c.getFechaVence().isBefore(LocalDate.now()) && !"Pagado".equalsIgnoreCase(c.getEstado()))) {
                 vencidas++;
             }
         }
-        lblTotalPorCobrar.setText("Total por cobrar: S/ " + String.format("%.2f", totalCobrarPendiente));
 
-        // 2. Recargar Cuentas por Pagar
-        modeloPagar.setRowCount(0);
-        List<CuentaPorPagar> listaPagar = repo.getCuentasPorPagar();
-        double totalPagarPendiente = 0.0;
-
-        for (CuentaPorPagar p : listaPagar) {
-            modeloPagar.addRow(new Object[]{
-                    p.getProveedor(),
-                    p.getConcepto(),
-                    String.format("%.2f", p.getMonto()),
-                    p.getFechaVenceTexto(),
-                    p.getEstado()
-            });
-            if (!"Pagado".equalsIgnoreCase(p.getEstado())) {
-                totalPagarPendiente += p.getSaldo();
-            }
-            if ("Vencido".equalsIgnoreCase(p.getEstado())) {
+        double totalPagar = 0.0;
+        for (CuentaPorPagar p : cxpList) {
+            totalPagar += p.getSaldo();
+            if ("Vencido".equalsIgnoreCase(p.getEstado()) || (p.getFechaVence() != null && p.getFechaVence().isBefore(LocalDate.now()) && !"Pagado".equalsIgnoreCase(p.getEstado()))) {
                 vencidas++;
             }
         }
-        lblTotalPorPagar.setText("Total pendiente: S/ " + String.format("%.2f", totalPagarPendiente));
 
-        // 3. Actualizar KPIs superiores
-        lblKpiCobrar.setText("S/ " + String.format("%.2f", totalCobrarPendiente));
-        lblKpiPagar.setText("S/ " + String.format("%.2f", totalPagarPendiente));
-        lblKpiVencidas.setText(vencidas + " vencidas");
-        double balance = totalCobrarPendiente - totalPagarPendiente;
-        lblKpiBalance.setText((balance >= 0 ? "+ S/ " : "- S/ ") + String.format("%.2f", Math.abs(balance)));
-        lblKpiBalance.setForeground(balance >= 0 ? COLOR_VERDE : COLOR_ROJO);
+        double balance = totalCobrar - totalPagar;
+
+        lblKpiCobrar.setText(String.format("S/. %.2f", totalCobrar));
+        lblKpiPagar.setText(String.format("S/. %.2f", totalPagar));
+        lblKpiVencidas.setText(String.valueOf(vencidas));
+        lblKpiBalance.setText(String.format("S/. %.2f", balance));
     }
 
-    private void seleccionarFilaCobrar() {
-        int r = tablaCobrar.getSelectedRow();
-        if (r >= 0 && r < repo.getCuentasPorCobrar().size()) {
-            CuentaPorCobrar c = repo.getCuentasPorCobrar().get(r);
-            idSeleccionadoCobrar = c.getIdCuenta();
-            txtClienteCobrar.setText(c.getCliente());
-            txtConceptoCobrar.setText(c.getConcepto());
-            txtMontoCobrar.setText(String.format("%.2f", c.getMonto()));
-            txtVenceCobrar.setText(c.getFechaVenceTexto());
-            cboEstadoCobrar.setSelectedItem(c.getEstado());
-        }
-    }
+    private void filtrarCartera() {
+        String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+        listaCarteraFiltrada.clear();
 
-    private void agregarCuentaCobrar() {
-        try {
-            String cli = txtClienteCobrar.getText().trim();
-            String con = txtConceptoCobrar.getText().trim();
-            String monStr = txtMontoCobrar.getText().trim();
-            String venStr = txtVenceCobrar.getText().trim();
-            String est = (String) cboEstadoCobrar.getSelectedItem();
-
-            if (cli.isEmpty() || con.isEmpty() || monStr.isEmpty() || venStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Complete todos los campos del formulario.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            double mon = Double.parseDouble(monStr);
-            LocalDate ven = LocalDate.parse(venStr, FORMATO_FECHA);
-
-            CuentaPorCobrar nueva = new CuentaPorCobrar(null, cli, con, mon, ven, est);
-            repo.guardarCuentaPorCobrar(nueva);
-            recargarDatos();
-            limpiarFormCobrar();
-            JOptionPane.showMessageDialog(this, "Cuenta por cobrar registrada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Datos inválidos: verifique formato de monto o fecha (dd/MM/yyyy).", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void modificarCuentaCobrar() {
-        if (idSeleccionadoCobrar == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para modificar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        try {
-            String cli = txtClienteCobrar.getText().trim();
-            String con = txtConceptoCobrar.getText().trim();
-            double mon = Double.parseDouble(txtMontoCobrar.getText().trim());
-            LocalDate ven = LocalDate.parse(txtVenceCobrar.getText().trim(), FORMATO_FECHA);
-            String est = (String) cboEstadoCobrar.getSelectedItem();
-
+        // 1. Cuentas por Cobrar
+        if (!"Por Pagar".equals(filtroTipoSeleccionado)) {
             for (CuentaPorCobrar c : repo.getCuentasPorCobrar()) {
-                if (c.getIdCuenta().equalsIgnoreCase(idSeleccionadoCobrar)) {
-                    c.setCliente(cli);
-                    c.setConcepto(con);
-                    c.setMonto(mon);
-                    c.setFechaVence(ven);
-                    c.setEstado(est);
-                    break;
+                if (!coincideFiltroEstado(c.getEstado(), c.getFechaVence())) continue;
+
+                if (!query.isEmpty()) {
+                    boolean match = c.getIdCuenta().toLowerCase().contains(query)
+                            || c.getCliente().toLowerCase().contains(query)
+                            || c.getConcepto().toLowerCase().contains(query)
+                            || c.getComprobanteReferencia().toLowerCase().contains(query);
+                    if (!match) continue;
                 }
+                listaCarteraFiltrada.add(new FilaCartera(c));
             }
-            recargarDatos();
-            JOptionPane.showMessageDialog(this, "Cuenta modificada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al modificar: verifique los datos ingresados.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // 2. Cuentas por Pagar
+        if (!"Por Cobrar".equals(filtroTipoSeleccionado)) {
+            for (CuentaPorPagar p : repo.getCuentasPorPagar()) {
+                if (!coincideFiltroEstado(p.getEstado(), p.getFechaVence())) continue;
+
+                if (!query.isEmpty()) {
+                    boolean match = p.getIdCuenta().toLowerCase().contains(query)
+                            || p.getProveedor().toLowerCase().contains(query)
+                            || p.getConcepto().toLowerCase().contains(query)
+                            || p.getFacturaProveedor().toLowerCase().contains(query);
+                    if (!match) continue;
+                }
+                listaCarteraFiltrada.add(new FilaCartera(p));
+            }
+        }
+
+        modeloCartera.setRowCount(0);
+        for (FilaCartera f : listaCarteraFiltrada) {
+            modeloCartera.addRow(new Object[]{
+                    f.id,
+                    f.esCobrar ? "Por Cobrar" : "Por Pagar",
+                    f.titular,
+                    f.concepto,
+                    String.format("%.2f", f.montoTotal),
+                    String.format("%.2f", f.saldoPendiente),
+                    f.fechaVence != null ? f.fechaVence.format(FORMATO_FECHA) : "-",
+                    f.estado
+            });
+        }
+
+        if (!listaCarteraFiltrada.isEmpty()) {
+            tablaCartera.setRowSelectionInterval(0, 0);
+            mostrarDetalleItem(listaCarteraFiltrada.get(0));
+        } else {
+            mostrarDetalleItem(null);
         }
     }
 
-    private void eliminarCuentaCobrar() {
-        if (idSeleccionadoCobrar == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione una cuenta para eliminar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+    private boolean coincideFiltroEstado(String estado, LocalDate fechaVence) {
+        if ("TODAS".equals(filtroTipoSeleccionado) || "Por Cobrar".equals(filtroTipoSeleccionado) || "Por Pagar".equals(filtroTipoSeleccionado)) {
+            return true;
+        }
+        if ("Pendientes".equals(filtroTipoSeleccionado)) {
+            return "Pendiente".equalsIgnoreCase(estado);
+        }
+        if ("Parciales".equals(filtroTipoSeleccionado)) {
+            return "Parcial".equalsIgnoreCase(estado);
+        }
+        if ("Pagadas".equals(filtroTipoSeleccionado)) {
+            return "Pagado".equalsIgnoreCase(estado);
+        }
+        if ("Vencidas".equals(filtroTipoSeleccionado)) {
+            return "Vencido".equalsIgnoreCase(estado) || (fechaVence != null && fechaVence.isBefore(LocalDate.now()) && !"Pagado".equalsIgnoreCase(estado));
+        }
+        return true;
+    }
+
+    private void mostrarDetalleItem(FilaCartera f) {
+        this.itemSeleccionado = f;
+        panelHubContenido.removeAll();
+
+        if (f == null) {
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+            panelHubContenido.revalidate();
+            panelHubContenido.repaint();
             return;
         }
-        int r = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar esta cuenta por cobrar?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
-        if (r == JOptionPane.YES_OPTION) {
-            repo.eliminarCuentaPorCobrar(idSeleccionadoCobrar);
+
+        lblHubAvatar.setText(f.titular != null && !f.titular.isEmpty() ? f.titular.substring(0, 1).toUpperCase() : "C");
+        lblHubTitulo.setText(f.titular);
+        lblHubSubtitulo.setText(f.id + " · " + (f.esCobrar ? "Cuenta por Cobrar (Cliente)" : "Cuenta por Pagar (Proveedor)"));
+        lblHubChipEstado.setText("  " + f.estado + "  ");
+
+        if ("Pagado".equalsIgnoreCase(f.estado)) {
+            lblHubChipEstado.setForeground(Ui.COLOR_EXITO);
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(187, 247, 208), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        } else if ("Parcial".equalsIgnoreCase(f.estado)) {
+            lblHubChipEstado.setForeground(Ui.TURQUESA_OSCURO);
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(153, 246, 228), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        } else if ("Vencido".equalsIgnoreCase(f.estado) || (f.fechaVence != null && f.fechaVence.isBefore(LocalDate.now()))) {
+            lblHubChipEstado.setForeground(Ui.COLOR_PELIGRO);
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(254, 202, 202), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        } else {
+            lblHubChipEstado.setForeground(new Color(217, 119, 6));
+            lblHubChipEstado.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(254, 215, 170), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        }
+
+        lblHubMontoOriginal.setText(String.format("S/. %.2f", f.montoTotal));
+        lblHubSaldoPendiente.setText(String.format("S/. %.2f", f.saldoPendiente));
+        lblHubTotalAbonado.setText(String.format("S/. %.2f", f.montoAbonado));
+
+        long dias = f.fechaVence != null ? ChronoUnit.DAYS.between(LocalDate.now(), f.fechaVence) : 0;
+        if (dias < 0) {
+            lblHubDiasVence.setText("Vencido (" + Math.abs(dias) + " d)");
+            lblHubDiasVence.setForeground(Ui.COLOR_PELIGRO);
+        } else {
+            lblHubDiasVence.setText(dias + " días vigentes");
+            lblHubDiasVence.setForeground(Ui.TURQUESA_OSCURO);
+        }
+
+        lblHubTitularTipo.setText("Titular: " + f.titular + " (" + (f.esCobrar ? "Cliente" : "Laboratorio/Proveedor") + ")");
+        lblHubDocumentoRef.setText("Ref / Teléfono: " + (f.referencia != null && !f.referencia.isEmpty() ? f.referencia : "-"));
+        lblHubConcepto.setText("Concepto: " + f.concepto);
+        lblHubFechaEmisionVence.setText("Emisión: " + (f.fechaRegistro != null ? f.fechaRegistro.format(FORMATO_FECHA) : "-")
+                + " | Vence: " + (f.fechaVence != null ? f.fechaVence.format(FORMATO_FECHA) : "-"));
+
+        panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
+    }
+
+    private void abrirDialogoNuevaCxC() {
+        Frame parent = (Frame) SwingUtilities.getWindowAncestor(this);
+        FormularioCuentaCobrarDialog dlg = new FormularioCuentaCobrarDialog(parent);
+        dlg.setVisible(true);
+        if (dlg.isConfirmado()) {
             recargarDatos();
-            limpiarFormCobrar();
         }
     }
 
-    private void limpiarFormCobrar() {
-        idSeleccionadoCobrar = null;
-        txtClienteCobrar.setText("");
-        txtConceptoCobrar.setText("");
-        txtMontoCobrar.setText("");
-        txtVenceCobrar.setText(LocalDate.now().plusDays(15).format(FORMATO_FECHA));
-        cboEstadoCobrar.setSelectedIndex(0);
-        tablaCobrar.clearSelection();
+    private void abrirDialogoNuevaCxP() {
+        Frame parent = (Frame) SwingUtilities.getWindowAncestor(this);
+        FormularioCuentaPagarDialog dlg = new FormularioCuentaPagarDialog(parent);
+        dlg.setVisible(true);
+        if (dlg.isConfirmado()) {
+            recargarDatos();
+        }
     }
 
-    private void abrirDialogoAbonoCobrar() {
-        int r = tablaCobrar.getSelectedRow();
-        if (r < 0 || r >= repo.getCuentasPorCobrar().size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione la cuenta del cliente a la que desea registrar el cobro.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        CuentaPorCobrar cuenta = repo.getCuentasPorCobrar().get(r);
-        if ("Pagado".equalsIgnoreCase(cuenta.getEstado())) {
-            JOptionPane.showMessageDialog(this, "Esta cuenta ya se encuentra totalmente saldada.", "Información", JOptionPane.INFORMATION_MESSAGE);
+    private void registrarAbonoPago() {
+        if (itemSeleccionado == null) return;
+        if (itemSeleccionado.saldoPendiente <= 0) {
+            JOptionPane.showMessageDialog(this, "Esta cuenta ya se encuentra totalmente saldada.", "Cuenta Pagada", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         String input = JOptionPane.showInputDialog(this,
-                "<html><body><b>Registrar Cobro a Cliente:</b> " + cuenta.getCliente() + "<br>" +
-                "<b>Concepto:</b> " + cuenta.getConcepto() + "<br>" +
-                "<b>Monto Total:</b> S/ " + String.format("%.2f", cuenta.getMonto()) + "<br>" +
-                "<b>Saldo Pendiente:</b> S/ " + String.format("%.2f", cuenta.getSaldo()) + "<br><br>" +
-                "Ingrese el importe a cobrar (S/):</body></html>",
-                String.format("%.2f", cuenta.getSaldo()));
+                "Ingrese el importe a amortizar para " + itemSeleccionado.titular + " (" + itemSeleccionado.id + "):\n" +
+                        "Saldo actual pendiente: S/. " + String.format("%.2f", itemSeleccionado.saldoPendiente),
+                String.format("%.2f", itemSeleccionado.saldoPendiente));
 
         if (input != null && !input.trim().isEmpty()) {
             try {
                 double abono = Double.parseDouble(input.trim());
-                if (abono <= 0) return;
-                repo.registrarAbonoCuentaPorCobrar(cuenta.getIdCuenta(), abono);
+                if (abono <= 0) throw new NumberFormatException();
 
-                // Opcional: registrar automáticamente en caja chica
-                repo.guardarMovimientoCajaChica(new happypets.model.MovimientoCajaChica(
-                        null, LocalDate.now(), "Ingreso",
-                        "Cobro CXC " + cuenta.getIdCuenta() + " - " + cuenta.getCliente(),
-                        abono, "Joanna Corrales", "Recibo Cobro #0" + cuenta.getIdCuenta()
-                ));
-
-                recargarDatos();
-                JOptionPane.showMessageDialog(this, "Abono de S/ " + String.format("%.2f", abono) + " registrado con éxito.", "Cobro Registrado", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Monto inválido.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    // =========================================================================
-    // LÓGICA DE NEGOCIO: CARGA Y CRUD CUENTAS POR PAGAR
-    // =========================================================================
-    private void seleccionarFilaPagar() {
-        int r = tablaPagar.getSelectedRow();
-        if (r >= 0 && r < repo.getCuentasPorPagar().size()) {
-            CuentaPorPagar p = repo.getCuentasPorPagar().get(r);
-            idSeleccionadoPagar = p.getIdCuenta();
-            txtProveedorPagar.setText(p.getProveedor());
-            txtConceptoPagar.setText(p.getConcepto());
-            txtMontoPagar.setText(String.format("%.2f", p.getMonto()));
-            txtVencePagar.setText(p.getFechaVenceTexto());
-            cboEstadoPagar.setSelectedItem(p.getEstado());
-        }
-    }
-
-    private void agregarCuentaPagar() {
-        try {
-            String prov = txtProveedorPagar.getText().trim();
-            String con = txtConceptoPagar.getText().trim();
-            String monStr = txtMontoPagar.getText().trim();
-            String venStr = txtVencePagar.getText().trim();
-            String est = (String) cboEstadoPagar.getSelectedItem();
-
-            if (prov.isEmpty() || con.isEmpty() || monStr.isEmpty() || venStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Complete todos los campos del formulario.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            double mon = Double.parseDouble(monStr);
-            LocalDate ven = LocalDate.parse(venStr, FORMATO_FECHA);
-
-            CuentaPorPagar nueva = new CuentaPorPagar(null, prov, con, mon, ven, est);
-            repo.guardarCuentaPorPagar(nueva);
-            recargarDatos();
-            limpiarFormPagar();
-            JOptionPane.showMessageDialog(this, "Cuenta por pagar registrada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Datos inválidos: verifique formato de monto o fecha (dd/MM/yyyy).", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void modificarCuentaPagar() {
-        if (idSeleccionadoPagar == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para modificar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        try {
-            String prov = txtProveedorPagar.getText().trim();
-            String con = txtConceptoPagar.getText().trim();
-            double mon = Double.parseDouble(txtMontoPagar.getText().trim());
-            LocalDate ven = LocalDate.parse(txtVencePagar.getText().trim(), FORMATO_FECHA);
-            String est = (String) cboEstadoPagar.getSelectedItem();
-
-            for (CuentaPorPagar p : repo.getCuentasPorPagar()) {
-                if (p.getIdCuenta().equalsIgnoreCase(idSeleccionadoPagar)) {
-                    p.setProveedor(prov);
-                    p.setConcepto(con);
-                    p.setMonto(mon);
-                    p.setFechaVence(ven);
-                    p.setEstado(est);
-                    break;
+                if (itemSeleccionado.esCobrar) {
+                    repo.registrarAbonoCuentaPorCobrar(itemSeleccionado.id, abono);
+                } else {
+                    repo.registrarPagoCuentaPorPagar(itemSeleccionado.id, abono);
                 }
-            }
-            recargarDatos();
-            JOptionPane.showMessageDialog(this, "Cuenta modificada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al modificar: verifique los datos ingresados.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
-    private void eliminarCuentaPagar() {
-        if (idSeleccionadoPagar == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione una cuenta para eliminar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int r = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar esta cuenta por pagar?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
-        if (r == JOptionPane.YES_OPTION) {
-            repo.eliminarCuentaPorPagar(idSeleccionadoPagar);
-            recargarDatos();
-            limpiarFormPagar();
-        }
-    }
-
-    private void limpiarFormPagar() {
-        idSeleccionadoPagar = null;
-        txtProveedorPagar.setText("");
-        txtConceptoPagar.setText("");
-        txtMontoPagar.setText("");
-        txtVencePagar.setText(LocalDate.now().plusDays(20).format(FORMATO_FECHA));
-        cboEstadoPagar.setSelectedIndex(0);
-        tablaPagar.clearSelection();
-    }
-
-    private void abrirDialogoPagoPagar() {
-        int r = tablaPagar.getSelectedRow();
-        if (r < 0 || r >= repo.getCuentasPorPagar().size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione la cuenta por pagar a liquidar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        CuentaPorPagar cuenta = repo.getCuentasPorPagar().get(r);
-        if ("Pagado".equalsIgnoreCase(cuenta.getEstado())) {
-            JOptionPane.showMessageDialog(this, "Esta cuenta ya se encuentra totalmente cancelada.", "Información", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        String input = JOptionPane.showInputDialog(this,
-                "<html><body><b>Registrar Pago a Proveedor:</b> " + cuenta.getProveedor() + "<br>" +
-                "<b>Concepto:</b> " + cuenta.getConcepto() + "<br>" +
-                "<b>Monto Total:</b> S/ " + String.format("%.2f", cuenta.getMonto()) + "<br>" +
-                "<b>Saldo Pendiente:</b> S/ " + String.format("%.2f", cuenta.getSaldo()) + "<br><br>" +
-                "Ingrese el importe a pagar (S/):</body></html>",
-                String.format("%.2f", cuenta.getSaldo()));
-
-        if (input != null && !input.trim().isEmpty()) {
-            try {
-                double pago = Double.parseDouble(input.trim());
-                if (pago <= 0) return;
-                repo.registrarPagoCuentaPorPagar(cuenta.getIdCuenta(), pago);
-
-                // Opcional: registrar en egresos operativos
-                repo.guardarEgresoOperativo(new happypets.model.EgresoOperativo(
-                        null, LocalDate.now(), "Suministros y Mercadería",
-                        "Pago a proveedor " + cuenta.getProveedor() + " (" + cuenta.getConcepto() + ")",
-                        cuenta.getProveedor(), pago, "Transferencia", "OP-BCP-9812", "Pagado"
-                ));
-
+                JOptionPane.showMessageDialog(this,
+                        "Abono de S/. " + String.format("%.2f", abono) + " aplicado exitosamente.",
+                        "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
                 recargarDatos();
-                JOptionPane.showMessageDialog(this, "Pago de S/ " + String.format("%.2f", pago) + " registrado con éxito.", "Pago Registrado", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Monto inválido.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Ingrese un monto numérico válido mayor a cero.", "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void emitirEstadoCuentaPDF() {
+        if (itemSeleccionado == null) return;
+
+        List<Object[]> filas = new ArrayList<>();
+        filas.add(new Object[]{
+                itemSeleccionado.id,
+                itemSeleccionado.concepto,
+                String.format("S/ %.2f", itemSeleccionado.montoTotal),
+                String.format("S/ %.2f", itemSeleccionado.montoAbonado),
+                String.format("S/ %.2f", itemSeleccionado.saldoPendiente),
+                itemSeleccionado.estado
+        });
+
+        Ui.mostrarVisorReporte(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                "Estado de Cuenta " + itemSeleccionado.id,
+                "Certificado Oficial de Cartera & Liquidación Happy Pets",
+                new String[][]{
+                        {"Titular", itemSeleccionado.titular},
+                        {"Tipo de Obligación", itemSeleccionado.esCobrar ? "Cuenta por Cobrar (Cliente)" : "Cuenta por Pagar (Proveedor)"},
+                        {"Documento / Referencia", itemSeleccionado.referencia},
+                        {"Fecha de Vencimiento", itemSeleccionado.fechaVence != null ? itemSeleccionado.fechaVence.format(FORMATO_FECHA) : "-"},
+                        {"Estado de Cuenta", itemSeleccionado.estado}
+                },
+                new String[]{"ID Cuenta", "Concepto", "Monto Orig.", "Amortizado", "Saldo Pend.", "Estado"},
+                filas,
+                "Total Facturado: S/ " + String.format("%.2f", itemSeleccionado.montoTotal)
+                        + " | Amortizaciones: S/ " + String.format("%.2f", itemSeleccionado.montoAbonado)
+                        + " | SALDO EXIGIBLE: S/ " + String.format("%.2f", itemSeleccionado.saldoPendiente),
+                "estado_cuenta_" + itemSeleccionado.id
+        );
+    }
+
+    private void notificarWhatsApp() {
+        if (itemSeleccionado == null) return;
+        JOptionPane.showMessageDialog(this,
+                "Enviando notificación por WhatsApp:\n" +
+                        "Destinatario: " + itemSeleccionado.titular + "\n" +
+                        "Mensaje: Estimado(a), le recordamos que la cuenta " + itemSeleccionado.id +
+                        " por S/. " + String.format("%.2f", itemSeleccionado.saldoPendiente) +
+                        " vence el " + (itemSeleccionado.fechaVence != null ? itemSeleccionado.fechaVence.format(FORMATO_FECHA) : "-") +
+                        ". Gracias por su confianza en Happy Pets.",
+                "WhatsApp API - Notificación Enviada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void editarOAnularCuenta() {
+        if (itemSeleccionado == null) return;
+        Frame parent = (Frame) SwingUtilities.getWindowAncestor(this);
+
+        if (itemSeleccionado.esCobrar) {
+            CuentaPorCobrar c = repo.getCuentasPorCobrar().stream()
+                    .filter(x -> x.getIdCuenta().equalsIgnoreCase(itemSeleccionado.id))
+                    .findFirst().orElse(null);
+            if (c != null) {
+                FormularioCuentaCobrarDialog dlg = new FormularioCuentaCobrarDialog(parent, c);
+                dlg.setVisible(true);
+                if (dlg.isConfirmado()) recargarDatos();
+            }
+        } else {
+            CuentaPorPagar p = repo.getCuentasPorPagar().stream()
+                    .filter(x -> x.getIdCuenta().equalsIgnoreCase(itemSeleccionado.id))
+                    .findFirst().orElse(null);
+            if (p != null) {
+                FormularioCuentaPagarDialog dlg = new FormularioCuentaPagarDialog(parent, p);
+                dlg.setVisible(true);
+                if (dlg.isConfirmado()) recargarDatos();
+            }
+        }
+    }
+
+    private static class FilaCartera {
+        final String id;
+        final boolean esCobrar;
+        final String titular;
+        final String concepto;
+        final double montoTotal;
+        final double montoAbonado;
+        final double saldoPendiente;
+        final LocalDate fechaRegistro;
+        final LocalDate fechaVence;
+        final String estado;
+        final String referencia;
+
+        FilaCartera(CuentaPorCobrar c) {
+            this.id = c.getIdCuenta();
+            this.esCobrar = true;
+            this.titular = c.getCliente();
+            this.concepto = c.getConcepto();
+            this.montoTotal = c.getMonto();
+            this.montoAbonado = c.getMontoPagado();
+            this.saldoPendiente = c.getSaldo();
+            this.fechaRegistro = c.getFechaRegistro();
+            this.fechaVence = c.getFechaVence();
+            this.estado = c.getEstado();
+            this.referencia = c.getComprobanteReferencia() != null && !c.getComprobanteReferencia().isEmpty()
+                    ? c.getComprobanteReferencia() : c.getTelefonoCliente();
+        }
+
+        FilaCartera(CuentaPorPagar p) {
+            this.id = p.getIdCuenta();
+            this.esCobrar = false;
+            this.titular = p.getProveedor();
+            this.concepto = p.getConcepto();
+            this.montoTotal = p.getMonto();
+            this.montoAbonado = p.getMontoPagado();
+            this.saldoPendiente = p.getSaldo();
+            this.fechaRegistro = p.getFechaRegistro();
+            this.fechaVence = p.getFechaVence();
+            this.estado = p.getEstado();
+            this.referencia = p.getFacturaProveedor() != null && !p.getFacturaProveedor().isEmpty()
+                    ? p.getFacturaProveedor() : p.getRucProveedor();
         }
     }
 }

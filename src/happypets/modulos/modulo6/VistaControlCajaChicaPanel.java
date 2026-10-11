@@ -3,13 +3,18 @@ package happypets.modulos.modulo6;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.awt.geom.Ellipse2D;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -19,20 +24,22 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -42,78 +49,75 @@ import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 6.3: Control de Caja Chica.
- * Basado estrictamente en el wireframe oficial CONTROL DE CAJA CHICA.pdf y mejorado:
- * - Formulario: Fecha, Tipo (Ingreso/Egreso), Concepto, Monto, Responsable, Comprobante.
- * - Botones oficiales: Agregar, Modificar, Eliminar, Limpiar.
- * - Tabla interactiva con badges de tipo y comprobante.
- * - Totales inferiores: Total ingresos, Total egresos, Saldo actual.
- * - Mejoras: KPIs de fondo, Diálogo de Arqueo Físico (billetes/monedas) y Reporte de Cierre.
+ * Submódulo 6.3: Control de Caja Chica y Arqueos Diarios.
+ * Arquitectura Master-Detail (58% / 42%) - Opción A Recomendada:
+ * - Master Table: Registro cronológico de ingresos y egresos menores con saldos dinámicos.
+ * - Live Cash Hub: Telemetría 2x2, conciliación de fondos, arqueos físicos y acciones 1-click.
  */
 public class VistaControlCajaChicaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_PRIMARIO = Ui.TURQUESA; // Turquesa Clínico Original
-    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
-    private static final Color COLOR_ROJO = Ui.COLOR_PELIGRO;
-    private static final Color COLOR_AZUL = Ui.TURQUESA_OSCURO;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
-
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
-    // KPIs Superiores
-    private JLabel lblKpiIngresos;
-    private JLabel lblKpiEgresos;
-    private JLabel lblKpiSaldo;
+    // KPIs
+    private JLabel lblKpiSaldoActual;
+    private JLabel lblKpiTotalIngresos;
+    private JLabel lblKpiTotalEgresos;
     private JLabel lblKpiOperaciones;
 
-    // Componentes del Formulario del Wireframe
-    private JTextField txtFecha;         // txtFecha
-    private JComboBox<String> cboTipo;   // cboTipo: Ingreso
-    private JTextField txtConcepto;      // txtConcepto
-    private JTextField txtMonto;         // txtMonto
-    private JTextField txtResponsable;   // txtResponsable
-    private JTextField txtComprobante;   // txtComprobante
-
-    // Tabla
+    // Tabla Maestra (Izquierda - 58%)
     private JTable tablaCaja;
     private DefaultTableModel modeloCaja;
-    private String idSeleccionado = null;
+    private JTextField txtBuscar;
+    private String filtroTipoSeleccionado = "TODOS";
+    private final List<MovimientoCajaChica> listaCajaFiltrada = new ArrayList<>();
 
-    // Totales del Footer del Wireframe
-    private JLabel lblTotalIngresos;
-    private JLabel lblTotalEgresos;
-    private JLabel lblSaldoActual;
+    // Live Cash Hub (Derecha - 42%)
+    private JPanel panelHubContenido;
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
+
+    private JLabel lblHubAvatar;
+    private JLabel lblHubTitulo;
+    private JLabel lblHubSubtitulo;
+    private JLabel lblHubChipTipo;
+
+    // Telemetría 2x2
+    private JLabel lblHubMontoOperado;
+    private JLabel lblHubSaldoResultante;
+    private JLabel lblHubFechaOperacion;
+    private JLabel lblHubTipoTransaccion;
+
+    // Secciones de Detalle
+    private JLabel lblHubResponsable;
+    private JLabel lblHubComprobante;
+    private JLabel lblHubConcepto;
+    private JLabel lblHubSaldoActualCaja;
+
+    private MovimientoCajaChica movimientoSeleccionado;
 
     public VistaControlCajaChicaPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        JPanel panelContenido = new JPanel();
+        panelContenido.setOpaque(false);
+        panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
+        panelContenido.setBorder(new EmptyBorder(12, 18, 14, 18));
 
-        // 1. Cabecera institucional
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(10));
+        // 1. Cabecera Principal
+        panelContenido.add(crearCabeceraVista());
+        panelContenido.add(Box.createVerticalStrut(10));
 
         // 2. Fila de KPIs
-        contenido.add(crearFilaKpis());
-        contenido.add(Box.createVerticalStrut(12));
+        panelContenido.add(crearFilaKpis());
+        panelContenido.add(Box.createVerticalStrut(12));
 
-        // 3. Formulario oficial del Wireframe
-        contenido.add(crearFormularioCaja());
-        contenido.add(Box.createVerticalStrut(12));
+        // 3. Contenedor Master-Detail (58% / 42%)
+        panelContenido.add(crearSplitMasterDetail());
 
-        // 4. Tabla y Footer
-        contenido.add(crearSeccionTablaYFooter());
-
-        add(contenido, BorderLayout.CENTER);
+        add(panelContenido, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -122,46 +126,41 @@ public class VistaControlCajaChicaPanel extends JPanel {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel izq = new JPanel();
         izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel ico = new JLabel(Iconos.crearIconoCajaChica(22, COLOR_PRIMARIO));
-        izq.add(ico);
+        JLabel titulo = new JLabel("Control de Caja Chica & Arqueos Diarios");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JPanel titulos = new JPanel();
-        titulos.setOpaque(false);
-        titulos.setLayout(new BoxLayout(titulos, BoxLayout.Y_AXIS));
+        JLabel subtitulo = new JLabel("Módulo 6.3 · Custodia de fondos en efectivo, vales de caja y arqueo por denominación");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblTit = new JLabel("Submódulo 6.3: Control de Caja Chica");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblSub = new JLabel("Administración de fondo fijo para gastos menores, reposiciones y arqueos en efectivo");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-
-        titulos.add(lblTit);
-        titulos.add(lblSub);
-        izq.add(titulos);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
         cab.add(izq, BorderLayout.WEST);
 
-        // Botón superior de Arqueo
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
-        JButton btnArqueo = Ui.boton("Realizar Arqueo Físico", true);
-        btnArqueo.setBackground(COLOR_AZUL);
-        btnArqueo.setIcon(Iconos.crearIconoMonedas(14, Color.WHITE));
-        btnArqueo.addActionListener(e -> abrirModalArqueoCaja());
+        JButton btnNuevoMov = Ui.boton("+ Nuevo Movimiento", true);
+        btnNuevoMov.setIcon(Iconos.crearIconoMonedas(14, Color.WHITE));
+        btnNuevoMov.addActionListener(e -> abrirDialogoNuevoMovimiento());
+        der.add(btnNuevoMov);
 
-        JButton btnReporte = Ui.boton("Reporte de Cuadre", false);
-        btnReporte.setIcon(Iconos.crearIconoImprimir(14, COLOR_TEXTO_TITULO));
-        btnReporte.addActionListener(e -> generarReporteCuadre());
-
+        JButton btnArqueo = Ui.boton("Arqueo Físico de Caja", false);
+        btnArqueo.setIcon(Iconos.crearIconoCajaChica(14, Ui.TEXTO_TITULO));
+        btnArqueo.addActionListener(e -> realizarArqueoFisico());
         der.add(btnArqueo);
-        der.add(btnReporte);
-        cab.add(der, BorderLayout.EAST);
 
+        JButton btnActualizar = Ui.boton("Actualizar", false);
+        btnActualizar.addActionListener(e -> recargarDatos());
+        der.add(btnActualizar);
+
+        cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
@@ -170,626 +169,722 @@ public class VistaControlCajaChicaPanel extends JPanel {
         fila.setOpaque(false);
         fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        lblKpiIngresos = new JLabel("S/ 0.00");
-        lblKpiEgresos = new JLabel("S/ 0.00");
-        lblKpiSaldo = new JLabel("S/ 0.00");
-        lblKpiOperaciones = new JLabel("0 movs");
+        lblKpiSaldoActual = new JLabel("S/. 0.00");
+        lblKpiTotalIngresos = new JLabel("S/. 0.00");
+        lblKpiTotalEgresos = new JLabel("S/. 0.00");
+        lblKpiOperaciones = new JLabel("0");
 
-        fila.add(crearCardKpi("Total Ingresos / Fondos", lblKpiIngresos, COLOR_VERDE, "Apertura y reposiciones"));
-        fila.add(crearCardKpi("Total Egresos Menores", lblKpiEgresos, COLOR_ROJO, "Gastos corrientes sustentados"));
-        fila.add(crearCardKpi("Saldo Disponible Actual", lblKpiSaldo, COLOR_PRIMARIO, "Efectivo físico disponible"));
-        fila.add(crearCardKpi("Movimientos Registrados", lblKpiOperaciones, COLOR_AZUL, "Transacciones en el periodo"));
+        fila.add(crearCardKpi("Saldo Actual en Custodia", lblKpiSaldoActual, "Efectivo disponible en caja", Iconos.crearIconoMonedas(22, Ui.COLOR_EXITO)));
+        fila.add(crearCardKpi("Ingresos del Turno", lblKpiTotalIngresos, "Reposición y ventas efectivo", Iconos.crearIconoPOS(22, Ui.TURQUESA)));
+        fila.add(crearCardKpi("Egresos del Turno", lblKpiTotalEgresos, "Vales y gastos menores", Iconos.crearIconoAlertaMerma(22, Ui.COLOR_PELIGRO)));
+        fila.add(crearCardKpi("Operaciones Registradas", lblKpiOperaciones, "Movimientos auditados", Iconos.crearIconoCajaChica(22, Ui.TURQUESA_OSCURO)));
 
         return fila;
     }
 
-    private JPanel crearCardKpi(String titulo, JLabel lblValor, Color colorAcento, String subtitulo) {
-        JPanel card = new JPanel(new BorderLayout(4, 4)) {
+    private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                g2.setColor(colorAcento);
-                g2.fillRect(0, 0, 4, getHeight());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
-                super.paintComponent(g);
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(8, 12, 8, 12));
+        card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
-        JLabel lblT = new JLabel(titulo.toUpperCase());
-        lblT.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lblT.setForeground(COLOR_TEXTO_MUTED);
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblValor.setForeground(colorAcento);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblS = new JLabel(subtitulo);
-        lblS.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblS.setForeground(COLOR_TEXTO_MUTED);
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
 
-        card.add(lblT, BorderLayout.NORTH);
-        card.add(lblValor, BorderLayout.CENTER);
-        card.add(lblS, BorderLayout.SOUTH);
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblSub);
+
+        card.add(texto, BorderLayout.CENTER);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            card.add(lblIco, BorderLayout.EAST);
+        }
 
         return card;
     }
 
-    /**
-     * Formulario que replica exactamente el wireframe CONTROL DE CAJA CHICA.pdf:
-     * Fecha: txtFecha           Tipo: cboTipo: Ingreso
-     * Concepto: txtConcepto     Monto: txtMonto
-     * Responsable: txtResponsable Comprobante: txtComprobante
-     * [Agregar] [Modificar] [Eliminar] [Limpiar]
-     */
-    private JPanel crearFormularioCaja() {
-        JPanel boxForm = new JPanel(new BorderLayout(0, 10));
-        boxForm.setBackground(Color.WHITE);
-        boxForm.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(12, 18, 14, 18)
-        ));
+    private JPanel crearSplitMasterDetail() {
+        JPanel split = new JPanel(new GridBagLayout());
+        split.setOpaque(false);
 
-        JPanel gridCampos = new JPanel(new GridLayout(3, 2, 22, 8));
-        gridCampos.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
-        // Fila 1: Fecha y Tipo
-        JPanel fFec = new JPanel(new BorderLayout(6, 0));
-        fFec.setOpaque(false);
-        JLabel lFec = new JLabel("Fecha:");
-        lFec.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lFec.setPreferredSize(new Dimension(95, 24));
-        txtFecha = new JTextField(LocalDate.now().format(FORMATO_FECHA));
-        fFec.add(lFec, BorderLayout.WEST);
-        fFec.add(txtFecha, BorderLayout.CENTER);
+        // 58% Tabla Maestra Izquierda
+        gbc.gridx = 0;
+        gbc.weightx = 0.58;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 12);
+        split.add(crearPanelMasterTable(), gbc);
 
-        JPanel fTip = new JPanel(new BorderLayout(6, 0));
-        fTip.setOpaque(false);
-        JLabel lTip = new JLabel("Tipo:");
-        lTip.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lTip.setPreferredSize(new Dimension(95, 24));
-        cboTipo = new JComboBox<>(new String[]{"Ingreso", "Egreso"});
-        fTip.add(lTip, BorderLayout.WEST);
-        fTip.add(cboTipo, BorderLayout.CENTER);
+        // 42% Live Hub Derecha
+        gbc.gridx = 1;
+        gbc.weightx = 0.42;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 0);
+        split.add(crearPanelLiveHub(), gbc);
 
-        gridCampos.add(fFec);
-        gridCampos.add(fTip);
-
-        // Fila 2: Concepto y Monto
-        JPanel fCon = new JPanel(new BorderLayout(6, 0));
-        fCon.setOpaque(false);
-        JLabel lCon = new JLabel("Concepto:");
-        lCon.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lCon.setPreferredSize(new Dimension(95, 24));
-        txtConcepto = new JTextField();
-        fCon.add(lCon, BorderLayout.WEST);
-        fCon.add(txtConcepto, BorderLayout.CENTER);
-
-        JPanel fMon = new JPanel(new BorderLayout(6, 0));
-        fMon.setOpaque(false);
-        JLabel lMon = new JLabel("Monto S/:");
-        lMon.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lMon.setPreferredSize(new Dimension(95, 24));
-        txtMonto = new JTextField();
-        fMon.add(lMon, BorderLayout.WEST);
-        fMon.add(txtMonto, BorderLayout.CENTER);
-
-        gridCampos.add(fCon);
-        gridCampos.add(fMon);
-
-        // Fila 3: Responsable y Comprobante
-        JPanel fResp = new JPanel(new BorderLayout(6, 0));
-        fResp.setOpaque(false);
-        JLabel lResp = new JLabel("Responsable:");
-        lResp.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lResp.setPreferredSize(new Dimension(95, 24));
-        txtResponsable = new JTextField("Joanna Corrales");
-        fResp.add(lResp, BorderLayout.WEST);
-        fResp.add(txtResponsable, BorderLayout.CENTER);
-
-        JPanel fComp = new JPanel(new BorderLayout(6, 0));
-        fComp.setOpaque(false);
-        JLabel lComp = new JLabel("Comprobante:");
-        lComp.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lComp.setPreferredSize(new Dimension(95, 24));
-        txtComprobante = new JTextField();
-        fComp.add(lComp, BorderLayout.WEST);
-        fComp.add(txtComprobante, BorderLayout.CENTER);
-
-        gridCampos.add(fResp);
-        gridCampos.add(fComp);
-
-        boxForm.add(gridCampos, BorderLayout.CENTER);
-
-        // Botones de acción exactos: [Agregar] [Modificar] [Eliminar] [Limpiar]
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 4));
-        panelBotones.setOpaque(false);
-
-        JButton btnAgregar = Ui.boton("Agregar", true);
-        btnAgregar.setPreferredSize(new Dimension(115, 34));
-        btnAgregar.addActionListener(e -> agregarMovimiento());
-
-        JButton btnModificar = Ui.boton("Modificar", false);
-        btnModificar.setPreferredSize(new Dimension(115, 34));
-        btnModificar.addActionListener(e -> modificarMovimiento());
-
-        JButton btnEliminar = Ui.boton("Eliminar", false);
-        btnEliminar.setPreferredSize(new Dimension(115, 34));
-        btnEliminar.setForeground(COLOR_ROJO);
-        btnEliminar.addActionListener(e -> eliminarMovimiento());
-
-        JButton btnLimpiar = Ui.boton("Limpiar", false);
-        btnLimpiar.setPreferredSize(new Dimension(115, 34));
-        btnLimpiar.addActionListener(e -> limpiarFormulario());
-
-        panelBotones.add(btnAgregar);
-        panelBotones.add(btnModificar);
-        panelBotones.add(btnEliminar);
-        panelBotones.add(btnLimpiar);
-
-        boxForm.add(panelBotones, BorderLayout.SOUTH);
-        return boxForm;
+        return split;
     }
 
-    /**
-     * Tabla y Footer idénticos al wireframe:
-     * Tabla: Fecha | Tipo | Concepto | Monto | Responsable
-     * Footer: Total ingresos: S/ 0.00    Total egresos: S/ 0.00    Saldo actual: S/ 0.00
-     */
-    private JPanel crearSeccionTablaYFooter() {
-        JPanel sec = new JPanel(new BorderLayout(0, 8));
-        sec.setOpaque(false);
-
-        String[] cols = {"Fecha", "Tipo", "Concepto", "Monto (S/)", "Responsable", "Comprobante"};
-        modeloCaja = new DefaultTableModel(cols, 0) {
+    private JPanel crearPanelMasterTable() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
             }
+        };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // Filtros y Buscador
+        JPanel cabFiltros = new JPanel();
+        cabFiltros.setOpaque(false);
+        cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
+
+        JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
+        barraBuscar.setOpaque(false);
+
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        barraBuscar.add(lblBuscar, BorderLayout.WEST);
+
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar por concepto, responsable o comprobante...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarCaja(); }
+            public void removeUpdate(DocumentEvent e) { filtrarCaja(); }
+            public void changedUpdate(DocumentEvent e) { filtrarCaja(); }
+        });
+        barraBuscar.add(txtBuscar, BorderLayout.CENTER);
+        cabFiltros.add(barraBuscar);
+        cabFiltros.add(Box.createVerticalStrut(8));
+
+        // Pills de Filtro
+        JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pills.setOpaque(false);
+
+        String[] tipos = {"TODOS", "Ingresos", "Egresos", "Con Comprobante", "Hoy"};
+        for (String t : tipos) {
+            JButton btnPill = new JButton(t);
+            btnPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            btnPill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btnPill.setBorder(new EmptyBorder(4, 10, 4, 10));
+            btnPill.setFocusPainted(false);
+
+            if (t.equals(filtroTipoSeleccionado)) {
+                btnPill.setBackground(Ui.TURQUESA);
+                btnPill.setForeground(Color.WHITE);
+            } else {
+                btnPill.setBackground(new Color(241, 245, 249));
+                btnPill.setForeground(Ui.TEXTO_MUTED);
+            }
+
+            btnPill.addActionListener(e -> {
+                filtroTipoSeleccionado = t;
+                for (Component c : pills.getComponents()) {
+                    if (c instanceof JButton) {
+                        JButton b = (JButton) c;
+                        if (b.getText().equals(filtroTipoSeleccionado)) {
+                            b.setBackground(Ui.TURQUESA);
+                            b.setForeground(Color.WHITE);
+                        } else {
+                            b.setBackground(new Color(241, 245, 249));
+                            b.setForeground(Ui.TEXTO_MUTED);
+                        }
+                    }
+                }
+                filtrarCaja();
+            });
+            pills.add(btnPill);
+        }
+        cabFiltros.add(pills);
+        master.add(cabFiltros, BorderLayout.NORTH);
+
+        // Tabla
+        String[] cols = {"ID Mov.", "Tipo", "Concepto de la Operación", "Monto S/.", "Saldo Res. S/.", "Responsable", "Fecha"};
+        modeloCaja = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
         tablaCaja = new JTable(modeloCaja);
-        Ui.formatearTabla(tablaCaja, new int[]{0, 1, 5}, new int[]{3});
-        tablaCaja.getColumnModel().getColumn(0).setPreferredWidth(85);
-        tablaCaja.getColumnModel().getColumn(1).setPreferredWidth(75);
-        tablaCaja.getColumnModel().getColumn(2).setPreferredWidth(230);
-        tablaCaja.getColumnModel().getColumn(3).setPreferredWidth(85);
-        tablaCaja.getColumnModel().getColumn(4).setPreferredWidth(120);
-        tablaCaja.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tablaCaja.setRowHeight(48);
+        tablaCaja.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaCaja.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaCaja.setShowVerticalLines(false);
+        tablaCaja.setGridColor(new Color(241, 245, 249));
+        tablaCaja.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaCaja.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaCaja.getTableHeader().setForeground(Ui.TEXTO_MUTED);
 
-        tablaCaja.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                seleccionarFilaCaja();
+        tablaCaja.getColumnModel().getColumn(0).setPreferredWidth(75);
+        tablaCaja.getColumnModel().getColumn(1).setPreferredWidth(80);
+        tablaCaja.getColumnModel().getColumn(2).setPreferredWidth(210);
+        tablaCaja.getColumnModel().getColumn(3).setPreferredWidth(80);
+        tablaCaja.getColumnModel().getColumn(4).setPreferredWidth(85);
+        tablaCaja.getColumnModel().getColumn(5).setPreferredWidth(110);
+        tablaCaja.getColumnModel().getColumn(6).setPreferredWidth(80);
+
+        // Monograma en columna 2 (Concepto)
+        tablaCaja.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String concepto = value != null ? value.toString() : "";
+                String letra = !concepto.isEmpty() ? concepto.substring(0, 1).toUpperCase() : "M";
+
+                JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(new Color(240, 253, 250));
+                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.setColor(new Color(153, 246, 228));
+                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(30, 30));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(Ui.TURQUESA_PROFUNDO);
+
+                JLabel lblTexto = new JLabel(concepto);
+                lblTexto.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblTexto.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+                cell.add(avatar);
+                cell.add(lblTexto);
+                return cell;
             }
         });
 
-        // Renderer de colores para Tipo (Ingreso verde, Egreso rojo)
+        // Render de Tipo (Columna 1)
         tablaCaja.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setHorizontalAlignment(SwingConstants.CENTER);
-                setFont(new Font("Segoe UI", Font.BOLD, 11));
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setHorizontalAlignment(SwingConstants.CENTER);
                 String tipo = value != null ? value.toString() : "";
                 if ("Ingreso".equalsIgnoreCase(tipo)) {
-                    setForeground(new Color(22, 101, 52));
+                    l.setForeground(Ui.COLOR_EXITO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 } else {
-                    setForeground(new Color(185, 28, 28));
+                    l.setForeground(Ui.COLOR_PELIGRO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 }
-                return c;
+                return l;
+            }
+        });
+
+        tablaCaja.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaCaja.getSelectedRow();
+                if (r >= 0 && r < listaCajaFiltrada.size()) {
+                    mostrarDetalleMovimiento(listaCajaFiltrada.get(r));
+                } else {
+                    mostrarDetalleMovimiento(null);
+                }
             }
         });
 
         JScrollPane scroll = new JScrollPane(tablaCaja);
-        scroll.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        sec.add(scroll, BorderLayout.CENTER);
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        master.add(scroll, BorderLayout.CENTER);
 
-        // Footer exacto del Wireframe:
-        // Total ingresos: S/ 0.00 | Total egresos: S/ 0.00 | Saldo actual: S/ 0.00
-        JPanel footer = new JPanel(new GridLayout(1, 3, 20, 0));
-        footer.setBackground(Color.WHITE);
-        footer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(8, 18, 8, 18)
-        ));
-
-        lblTotalIngresos = new JLabel("Total ingresos: S/ 0.00", SwingConstants.LEFT);
-        lblTotalIngresos.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTotalIngresos.setForeground(COLOR_VERDE);
-
-        lblTotalEgresos = new JLabel("Total egresos: S/ 0.00", SwingConstants.CENTER);
-        lblTotalEgresos.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTotalEgresos.setForeground(COLOR_ROJO);
-
-        lblSaldoActual = new JLabel("Saldo actual: S/ 0.00", SwingConstants.RIGHT);
-        lblSaldoActual.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblSaldoActual.setForeground(COLOR_PRIMARIO);
-
-        footer.add(lblTotalIngresos);
-        footer.add(lblTotalEgresos);
-        footer.add(lblSaldoActual);
-
-        sec.add(footer, BorderLayout.SOUTH);
-        return sec;
+        return master;
     }
 
-    // =========================================================================
-    // LÓGICA DE NEGOCIO Y OPERACIONES DE CAJA CHICA
-    // =========================================================================
+    private JPanel crearPanelLiveHub() {
+        panelHubContenido = new JPanel(new BorderLayout());
+        panelHubContenido.setOpaque(false);
+
+        // Panel Hub Vacío
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione un movimiento para consultar el Live Cash Hub", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        // Panel Detalle Activo
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // 1. Cabecera del Hub
+        JPanel cabHub = new JPanel(new BorderLayout(10, 0));
+        cabHub.setOpaque(false);
+
+        lblHubAvatar = new JLabel("$", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int diametro = Math.min(getWidth(), getHeight()) - 2;
+                if (diametro > 0) {
+                    g2.setColor(new Color(240, 253, 250));
+                    g2.fill(new Ellipse2D.Double(1, 1, diametro, diametro));
+                    g2.setColor(Ui.TURQUESA);
+                    g2.draw(new Ellipse2D.Double(1, 1, diametro, diametro));
+                }
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
+        cabHub.add(lblHubAvatar, BorderLayout.WEST);
+
+        JPanel titulosHub = new JPanel();
+        titulosHub.setOpaque(false);
+        titulosHub.setLayout(new BoxLayout(titulosHub, BoxLayout.Y_AXIS));
+
+        lblHubTitulo = new JLabel("Concepto de la Operación");
+        lblHubTitulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblHubTitulo.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubSubtitulo = new JLabel("CCH-001 · Responsable: Juan Pérez");
+        lblHubSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubSubtitulo.setForeground(Ui.TEXTO_MUTED);
+
+        titulosHub.add(lblHubTitulo);
+        titulosHub.add(Box.createVerticalStrut(2));
+        titulosHub.add(lblHubSubtitulo);
+        cabHub.add(titulosHub, BorderLayout.CENTER);
+
+        lblHubChipTipo = new JLabel("  Ingreso  ");
+        lblHubChipTipo.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubChipTipo.setForeground(Ui.COLOR_EXITO);
+        lblHubChipTipo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(187, 247, 208), 1),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+        cabHub.add(lblHubChipTipo, BorderLayout.EAST);
+        panelHubDetalle.add(cabHub, BorderLayout.NORTH);
+
+        // 2. Centro con Telemetría 2x2 y Especificaciones
+        JPanel centroHub = new JPanel();
+        centroHub.setOpaque(false);
+        centroHub.setLayout(new BoxLayout(centroHub, BoxLayout.Y_AXIS));
+
+        // Telemetría 2x2
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridTelemetria.setOpaque(false);
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 115));
+
+        lblHubMontoOperado = new JLabel("S/. 0.00");
+        lblHubSaldoResultante = new JLabel("S/. 0.00");
+        lblHubFechaOperacion = new JLabel("00/00/0000");
+        lblHubTipoTransaccion = new JLabel("Ingreso");
+
+        gridTelemetria.add(crearCardMiniTelemetria("MONTO OPERADO", lblHubMontoOperado, Ui.TURQUESA_OSCURO));
+        gridTelemetria.add(crearCardMiniTelemetria("SALDO RESULTANTE", lblHubSaldoResultante, Ui.COLOR_EXITO));
+        gridTelemetria.add(crearCardMiniTelemetria("FECHA OPERACIÓN", lblHubFechaOperacion, Ui.TEXTO_TITULO));
+        gridTelemetria.add(crearCardMiniTelemetria("TIPO TRANSACCIÓN", lblHubTipoTransaccion, Ui.TEXTO_MUTED));
+
+        centroHub.add(gridTelemetria);
+        centroHub.add(Box.createVerticalStrut(8));
+
+        // Especificaciones
+        centroHub.add(crearSeccionTitulo("AUDITORÍA DE CAJA & RESPONSABLE"));
+        lblHubResponsable = new JLabel("Responsable de Turno: -");
+        lblHubResponsable.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubComprobante = new JLabel("Comprobante de Respaldo: -");
+        lblHubComprobante.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        centroHub.add(lblHubResponsable);
+        centroHub.add(lblHubComprobante);
+        centroHub.add(Box.createVerticalStrut(8));
+
+        centroHub.add(crearSeccionTitulo("CONCILIACIÓN & JUSTIFICACIÓN CONTABLE"));
+        lblHubConcepto = new JLabel("Detalle: -");
+        lblHubConcepto.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubSaldoActualCaja = new JLabel("Saldo Total de Caja: S/. 0.00");
+        lblHubSaldoActualCaja.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        centroHub.add(lblHubConcepto);
+        centroHub.add(lblHubSaldoActualCaja);
+
+        panelHubDetalle.add(centroHub, BorderLayout.CENTER);
+
+        // 3. Footer con 4 Botones de Acción 1-click
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+
+        JButton btnValePDF = Ui.boton("Vale de Caja PDF", true);
+        btnValePDF.setIcon(Iconos.crearIconoFactura(14, Color.WHITE));
+        btnValePDF.addActionListener(e -> emitirValePDF());
+
+        JButton btnArqueoModal = Ui.boton("Arqueo Físico", false);
+        btnArqueoModal.setIcon(Iconos.crearIconoCajaChica(14, Ui.TEXTO_TITULO));
+        btnArqueoModal.addActionListener(e -> realizarArqueoFisico());
+
+        JButton btnCierreTurno = Ui.boton("Cierre de Turno", false);
+        btnCierreTurno.setIcon(Iconos.crearIconoExportar(14, Ui.TURQUESA_OSCURO));
+        btnCierreTurno.addActionListener(e -> emitirCierreTurnoPDF());
+
+        JButton btnAnular = Ui.boton("Anular Movimiento", false);
+        btnAnular.setIcon(Iconos.crearIconoAlertaMerma(14, Ui.COLOR_PELIGRO));
+        btnAnular.addActionListener(e -> anularMovimientoSeleccionado());
+
+        gridAcciones.add(btnValePDF);
+        gridAcciones.add(btnArqueoModal);
+        gridAcciones.add(btnCierreTurno);
+        gridAcciones.add(btnAnular);
+
+        panelHubDetalle.add(gridAcciones, BorderLayout.SOUTH);
+
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        return panelHubContenido;
+    }
+
+    private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel(new BorderLayout());
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(colorValor);
+
+        c.add(t, BorderLayout.NORTH);
+        c.add(lblValor, BorderLayout.CENTER);
+        return c;
+    }
+
+    private JPanel crearSeccionTitulo(String titulo) {
+        JPanel s = new JPanel(new BorderLayout(6, 0));
+        s.setOpaque(false);
+        JLabel l = new JLabel(titulo);
+        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setForeground(Ui.TURQUESA_PROFUNDO);
+        s.add(l, BorderLayout.WEST);
+        s.add(new JSeparator(), BorderLayout.CENTER);
+        s.setBorder(new EmptyBorder(4, 0, 4, 0));
+        return s;
+    }
+
     public void recargarDatos() {
+        actualizarKpis();
+        filtrarCaja();
+    }
+
+    private void actualizarKpis() {
+        lblKpiSaldoActual.setText(String.format("S/. %.2f", repo.getSaldoActualCajaChica()));
+        lblKpiTotalIngresos.setText(String.format("S/. %.2f", repo.getTotalIngresosCajaChica()));
+        lblKpiTotalEgresos.setText(String.format("S/. %.2f", repo.getTotalEgresosCajaChica()));
+        lblKpiOperaciones.setText(String.valueOf(repo.getMovimientosCajaChica().size()));
+    }
+
+    private void filtrarCaja() {
+        String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+        List<MovimientoCajaChica> todos = repo.getMovimientosCajaChica();
+        listaCajaFiltrada.clear();
+
+        for (MovimientoCajaChica m : todos) {
+            boolean coincideTipo = true;
+            if ("Ingresos".equals(filtroTipoSeleccionado)) {
+                coincideTipo = m.esIngreso();
+            } else if ("Egresos".equals(filtroTipoSeleccionado)) {
+                coincideTipo = m.esEgreso();
+            } else if ("Con Comprobante".equals(filtroTipoSeleccionado)) {
+                coincideTipo = m.getComprobante() != null && !m.getComprobante().equals("-") && !m.getComprobante().trim().isEmpty();
+            } else if ("Hoy".equals(filtroTipoSeleccionado)) {
+                coincideTipo = m.getFecha() != null && m.getFecha().isEqual(LocalDate.now());
+            }
+            if (!coincideTipo) continue;
+
+            if (!query.isEmpty()) {
+                boolean match = m.getIdMovimiento().toLowerCase().contains(query)
+                        || m.getConcepto().toLowerCase().contains(query)
+                        || m.getResponsable().toLowerCase().contains(query)
+                        || m.getComprobante().toLowerCase().contains(query);
+                if (!match) continue;
+            }
+
+            listaCajaFiltrada.add(m);
+        }
+
         modeloCaja.setRowCount(0);
-        List<MovimientoCajaChica> movimientos = repo.getMovimientosCajaChica();
-
-        double totalIng = 0.0;
-        double totalEg = 0.0;
-
-        for (MovimientoCajaChica m : movimientos) {
+        for (MovimientoCajaChica m : listaCajaFiltrada) {
             modeloCaja.addRow(new Object[]{
-                    m.getFechaTexto(),
+                    m.getIdMovimiento(),
                     m.getTipo(),
                     m.getConcepto(),
                     String.format("%.2f", m.getMonto()),
+                    String.format("%.2f", m.getSaldoResultante()),
                     m.getResponsable(),
-                    m.getComprobante()
+                    m.getFecha() != null ? m.getFecha().format(FORMATO_FECHA) : "-"
             });
-
-            if (m.esIngreso()) {
-                totalIng += m.getMonto();
-            } else {
-                totalEg += m.getMonto();
-            }
         }
 
-        double saldoActual = Math.max(0.0, totalIng - totalEg);
-
-        // Actualizar Footer
-        lblTotalIngresos.setText("Total ingresos: S/ " + String.format("%.2f", totalIng));
-        lblTotalEgresos.setText("Total egresos: S/ " + String.format("%.2f", totalEg));
-        lblSaldoActual.setText("Saldo actual: S/ " + String.format("%.2f", saldoActual));
-
-        // Actualizar KPIs
-        lblKpiIngresos.setText("S/ " + String.format("%.2f", totalIng));
-        lblKpiEgresos.setText("S/ " + String.format("%.2f", totalEg));
-        lblKpiSaldo.setText("S/ " + String.format("%.2f", saldoActual));
-        lblKpiOperaciones.setText(movimientos.size() + " movimientos");
-    }
-
-    private void seleccionarFilaCaja() {
-        int r = tablaCaja.getSelectedRow();
-        if (r >= 0 && r < repo.getMovimientosCajaChica().size()) {
-            MovimientoCajaChica m = repo.getMovimientosCajaChica().get(r);
-            idSeleccionado = m.getIdMovimiento();
-            txtFecha.setText(m.getFechaTexto());
-            cboTipo.setSelectedItem(m.getTipo());
-            txtConcepto.setText(m.getConcepto());
-            txtMonto.setText(String.format("%.2f", m.getMonto()));
-            txtResponsable.setText(m.getResponsable());
-            txtComprobante.setText(m.getComprobante());
+        if (!listaCajaFiltrada.isEmpty()) {
+            tablaCaja.setRowSelectionInterval(0, 0);
+            mostrarDetalleMovimiento(listaCajaFiltrada.get(0));
+        } else {
+            mostrarDetalleMovimiento(null);
         }
     }
 
-    private void agregarMovimiento() {
-        try {
-            String fecStr = txtFecha.getText().trim();
-            String tip = (String) cboTipo.getSelectedItem();
-            String con = txtConcepto.getText().trim();
-            String monStr = txtMonto.getText().trim();
-            String resp = txtResponsable.getText().trim();
-            String comp = txtComprobante.getText().trim();
+    private void mostrarDetalleMovimiento(MovimientoCajaChica m) {
+        this.movimientoSeleccionado = m;
+        panelHubContenido.removeAll();
 
-            if (fecStr.isEmpty() || con.isEmpty() || monStr.isEmpty() || resp.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Complete todos los campos obligatorios del formulario.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            double mon = Double.parseDouble(monStr);
-            if (mon <= 0) {
-                JOptionPane.showMessageDialog(this, "El monto debe ser mayor a 0.00.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // Validar que un egreso no exceda el saldo disponible
-            double saldoActual = repo.getSaldoActualCajaChica();
-            if ("Egreso".equalsIgnoreCase(tip) && mon > saldoActual) {
-                int conf = JOptionPane.showConfirmDialog(this,
-                        "El egreso (S/ " + String.format("%.2f", mon) + ") supera el saldo actual en caja (S/ " + String.format("%.2f", saldoActual) + ").\n¿Desea registrarlo de todas formas?",
-                        "Advertencia de Saldo Insuficiente", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (conf != JOptionPane.YES_OPTION) return;
-            }
-
-            LocalDate fec = LocalDate.parse(fecStr, FORMATO_FECHA);
-            MovimientoCajaChica mov = new MovimientoCajaChica(null, fec, tip, con, mon, resp, comp);
-            repo.guardarMovimientoCajaChica(mov);
-
-            recargarDatos();
-            limpiarFormulario();
-            JOptionPane.showMessageDialog(this, "Movimiento de caja chica registrado con éxito.", "Registro Conforme", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Datos inválidos: verifique formato de monto o fecha (dd/MM/yyyy).", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void modificarMovimiento() {
-        if (idSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un movimiento de la tabla para modificar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        if (m == null) {
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+            panelHubContenido.revalidate();
+            panelHubContenido.repaint();
             return;
         }
-        try {
-            LocalDate fec = LocalDate.parse(txtFecha.getText().trim(), FORMATO_FECHA);
-            String tip = (String) cboTipo.getSelectedItem();
-            String con = txtConcepto.getText().trim();
-            double mon = Double.parseDouble(txtMonto.getText().trim());
-            String resp = txtResponsable.getText().trim();
-            String comp = txtComprobante.getText().trim();
 
-            for (MovimientoCajaChica m : repo.getMovimientosCajaChica()) {
-                if (m.getIdMovimiento().equalsIgnoreCase(idSeleccionado)) {
-                    m.setFecha(fec);
-                    m.setTipo(tip);
-                    m.setConcepto(con);
-                    m.setMonto(mon);
-                    m.setResponsable(resp);
-                    m.setComprobante(comp);
-                    break;
-                }
-            }
+        lblHubAvatar.setText(m.esIngreso() ? "+" : "-");
+        lblHubTitulo.setText(m.getConcepto());
+        lblHubSubtitulo.setText(m.getIdMovimiento() + " · " + m.getResponsable());
+        lblHubChipTipo.setText("  " + m.getTipo() + "  ");
+
+        if (m.esIngreso()) {
+            lblHubChipTipo.setForeground(Ui.COLOR_EXITO);
+            lblHubChipTipo.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(187, 247, 208), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        } else {
+            lblHubChipTipo.setForeground(Ui.COLOR_PELIGRO);
+            lblHubChipTipo.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(254, 202, 202), 1),
+                    new EmptyBorder(4, 8, 4, 8)
+            ));
+        }
+
+        lblHubMontoOperado.setText(String.format("S/. %.2f", m.getMonto()));
+        lblHubSaldoResultante.setText(String.format("S/. %.2f", m.getSaldoResultante()));
+        lblHubFechaOperacion.setText(m.getFecha() != null ? m.getFecha().format(FORMATO_FECHA) : "-");
+        lblHubTipoTransaccion.setText(m.getTipo());
+
+        lblHubResponsable.setText("Responsable: " + m.getResponsable());
+        lblHubComprobante.setText("Comprobante: " + m.getComprobante());
+        lblHubConcepto.setText("Detalle: " + m.getConcepto());
+        lblHubSaldoActualCaja.setText(String.format("Saldo Total en Custodia: S/. %.2f", repo.getSaldoActualCajaChica()));
+
+        panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
+    }
+
+    private void abrirDialogoNuevoMovimiento() {
+        Frame parent = (Frame) SwingUtilities.getWindowAncestor(this);
+        FormularioMovimientoCajaChicaDialog dlg = new FormularioMovimientoCajaChicaDialog(parent);
+        dlg.setVisible(true);
+        if (dlg.isConfirmado()) {
             recargarDatos();
-            JOptionPane.showMessageDialog(this, "Movimiento modificado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al modificar movimiento.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void eliminarMovimiento() {
-        if (idSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un movimiento de la tabla para eliminar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int r = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar este movimiento de caja chica?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
-        if (r == JOptionPane.YES_OPTION) {
-            repo.eliminarMovimientoCajaChica(idSeleccionado);
-            recargarDatos();
-            limpiarFormulario();
-        }
-    }
-
-    private void limpiarFormulario() {
-        idSeleccionado = null;
-        txtFecha.setText(LocalDate.now().format(FORMATO_FECHA));
-        cboTipo.setSelectedIndex(0);
-        txtConcepto.setText("");
-        txtMonto.setText("");
-        txtResponsable.setText("Joanna Corrales");
-        txtComprobante.setText("");
-        tablaCaja.clearSelection();
-    }
-
-    /**
-     * Modal interactivo para arqueo físico de efectivo (billetes y monedas).
-     */
-    private void abrirModalArqueoCaja() {
-        JDialog dlg = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this),
-                "Arqueo Físico y Cuadre de Caja Chica", true);
-        dlg.setSize(520, 560);
+    private void realizarArqueoFisico() {
+        Frame parent = (Frame) SwingUtilities.getWindowAncestor(this);
+        JDialog dlg = new JDialog(parent, "Arqueo Físico de Billetes y Monedas", true);
+        dlg.setSize(520, 500);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
         JPanel p = new JPanel(new BorderLayout(0, 12));
         p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(14, 18, 14, 18));
+        p.setBorder(new EmptyBorder(16, 20, 16, 20));
 
-        // Cabecera del diálogo
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-        JLabel tit = new JLabel("Conteo Físico de Efectivo en Bóveda");
+        JLabel tit = new JLabel("Conteo por Denominación en Caja Chica");
         tit.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        tit.setForeground(COLOR_TEXTO_TITULO);
-        top.add(tit, BorderLayout.NORTH);
+        tit.setForeground(Ui.TEXTO_TITULO);
+        p.add(tit, BorderLayout.NORTH);
 
-        double saldoSistema = repo.getSaldoActualCajaChica();
-        JLabel sub = new JLabel("Saldo según sistema: S/ " + String.format("%.2f", saldoSistema));
-        sub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        sub.setForeground(COLOR_AZUL);
-        top.add(sub, BorderLayout.SOUTH);
-        p.add(top, BorderLayout.NORTH);
-
-        // Denominaciones peruanas oficiales
-        double[] denomValores = {100.0, 50.0, 20.0, 10.0, 5.0, 2.0, 1.0, 0.50};
-        String[] denomNombres = {"Billetes de S/ 100", "Billetes de S/ 50", "Billetes de S/ 20", "Billetes de S/ 10",
-                                 "Monedas de S/ 5", "Monedas de S/ 2", "Monedas de S/ 1", "Monedas de S/ 0.50"};
-        JSpinner[] spinners = new JSpinner[denomValores.length];
-
-        JPanel gridDenom = new JPanel(new GridLayout(denomValores.length, 3, 10, 4));
+        JPanel gridDenom = new JPanel(new GridLayout(6, 2, 10, 8));
         gridDenom.setOpaque(false);
 
-        JLabel lblTotalConteo = new JLabel("S/ 0.00", SwingConstants.RIGHT);
-        lblTotalConteo.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTotalConteo.setForeground(COLOR_PRIMARIO);
+        int[] denominaciones = {100, 50, 20, 10, 5, 1};
+        JSpinner[] spinners = new JSpinner[denominaciones.length];
 
-        JLabel lblDiferencia = new JLabel("Diferencia: S/ 0.00", SwingConstants.RIGHT);
-        lblDiferencia.setFont(new Font("Segoe UI", Font.BOLD, 13));
-
-        Runnable recalcularConteo = () -> {
-            double totalFisico = 0.0;
-            for (int i = 0; i < denomValores.length; i++) {
-                int cant = ((Number) spinners[i].getValue()).intValue();
-                totalFisico += cant * denomValores[i];
-            }
-            lblTotalConteo.setText("S/ " + String.format("%.2f", totalFisico));
-            double dif = totalFisico - saldoSistema;
-            if (Math.abs(dif) < 0.01) {
-                lblDiferencia.setText("Caja Cuadrada Exacta (0.00)");
-                lblDiferencia.setForeground(COLOR_VERDE);
-            } else if (dif > 0) {
-                lblDiferencia.setText("Sobrante: + S/ " + String.format("%.2f", dif));
-                lblDiferencia.setForeground(COLOR_AZUL);
-            } else {
-                lblDiferencia.setText("Faltante: - S/ " + String.format("%.2f", Math.abs(dif)));
-                lblDiferencia.setForeground(COLOR_ROJO);
-            }
-        };
-
-        for (int i = 0; i < denomValores.length; i++) {
-            JLabel lblD = new JLabel(denomNombres[i]);
-            lblD.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        for (int i = 0; i < denominaciones.length; i++) {
+            gridDenom.add(new JLabel("Denominación S/. " + denominaciones[i] + ":"));
             spinners[i] = new JSpinner(new SpinnerNumberModel(0, 0, 500, 1));
-            spinners[i].addChangeListener(e -> recalcularConteo.run());
-
-            gridDenom.add(lblD);
             gridDenom.add(spinners[i]);
-            JLabel subTotalDenom = new JLabel("x S/ " + String.format("%.2f", denomValores[i]));
-            subTotalDenom.setFont(new Font("Segoe UI", Font.ITALIC, 11));
-            subTotalDenom.setForeground(COLOR_TEXTO_MUTED);
-            gridDenom.add(subTotalDenom);
         }
-
         p.add(gridDenom, BorderLayout.CENTER);
 
-        // Bloque inferior con totales y botón guardar acta de arqueo
-        JPanel bot = new JPanel(new BorderLayout(0, 8));
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bot.setOpaque(false);
 
-        JPanel pTotales = new JPanel(new GridLayout(2, 2, 8, 4));
-        pTotales.setBackground(new Color(248, 250, 252));
-        pTotales.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(8, 12, 8, 12)
-        ));
+        JButton btnCalcular = Ui.boton("Conciliar Arqueo", true);
+        btnCalcular.addActionListener(e -> {
+            double conteoTotal = 0.0;
+            for (int i = 0; i < denominaciones.length; i++) {
+                int cant = (Integer) spinners[i].getValue();
+                conteoTotal += (cant * denominaciones[i]);
+            }
+            double saldoSistema = repo.getSaldoActualCajaChica();
+            double diferencia = conteoTotal - saldoSistema;
 
-        JLabel l1 = new JLabel("Total Efectivo Contado:");
-        l1.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        pTotales.add(l1);
-        pTotales.add(lblTotalConteo);
+            String resultado = String.format("Conteo Físico Total: S/. %.2f\nSaldo en Sistema: S/. %.2f\n", conteoTotal, saldoSistema);
+            if (Math.abs(diferencia) < 0.01) {
+                resultado += "Estado: [CONFORME] Arqueo cuadrado exactamente sin diferencias.";
+            } else if (diferencia > 0) {
+                resultado += String.format("Estado: [SOBRANTE] Sobrante en caja de S/. %.2f.", diferencia);
+            } else {
+                resultado += String.format("Estado: [FALTANTE] Faltante en caja de S/. %.2f.", Math.abs(diferencia));
+            }
 
-        JLabel l2 = new JLabel("Estado del Cuadre:");
-        l2.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        pTotales.add(l2);
-        pTotales.add(lblDiferencia);
-
-        bot.add(pTotales, BorderLayout.NORTH);
-
-        JPanel pBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        pBtns.setOpaque(false);
-
-        JButton btnGuardarActa = Ui.boton("Guardar Acta de Arqueo", true);
-        btnGuardarActa.addActionListener(e -> {
-            JOptionPane.showMessageDialog(dlg,
-                    "Acta de Arqueo registrada satisfactoriamente para la sesión actual.\nResponsable: Joanna Corrales.",
-                    "Arqueo Conforme", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(dlg, resultado, "Resultado del Arqueo", JOptionPane.INFORMATION_MESSAGE);
             dlg.dispose();
         });
 
         JButton btnCerrar = Ui.boton("Cerrar", false);
         btnCerrar.addActionListener(e -> dlg.dispose());
 
-        pBtns.add(btnGuardarActa);
-        pBtns.add(btnCerrar);
-        bot.add(pBtns, BorderLayout.SOUTH);
-
+        bot.add(btnCerrar);
+        bot.add(btnCalcular);
         p.add(bot, BorderLayout.SOUTH);
 
         dlg.add(p);
         dlg.setVisible(true);
     }
 
-    private void generarReporteCuadre() {
-        JDialog dlg = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this),
-                "Reporte Oficial de Movimientos de Caja Chica", true);
-        dlg.setSize(540, 600);
-        dlg.setLocationRelativeTo(this);
-        dlg.setLayout(new BorderLayout());
+    private void emitirValePDF() {
+        if (movimientoSeleccionado == null) return;
 
-        JPanel p = new JPanel(new BorderLayout(0, 10));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(14, 18, 14, 18));
+        List<Object[]> filas = new ArrayList<>();
+        filas.add(new Object[]{
+                movimientoSeleccionado.getIdMovimiento(),
+                movimientoSeleccionado.getConcepto(),
+                movimientoSeleccionado.getTipo(),
+                String.format("S/ %.2f", movimientoSeleccionado.getMonto()),
+                String.format("S/ %.2f", movimientoSeleccionado.getSaldoResultante()),
+                movimientoSeleccionado.getComprobante()
+        });
 
-        JTextArea txt = new JTextArea();
-        txt.setFont(new Font("Consolas", Font.PLAIN, 12));
-        txt.setEditable(false);
+        Ui.mostrarVisorReporte(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                "Vale de Caja " + movimientoSeleccionado.getIdMovimiento(),
+                "Comprobante Oficial de Movimiento en Caja Chica",
+                new String[][]{
+                        {"N° Operación", movimientoSeleccionado.getIdMovimiento()},
+                        {"Fecha", movimientoSeleccionado.getFecha() != null ? movimientoSeleccionado.getFecha().format(FORMATO_FECHA) : "-"},
+                        {"Tipo", movimientoSeleccionado.getTipo()},
+                        {"Responsable", movimientoSeleccionado.getResponsable()},
+                        {"Comprobante / Vale", movimientoSeleccionado.getComprobante()}
+                },
+                new String[]{"ID Mov.", "Concepto", "Tipo", "Monto Operado", "Saldo Resultante", "Comprobante"},
+                filas,
+                "MONTO: S/ " + String.format("%.2f", movimientoSeleccionado.getMonto())
+                        + " | Saldo Resultante en Caja: S/ " + String.format("%.2f", movimientoSeleccionado.getSaldoResultante()),
+                "vale_caja_" + movimientoSeleccionado.getIdMovimiento()
+        );
+    }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("====================================================\n");
-        sb.append("         VETERINARIA HAPPY PETS S.A.C.             \n");
-        sb.append("       REPORTE DE CIERRE Y MOVIMIENTOS CAJA CHICA   \n");
-        sb.append("====================================================\n");
-        sb.append("Fecha de Emisión: ").append(LocalDate.now().format(FORMATO_FECHA)).append("\n");
-        sb.append("Responsable     : Joanna Corrales / Harry Arroyo\n");
-        sb.append("Estado          : Conciliado\n");
-        sb.append("----------------------------------------------------\n");
-        sb.append(String.format("%-10s %-8s %-20s %10s\n", "FECHA", "TIPO", "CONCEPTO", "MONTO"));
-        sb.append("----------------------------------------------------\n");
-
+    private void emitirCierreTurnoPDF() {
+        List<Object[]> filas = new ArrayList<>();
         for (MovimientoCajaChica m : repo.getMovimientosCajaChica()) {
-            String con = m.getConcepto().length() > 20 ? m.getConcepto().substring(0, 18) + ".." : m.getConcepto();
-            sb.append(String.format("%-10s %-8s %-20s S/ %7.2f\n",
-                    m.getFechaTexto(), m.getTipo(), con, m.getMonto()));
+            filas.add(new Object[]{
+                    m.getIdMovimiento(),
+                    m.getFecha() != null ? m.getFecha().format(FORMATO_FECHA) : "-",
+                    m.getTipo(),
+                    m.getConcepto(),
+                    String.format("S/ %.2f", m.getMonto()),
+                    m.getResponsable()
+            });
         }
 
-        sb.append("----------------------------------------------------\n");
-        sb.append(String.format("%-30s S/ %10.2f\n", "TOTAL INGRESOS REGISTRADOS:", repo.getTotalIngresosCajaChica()));
-        sb.append(String.format("%-30s S/ %10.2f\n", "TOTAL EGRESOS EJECUTADOS:", repo.getTotalEgresosCajaChica()));
-        sb.append(String.format("%-30s S/ %10.2f\n", "SALDO DISPONIBLE EN EFECTIVO:", repo.getSaldoActualCajaChica()));
-        sb.append("====================================================\n");
-        sb.append("\n  Firma Responsable de Caja: ____________________\n");
-        sb.append("  Firma Administración     : ____________________\n");
+        Ui.mostrarVisorReporte(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                "Cierre de Turno de Caja Chica",
+                "Acta de Cuadre y Conciliación Oficial de Efectivo",
+                new String[][]{
+                        {"Fecha de Cierre", LocalDate.now().format(FORMATO_FECHA)},
+                        {"Cajero Responsable", "Juan Pérez Castro (Caja Central)"},
+                        {"Ingresos del Turno", String.format("S/ %.2f", repo.getTotalIngresosCajaChica())},
+                        {"Egresos del Turno", String.format("S/ %.2f", repo.getTotalEgresosCajaChica())},
+                        {"Saldo Final en Custodia", String.format("S/ %.2f", repo.getSaldoActualCajaChica())}
+                },
+                new String[]{"ID Mov.", "Fecha", "Tipo", "Concepto", "Monto", "Responsable"},
+                filas,
+                "Ingresos: S/ " + String.format("%.2f", repo.getTotalIngresosCajaChica())
+                        + " | Egresos: S/ " + String.format("%.2f", repo.getTotalEgresosCajaChica())
+                        + " | SALDO FINAL EN CUSTODIA: S/ " + String.format("%.2f", repo.getSaldoActualCajaChica()),
+                "cierre_turno_caja"
+        );
+    }
 
-        txt.setText(sb.toString());
+    private void anularMovimientoSeleccionado() {
+        if (movimientoSeleccionado == null) return;
 
-        p.add(new JScrollPane(txt), BorderLayout.CENTER);
+        int opt = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de anular el movimiento " + movimientoSeleccionado.getIdMovimiento() + "?\n" +
+                        "Esta acción recalculará los saldos de caja y registrará la auditoría correspondiente.",
+                "Confirmar Anulación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        bot.setOpaque(false);
-
-        JButton btnExportar = Ui.boton("Descargar PDF / Excel", false);
-        btnExportar.setIcon(Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
-        btnExportar.addActionListener(e -> {
-            List<Object[]> filasMovs = new ArrayList<>();
-            double totalIng = 0.0;
-            double totalEg = 0.0;
-            for (MovimientoCajaChica m : repo.getMovimientosCajaChica()) {
-                filasMovs.add(new Object[]{m.getFechaTexto(), m.getTipo(), m.getConcepto(), String.format("S/ %.2f", m.getMonto()), m.getResponsable(), m.getComprobante()});
-                if (m.esIngreso()) totalIng += m.getMonto(); else totalEg += m.getMonto();
-            }
-            Ui.mostrarVisorReporte(dlg,
-                    "REPORTE OFICIAL DE MOVIMIENTOS DE CAJA CHICA",
-                    "Clínica Veterinaria Happy Pets 24H · Arqueo y Conciliación",
-                    new String[][]{
-                            {"Responsable de Caja", "Joanna Corrales / Harry Arroyo"},
-                            {"Fecha de Emisión", LocalDate.now().format(FORMATO_FECHA)},
-                            {"Estado de Cuadre", "Conciliado y Conforme"},
-                            {"Saldo Actual en Caja", String.format("S/ %.2f", (totalIng - totalEg))}
-                    },
-                    new String[]{"Fecha", "Tipo", "Concepto", "Monto", "Responsable", "Comprobante"},
-                    filasMovs,
-                    "Total Ingresos: S/ " + String.format("%.2f", totalIng) + " | Total Egresos: S/ " + String.format("%.2f", totalEg) + " | Saldo Disponible: S/ " + String.format("%.2f", (totalIng - totalEg)),
-                    "caja_chica_arqueo"
-            );
-        });
-
-        JButton btnImp = Ui.boton("Imprimir Acta", true);
-        btnImp.setIcon(Iconos.crearIconoImprimir(14, Color.WHITE));
-        btnImp.addActionListener(e -> {
-            JOptionPane.showMessageDialog(dlg, "Reporte enviado a imprimir con éxito.", "Impresión", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
-        });
-        JButton btnCerrar = Ui.boton("Cerrar", false);
-        btnCerrar.addActionListener(e -> dlg.dispose());
-
-        bot.add(btnExportar);
-        bot.add(btnImp);
-        bot.add(btnCerrar);
-        p.add(bot, BorderLayout.SOUTH);
-
-        dlg.add(p);
-        dlg.setVisible(true);
+        if (opt == JOptionPane.YES_OPTION) {
+            repo.eliminarMovimientoCajaChica(movimientoSeleccionado.getIdMovimiento());
+            recargarDatos();
+        }
     }
 }

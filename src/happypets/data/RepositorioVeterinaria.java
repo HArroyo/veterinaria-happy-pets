@@ -1759,6 +1759,11 @@ public class RepositorioVeterinaria {
         }
     }
 
+    public void eliminarVentaPOS(String idVenta) {
+        if (idVenta == null) return;
+        ventasPOS.removeIf(v -> v.getIdVenta().equalsIgnoreCase(idVenta));
+    }
+
     // 2. Cuentas por Cobrar
     public List<CuentaPorCobrar> getCuentasPorCobrar() {
         return new ArrayList<>(cuentasPorCobrar);
