@@ -7,58 +7,72 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.Cita;
+import happypets.model.PacienteTriaje;
 import happypets.model.RecordatorioCita;
 import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 2.3: Gestión de Recordatorios de Citas y Tratamientos (WhatsApp, SMS, Email).
+ * Submódulo 2.3: Gestión y Envío de Recordatorios de Citas y Tratamientos.
+ * Arquitectura Opción A: Master-Detail con tabla de alta densidad, avatares circulares matemáticamente perfectos,
+ * simulador interactivo de mensajería móvil (WhatsApp / SMS Chat Bubble), KPIs en vivo y redactor modal.
  */
 public class VistaRecordatoriosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
     private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_AZUL_OSCURO = Ui.TURQUESA_OSCURO;
+    private static final Color COLOR_AZUL_SUAVE = Ui.TURQUESA_SUAVE;
     private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
     private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
-    // Filtros
+    // Filtros y Búsqueda
     private JComboBox<String> cbFiltroCanal;
     private JComboBox<String> cbFiltroEstado;
     private JTextField txtBuscar;
+    private String tabActiva = "EMITIDOS"; // "EMITIDOS" o "PENDIENTES"
+    private JButton btnTabEmitidos;
+    private JButton btnTabPendientes;
 
     // KPIs
     private JLabel lblKpiTotalEnviados;
@@ -66,20 +80,26 @@ public class VistaRecordatoriosPanel extends JPanel {
     private JLabel lblKpiTasaRespuesta;
     private JLabel lblKpiPendientes;
 
-    // Redactor
-    private JComboBox<CitaItem> cbCitaVinculada;
-    private JTextField txtContactoDestino;
-    private JRadioButton rbWhatsApp;
-    private JRadioButton rbSms;
-    private JRadioButton rbEmail;
-    private JComboBox<String> cbPlantilla;
-    private JTextArea txtMensaje;
-
-    // Tabla
+    // Tabla Master
     private JTable tablaRecordatorios;
     private DefaultTableModel modeloRecordatorios;
-    private JLabel lblContador;
-    private List<RecordatorioCita> listaActual;
+    private JLabel lblContadorRegistros;
+    private List<RecordatorioCita> listaRecordatoriosActual = new ArrayList<>();
+    private List<Cita> listaCitasPendientesAviso = new ArrayList<>();
+    private RecordatorioCita recordatorioSeleccionado = null;
+
+    // Panel Detalle / Simulador Móvil
+    private JPanel panelDetalleSimulador;
+    private JLabel lblSimuladorContacto;
+    private JLabel lblSimuladorSub;
+    private JPanel headerSimulador;
+    private JTextArea txtSimuladorBurbuja;
+    private JLabel lblSimuladorHoraCheck;
+    private JLabel lblFichaPaciente;
+    private JLabel lblFichaTutor;
+    private JLabel lblBadgeCanal;
+    private JLabel lblBadgeEstado;
+    private JLabel lblBadgeCita;
 
     public VistaRecordatoriosPanel() {
         setLayout(new BorderLayout());
@@ -90,20 +110,16 @@ public class VistaRecordatoriosPanel extends JPanel {
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
         contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
 
-        // 1. Cabecera
+        // 1. Cabecera principal
         contenido.add(crearCabeceraVista());
         contenido.add(Box.createVerticalStrut(8));
 
-        // 2. Barra de filtros
-        contenido.add(crearBarraFiltros());
+        // 2. Fila superior de 4 KPIs
+        contenido.add(crearFilaKpis());
         contenido.add(Box.createVerticalStrut(10));
 
-        // 3. Fila de 4 KPIs
-        contenido.add(crearFilaKpi());
-        contenido.add(Box.createVerticalStrut(10));
-
-        // 4. Doble columna: Redactor a la izquierda, Historial a la derecha
-        contenido.add(crearDobleColumna());
+        // 3. Contenedor Master-Detail (Tabla 58% + Simulador Móvil 42%)
+        contenido.add(crearContenedorMasterDetail());
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
@@ -119,11 +135,15 @@ public class VistaRecordatoriosPanel extends JPanel {
         recargarDatos();
     }
 
+    // =========================================================================
+    // 1. CABECERA Y KPIS
+    // =========================================================================
+
     private JPanel crearCabeceraVista() {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setPreferredSize(new Dimension(0, 40));
-        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        cab.setPreferredSize(new Dimension(0, 42));
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
         JPanel izq = new JPanel();
         izq.setOpaque(false);
@@ -145,122 +165,49 @@ public class VistaRecordatoriosPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
-        JButton btnMasivo = crearBotonAccion("Enviar Notificaciones Masivas", false);
-        btnMasivo.setIcon(Iconos.crearIconoWhatsApp(12, new Color(22, 163, 74)));
-        btnMasivo.setIconTextGap(4);
-        btnMasivo.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                    "Se enviaron 5 recordatorios pendientes a los clientes con citas programadas para las próximas 24 horas.",
-                    "Envío Masivo Completado", JOptionPane.INFORMATION_MESSAGE);
-            recargarDatos();
-        });
+        JButton btnMasivo = crearBotonAccion("Envío Masivo (Próximas 24h)", false);
+        btnMasivo.setIcon(Iconos.crearIconoWhatsApp(13, new Color(22, 163, 74)));
+        btnMasivo.setIconTextGap(6);
+        btnMasivo.addActionListener(e -> ejecutarEnvioMasivo());
+
+        JButton btnActualizar = crearBotonAccion("Actualizar", false);
+        btnActualizar.setIcon(Iconos.crearIconoCheck(13, new Color(22, 163, 74)));
+        btnActualizar.setIconTextGap(6);
+        btnActualizar.addActionListener(e -> recargarDatos());
+
+        JButton btnNuevo = crearBotonAccion("+ Redactar Recordatorio", true);
+        btnNuevo.setIcon(Iconos.crearIconoWhatsApp(13, Color.WHITE));
+        btnNuevo.setIconTextGap(6);
+        btnNuevo.addActionListener(e -> abrirDialogoNuevoRecordatorio(null));
 
         der.add(btnMasivo);
+        der.add(btnActualizar);
+        der.add(btnNuevo);
         cab.add(der, BorderLayout.EAST);
 
         return cab;
     }
 
-    private JPanel crearBarraFiltros() {
-        JPanel barra = new JPanel(new BorderLayout(10, 0)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        barra.setOpaque(false);
-        barra.setBorder(new EmptyBorder(3, 10, 3, 10));
-        barra.setPreferredSize(new Dimension(0, 38));
-        barra.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        izq.setOpaque(false);
-
-        JLabel lblCanal = new JLabel("Canal:");
-        lblCanal.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblCanal.setForeground(COLOR_TEXTO_MUTED);
-        izq.add(lblCanal);
-
-        cbFiltroCanal = new JComboBox<>(new String[]{"Todos los canales", "WhatsApp", "SMS", "E-Mail"});
-        cbFiltroCanal.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbFiltroCanal.setPreferredSize(new Dimension(130, 26));
-        cbFiltroCanal.setBackground(Color.WHITE);
-        cbFiltroCanal.addActionListener(e -> recargarDatos());
-        izq.add(cbFiltroCanal);
-
-        JLabel lblEst = new JLabel("Estado:");
-        lblEst.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblEst.setForeground(COLOR_TEXTO_MUTED);
-        izq.add(lblEst);
-
-        cbFiltroEstado = new JComboBox<>(new String[]{"Todos los estados", "Confirmado", "Enviado", "Pendiente"});
-        cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbFiltroEstado.setPreferredSize(new Dimension(130, 26));
-        cbFiltroEstado.setBackground(Color.WHITE);
-        cbFiltroEstado.addActionListener(e -> recargarDatos());
-        izq.add(cbFiltroEstado);
-
-        barra.add(izq, BorderLayout.WEST);
-
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
-        der.setOpaque(false);
-
-        JLabel lblB = new JLabel("Buscar:");
-        lblB.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblB.setForeground(COLOR_TEXTO_MUTED);
-        der.add(lblB);
-
-        txtBuscar = new JTextField(12);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtBuscar.setPreferredSize(new Dimension(140, 26));
-        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                new EmptyBorder(2, 6, 2, 6)
-        ));
-        txtBuscar.setToolTipText("Buscar paciente o propietario...");
-        java.awt.event.ActionListener accionB = e -> recargarDatos();
-        txtBuscar.addActionListener(accionB);
-        der.add(txtBuscar);
-
-        JButton btnB = crearBotonAccion("Buscar", false);
-        btnB.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
-        btnB.setIconTextGap(6);
-        btnB.setPreferredSize(new Dimension(92, 28));
-        btnB.addActionListener(accionB);
-        der.add(btnB);
-
-        barra.add(der, BorderLayout.EAST);
-        return barra;
-    }
-
-    private JPanel crearFilaKpi() {
+    private JPanel crearFilaKpis() {
         JPanel fila = new JPanel(new GridLayout(1, 4, 10, 0));
         fila.setOpaque(false);
+        fila.setPreferredSize(new Dimension(0, 56));
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 56));
 
         lblKpiTotalEnviados = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiTotalEnviados, "RECORDATORIOS EMITIDOS", Ui.TURQUESA_SUAVE, Iconos.crearIconoMensaje(20, COLOR_AZUL_PRIMARIO)));
-
         lblKpiConfirmados = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiConfirmados, "CONFIRMADOS POR CLIENTES", new Color(220, 252, 231), Iconos.crearIconoWhatsApp(20, new Color(22, 163, 74))));
-
         lblKpiTasaRespuesta = new JLabel("0%");
-        fila.add(crearCardKpi(lblKpiTasaRespuesta, "TASA DE EFECTIVIDAD", new Color(243, 232, 255), Iconos.crearIconoCheck(20, new Color(147, 51, 234))));
-
         lblKpiPendientes = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiPendientes, "RECORDATORIOS PENDIENTES", new Color(254, 243, 199), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
+
+        fila.add(crearCardKpi(lblKpiTotalEnviados, "RECORDATORIOS EMITIDOS", new JLabel("Enviados por todos los canales"), new Color(224, 242, 254), Iconos.crearIconoMensaje(18, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiConfirmados, "CONFIRMADOS POR CLIENTES", new JLabel("Asistencia ratificada"), new Color(220, 252, 231), Iconos.crearIconoWhatsApp(18, new Color(22, 163, 74))));
+        fila.add(crearCardKpi(lblKpiTasaRespuesta, "TASA DE EFECTIVIDAD", new JLabel("Ratio de respuesta positiva"), new Color(243, 232, 255), Iconos.crearIconoCheck(18, new Color(147, 51, 234))));
+        fila.add(crearCardKpi(lblKpiPendientes, "PENDIENTES POR CONFIRMAR", new JLabel("En espera de respuesta"), new Color(254, 243, 199), Iconos.crearIconoReloj(18, new Color(217, 119, 6))));
 
         return fila;
     }
 
-    private JPanel crearCardKpi(JLabel lblVal, String etiqueta, Color bgIco, Icon icono) {
+    private JPanel crearCardKpi(JLabel lblVal, String etiqueta, JLabel lblSub, Color bgIco, Icon icono) {
         JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -301,28 +248,40 @@ public class VistaRecordatoriosPanel extends JPanel {
         lblEtq.setFont(new Font("Segoe UI", Font.BOLD, 9));
         lblEtq.setForeground(COLOR_TEXTO_MUTED);
 
-        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblVal.setForeground(COLOR_TEXTO_TITULO);
 
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(COLOR_TEXTO_MUTED);
+
         pText.add(lblEtq);
-        pText.add(Box.createVerticalStrut(2));
+        pText.add(Box.createVerticalStrut(1));
         pText.add(lblVal);
+        pText.add(Box.createVerticalStrut(1));
+        pText.add(lblSub);
+
         card.add(pText, BorderLayout.CENTER);
-
         return card;
     }
 
-    private JPanel crearDobleColumna() {
-        JPanel grid = new JPanel(new GridLayout(1, 2, 12, 0));
-        grid.setOpaque(false);
+    // =========================================================================
+    // 2. MASTER-DETAIL: TABLA HISTÓRICA Y SIMULADOR SMARTPHONE
+    // =========================================================================
 
-        grid.add(crearTarjetaRedactor());
-        grid.add(crearTarjetaHistorial());
+    private JPanel crearContenedorMasterDetail() {
+        JPanel split = new JPanel(new BorderLayout(14, 0));
+        split.setOpaque(false);
 
-        return grid;
+        // Columna Izquierda (Master: Tabla y Filtros ~ 62%)
+        split.add(crearTarjetaMaster(), BorderLayout.CENTER);
+
+        // Columna Derecha (Detail: Simulador Móvil y Acciones ~ 38%)
+        split.add(crearTarjetaSimuladorMovil(), BorderLayout.EAST);
+
+        return split;
     }
 
-    private JPanel crearTarjetaRedactor() {
+    private JPanel crearTarjetaMaster() {
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -340,176 +299,125 @@ public class VistaRecordatoriosPanel extends JPanel {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(12, 14, 12, 14));
 
-        JLabel lblTit = new JLabel("Redactor de Notificación y Recordatorio");
-        lblTit.setIcon(Iconos.crearIconoWhatsApp(15, new Color(22, 163, 74)));
-        lblTit.setIconTextGap(6);
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-        card.add(lblTit, BorderLayout.NORTH);
+        // Barra superior de herramientas con selector de vista (Tabs)
+        JPanel pTop = new JPanel(new BorderLayout(8, 6));
+        pTop.setOpaque(false);
 
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        JPanel pTabs = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pTabs.setOpaque(false);
 
-        // 1. Selector de cita vinculada
-        cbCitaVinculada = new JComboBox<>();
-        cbCitaVinculada.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbCitaVinculada.setBackground(Color.WHITE);
-        cbCitaVinculada.setPreferredSize(new Dimension(0, 26));
-        cbCitaVinculada.addActionListener(e -> autocompletarDatosCita());
-        form.add(crearFilaCampo("Cita Médica Vinculada *", cbCitaVinculada));
-        form.add(Box.createVerticalStrut(6));
+        btnTabEmitidos = crearBotonPill("Historial Emitido", true);
+        btnTabPendientes = crearBotonPill("Citas por Notificar", false);
 
-        // 2. Destinatario y Canal
-        txtContactoDestino = crearCampoTextoCompacto();
+        btnTabEmitidos.addActionListener(e -> setTabActiva("EMITIDOS"));
+        btnTabPendientes.addActionListener(e -> setTabActiva("PENDIENTES"));
 
-        JPanel pCanales = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        pCanales.setOpaque(false);
+        pTabs.add(btnTabEmitidos);
+        pTabs.add(btnTabPendientes);
+        pTop.add(pTabs, BorderLayout.WEST);
 
-        rbWhatsApp = new JRadioButton("WhatsApp", true);
-        rbWhatsApp.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        rbWhatsApp.setForeground(new Color(22, 163, 74));
-        rbWhatsApp.setOpaque(false);
+        lblContadorRegistros = new JLabel("0 registros");
+        lblContadorRegistros.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblContadorRegistros.setForeground(COLOR_TEXTO_MUTED);
+        pTop.add(lblContadorRegistros, BorderLayout.EAST);
 
-        rbSms = new JRadioButton("SMS");
-        rbSms.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        rbSms.setForeground(new Color(2, 132, 199));
-        rbSms.setOpaque(false);
+        // Barra de Filtros secundarios
+        JPanel pFiltros = new JPanel(new BorderLayout(8, 0));
+        pFiltros.setOpaque(false);
 
-        rbEmail = new JRadioButton("E-Mail");
-        rbEmail.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        rbEmail.setForeground(new Color(147, 51, 234));
-        rbEmail.setOpaque(false);
+        JPanel pCombos = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pCombos.setOpaque(false);
 
-        ButtonGroup bg = new ButtonGroup();
-        bg.add(rbWhatsApp);
-        bg.add(rbSms);
-        bg.add(rbEmail);
+        cbFiltroCanal = new JComboBox<>(new String[]{"Todos los canales", "WhatsApp", "SMS", "E-Mail"});
+        cbFiltroCanal.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroCanal.setPreferredSize(new Dimension(130, 26));
+        cbFiltroCanal.setBackground(Color.WHITE);
+        cbFiltroCanal.addActionListener(e -> filtrarDatos());
+        pCombos.add(cbFiltroCanal);
 
-        pCanales.add(rbWhatsApp);
-        pCanales.add(rbSms);
-        pCanales.add(rbEmail);
+        cbFiltroEstado = new JComboBox<>(new String[]{"Todos los estados", "Confirmado", "Enviado", "Pendiente"});
+        cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroEstado.setPreferredSize(new Dimension(130, 26));
+        cbFiltroEstado.setBackground(Color.WHITE);
+        cbFiltroEstado.addActionListener(e -> filtrarDatos());
+        pCombos.add(cbFiltroEstado);
 
-        JPanel fila2 = new JPanel(new GridLayout(1, 2, 8, 0));
-        fila2.setOpaque(false);
-        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
-        fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        fila2.add(crearFilaCampo("Teléfono / Correo Destino *", txtContactoDestino));
-        fila2.add(crearFilaCampo("Canal de Transmisión *", pCanales));
-        form.add(fila2);
-        form.add(Box.createVerticalStrut(6));
+        pFiltros.add(pCombos, BorderLayout.WEST);
 
-        // 3. Plantilla
-        cbPlantilla = new JComboBox<>(new String[]{
-                "Recordatorio 24 horas previas",
-                "Indicaciones de ayuno prequirúrgico (8 horas)",
-                "Recordatorio de vacuna anual",
-                "Seguimiento posoperatorio y evolución"
+        // Buscador reactivo
+        txtBuscar = Ui.campoTexto(14);
+        txtBuscar.setPreferredSize(new Dimension(160, 26));
+        txtBuscar.setToolTipText("Buscar paciente, dueño, contacto...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { filtrarDatos(); }
+            @Override public void removeUpdate(DocumentEvent e) { filtrarDatos(); }
+            @Override public void changedUpdate(DocumentEvent e) { filtrarDatos(); }
         });
-        cbPlantilla.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbPlantilla.setBackground(Color.WHITE);
-        cbPlantilla.addActionListener(e -> regenerarMensajePlantilla());
-        form.add(crearFilaCampo("Plantilla de Mensaje Inteligente", cbPlantilla));
-        form.add(Box.createVerticalStrut(6));
 
-        // 4. Área de texto
-        txtMensaje = new JTextArea(4, 20);
-        txtMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtMensaje.setLineWrap(true);
-        txtMensaje.setWrapStyleWord(true);
-        txtMensaje.setBorder(new EmptyBorder(4, 6, 4, 6));
+        JPanel pBusq = new JPanel(new BorderLayout(4, 0));
+        pBusq.setOpaque(false);
+        JLabel lblLupa = new JLabel(Iconos.crearIconoBuscar(13, COLOR_TEXTO_MUTED));
+        pBusq.add(lblLupa, BorderLayout.WEST);
+        pBusq.add(txtBuscar, BorderLayout.CENTER);
+        pFiltros.add(pBusq, BorderLayout.EAST);
 
-        JScrollPane spMsg = new JScrollPane(txtMensaje);
-        spMsg.setPreferredSize(new Dimension(0, 80));
-        spMsg.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-        spMsg.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
-        form.add(crearFilaCampo("Contenido del Mensaje a Enviar *", spMsg));
+        pTop.add(pFiltros, BorderLayout.SOUTH);
+        card.add(pTop, BorderLayout.NORTH);
 
-        card.add(form, BorderLayout.CENTER);
-
-        // Botones inferiores
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
-        bot.setOpaque(false);
-
-        JButton btnLimpiar = crearBotonAccion("Restablecer", false);
-        btnLimpiar.addActionListener(e -> regenerarMensajePlantilla());
-
-        JButton btnEnviar = crearBotonAccion("Enviar Notificación", true);
-        btnEnviar.setIcon(Iconos.crearIconoWhatsApp(12, Color.WHITE));
-        btnEnviar.setIconTextGap(4);
-        btnEnviar.addActionListener(e -> ejecutarEnvioRecordatorio());
-
-        bot.add(btnLimpiar);
-        bot.add(btnEnviar);
-        card.add(bot, BorderLayout.SOUTH);
-
-        return card;
-    }
-
-    private JPanel crearTarjetaHistorial() {
-        JPanel card = new JPanel(new BorderLayout(0, 8)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-
-        JLabel lblTit = new JLabel("Historial de Recordatorios Enviados");
-        lblTit.setIcon(Iconos.crearIconoHistorial(15, COLOR_AZUL_PRIMARIO));
-        lblTit.setIconTextGap(6);
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-        top.add(lblTit, BorderLayout.WEST);
-
-        lblContador = new JLabel("0 registros");
-        lblContador.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblContador.setForeground(COLOR_TEXTO_MUTED);
-        top.add(lblContador, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
-
-        // Tabla
-        String[] columnas = {"Canal", "Cita", "Paciente", "Destinatario", "Fecha y Hora", "Estado"};
+        // Tabla Master con columnas ricas
+        String[] columnas = {"Canal", "Paciente & Tutor", "Cita", "Contacto", "Fecha Emisión", "Estado"};
         modeloRecordatorios = new DefaultTableModel(columnas, 0) {
             private static final long serialVersionUID = 1L;
-            @Override
-            public boolean isCellEditable(int r, int c) { return false; }
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
         tablaRecordatorios = new JTable(modeloRecordatorios);
-        Ui.formatearTabla(tablaRecordatorios, new int[]{0, 1, 4, 5}, new int[]{});
+        tablaRecordatorios.setRowHeight(44);
+        tablaRecordatorios.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        tablaRecordatorios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaRecordatorios.getTableHeader().setBackground(new Color(241, 245, 249));
+        tablaRecordatorios.getTableHeader().setForeground(COLOR_TEXTO_TITULO);
+        tablaRecordatorios.setSelectionBackground(COLOR_AZUL_SUAVE);
+        tablaRecordatorios.setSelectionForeground(COLOR_TEXTO_TITULO);
 
-        tablaRecordatorios.getColumnModel().getColumn(5).setCellRenderer(new BadgeEstadoRecRenderer());
+        // Renderers especializados
+        tablaRecordatorios.getColumnModel().getColumn(0).setPreferredWidth(90);
+        tablaRecordatorios.getColumnModel().getColumn(0).setCellRenderer(new CanalBadgeCellRenderer());
 
-        tablaRecordatorios.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    verDetalleMensajeSeleccionado();
+        tablaRecordatorios.getColumnModel().getColumn(1).setPreferredWidth(170);
+        tablaRecordatorios.getColumnModel().getColumn(1).setCellRenderer(new PacienteTutorCellRenderer());
+
+        tablaRecordatorios.getColumnModel().getColumn(2).setPreferredWidth(95);
+        tablaRecordatorios.getColumnModel().getColumn(2).setCellRenderer(new CenteredCellRenderer());
+
+        tablaRecordatorios.getColumnModel().getColumn(3).setPreferredWidth(130);
+        tablaRecordatorios.getColumnModel().getColumn(4).setPreferredWidth(110);
+        tablaRecordatorios.getColumnModel().getColumn(4).setCellRenderer(new CenteredCellRenderer());
+
+        tablaRecordatorios.getColumnModel().getColumn(5).setPreferredWidth(95);
+        tablaRecordatorios.getColumnModel().getColumn(5).setCellRenderer(new EstadoBadgeCellRenderer());
+
+        tablaRecordatorios.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tablaRecordatorios.getSelectedRow();
+                if (row >= 0 && row < listaRecordatoriosActual.size()) {
+                    seleccionarRecordatorio(listaRecordatoriosActual.get(row));
                 }
             }
         });
 
         JScrollPane sp = new JScrollPane(tablaRecordatorios);
-        sp.setPreferredSize(new Dimension(540, 240));
+        sp.setPreferredSize(new Dimension(620, 380));
         sp.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        sp.getVerticalScrollBar().setUnitIncrement(16);
         card.add(sp, BorderLayout.CENTER);
 
-        // Acciones inferiores
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
+        // Barra inferior de acciones master
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         bot.setOpaque(false);
+
+        JButton btnCopiar = crearBotonAccion("Copiar Mensaje", false);
+        btnCopiar.addActionListener(e -> copiarMensajePortapapeles());
 
         JButton btnReenviar = crearBotonAccion("Reenviar", false);
         btnReenviar.setIcon(Iconos.crearIconoWhatsApp(12, new Color(22, 163, 74)));
@@ -517,8 +425,9 @@ public class VistaRecordatoriosPanel extends JPanel {
         btnReenviar.addActionListener(e -> reenviarSeleccionado());
 
         JButton btnConfirmar = crearBotonAccion("Confirmar Asistencia", true);
-        btnConfirmar.addActionListener(e -> marcarConfirmadoSeleccionado());
+        btnConfirmar.addActionListener(e -> confirmarAsistenciaSeleccionada());
 
+        bot.add(btnCopiar);
         bot.add(btnReenviar);
         bot.add(btnConfirmar);
         card.add(bot, BorderLayout.SOUTH);
@@ -526,34 +435,705 @@ public class VistaRecordatoriosPanel extends JPanel {
         return card;
     }
 
-    private JPanel crearFilaCampo(String label, Component componente) {
-        JPanel p = new JPanel(new BorderLayout(0, 2));
-        p.setOpaque(false);
-        p.setAlignmentX(Component.LEFT_ALIGNMENT);
-        int altura = (componente instanceof JScrollPane) ? 104 : 44;
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, altura));
+    // =========================================================================
+    // 3. DETAIL: SIMULADOR SMARTPHONE Y FICHA EN VIVO
+    // =========================================================================
 
-        JLabel lbl = new JLabel(label, SwingConstants.LEFT);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lbl.setForeground(new Color(100, 116, 139));
-        lbl.setHorizontalAlignment(SwingConstants.LEFT);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private JPanel crearTarjetaSimuladorMovil() {
+        panelDetalleSimulador = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        panelDetalleSimulador.setOpaque(false);
+        panelDetalleSimulador.setBorder(new EmptyBorder(12, 14, 12, 14));
+        panelDetalleSimulador.setPreferredSize(new Dimension(380, 0));
 
-        p.add(lbl, BorderLayout.NORTH);
-        p.add(componente, BorderLayout.CENTER);
-        return p;
+        // 1. Cabecera ejecutiva del contacto
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblTit = new JLabel("Vista Previa y Control en Vivo");
+        lblTit.setIcon(Iconos.crearIconoReloj(14, COLOR_AZUL_PRIMARIO));
+        lblTit.setIconTextGap(6);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        top.add(lblTit, BorderLayout.WEST);
+
+        panelDetalleSimulador.add(top, BorderLayout.NORTH);
+
+        // 2. Ficha del Paciente y Cita + Teléfono Inteligente
+        JPanel centro = new JPanel();
+        centro.setOpaque(false);
+        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
+
+        // Ficha ejecutiva
+        JPanel cardFicha = new JPanel(new BorderLayout(10, 0));
+        cardFicha.setBackground(new Color(248, 250, 252));
+        cardFicha.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_BORDE, 1),
+                new EmptyBorder(8, 10, 8, 10)
+        ));
+        cardFicha.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
+
+        lblFichaPaciente = new JLabel("Paciente: --");
+        lblFichaPaciente.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblFichaPaciente.setForeground(COLOR_TEXTO_TITULO);
+
+        lblFichaTutor = new JLabel("Tutor: -- | Tel: --");
+        lblFichaTutor.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblFichaTutor.setForeground(COLOR_TEXTO_MUTED);
+
+        JPanel pFichaText = new JPanel();
+        pFichaText.setOpaque(false);
+        pFichaText.setLayout(new BoxLayout(pFichaText, BoxLayout.Y_AXIS));
+        pFichaText.add(lblFichaPaciente);
+        pFichaText.add(Box.createVerticalStrut(2));
+        pFichaText.add(lblFichaTutor);
+
+        cardFicha.add(pFichaText, BorderLayout.CENTER);
+
+        JPanel pFichaBadges = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        pFichaBadges.setOpaque(false);
+        lblBadgeCanal = crearBadgePastilla("WhatsApp", new Color(220, 252, 231), new Color(22, 163, 74));
+        lblBadgeEstado = crearBadgePastilla("Enviado", new Color(224, 242, 254), new Color(2, 132, 199));
+        pFichaBadges.add(lblBadgeCanal);
+        pFichaBadges.add(lblBadgeEstado);
+        cardFicha.add(pFichaBadges, BorderLayout.EAST);
+
+        centro.add(cardFicha);
+        centro.add(Box.createVerticalStrut(8));
+
+        // Smartphone Frame Simulator
+        JPanel phoneFrame = new JPanel(new BorderLayout()) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(239, 234, 226)); // WhatsApp Chat BG
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(new Color(203, 213, 225));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        phoneFrame.setOpaque(false);
+        phoneFrame.setPreferredSize(new Dimension(350, 240));
+
+        // Phone Header
+        headerSimulador = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                Color bg = (Color) getClientProperty("bgColor");
+                if (bg == null) bg = new Color(7, 94, 84);
+                g2.setColor(bg);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.fillRect(0, getHeight() - 6, getWidth(), 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        headerSimulador.setOpaque(false);
+        headerSimulador.setBorder(new EmptyBorder(8, 10, 8, 10));
+        headerSimulador.setPreferredSize(new Dimension(0, 42));
+
+        JLabel avatarSim = crearAvatarCircular("HP", 28, Color.WHITE, new Color(7, 94, 84));
+        headerSimulador.add(avatarSim, BorderLayout.WEST);
+
+        JPanel pHeaderTxt = new JPanel();
+        pHeaderTxt.setOpaque(false);
+        pHeaderTxt.setLayout(new BoxLayout(pHeaderTxt, BoxLayout.Y_AXIS));
+
+        lblSimuladorContacto = new JLabel("Cliente Destino");
+        lblSimuladorContacto.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblSimuladorContacto.setForeground(Color.WHITE);
+
+        lblSimuladorSub = new JLabel("En línea  ·  Notificaciones HappyPets");
+        lblSimuladorSub.setFont(new Font("Segoe UI", Font.PLAIN, 9));
+        lblSimuladorSub.setForeground(new Color(220, 252, 231));
+
+        pHeaderTxt.add(lblSimuladorContacto);
+        pHeaderTxt.add(lblSimuladorSub);
+        headerSimulador.add(pHeaderTxt, BorderLayout.CENTER);
+
+        phoneFrame.add(headerSimulador, BorderLayout.NORTH);
+
+        // Chat Body con burbuja saliente
+        JPanel chatBody = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 14));
+        chatBody.setOpaque(false);
+
+        JPanel bubble = new JPanel(new BorderLayout(4, 4)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(220, 248, 198)); // WhatsApp outgoing bubble
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(new Color(187, 247, 208));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        bubble.setOpaque(false);
+        bubble.setBorder(new EmptyBorder(8, 10, 6, 10));
+        bubble.setPreferredSize(new Dimension(320, 140));
+
+        txtSimuladorBurbuja = new JTextArea();
+        txtSimuladorBurbuja.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtSimuladorBurbuja.setForeground(new Color(15, 23, 42));
+        txtSimuladorBurbuja.setLineWrap(true);
+        txtSimuladorBurbuja.setWrapStyleWord(true);
+        txtSimuladorBurbuja.setEditable(false);
+        txtSimuladorBurbuja.setOpaque(false);
+        bubble.add(txtSimuladorBurbuja, BorderLayout.CENTER);
+
+        JPanel pBubbleBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        pBubbleBottom.setOpaque(false);
+
+        lblSimuladorHoraCheck = new JLabel("12:00 hrs · Entregado");
+        lblSimuladorHoraCheck.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblSimuladorHoraCheck.setForeground(new Color(2, 132, 199));
+        pBubbleBottom.add(lblSimuladorHoraCheck);
+        bubble.add(pBubbleBottom, BorderLayout.SOUTH);
+
+        chatBody.add(bubble);
+        phoneFrame.add(chatBody, BorderLayout.CENTER);
+
+        centro.add(phoneFrame);
+        panelDetalleSimulador.add(centro, BorderLayout.CENTER);
+
+        // 3. Barra de Acciones Operativas Inmediatas
+        JPanel bot = new JPanel(new GridLayout(2, 2, 6, 6));
+        bot.setOpaque(false);
+        bot.setBorder(new EmptyBorder(6, 0, 0, 0));
+
+        JButton btnConfirmarAsist = crearBotonAccion("Confirmar Asistencia", true);
+        btnConfirmarAsist.setIcon(Iconos.crearIconoCheck(12, Color.WHITE));
+        btnConfirmarAsist.addActionListener(e -> confirmarAsistenciaSeleccionada());
+
+        JButton btnReenviarMsg = crearBotonAccion("Reenviar Notificación", false);
+        btnReenviarMsg.setIcon(Iconos.crearIconoWhatsApp(12, new Color(22, 163, 74)));
+        btnReenviarMsg.addActionListener(e -> reenviarSeleccionado());
+
+        JButton btnEditarReenviar = crearBotonAccion("Editar y Reenviar", false);
+        btnEditarReenviar.setIcon(Iconos.crearIconoCalendario(12, COLOR_AZUL_PRIMARIO));
+        btnEditarReenviar.addActionListener(e -> editarYReenviar());
+
+        JButton btnTriaje = crearBotonAccion("Pasar a Sala de Espera", false);
+        btnTriaje.setIcon(Iconos.crearIconoReloj(12, new Color(217, 119, 6)));
+        btnTriaje.addActionListener(e -> pasarASalaEspera());
+
+        bot.add(btnConfirmarAsist);
+        bot.add(btnReenviarMsg);
+        bot.add(btnEditarReenviar);
+        bot.add(btnTriaje);
+
+        panelDetalleSimulador.add(bot, BorderLayout.SOUTH);
+
+        return panelDetalleSimulador;
     }
 
-    private JTextField crearCampoTextoCompacto() {
-        JTextField txt = new JTextField();
-        txt.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txt.setPreferredSize(new Dimension(0, 26));
-        txt.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
-        txt.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                new EmptyBorder(2, 6, 2, 6)
-        ));
-        return txt;
+    public void prepararParaCita(Cita cita) {
+        if (cita == null) return;
+        List<RecordatorioCita> todos = repo.getRecordatorios();
+        RecordatorioCita existente = todos.stream()
+                .filter(r -> r.getIdCita() != null && r.getIdCita().equalsIgnoreCase(cita.getIdCita()))
+                .findFirst().orElse(null);
+
+        if (existente != null) {
+            setTabActiva("EMITIDOS");
+            seleccionarRecordatorio(existente);
+            for (int i = 0; i < listaRecordatoriosActual.size(); i++) {
+                if (listaRecordatoriosActual.get(i).getIdRecordatorio().equals(existente.getIdRecordatorio())) {
+                    tablaRecordatorios.setRowSelectionInterval(i, i);
+                    break;
+                }
+            }
+        } else {
+            abrirDialogoNuevoRecordatorio(cita);
+        }
+    }
+
+    public void recargarDatos() {
+        actualizarKpis();
+        filtrarDatos();
+    }
+
+    private void actualizarKpis() {
+        List<RecordatorioCita> todos = repo.getRecordatorios();
+        int total = todos.size();
+        long confirmados = todos.stream().filter(r -> "Confirmado".equalsIgnoreCase(r.getEstado())).count();
+        long pendientes = todos.stream().filter(r -> "Pendiente".equalsIgnoreCase(r.getEstado()) || "Enviado".equalsIgnoreCase(r.getEstado())).count();
+        int tasa = total > 0 ? (int) ((confirmados * 100) / total) : 0;
+
+        lblKpiTotalEnviados.setText(total + (total == 1 ? " emitido" : " emitidos"));
+        lblKpiConfirmados.setText(confirmados + (confirmados == 1 ? " confirmado" : " confirmados"));
+        lblKpiTasaRespuesta.setText(tasa + "%");
+        lblKpiPendientes.setText(pendientes + (pendientes == 1 ? " pendiente" : " pendientes"));
+    }
+
+    private void setTabActiva(String tab) {
+        this.tabActiva = tab;
+        btnTabEmitidos.putClientProperty("activo", "EMITIDOS".equals(tab));
+        btnTabPendientes.putClientProperty("activo", "PENDIENTES".equals(tab));
+        btnTabEmitidos.repaint();
+        btnTabPendientes.repaint();
+        filtrarDatos();
+    }
+
+    private void filtrarDatos() {
+        modeloRecordatorios.setRowCount(0);
+        listaRecordatoriosActual.clear();
+
+        String fCanal = cbFiltroCanal != null ? (String) cbFiltroCanal.getSelectedItem() : "Todos";
+        String fEstado = cbFiltroEstado != null ? (String) cbFiltroEstado.getSelectedItem() : "Todos";
+        String q = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+
+        if ("EMITIDOS".equals(tabActiva)) {
+            List<RecordatorioCita> todos = repo.getRecordatorios();
+            for (RecordatorioCita r : todos) {
+                if (fCanal != null && !fCanal.startsWith("Todos") && !r.getCanal().equalsIgnoreCase(fCanal)) continue;
+                if (fEstado != null && !fEstado.startsWith("Todos") && !r.getEstado().equalsIgnoreCase(fEstado)) continue;
+
+                if (!q.isEmpty()) {
+                    boolean match = (r.getNombreMascota() != null && r.getNombreMascota().toLowerCase().contains(q)) ||
+                                    (r.getNombreCliente() != null && r.getNombreCliente().toLowerCase().contains(q)) ||
+                                    (r.getContactoDestino() != null && r.getContactoDestino().toLowerCase().contains(q)) ||
+                                    (r.getIdCita() != null && r.getIdCita().toLowerCase().contains(q)) ||
+                                    (r.getMensaje() != null && r.getMensaje().toLowerCase().contains(q));
+                    if (!match) continue;
+                }
+
+                listaRecordatoriosActual.add(r);
+                modeloRecordatorios.addRow(new Object[]{
+                        r.getCanal(),
+                        new Object[]{r.getNombreMascota(), r.getNombreCliente()},
+                        r.getIdCita(),
+                        r.getContactoDestino(),
+                        r.getFechaEnvio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                        r.getEstado()
+                });
+            }
+            lblContadorRegistros.setText(listaRecordatoriosActual.size() + " recordatorios emitidos");
+        } else {
+            // Bandeja de citas por notificar
+            List<Cita> citas = repo.getCitas();
+            List<RecordatorioCita> todosRec = repo.getRecordatorios();
+
+            for (Cita c : citas) {
+                boolean yaTieneRec = todosRec.stream().anyMatch(r -> r.getIdCita().equalsIgnoreCase(c.getIdCita()));
+                if (yaTieneRec) continue; // Ya fue notificada
+
+                if (!q.isEmpty()) {
+                    boolean match = (c.getNombreMascota() != null && c.getNombreMascota().toLowerCase().contains(q)) ||
+                                    (c.getNombreCliente() != null && c.getNombreCliente().toLowerCase().contains(q)) ||
+                                    (c.getTelefonoCliente() != null && c.getTelefonoCliente().toLowerCase().contains(q)) ||
+                                    (c.getIdCita() != null && c.getIdCita().toLowerCase().contains(q));
+                    if (!match) continue;
+                }
+
+                // Generar recordatorio temporal para visualización
+                RecordatorioCita rTemp = new RecordatorioCita(
+                        "PEND",
+                        c.getIdCita(),
+                        c.getNombreMascota(),
+                        c.getNombreCliente(),
+                        c.getTelefonoCliente(),
+                        "WhatsApp",
+                        LocalDateTime.now(),
+                        "Hola " + c.getNombreCliente() + ", recordamos cita de " + c.getNombreMascota() + " el " + c.getFechaFormateada() + " a las " + c.getHoraFormateada() + " hrs.",
+                        "Pendiente"
+                );
+
+                listaRecordatoriosActual.add(rTemp);
+                modeloRecordatorios.addRow(new Object[]{
+                        "WhatsApp",
+                        new Object[]{c.getNombreMascota(), c.getNombreCliente()},
+                        c.getIdCita(),
+                        c.getTelefonoCliente(),
+                        c.getFechaFormateada() + " " + c.getHoraFormateada(),
+                        "Pendiente"
+                });
+            }
+            lblContadorRegistros.setText(listaRecordatoriosActual.size() + " citas pendientes de aviso");
+        }
+
+        // Auto-seleccionar primer elemento
+        if (!listaRecordatoriosActual.isEmpty()) {
+            tablaRecordatorios.setRowSelectionInterval(0, 0);
+            seleccionarRecordatorio(listaRecordatoriosActual.get(0));
+        } else {
+            limpiarDetalleSimulador();
+        }
+    }
+
+    private void seleccionarRecordatorio(RecordatorioCita r) {
+        this.recordatorioSeleccionado = r;
+        if (r == null) return;
+
+        lblFichaPaciente.setText("Paciente: " + r.getNombreMascota());
+        lblFichaTutor.setText("Tutor: " + r.getNombreCliente() + "  |  " + r.getContactoDestino());
+        lblBadgeCanal.setText(r.getCanal());
+        lblBadgeEstado.setText(r.getEstado());
+
+        lblSimuladorContacto.setText(r.getNombreCliente() + " (" + r.getNombreMascota() + ")");
+        lblSimuladorSub.setText("En línea  ·  " + r.getContactoDestino());
+        txtSimuladorBurbuja.setText(r.getMensaje());
+
+        String sufijoCheck = "Confirmado".equalsIgnoreCase(r.getEstado()) ? " · Leído" :
+                             "Enviado".equalsIgnoreCase(r.getEstado()) ? " · Entregado" : " · Pendiente";
+        lblSimuladorHoraCheck.setText(r.getFechaEnvio().format(DateTimeFormatter.ofPattern("HH:mm")) + " hrs" + sufijoCheck);
+        lblSimuladorHoraCheck.setForeground("Confirmado".equalsIgnoreCase(r.getEstado()) ? new Color(2, 132, 199) : new Color(100, 116, 139));
+
+        Color colHeader = "SMS".equalsIgnoreCase(r.getCanal()) ? new Color(2, 132, 199) :
+                          "E-Mail".equalsIgnoreCase(r.getCanal()) ? new Color(126, 34, 206) : new Color(7, 94, 84);
+        headerSimulador.putClientProperty("bgColor", colHeader);
+
+        panelDetalleSimulador.revalidate();
+        panelDetalleSimulador.repaint();
+    }
+
+    private void limpiarDetalleSimulador() {
+        this.recordatorioSeleccionado = null;
+        lblFichaPaciente.setText("Paciente: --");
+        lblFichaTutor.setText("Tutor: --");
+        txtSimuladorBurbuja.setText("Seleccione un recordatorio en la tabla para ver su vista previa interactiva.");
+    }
+
+    // =========================================================================
+    // 5. ACCIONES OPERATIVAS
+    // =========================================================================
+
+    private void abrirDialogoNuevoRecordatorio(Cita c) {
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        FormularioEnvioRecordatorioDialog dlg = new FormularioEnvioRecordatorioDialog(parent, c, rec -> {
+            recargarDatos();
+            seleccionarRecordatorio(rec);
+        });
+        dlg.setVisible(true);
+    }
+
+    private void confirmarAsistenciaSeleccionada() {
+        if (recordatorioSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un recordatorio primero.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        recordatorioSeleccionado.setEstado("Confirmado");
+        repo.actualizarEstadoRecordatorio(recordatorioSeleccionado.getIdRecordatorio(), "Confirmado");
+        repo.actualizarEstadoCita(recordatorioSeleccionado.getIdCita(), "Confirmada");
+
+        JOptionPane.showMessageDialog(this,
+                "Asistencia confirmada para " + recordatorioSeleccionado.getNombreMascota() + " (" + recordatorioSeleccionado.getNombreCliente() + ").\nLa cita médica " + recordatorioSeleccionado.getIdCita() + " ha sido actualizada a 'Confirmada'.",
+                "Confirmación Registrada", JOptionPane.INFORMATION_MESSAGE);
+
+        recargarDatos();
+    }
+
+    private void reenviarSeleccionado() {
+        if (recordatorioSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un recordatorio primero.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        recordatorioSeleccionado.setFechaEnvio(LocalDateTime.now());
+        recordatorioSeleccionado.setEstado("Enviado");
+        repo.actualizarEstadoRecordatorio(recordatorioSeleccionado.getIdRecordatorio(), "Enviado");
+
+        JOptionPane.showMessageDialog(this,
+                "Notificación reenviada vía " + recordatorioSeleccionado.getCanal() + " a " + recordatorioSeleccionado.getNombreCliente() + " (" + recordatorioSeleccionado.getContactoDestino() + ").",
+                "Reenvío Exitoso", JOptionPane.INFORMATION_MESSAGE);
+
+        recargarDatos();
+    }
+
+    private void editarYReenviar() {
+        if (recordatorioSeleccionado == null) return;
+        List<Cita> citas = repo.getCitas();
+        Cita c = citas.stream().filter(it -> it.getIdCita().equalsIgnoreCase(recordatorioSeleccionado.getIdCita())).findFirst().orElse(null);
+        abrirDialogoNuevoRecordatorio(c);
+    }
+
+    private void pasarASalaEspera() {
+        if (recordatorioSeleccionado == null) return;
+        List<Cita> citas = repo.getCitas();
+        Cita c = citas.stream().filter(it -> it.getIdCita().equalsIgnoreCase(recordatorioSeleccionado.getIdCita())).findFirst().orElse(null);
+
+        if (c != null) {
+            c.setEstado("En Sala de Espera");
+            repo.guardarCita(c);
+
+            PacienteTriaje pt = new PacienteTriaje(
+                    null, c.getIdCita(), c.getCodigoMascota(), c.getNombreMascota(),
+                    c.getEspecieRaza(), c.getNombreCliente(), c.getTelefonoCliente(),
+                    java.time.LocalTime.now(), 20.0, 38.5, 90,
+                    "VERDE (Normal)", c.getMotivo(),
+                    "Consultorio 1 - Dr. Mendoza", "En Espera"
+            );
+            repo.agregarPacienteTriaje(pt);
+
+            JOptionPane.showMessageDialog(this,
+                    "El paciente " + c.getNombreMascota() + " ha sido transferido a Sala de Espera (Ticket " + pt.getIdTicket() + ").",
+                    "Ingreso a Triaje", JOptionPane.INFORMATION_MESSAGE);
+
+            recargarDatos();
+        }
+    }
+
+    private void ejecutarEnvioMasivo() {
+        List<Cita> citas = repo.getCitas();
+        int enviados = 0;
+        for (Cita c : citas) {
+            if ("Programada".equalsIgnoreCase(c.getEstado())) {
+                RecordatorioCita rec = new RecordatorioCita(
+                        null,
+                        c.getIdCita(),
+                        c.getNombreMascota(),
+                        c.getNombreCliente(),
+                        c.getTelefonoCliente(),
+                        "WhatsApp",
+                        LocalDateTime.now(),
+                        "Hola " + c.getNombreCliente() + ", te recordamos tu cita en Happy Pets para " + c.getNombreMascota() + " programada para mañana a las " + c.getHoraFormateada() + " hrs. Por favor confirma tu asistencia.",
+                        "Enviado"
+                );
+                repo.agregarRecordatorio(rec);
+                enviados++;
+            }
+        }
+
+        JOptionPane.showMessageDialog(this,
+                "Envío masivo completado: Se han generado y transmitido " + enviados + " recordatorios automáticos por WhatsApp para las citas programadas.",
+                "Automatización Ejecutada", JOptionPane.INFORMATION_MESSAGE);
+
+        recargarDatos();
+    }
+
+    private void copiarMensajePortapapeles() {
+        if (recordatorioSeleccionado != null && recordatorioSeleccionado.getMensaje() != null) {
+            java.awt.datatransfer.StringSelection sel = new java.awt.datatransfer.StringSelection(recordatorioSeleccionado.getMensaje());
+            java.awt.Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, null);
+            JOptionPane.showMessageDialog(this, "Mensaje copiado al portapapeles.", "Copiado", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    // =========================================================================
+    // 6. RENDERERS ESPECIALIZADOS Y HELPERS
+    // =========================================================================
+
+    public static String extraerIniciales(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty()) return "HP";
+        String[] partes = nombre.trim().split("\\s+");
+        if (partes.length >= 2) {
+            return ("" + partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
+        } else if (nombre.length() >= 2) {
+            return nombre.substring(0, 2).toUpperCase();
+        }
+        return nombre.toUpperCase();
+    }
+
+    public static JLabel crearAvatarCircular(String texto, int tamano, Color bg, Color fg) {
+        JLabel lbl = new JLabel(texto, SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int d = Math.min(getWidth(), getHeight()) - 2;
+                int x = (getWidth() - d) / 2;
+                int y = (getHeight() - d) / 2;
+                g2.setColor(bg);
+                g2.fillOval(x, y, d, d);
+                g2.setColor(new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 80));
+                g2.drawOval(x, y, d, d);
+                g2.setColor(fg);
+                g2.setFont(new Font("Segoe UI", Font.BOLD, tamano >= 36 ? 13 : 10));
+                FontMetrics fm = g2.getFontMetrics();
+                String t = getText();
+                int tx = x + (d - fm.stringWidth(t)) / 2;
+                int ty = y + (d - fm.getHeight()) / 2 + fm.getAscent();
+                g2.drawString(t, tx, ty);
+                g2.dispose();
+            }
+        };
+        lbl.setPreferredSize(new Dimension(tamano, tamano));
+        lbl.setMinimumSize(new Dimension(tamano, tamano));
+        lbl.setMaximumSize(new Dimension(tamano, tamano));
+        lbl.setOpaque(false);
+        return lbl;
+    }
+
+    private JLabel crearBadgePastilla(String texto, Color bg, Color fg) {
+        JLabel l = new JLabel(texto, SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(bg);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        l.setForeground(fg);
+        l.setBorder(new EmptyBorder(2, 8, 2, 8));
+        return l;
+    }
+
+    private class PacienteTutorCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new BorderLayout(8, 0));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+            p.setBorder(new EmptyBorder(4, 8, 4, 8));
+
+            if (value instanceof Object[]) {
+                Object[] arr = (Object[]) value;
+                String pet = arr[0] != null ? arr[0].toString() : "";
+                String tutor = arr[1] != null ? arr[1].toString() : "";
+
+                JLabel av = crearAvatarCircular(extraerIniciales(pet), 28, COLOR_AZUL_SUAVE, COLOR_AZUL_OSCURO);
+                JPanel avWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
+                avWrap.setOpaque(false);
+                avWrap.add(av);
+                p.add(avWrap, BorderLayout.WEST);
+
+                JPanel pTxt = new JPanel();
+                pTxt.setOpaque(false);
+                pTxt.setLayout(new BoxLayout(pTxt, BoxLayout.Y_AXIS));
+
+                JLabel lblPet = new JLabel(pet);
+                lblPet.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblPet.setForeground(COLOR_TEXTO_TITULO);
+
+                JLabel lblTut = new JLabel(tutor);
+                lblTut.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblTut.setForeground(COLOR_TEXTO_MUTED);
+
+                pTxt.add(lblPet);
+                pTxt.add(Box.createVerticalStrut(1));
+                pTxt.add(lblTut);
+                p.add(pTxt, BorderLayout.CENTER);
+            }
+            return p;
+        }
+    }
+
+    private class CanalBadgeCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            String canal = value != null ? value.toString() : "";
+            Color bg = new Color(220, 252, 231);
+            Color fg = new Color(22, 163, 74);
+            if ("SMS".equalsIgnoreCase(canal)) {
+                bg = new Color(224, 242, 254);
+                fg = new Color(2, 132, 199);
+            } else if ("E-Mail".equalsIgnoreCase(canal)) {
+                bg = new Color(243, 232, 255);
+                fg = new Color(147, 51, 234);
+            }
+
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+            JLabel b = crearBadgePastilla(canal, bg, fg);
+            p.add(b);
+            return p;
+        }
+    }
+
+    private class EstadoBadgeCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            String est = value != null ? value.toString() : "";
+            Color bg = new Color(220, 252, 231);
+            Color fg = new Color(22, 163, 74);
+            if ("Pendiente".equalsIgnoreCase(est)) {
+                bg = new Color(254, 243, 199);
+                fg = new Color(217, 119, 6);
+            } else if ("Enviado".equalsIgnoreCase(est)) {
+                bg = new Color(224, 242, 254);
+                fg = new Color(2, 132, 199);
+            }
+
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+            JLabel b = crearBadgePastilla(est, bg, fg);
+            p.add(b);
+            return p;
+        }
+    }
+
+    private static class CenteredCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        public CenteredCellRenderer() {
+            setHorizontalAlignment(SwingConstants.CENTER);
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            if (!isSelected) {
+                c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
+            }
+            return c;
+        }
+    }
+
+    private JButton crearBotonPill(String texto, boolean activo) {
+        JButton btn = new JButton(texto) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                boolean act = Boolean.TRUE.equals(getClientProperty("activo"));
+                if (act) {
+                    g2.setColor(COLOR_AZUL_PRIMARIO);
+                } else if (getModel().isRollover()) {
+                    g2.setColor(new Color(241, 245, 249));
+                } else {
+                    g2.setColor(Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(act ? COLOR_AZUL_PRIMARIO : COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        btn.putClientProperty("activo", activo);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(activo ? Color.WHITE : new Color(71, 85, 105));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(140, 26));
+        return btn;
     }
 
     private JButton crearBotonAccion(String texto, boolean primario) {
@@ -565,7 +1145,7 @@ public class VistaRecordatoriosPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
                 if (esPrimario) {
-                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
+                    g2.setColor(getModel().isRollover() ? COLOR_AZUL_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
@@ -581,7 +1161,7 @@ public class VistaRecordatoriosPanel extends JPanel {
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
-                return new Dimension(d.width + 16, 28);
+                return new Dimension(d.width + 12, 28);
             }
         };
         btn.putClientProperty("primario", primario);
@@ -591,202 +1171,7 @@ public class VistaRecordatoriosPanel extends JPanel {
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(4, 12, 4, 12));
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
         return btn;
-    }
-
-    public void prepararParaCita(Cita cita) {
-        if (cita == null) return;
-        recargarDatos();
-        for (int i = 0; i < cbCitaVinculada.getItemCount(); i++) {
-            CitaItem item = cbCitaVinculada.getItemAt(i);
-            if (item != null && item.cita != null && item.cita.getIdCita().equals(cita.getIdCita())) {
-                cbCitaVinculada.setSelectedIndex(i);
-                autocompletarDatosCita();
-                break;
-            }
-        }
-    }
-
-    public void recargarDatos() {
-        // Cargar citas en combo si está vacío
-        if (cbCitaVinculada.getItemCount() == 0) {
-            for (Cita c : repo.getCitas()) {
-                cbCitaVinculada.addItem(new CitaItem(c));
-            }
-            autocompletarDatosCita();
-        }
-
-        List<RecordatorioCita> todos = repo.getRecordatorios();
-        String fCanal = (String) cbFiltroCanal.getSelectedItem();
-        String fEstado = (String) cbFiltroEstado.getSelectedItem();
-        String q = txtBuscar.getText().trim().toLowerCase();
-
-        listaActual = todos.stream().filter(r -> {
-            if (fCanal != null && !fCanal.startsWith("Todos") && !r.getCanal().equalsIgnoreCase(fCanal)) return false;
-            if (fEstado != null && !fEstado.startsWith("Todos") && !r.getEstado().equalsIgnoreCase(fEstado)) return false;
-            if (!q.isEmpty()) {
-                boolean m = r.getNombreMascota().toLowerCase().contains(q) ||
-                            r.getNombreCliente().toLowerCase().contains(q) ||
-                            r.getIdCita().toLowerCase().contains(q) ||
-                            r.getMensaje().toLowerCase().contains(q);
-                if (!m) return false;
-            }
-            return true;
-        }).toList();
-
-        modeloRecordatorios.setRowCount(0);
-        for (RecordatorioCita r : listaActual) {
-            modeloRecordatorios.addRow(new Object[]{
-                    r.getCanal(),
-                    r.getIdCita(),
-                    r.getNombreMascota(),
-                    r.getContactoDestino(),
-                    r.getFechaEnvioFormateada(),
-                    r.getEstado()
-            });
-        }
-        lblContador.setText(listaActual.size() + " registros");
-
-        // KPIs
-        long total = todos.size();
-        long confirmados = todos.stream().filter(r -> "Confirmado".equalsIgnoreCase(r.getEstado())).count();
-        long pendientes = todos.stream().filter(r -> "Pendiente".equalsIgnoreCase(r.getEstado())).count();
-
-        lblKpiTotalEnviados.setText(String.valueOf(total));
-        lblKpiConfirmados.setText(String.valueOf(confirmados));
-        lblKpiTasaRespuesta.setText((total > 0 ? (confirmados * 100 / total) : 0) + "%");
-        lblKpiPendientes.setText(String.valueOf(pendientes));
-    }
-
-    private void autocompletarDatosCita() {
-        CitaItem ci = (CitaItem) cbCitaVinculada.getSelectedItem();
-        if (ci != null && ci.cita != null) {
-            txtContactoDestino.setText(ci.cita.getTelefonoCliente());
-            regenerarMensajePlantilla();
-        }
-    }
-
-    private void regenerarMensajePlantilla() {
-        CitaItem ci = (CitaItem) cbCitaVinculada.getSelectedItem();
-        if (ci == null || ci.cita == null) return;
-        Cita c = ci.cita;
-        String plantilla = (String) cbPlantilla.getSelectedItem();
-
-        if (plantilla != null && plantilla.contains("ayuno")) {
-            txtMensaje.setText("Hola " + c.getNombreCliente() + ", le recordamos que " + c.getNombreMascota() + " tiene programada su cita de " + c.getTipoServicio() + " el " + c.getFechaFormateada() + " a las " + c.getHoraFormateada() + " hrs. Es fundamental que cumpla con 8 horas de ayuno estricto. Responda 'CONFIRMAR' para ratificar su turno.");
-        } else if (plantilla != null && plantilla.contains("vacuna")) {
-            txtMensaje.setText("¡Hola " + c.getNombreCliente() + "! En Happy Pets te recordamos que le toca el plan vacunal anual a " + c.getNombreMascota() + " el " + c.getFechaFormateada() + " a las " + c.getHoraFormateada() + " hrs con el " + c.getVeterinario() + ". Por favor confirme si asistirá.");
-        } else if (plantilla != null && plantilla.contains("posoperatorio")) {
-            txtMensaje.setText("Estimado/a " + c.getNombreCliente() + ", le escribimos de Veterinaria Happy Pets para consultar por la evolución de " + c.getNombreMascota() + " y confirmar su cita de control el " + c.getFechaFormateada() + " a las " + c.getHoraFormateada() + " hrs.");
-        } else {
-            txtMensaje.setText("Hola " + c.getNombreCliente() + ", te recordamos que " + c.getNombreMascota() + " tiene cita de " + c.getTipoServicio() + " el " + c.getFechaFormateada() + " a las " + c.getHoraFormateada() + " hrs en Happy Pets con el " + c.getVeterinario() + ". Por favor confirme su asistencia.");
-        }
-    }
-
-    private void ejecutarEnvioRecordatorio() {
-        CitaItem ci = (CitaItem) cbCitaVinculada.getSelectedItem();
-        String destino = txtContactoDestino.getText().trim();
-        String mensaje = txtMensaje.getText().trim();
-
-        if (ci == null || destino.isEmpty() || mensaje.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Complete todos los campos del recordatorio antes de enviar.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String canal = rbWhatsApp.isSelected() ? "WhatsApp" : rbSms.isSelected() ? "SMS" : "E-Mail";
-
-        RecordatorioCita rec = new RecordatorioCita(
-                null,
-                ci.cita.getIdCita(),
-                ci.cita.getNombreMascota(),
-                ci.cita.getNombreCliente(),
-                destino,
-                canal,
-                LocalDateTime.now(),
-                mensaje,
-                "Enviado"
-        );
-        repo.agregarRecordatorio(rec);
-
-        JOptionPane.showMessageDialog(this,
-                "Recordatorio transmitido exitosamente por " + canal + " a " + ci.cita.getNombreCliente() + " (" + destino + ").",
-                "Notificación Enviada", JOptionPane.INFORMATION_MESSAGE);
-
-        recargarDatos();
-    }
-
-    private void reenviarSeleccionado() {
-        int row = tablaRecordatorios.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione un recordatorio de la tabla para reenviar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        RecordatorioCita r = listaActual.get(row);
-        r.setFechaEnvio(LocalDateTime.now());
-        r.setEstado("Enviado");
-        recargarDatos();
-        JOptionPane.showMessageDialog(this, "Recordatorio reenviado a " + r.getNombreCliente() + " por " + r.getCanal() + ".", "Reenvío Exitoso", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void marcarConfirmadoSeleccionado() {
-        int row = tablaRecordatorios.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione un recordatorio de la tabla para confirmar asistencia.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        RecordatorioCita r = listaActual.get(row);
-        r.setEstado("Confirmado");
-        repo.actualizarEstadoCita(r.getIdCita(), "Confirmada");
-        recargarDatos();
-        JOptionPane.showMessageDialog(this, "La asistencia para la cita " + r.getIdCita() + " de " + r.getNombreMascota() + " ha sido confirmada por el cliente.", "Asistencia Confirmada", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void verDetalleMensajeSeleccionado() {
-        int row = tablaRecordatorios.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) return;
-        RecordatorioCita r = listaActual.get(row);
-
-        String msg = "DETALLES DEL RECORDATORIO\n\n" +
-                     "ID: " + r.getIdRecordatorio() + " | Cita: " + r.getIdCita() + "\n" +
-                     "Paciente: " + r.getNombreMascota() + "\n" +
-                     "Propietario: " + r.getNombreCliente() + "\n" +
-                     "Canal: " + r.getCanal() + "\n" +
-                     "Destinatario: " + r.getContactoDestino() + "\n" +
-                     "Fecha y Hora de Envío: " + r.getFechaEnvioFormateada() + "\n" +
-                     "Estado: " + r.getEstado() + "\n\n" +
-                     "CONTENIDO DEL MENSAJE:\n" + r.getMensaje();
-
-        JOptionPane.showMessageDialog(this, msg, "Notificación - " + r.getIdRecordatorio(), JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private static class CitaItem {
-        final Cita cita;
-        CitaItem(Cita cita) { this.cita = cita; }
-        @Override
-        public String toString() {
-            return cita != null ? cita.getIdCita() + " - " + cita.getNombreMascota() + " (" + cita.getFechaFormateada() + " " + cita.getHoraFormateada() + " - " + cita.getTipoServicio() + ")" : "-";
-        }
-    }
-
-    private static class BadgeEstadoRecRenderer extends DefaultTableCellRenderer {
-        private static final long serialVersionUID = 1L;
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            lbl.setHorizontalAlignment(SwingConstants.CENTER);
-            lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-            String st = String.valueOf(value);
-            if (!isSelected) {
-                if ("Confirmado".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(22, 163, 74));
-                } else if ("Enviado".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(2, 132, 199));
-                } else {
-                    lbl.setForeground(new Color(217, 119, 6));
-                }
-            }
-            return lbl;
-        }
     }
 }
