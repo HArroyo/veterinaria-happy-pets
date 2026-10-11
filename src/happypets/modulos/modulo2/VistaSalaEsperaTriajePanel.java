@@ -9,57 +9,65 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.Cita;
-import happypets.model.Cliente;
-import happypets.model.Mascota;
 import happypets.model.PacienteTriaje;
 import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
  * Submódulo 2.4: Monitor de Sala de Espera y Triaje Clínico de Urgencias.
+ * Arquitectura Master-Detail (Opción A) con monitor de constantes vitales en vivo,
+ * escala Manchester visual y modal de admisión.
  */
 public class VistaSalaEsperaTriajePanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
     private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
+    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
     private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
     private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
+    private static final Color COLOR_BG_PANEL = new Color(248, 250, 252);
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
     // Filtros
-    private JComboBox<String> cbFiltroTriaje;
-    private JComboBox<String> cbFiltroEstado;
     private JTextField txtBuscar;
+    private JComboBox<String> cbFiltroPrioridad;
+    private JComboBox<String> cbFiltroEstado;
 
     // KPIs
     private JLabel lblKpiEnEspera;
@@ -67,61 +75,43 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
     private JLabel lblKpiTiempoMedio;
     private JLabel lblKpiCriticos;
 
-    // Formulario de Triaje
-    private JComboBox<CitaOTurnoItem> cbPacienteCita;
-    private JTextField txtNombreMascota;
-    private JTextField txtEspecieRaza;
-    private JTextField txtPropietario;
-    private JTextField txtTelefono;
-    private JTextField txtPeso;
-    private JTextField txtTemperatura;
-    private JTextField txtFrecuenciaCardiaca;
-    private JRadioButton rbVerde;
-    private JRadioButton rbAmarillo;
-    private JRadioButton rbRojo;
-    private JComboBox<String> cbConsultorio;
-    private JTextField txtMotivoTriaje;
-
-    // Tabla Monitor
+    // Master Table
     private JTable tablaMonitor;
     private DefaultTableModel modeloMonitor;
-    private JLabel lblContador;
+    private JLabel lblContadorLista;
     private List<PacienteTriaje> listaActual;
+
+    // Right Detail Hub (Monitor Clínico)
+    private JPanel panelDetalleHub;
+    private PacienteTriaje pacienteSeleccionado;
 
     public VistaSalaEsperaTriajePanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
+        setBorder(new EmptyBorder(12, 16, 14, 16));
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        // 1. Cabecera superior
+        JPanel panelNorte = new JPanel();
+        panelNorte.setOpaque(false);
+        panelNorte.setLayout(new BoxLayout(panelNorte, BoxLayout.Y_AXIS));
 
-        // 1. Cabecera
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(8));
+        panelNorte.add(crearCabeceraVista());
+        panelNorte.add(Box.createVerticalStrut(10));
+        panelNorte.add(crearFilaKpi());
+        panelNorte.add(Box.createVerticalStrut(10));
 
-        // 2. Barra de filtros
-        contenido.add(crearBarraFiltros());
-        contenido.add(Box.createVerticalStrut(10));
+        add(panelNorte, BorderLayout.NORTH);
 
-        // 3. Fila de 4 KPIs
-        contenido.add(crearFilaKpi());
-        contenido.add(Box.createVerticalStrut(10));
+        // 2. Split Master-Detail Central (58% Master / 42% Detail)
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetailWrapper());
+        splitPane.setOpaque(false);
+        splitPane.setBorder(null);
+        splitPane.setContinuousLayout(true);
+        splitPane.setDividerSize(8);
+        splitPane.setResizeWeight(0.58);
+        splitPane.setDividerLocation(690);
 
-        // 4. Doble columna: Formulario de Triaje y Monitor en Vivo
-        contenido.add(crearDobleColumna());
-
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.add(contenido, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(wrapper);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        add(scroll, BorderLayout.CENTER);
+        add(splitPane, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -129,18 +119,18 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
     private JPanel crearCabeceraVista() {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setPreferredSize(new Dimension(0, 40));
-        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        cab.setPreferredSize(new Dimension(0, 42));
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
         JLabel lblTit = new JLabel("Sala de Espera y Triaje de Urgencias");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTit.setForeground(COLOR_TEXTO_TITULO);
 
-        JLabel lblSub = new JLabel("Módulo 2.4 · Monitor en vivo de pacientes en sala, toma de signos vitales y clasificación Manchester");
+        JLabel lblSub = new JLabel("Módulo 2.4 · Monitor en vivo de pacientes en sala, toma de constantes vitales y clasificación Manchester");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblSub.setForeground(COLOR_TEXTO_MUTED);
 
@@ -149,22 +139,55 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         izq.add(lblSub);
         cab.add(izq, BorderLayout.CENTER);
 
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         der.setOpaque(false);
 
-        JButton btnLlamarSiguiente = crearBotonAccion("Llamar Siguiente a Consulta", true);
-        btnLlamarSiguiente.setIcon(Iconos.crearIconoReloj(12, Color.WHITE));
-        btnLlamarSiguiente.setIconTextGap(4);
+        JButton btnRefrescar = crearBotonAccion("Actualizar", false);
+        btnRefrescar.setIcon(Iconos.crearIconoRefrescar(13, COLOR_AZUL_PRIMARIO));
+        btnRefrescar.setIconTextGap(5);
+        btnRefrescar.addActionListener(e -> recargarDatos());
+
+        JButton btnLlamarSiguiente = crearBotonAccion("Llamar Siguiente Turno", false);
+        btnLlamarSiguiente.setIcon(Iconos.crearIconoReloj(13, new Color(217, 119, 6)));
+        btnLlamarSiguiente.setIconTextGap(5);
         btnLlamarSiguiente.addActionListener(e -> llamarSiguienteTurno());
 
+        JButton btnNuevoIngreso = crearBotonAccion("+ Ingresar Paciente a Triaje", true);
+        btnNuevoIngreso.setIcon(Iconos.crearIconoAlertaTriaje(13, Color.WHITE));
+        btnNuevoIngreso.setIconTextGap(5);
+        btnNuevoIngreso.addActionListener(e -> abrirModalIngreso(null, null));
+
+        der.add(btnRefrescar);
         der.add(btnLlamarSiguiente);
+        der.add(btnNuevoIngreso);
         cab.add(der, BorderLayout.EAST);
 
         return cab;
     }
 
-    private JPanel crearBarraFiltros() {
-        JPanel barra = new JPanel(new BorderLayout(10, 0)) {
+    private JPanel crearFilaKpi() {
+        JPanel fila = new JPanel(new GridLayout(1, 4, 10, 0));
+        fila.setOpaque(false);
+        fila.setPreferredSize(new Dimension(0, 52));
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 52));
+
+        lblKpiEnEspera = new JLabel("0");
+        fila.add(crearCardKpi(lblKpiEnEspera, "PACIENTES EN ESPERA", new Color(254, 243, 199), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
+
+        lblKpiEnConsulta = new JLabel("0");
+        fila.add(crearCardKpi(lblKpiEnConsulta, "EN CONSULTA / TÓPICO", Ui.TURQUESA_SUAVE, Iconos.crearIconoEstetoscopio(20, COLOR_AZUL_PRIMARIO)));
+
+        lblKpiTiempoMedio = new JLabel("11 min");
+        fila.add(crearCardKpi(lblKpiTiempoMedio, "TIEMPO PROMEDIO ESPERA", new Color(220, 252, 231), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
+
+        lblKpiCriticos = new JLabel("0");
+        fila.add(crearCardKpi(lblKpiCriticos, "CASOS CRÍTICOS (ROJO)", new Color(254, 226, 226), Iconos.crearIconoAlertaTriaje(20, new Color(220, 38, 38))));
+
+        return fila;
+    }
+
+    private JPanel crearCardKpi(JLabel lblVal, String etiqueta, Color bgIco, Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
@@ -178,106 +201,8 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
                 g2.dispose();
             }
         };
-        barra.setOpaque(false);
-        barra.setBorder(new EmptyBorder(3, 10, 3, 10));
-        barra.setPreferredSize(new Dimension(0, 38));
-        barra.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        izq.setOpaque(false);
-
-        JLabel lblTriaje = new JLabel("Nivel Triaje:");
-        lblTriaje.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblTriaje.setForeground(COLOR_TEXTO_MUTED);
-        izq.add(lblTriaje);
-
-        cbFiltroTriaje = new JComboBox<>(new String[]{"Todos los niveles", "VERDE (Normal)", "AMARILLO (Urgencia)", "ROJO (Emergencia crítica)"});
-        cbFiltroTriaje.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbFiltroTriaje.setPreferredSize(new Dimension(170, 26));
-        cbFiltroTriaje.setBackground(Color.WHITE);
-        cbFiltroTriaje.addActionListener(e -> recargarDatos());
-        izq.add(cbFiltroTriaje);
-
-        JLabel lblEst = new JLabel("Estado:");
-        lblEst.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblEst.setForeground(COLOR_TEXTO_MUTED);
-        izq.add(lblEst);
-
-        cbFiltroEstado = new JComboBox<>(new String[]{"Todos", "En Espera", "En Consulta", "Atendido"});
-        cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbFiltroEstado.setPreferredSize(new Dimension(110, 26));
-        cbFiltroEstado.setBackground(Color.WHITE);
-        cbFiltroEstado.addActionListener(e -> recargarDatos());
-        izq.add(cbFiltroEstado);
-
-        barra.add(izq, BorderLayout.WEST);
-
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
-        der.setOpaque(false);
-
-        JLabel lblB = new JLabel("Buscar:");
-        lblB.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblB.setForeground(COLOR_TEXTO_MUTED);
-        der.add(lblB);
-
-        txtBuscar = new JTextField(12);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtBuscar.setPreferredSize(new Dimension(130, 26));
-        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                new EmptyBorder(2, 6, 2, 6)
-        ));
-        java.awt.event.ActionListener accionB = e -> recargarDatos();
-        txtBuscar.addActionListener(accionB);
-        der.add(txtBuscar);
-
-        JButton btnB = crearBotonAccion("Buscar", false);
-        btnB.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
-        btnB.setIconTextGap(6);
-        btnB.setPreferredSize(new Dimension(92, 28));
-        btnB.addActionListener(accionB);
-        der.add(btnB);
-
-        barra.add(der, BorderLayout.EAST);
-        return barra;
-    }
-
-    private JPanel crearFilaKpi() {
-        JPanel fila = new JPanel(new GridLayout(1, 4, 10, 0));
-        fila.setOpaque(false);
-
-        lblKpiEnEspera = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiEnEspera, "PACIENTES EN SALA", new Color(254, 243, 199), Iconos.crearIconoReloj(20, new Color(217, 119, 6))));
-
-        lblKpiEnConsulta = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiEnConsulta, "EN CONSULTORIO", Ui.TURQUESA_SUAVE, Iconos.crearIconoEstetoscopio(20, COLOR_AZUL_PRIMARIO)));
-
-        lblKpiTiempoMedio = new JLabel("11 min");
-        fila.add(crearCardKpi(lblKpiTiempoMedio, "TIEMPO PROMEDIO ESPERA", new Color(220, 252, 231), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
-
-        lblKpiCriticos = new JLabel("0");
-        fila.add(crearCardKpi(lblKpiCriticos, "CASOS CRÍTICOS / ROJO", new Color(254, 226, 226), Iconos.crearIconoAlertaTriaje(20, new Color(220, 38, 38))));
-
-        return fila;
-    }
-
-    private JPanel crearCardKpi(JLabel lblVal, String etiqueta, Color bgIco, Icon icono) {
-        JPanel card = new JPanel(new BorderLayout(10, 0)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(8, 12, 8, 12));
+        card.setBorder(new EmptyBorder(6, 12, 6, 12));
 
         JLabel badge = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
@@ -286,7 +211,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(bgIco);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 super.paintComponent(g2);
                 g2.dispose();
             }
@@ -313,17 +238,10 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         return card;
     }
 
-    private JPanel crearDobleColumna() {
-        JPanel grid = new JPanel(new GridLayout(1, 2, 12, 0));
-        grid.setOpaque(false);
-
-        grid.add(crearTarjetaFormularioTriaje());
-        grid.add(crearTarjetaMonitorSala());
-
-        return grid;
-    }
-
-    private JPanel crearTarjetaFormularioTriaje() {
+    // ==========================================
+    // PANEL MASTER (TABLA DE TRIAJE Y MONITOR)
+    // ==========================================
+    private JPanel crearPanelMaster() {
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -339,176 +257,66 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
-        JLabel lblTit = new JLabel("Recepción y Clasificación de Triaje");
-        lblTit.setIcon(Iconos.crearIconoAlertaTriaje(15, COLOR_AZUL_PRIMARIO));
-        lblTit.setIconTextGap(6);
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-        card.add(lblTit, BorderLayout.NORTH);
+        // Barra superior de filtros
+        JPanel topFiltros = new JPanel(new BorderLayout(8, 0));
+        topFiltros.setOpaque(false);
 
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        JPanel izqFiltros = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        izqFiltros.setOpaque(false);
 
-        // 1. Selector de cita previa o ingreso directo
-        cbPacienteCita = new JComboBox<>();
-        cbPacienteCita.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbPacienteCita.setBackground(Color.WHITE);
-        cbPacienteCita.setPreferredSize(new Dimension(0, 26));
-        cbPacienteCita.addActionListener(e -> autollenarDatosDesdeCita());
-        form.add(crearFilaCampo("Cita Previa Programada (Opcional)", cbPacienteCita));
-        form.add(Box.createVerticalStrut(6));
+        JLabel lblPr = new JLabel("Prioridad:");
+        lblPr.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblPr.setForeground(COLOR_TEXTO_MUTED);
+        izqFiltros.add(lblPr);
 
-        // 2. Datos de Paciente y Dueño
-        txtNombreMascota = crearCampoTextoCompacto();
-        txtEspecieRaza = crearCampoTextoCompacto();
+        cbFiltroPrioridad = new JComboBox<>(new String[]{"Todas las Prioridades", "ROJO (Emergencia)", "AMARILLO (Urgencia)", "VERDE (Normal)"});
+        cbFiltroPrioridad.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroPrioridad.setBackground(Color.WHITE);
+        cbFiltroPrioridad.setPreferredSize(new Dimension(150, 28));
+        cbFiltroPrioridad.addActionListener(e -> filtrarDatos());
+        izqFiltros.add(cbFiltroPrioridad);
 
-        JPanel f1 = new JPanel(new GridLayout(1, 2, 8, 0));
-        f1.setOpaque(false);
-        f1.setAlignmentX(Component.LEFT_ALIGNMENT);
-        f1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        f1.add(crearFilaCampo("Nombre de la Mascota *", txtNombreMascota));
-        f1.add(crearFilaCampo("Especie y Raza *", txtEspecieRaza));
-        form.add(f1);
-        form.add(Box.createVerticalStrut(6));
+        JLabel lblEs = new JLabel("Estado:");
+        lblEs.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblEs.setForeground(COLOR_TEXTO_MUTED);
+        izqFiltros.add(lblEs);
 
-        txtPropietario = crearCampoTextoCompacto();
-        txtTelefono = crearCampoTextoCompacto();
+        cbFiltroEstado = new JComboBox<>(new String[]{"Todos en Sala", "En Espera", "En Consulta", "Atendidos Hoy"});
+        cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroEstado.setBackground(Color.WHITE);
+        cbFiltroEstado.setPreferredSize(new Dimension(120, 28));
+        cbFiltroEstado.addActionListener(e -> filtrarDatos());
+        izqFiltros.add(cbFiltroEstado);
 
-        JPanel f2 = new JPanel(new GridLayout(1, 2, 8, 0));
-        f2.setOpaque(false);
-        f2.setAlignmentX(Component.LEFT_ALIGNMENT);
-        f2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        f2.add(crearFilaCampo("Propietario Responsable *", txtPropietario));
-        f2.add(crearFilaCampo("Teléfono de Contacto", txtTelefono));
-        form.add(f2);
-        form.add(Box.createVerticalStrut(6));
+        topFiltros.add(izqFiltros, BorderLayout.WEST);
 
-        // 3. Constantes Vitales
-        txtPeso = crearCampoTextoCompacto();
-        txtPeso.setText("15.0");
-        txtTemperatura = crearCampoTextoCompacto();
-        txtTemperatura.setText("38.5");
-        txtFrecuenciaCardiaca = crearCampoTextoCompacto();
-        txtFrecuenciaCardiaca.setText("95");
+        JPanel derFiltros = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        derFiltros.setOpaque(false);
 
-        JPanel fConstantes = new JPanel(new GridLayout(1, 3, 8, 0));
-        fConstantes.setOpaque(false);
-        fConstantes.setAlignmentX(Component.LEFT_ALIGNMENT);
-        fConstantes.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        fConstantes.add(crearFilaCampo("Peso (kg) *", txtPeso));
-        fConstantes.add(crearFilaCampo("Temp (°C) *", txtTemperatura));
-        fConstantes.add(crearFilaCampo("FC (ppm) *", txtFrecuenciaCardiaca));
-        form.add(fConstantes);
-        form.add(Box.createVerticalStrut(6));
+        txtBuscar = new JTextField(12);
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtBuscar.setPreferredSize(new Dimension(140, 28));
+        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                new EmptyBorder(2, 6, 2, 6)
+        ));
+        txtBuscar.addActionListener(e -> filtrarDatos());
+        derFiltros.add(txtBuscar);
 
-        // 4. Clasificación Manchester
-        JPanel pTriajeRadios = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        pTriajeRadios.setOpaque(false);
+        JButton btnB = crearBotonAccion("Buscar", false);
+        btnB.setIcon(Iconos.crearIconoBuscar(12, COLOR_AZUL_PRIMARIO));
+        btnB.setIconTextGap(4);
+        btnB.setPreferredSize(new Dimension(84, 28));
+        btnB.addActionListener(e -> filtrarDatos());
+        derFiltros.add(btnB);
 
-        rbVerde = new JRadioButton("Verde (Normal)", true);
-        rbVerde.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        rbVerde.setForeground(new Color(22, 163, 74));
-        rbVerde.setOpaque(false);
+        topFiltros.add(derFiltros, BorderLayout.EAST);
+        card.add(topFiltros, BorderLayout.NORTH);
 
-        rbAmarillo = new JRadioButton("Amarillo (Urgente)");
-        rbAmarillo.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        rbAmarillo.setForeground(new Color(217, 119, 6));
-        rbAmarillo.setOpaque(false);
-
-        rbRojo = new JRadioButton("Rojo (Emergencia)");
-        rbRojo.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        rbRojo.setForeground(new Color(220, 38, 38));
-        rbRojo.setOpaque(false);
-
-        ButtonGroup bgT = new ButtonGroup();
-        bgT.add(rbVerde);
-        bgT.add(rbAmarillo);
-        bgT.add(rbRojo);
-
-        pTriajeRadios.add(rbVerde);
-        pTriajeRadios.add(rbAmarillo);
-        pTriajeRadios.add(rbRojo);
-
-        form.add(crearFilaCampo("Clasificación de Prioridad Clínica (Triaje Manchester) *", pTriajeRadios));
-        form.add(Box.createVerticalStrut(6));
-
-        // 5. Consultorio y Motivo
-        cbConsultorio = new JComboBox<>(new String[]{
-                "Consultorio 1 - Dr. Mendoza",
-                "Consultorio 2 - Dra. Morales",
-                "Quirófano Principal",
-                "Tópico de Emergencias",
-                "Área de Grooming"
-        });
-        cbConsultorio.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbConsultorio.setBackground(Color.WHITE);
-
-        form.add(crearFilaCampo("Consultorio o Espacio Asignado *", cbConsultorio));
-        form.add(Box.createVerticalStrut(6));
-
-        txtMotivoTriaje = crearCampoTextoCompacto();
-        form.add(crearFilaCampo("Signos Clínicos / Motivo de Urgencia *", txtMotivoTriaje));
-
-        card.add(form, BorderLayout.CENTER);
-
-        // Botones inferiores
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
-        bot.setOpaque(false);
-
-        JButton btnLimpiar = crearBotonAccion("Limpiar", false);
-        btnLimpiar.addActionListener(e -> limpiarFormulario());
-
-        JButton btnIngresar = crearBotonAccion("Ingresar a Sala", true);
-        btnIngresar.setIcon(Iconos.crearIconoReloj(12, Color.WHITE));
-        btnIngresar.setIconTextGap(4);
-        btnIngresar.addActionListener(e -> ingresarPacienteASala());
-
-        bot.add(btnLimpiar);
-        bot.add(btnIngresar);
-        card.add(bot, BorderLayout.SOUTH);
-
-        return card;
-    }
-
-    private JPanel crearTarjetaMonitorSala() {
-        JPanel card = new JPanel(new BorderLayout(0, 8)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-
-        JLabel lblTit = new JLabel("Monitor de Pacientes en Sala de Espera");
-        lblTit.setIcon(Iconos.crearIconoHistorial(15, COLOR_AZUL_PRIMARIO));
-        lblTit.setIconTextGap(6);
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-        top.add(lblTit, BorderLayout.WEST);
-
-        lblContador = new JLabel("0 en espera");
-        lblContador.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblContador.setForeground(COLOR_TEXTO_MUTED);
-        top.add(lblContador, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
-
-        // Tabla
-        String[] columnas = {"Ticket", "Hora", "Paciente", "Prioridad Triaje", "Motivo", "Consultorio", "Estado"};
+        // Tabla Master Monitor
+        String[] columnas = {"Ticket", "Paciente / Especie", "Tutor / Teléfono", "Triaje Manchester", "Destino", "Estado"};
         modeloMonitor = new DefaultTableModel(columnas, 0) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -516,71 +324,613 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         };
 
         tablaMonitor = new JTable(modeloMonitor);
-        Ui.formatearTabla(tablaMonitor, new int[]{0, 1, 3, 5, 6}, new int[]{});
+        tablaMonitor.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        Ui.formatearTabla(tablaMonitor, new int[]{0, 3, 4, 5}, new int[]{});
+        tablaMonitor.setRowHeight(48);
+        tablaMonitor.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        tablaMonitor.getColumnModel().getColumn(3).setCellRenderer(new BadgeTriajeRenderer());
-        tablaMonitor.getColumnModel().getColumn(6).setCellRenderer(new BadgeEstadoTriajeRenderer());
+        tablaMonitor.getColumnModel().getColumn(0).setPreferredWidth(75);
+        tablaMonitor.getColumnModel().getColumn(1).setPreferredWidth(170);
+        tablaMonitor.getColumnModel().getColumn(2).setPreferredWidth(150);
+        tablaMonitor.getColumnModel().getColumn(3).setPreferredWidth(130);
+        tablaMonitor.getColumnModel().getColumn(4).setPreferredWidth(110);
+        tablaMonitor.getColumnModel().getColumn(5).setPreferredWidth(95);
+
+        tablaMonitor.getColumnModel().getColumn(0).setCellRenderer(new TicketCellRenderer());
+        tablaMonitor.getColumnModel().getColumn(1).setCellRenderer(new PacienteCellRenderer());
+        tablaMonitor.getColumnModel().getColumn(2).setCellRenderer(new TutorCellRenderer());
+        tablaMonitor.getColumnModel().getColumn(3).setCellRenderer(new BadgeTriajeCellRenderer());
+        tablaMonitor.getColumnModel().getColumn(5).setCellRenderer(new BadgeEstadoTriajeRenderer());
+
+        tablaMonitor.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tablaMonitor.getSelectedRow();
+                if (row >= 0 && row < listaActual.size()) {
+                    pacienteSeleccionado = listaActual.get(row);
+                } else {
+                    pacienteSeleccionado = null;
+                }
+                actualizarPanelDetalle();
+            }
+        });
 
         tablaMonitor.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    mostrarDetalleTriajeSeleccionado();
+                if (e.getClickCount() == 2 && pacienteSeleccionado != null) {
+                    abrirModalIngreso(pacienteSeleccionado, null);
                 }
             }
         });
 
         JScrollPane sp = new JScrollPane(tablaMonitor);
-        sp.setPreferredSize(new Dimension(540, 240));
         sp.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        sp.getViewport().setBackground(Color.WHITE);
         card.add(sp, BorderLayout.CENTER);
 
-        // Acciones inferiores
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
-        bot.setOpaque(false);
+        // Barra inferior del Master
+        JPanel botMaster = new JPanel(new BorderLayout());
+        botMaster.setOpaque(false);
 
-        JButton btnLlamar = crearBotonAccion("Llamar a Consultorio", false);
-        btnLlamar.setIcon(Iconos.crearIconoEstetoscopio(12, COLOR_AZUL_PRIMARIO));
-        btnLlamar.setIconTextGap(4);
-        btnLlamar.addActionListener(e -> llamarPacienteSeleccionado());
+        lblContadorLista = new JLabel("0 pacientes en sala de espera");
+        lblContadorLista.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblContadorLista.setForeground(COLOR_TEXTO_MUTED);
+        botMaster.add(lblContadorLista, BorderLayout.WEST);
 
-        JButton btnFinalizar = crearBotonAccion("Finalizar Atención", true);
-        btnFinalizar.addActionListener(e -> finalizarAtencionSeleccionada());
+        JLabel lblDobleClic = new JLabel("Doble clic en un paciente para editar constantes vitales");
+        lblDobleClic.setFont(new Font("Segoe UI", Font.ITALIC, 10));
+        lblDobleClic.setForeground(COLOR_TEXTO_MUTED);
+        botMaster.add(lblDobleClic, BorderLayout.EAST);
 
-        bot.add(btnLlamar);
-        bot.add(btnFinalizar);
-        card.add(bot, BorderLayout.SOUTH);
+        card.add(botMaster, BorderLayout.SOUTH);
 
         return card;
     }
 
-    private JPanel crearFilaCampo(String label, Component componente) {
-        JPanel p = new JPanel(new BorderLayout(0, 2));
-        p.setOpaque(false);
-        p.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-
-        JLabel lbl = new JLabel(label, SwingConstants.LEFT);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lbl.setForeground(new Color(100, 116, 139));
-        lbl.setHorizontalAlignment(SwingConstants.LEFT);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        p.add(lbl, BorderLayout.NORTH);
-        p.add(componente, BorderLayout.CENTER);
-        return p;
+    // ==========================================
+    // PANEL DETAIL (CENTRO DE MANDO DE TRIAJE)
+    // ==========================================
+    private JPanel crearPanelDetailWrapper() {
+        panelDetalleHub = new JPanel(new BorderLayout());
+        panelDetalleHub.setOpaque(false);
+        actualizarPanelDetalle();
+        return panelDetalleHub;
     }
 
-    private JTextField crearCampoTextoCompacto() {
-        JTextField txt = new JTextField();
-        txt.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txt.setPreferredSize(new Dimension(0, 26));
-        txt.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
-        txt.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                new EmptyBorder(2, 6, 2, 6)
-        ));
-        return txt;
+    private void actualizarPanelDetalle() {
+        panelDetalleHub.removeAll();
+
+        if (pacienteSeleccionado == null) {
+            panelDetalleHub.add(crearEstadoVacioDetalle(), BorderLayout.CENTER);
+        } else {
+            panelDetalleHub.add(crearCardDetallePaciente(pacienteSeleccionado), BorderLayout.CENTER);
+        }
+
+        panelDetalleHub.revalidate();
+        panelDetalleHub.repaint();
+    }
+
+    private JPanel crearEstadoVacioDetalle() {
+        JPanel card = new JPanel(new BorderLayout()) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(30, 20, 30, 20));
+
+        JPanel centro = new JPanel();
+        centro.setOpaque(false);
+        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
+
+        JLabel ico = new JLabel(Iconos.crearIconoAlertaTriaje(48, new Color(148, 163, 184)));
+        ico.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel tit = new JLabel("Monitor Clínico de Triaje");
+        tit.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel msg = new JLabel("<html><center>Seleccione un paciente en la lista de espera para supervisar sus signos vitales, nivel de urgencia Manchester y ejecutar acciones clínicas rápidas.</center></html>");
+        msg.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        msg.setForeground(COLOR_TEXTO_MUTED);
+        msg.setAlignmentX(Component.CENTER_ALIGNMENT);
+        msg.setMaximumSize(new Dimension(320, 70));
+
+        centro.add(Box.createVerticalGlue());
+        centro.add(ico);
+        centro.add(Box.createVerticalStrut(12));
+        centro.add(tit);
+        centro.add(Box.createVerticalStrut(6));
+        centro.add(msg);
+        centro.add(Box.createVerticalGlue());
+
+        card.add(centro, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearCardDetallePaciente(PacienteTriaje p) {
+        JPanel card = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        // Determinar colores Manchester
+        String nt = p.getNivelTriaje().toUpperCase();
+        Color colorTriaje;
+        Color bgTriaje;
+        String descTriaje;
+        if (nt.contains("ROJO")) {
+            colorTriaje = new Color(220, 38, 38);
+            bgTriaje = new Color(254, 242, 242);
+            descTriaje = "PRIORIDAD ROJA · EMERGENCIA CRÍTICA";
+        } else if (nt.contains("AMARILLO")) {
+            colorTriaje = new Color(217, 119, 6);
+            bgTriaje = new Color(254, 252, 232);
+            descTriaje = "PRIORIDAD AMARILLA · URGENCIA (< 30 MIN)";
+        } else {
+            colorTriaje = new Color(22, 163, 74);
+            bgTriaje = new Color(240, 253, 244);
+            descTriaje = "PRIORIDAD VERDE · NORMAL / NO URGENTE";
+        }
+
+        // 1. Header con Avatar Circular, Datos y Banner Manchester
+        JPanel pTop = new JPanel();
+        pTop.setOpaque(false);
+        pTop.setLayout(new BoxLayout(pTop, BoxLayout.Y_AXIS));
+
+        JPanel pFilaAvatar = new JPanel(new BorderLayout(12, 0));
+        pFilaAvatar.setOpaque(false);
+
+        // Circular Avatar seguro
+        JPanel pAvatarWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        pAvatarWrap.setOpaque(false);
+        JLabel lblAvatar = new JLabel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth();
+                int h = getHeight();
+                int d = Math.min(w, h) - 2;
+                int x = (w - d) / 2;
+                int y = (h - d) / 2;
+
+                g2.setColor(bgTriaje);
+                g2.fillOval(x, y, d, d);
+                g2.setColor(colorTriaje);
+                g2.setStroke(new java.awt.BasicStroke(2.0f));
+                g2.drawOval(x, y, d, d);
+
+                // Letras iniciales
+                String ini = p.getNombreMascota().substring(0, Math.min(2, p.getNombreMascota().length())).toUpperCase();
+                g2.setFont(new Font("Segoe UI", Font.BOLD, 18));
+                g2.setColor(colorTriaje);
+                java.awt.FontMetrics fm = g2.getFontMetrics();
+                int tx = (w - fm.stringWidth(ini)) / 2;
+                int ty = (h + fm.getAscent() - fm.getDescent()) / 2;
+                g2.drawString(ini, tx, ty);
+                g2.dispose();
+            }
+        };
+        lblAvatar.setPreferredSize(new Dimension(54, 54));
+        pAvatarWrap.add(lblAvatar);
+        pFilaAvatar.add(pAvatarWrap, BorderLayout.WEST);
+
+        // Datos del paciente al lado del avatar
+        JPanel pInfoPaciente = new JPanel();
+        pInfoPaciente.setOpaque(false);
+        pInfoPaciente.setLayout(new BoxLayout(pInfoPaciente, BoxLayout.Y_AXIS));
+
+        JLabel lblNom = new JLabel(p.getNombreMascota() + "  (" + p.getIdTicket() + ")");
+        lblNom.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        lblNom.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblEsp = new JLabel(p.getEspecieRaza() + " · Tutor: " + p.getNombrePropietario());
+        lblEsp.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblEsp.setForeground(COLOR_TEXTO_MUTED);
+
+        JLabel lblTel = new JLabel("Teléfono: " + p.getTelefonoPropietario() + "  |  Llegada: " + p.getHoraLlegadaFormateada() + " hrs");
+        lblTel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblTel.setForeground(COLOR_TEXTO_MUTED);
+
+        pInfoPaciente.add(lblNom);
+        pInfoPaciente.add(Box.createVerticalStrut(2));
+        pInfoPaciente.add(lblEsp);
+        pInfoPaciente.add(Box.createVerticalStrut(2));
+        pInfoPaciente.add(lblTel);
+        pFilaAvatar.add(pInfoPaciente, BorderLayout.CENTER);
+
+        pTop.add(pFilaAvatar);
+        pTop.add(Box.createVerticalStrut(10));
+
+        // Banner Manchester Triage
+        JPanel bannerManchester = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(bgTriaje);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(colorTriaje);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        bannerManchester.setOpaque(false);
+        bannerManchester.setBorder(new EmptyBorder(8, 12, 8, 12));
+
+        JLabel lblManchester = new JLabel(descTriaje);
+        lblManchester.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblManchester.setForeground(colorTriaje);
+        lblManchester.setIcon(Iconos.crearIconoAlertaTriaje(16, colorTriaje));
+        lblManchester.setIconTextGap(8);
+        bannerManchester.add(lblManchester, BorderLayout.WEST);
+
+        JLabel lblEstadoPill = new JLabel("Estado: " + p.getEstado());
+        lblEstadoPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblEstadoPill.setForeground(colorTriaje);
+        bannerManchester.add(lblEstadoPill, BorderLayout.EAST);
+
+        pTop.add(bannerManchester);
+        card.add(pTop, BorderLayout.NORTH);
+
+        // 2. Centro: Constantes vitales + Motivo clínico
+        JPanel pCentro = new JPanel();
+        pCentro.setOpaque(false);
+        pCentro.setLayout(new BoxLayout(pCentro, BoxLayout.Y_AXIS));
+
+        // Grid de 4 constantes vitales
+        JPanel gridConstantes = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridConstantes.setOpaque(false);
+
+        // Temperatura
+        String evalTemp = (p.getTemperaturaC() > 39.2) ? "Febril" : (p.getTemperaturaC() < 38.0) ? "Hipotermia" : "Normal";
+        Color colTemp = evalTemp.equals("Normal") ? new Color(22, 163, 74) : new Color(220, 38, 38);
+        gridConstantes.add(crearWidgetSignoVital("TEMPERATURA CORPORAL", p.getTemperaturaC() + " °C", evalTemp, colTemp));
+
+        // Frecuencia Cardíaca
+        String evalFc = (p.getFrecuenciaCardiacaPpm() > 140) ? "Taquicardia" : (p.getFrecuenciaCardiacaPpm() < 60) ? "Bradicardia" : "Normal";
+        Color colFc = evalFc.equals("Normal") ? new Color(22, 163, 74) : new Color(217, 119, 6);
+        gridConstantes.add(crearWidgetSignoVital("FRECUENCIA CARDÍACA", p.getFrecuenciaCardiacaPpm() + " ppm", evalFc, colFc));
+
+        // Peso Corporal
+        gridConstantes.add(crearWidgetSignoVital("PESO DEL PACIENTE", p.getPesoKg() + " kg", "Biometría", COLOR_AZUL_PRIMARIO));
+
+        // Tiempo en Sala
+        long minutosEspera = 0;
+        if (p.getHoraLlegada() != null) {
+            minutosEspera = Math.max(0, Duration.between(p.getHoraLlegada(), LocalTime.now()).toMinutes());
+        }
+        gridConstantes.add(crearWidgetSignoVital("TIEMPO EN SALA", minutosEspera + " minutos", "Llegó " + p.getHoraLlegadaFormateada(), new Color(100, 116, 139)));
+
+        pCentro.add(gridConstantes);
+        pCentro.add(Box.createVerticalStrut(10));
+
+        // Motivo y Destino
+        JPanel pMotivo = new JPanel(new BorderLayout(0, 4)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        pMotivo.setOpaque(false);
+        pMotivo.setBorder(new EmptyBorder(10, 12, 10, 12));
+
+        JLabel lblTitM = new JLabel("SIGNOS CLÍNICOS / MOTIVO DE CONSULTA");
+        lblTitM.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTitM.setForeground(COLOR_TEXTO_MUTED);
+
+        JLabel lblDescM = new JLabel("<html>" + p.getMotivo() + "</html>");
+        lblDescM.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblDescM.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblDestino = new JLabel("Consultorio Destino: " + p.getConsultorioAsignado());
+        lblDestino.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblDestino.setForeground(COLOR_AZUL_PRIMARIO);
+
+        pMotivo.add(lblTitM, BorderLayout.NORTH);
+        pMotivo.add(lblDescM, BorderLayout.CENTER);
+        pMotivo.add(lblDestino, BorderLayout.SOUTH);
+
+        pCentro.add(pMotivo);
+        card.add(pCentro, BorderLayout.CENTER);
+
+        // 3. Footer: Dock de Acciones Rápidas (1-click triage operations)
+        JPanel pBotones = new JPanel(new GridLayout(2, 2, 8, 8));
+        pBotones.setOpaque(false);
+
+        JButton btnLlamar = crearBotonAccion("Llamar a Consultorio", true);
+        btnLlamar.setIcon(Iconos.crearIconoEstetoscopio(13, Color.WHITE));
+        btnLlamar.setIconTextGap(6);
+        btnLlamar.addActionListener(e -> pasarAConsulta(p));
+
+        JButton btnReclasificar = crearBotonAccion("Reclasificar Triaje", false);
+        btnReclasificar.setIcon(Iconos.crearIconoAlertaTriaje(13, COLOR_AZUL_PRIMARIO));
+        btnReclasificar.setIconTextGap(6);
+        btnReclasificar.addActionListener(e -> reclasificarPrioridad(p));
+
+        JButton btnAtendido = crearBotonAccion("Finalizar Atención", false);
+        btnAtendido.setIcon(Iconos.crearIconoCheck(13, new Color(22, 163, 74)));
+        btnAtendido.setIconTextGap(6);
+        btnAtendido.addActionListener(e -> finalizarAtencion(p));
+
+        JButton btnEditar = crearBotonAccion("Editar Constantes", false);
+        btnEditar.setIcon(Iconos.crearIconoEditar(13, new Color(100, 116, 139)));
+        btnEditar.setIconTextGap(6);
+        btnEditar.addActionListener(e -> abrirModalIngreso(p, null));
+
+        pBotones.add(btnLlamar);
+        pBotones.add(btnReclasificar);
+        pBotones.add(btnAtendido);
+        pBotones.add(btnEditar);
+
+        card.add(pBotones, BorderLayout.SOUTH);
+
+        return card;
+    }
+
+    private JPanel crearWidgetSignoVital(String titulo, String valor, String status, Color colorStatus) {
+        JPanel w = new JPanel(new BorderLayout(4, 2)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(250, 250, 250));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        w.setOpaque(false);
+        w.setBorder(new EmptyBorder(6, 10, 6, 10));
+
+        JLabel lblT = new JLabel(titulo);
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblT.setForeground(COLOR_TEXTO_MUTED);
+
+        JLabel lblV = new JLabel(valor);
+        lblV.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblV.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblS = new JLabel(status);
+        lblS.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblS.setForeground(colorStatus);
+
+        w.add(lblT, BorderLayout.NORTH);
+        w.add(lblV, BorderLayout.CENTER);
+        w.add(lblS, BorderLayout.SOUTH);
+
+        return w;
+    }
+
+    // ==========================================
+    // OPERACIONES Y LÓGICA DE NEGOCIO
+    // ==========================================
+    public void registrarLlegadaDesdeCita(Cita cita) {
+        if (cita == null) return;
+        recargarDatos();
+
+        // Buscar si ya está en triaje
+        for (PacienteTriaje p : listaActual) {
+            if (cita.getIdCita().equalsIgnoreCase(p.getIdCita())) {
+                seleccionarPaciente(p);
+                return;
+            }
+        }
+
+        // Si no está en triaje, abrir diálogo para admisión directa
+        abrirModalIngreso(null, cita);
+    }
+
+    private void abrirModalIngreso(PacienteTriaje pExistente, Cita citaPrevia) {
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        FormularioIngresoTriajeDialog dlg = new FormularioIngresoTriajeDialog(parent, pExistente, citaPrevia, guardado -> {
+            recargarDatos();
+            seleccionarPaciente(guardado);
+            JOptionPane.showMessageDialog(this,
+                    "Paciente " + guardado.getNombreMascota() + " registrado con ticket " + guardado.getIdTicket() + ".\n" +
+                    "Nivel de Triaje: " + guardado.getNivelTriaje() + "\n" +
+                    "Destino: " + guardado.getConsultorioAsignado(),
+                    "Ficha de Triaje Registrada", JOptionPane.INFORMATION_MESSAGE);
+        });
+        dlg.setVisible(true);
+    }
+
+    private void pasarAConsulta(PacienteTriaje p) {
+        p.setEstado("En Consulta");
+        repo.actualizarEstadoTriaje(p.getIdTicket(), "En Consulta");
+        recargarDatos();
+        seleccionarPaciente(p);
+        JOptionPane.showMessageDialog(this,
+                "LLAMADO A CONSULTA:\n\n" +
+                "Ticket: " + p.getIdTicket() + "\n" +
+                "Paciente: " + p.getNombreMascota() + " (" + p.getEspecieRaza() + ")\n" +
+                "Propietario: " + p.getNombrePropietario() + "\n" +
+                "Destino: " + p.getConsultorioAsignado() + "\n\n" +
+                "El paciente ha ingresado a atención clínica.",
+                "Llamado a Consulta", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void reclasificarPrioridad(PacienteTriaje p) {
+        String[] opciones = {"VERDE (Normal / Rutinario)", "AMARILLO (Urgencia < 30 min)", "ROJO (Emergencia Crítica)"};
+        int sel = JOptionPane.showOptionDialog(
+                this,
+                "Seleccione el nuevo nivel de clasificación Manchester para " + p.getNombreMascota() + ":",
+                "Reclasificación de Triaje - " + p.getIdTicket(),
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                Iconos.crearIconoAlertaTriaje(24, COLOR_AZUL_PRIMARIO),
+                opciones,
+                opciones[0]
+        );
+
+        if (sel >= 0 && sel < opciones.length) {
+            String nuevoNivel = opciones[sel];
+            p.setNivelTriaje(nuevoNivel);
+            repo.guardarPacienteTriaje(p);
+            recargarDatos();
+            seleccionarPaciente(p);
+            JOptionPane.showMessageDialog(this,
+                    "Prioridad actualizada para " + p.getNombreMascota() + ":\n" + nuevoNivel,
+                    "Prioridad Modificada", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void finalizarAtencion(PacienteTriaje p) {
+        p.setEstado("Atendido");
+        repo.actualizarEstadoTriaje(p.getIdTicket(), "Atendido");
+        recargarDatos();
+        seleccionarPaciente(p);
+        JOptionPane.showMessageDialog(this,
+                "Atención clínica finalizada para el paciente " + p.getNombreMascota() + ".",
+                "Atención Concluida", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void llamarSiguienteTurno() {
+        List<PacienteTriaje> enEspera = repo.getPacientesTriaje().stream()
+                .filter(p -> "En Espera".equalsIgnoreCase(p.getEstado()))
+                .sorted((a, b) -> {
+                    // Orden de prioridad Manchester: ROJO primero, luego AMARILLO, luego VERDE
+                    int pa = a.getNivelTriaje().toUpperCase().contains("ROJO") ? 0 : a.getNivelTriaje().toUpperCase().contains("AMARILLO") ? 1 : 2;
+                    int pb = b.getNivelTriaje().toUpperCase().contains("ROJO") ? 0 : b.getNivelTriaje().toUpperCase().contains("AMARILLO") ? 1 : 2;
+                    if (pa != pb) return Integer.compare(pa, pb);
+                    if (a.getHoraLlegada() == null) return 1;
+                    if (b.getHoraLlegada() == null) return -1;
+                    return a.getHoraLlegada().compareTo(b.getHoraLlegada());
+                }).toList();
+
+        if (enEspera.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "No hay pacientes pendientes en la sala de espera actualmente.",
+                    "Sala de Espera Despejada", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        PacienteTriaje sig = enEspera.get(0);
+        pasarAConsulta(sig);
+    }
+
+    public void recargarDatos() {
+        filtrarDatos();
+    }
+
+    private void filtrarDatos() {
+        List<PacienteTriaje> todos = repo.getPacientesTriaje();
+        String fPrio = cbFiltroPrioridad != null ? (String) cbFiltroPrioridad.getSelectedItem() : "Todas";
+        String fEst = cbFiltroEstado != null ? (String) cbFiltroEstado.getSelectedItem() : "Todos";
+        String q = (txtBuscar != null && txtBuscar.getText() != null) ? txtBuscar.getText().trim().toLowerCase() : "";
+
+        listaActual = todos.stream().filter(p -> {
+            if (fPrio != null && !fPrio.startsWith("Todas")) {
+                if (fPrio.startsWith("ROJO") && !p.getNivelTriaje().toUpperCase().contains("ROJO")) return false;
+                if (fPrio.startsWith("AMARILLO") && !p.getNivelTriaje().toUpperCase().contains("AMARILLO")) return false;
+                if (fPrio.startsWith("VERDE") && !p.getNivelTriaje().toUpperCase().contains("VERDE")) return false;
+            }
+            if (fEst != null && !fEst.startsWith("Todos")) {
+                if (fEst.startsWith("Atendidos") && !"Atendido".equalsIgnoreCase(p.getEstado())) return false;
+                if (!fEst.startsWith("Atendidos") && !p.getEstado().equalsIgnoreCase(fEst)) return false;
+            }
+            if (!q.isEmpty()) {
+                boolean match = p.getNombreMascota().toLowerCase().contains(q) ||
+                                p.getNombrePropietario().toLowerCase().contains(q) ||
+                                p.getIdTicket().toLowerCase().contains(q) ||
+                                p.getMotivo().toLowerCase().contains(q) ||
+                                p.getConsultorioAsignado().toLowerCase().contains(q);
+                if (!match) return false;
+            }
+            return true;
+        }).toList();
+
+        modeloMonitor.setRowCount(0);
+        for (PacienteTriaje p : listaActual) {
+            modeloMonitor.addRow(new Object[]{
+                    p,
+                    p,
+                    p,
+                    p.getNivelTriaje(),
+                    p.getConsultorioAsignado(),
+                    p.getEstado()
+            });
+        }
+
+        lblContadorLista.setText(listaActual.size() + " pacientes monitoreados");
+
+        // KPIs
+        long enEspera = todos.stream().filter(p -> "En Espera".equalsIgnoreCase(p.getEstado())).count();
+        long enConsulta = todos.stream().filter(p -> "En Consulta".equalsIgnoreCase(p.getEstado())).count();
+        long criticos = todos.stream().filter(p -> p.getNivelTriaje().toUpperCase().contains("ROJO")).count();
+
+        lblKpiEnEspera.setText(String.valueOf(enEspera));
+        lblKpiEnConsulta.setText(String.valueOf(enConsulta));
+        lblKpiCriticos.setText(String.valueOf(criticos));
+
+        // Seleccionar paciente previo si aún existe en la lista filtrada
+        if (pacienteSeleccionado != null) {
+            seleccionarPaciente(pacienteSeleccionado);
+        } else if (!listaActual.isEmpty()) {
+            seleccionarFila(0);
+        } else {
+            pacienteSeleccionado = null;
+            actualizarPanelDetalle();
+        }
+    }
+
+    private void seleccionarPaciente(PacienteTriaje p) {
+        if (p == null) return;
+        for (int i = 0; i < listaActual.size(); i++) {
+            if (listaActual.get(i).getIdTicket().equalsIgnoreCase(p.getIdTicket())) {
+                seleccionarFila(i);
+                return;
+            }
+        }
+        actualizarPanelDetalle();
+    }
+
+    private void seleccionarFila(int fila) {
+        if (fila >= 0 && fila < tablaMonitor.getRowCount()) {
+            tablaMonitor.setRowSelectionInterval(fila, fila);
+            tablaMonitor.scrollRectToVisible(tablaMonitor.getCellRect(fila, 0, true));
+            pacienteSeleccionado = listaActual.get(fila);
+        } else {
+            pacienteSeleccionado = null;
+        }
+        actualizarPanelDetalle();
     }
 
     private JButton crearBotonAccion(String texto, boolean primario) {
@@ -608,7 +958,7 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
-                return new Dimension(d.width + 16, 28);
+                return new Dimension(d.width + 12, 30);
             }
         };
         btn.putClientProperty("primario", primario);
@@ -618,265 +968,169 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(4, 12, 4, 12));
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
         return btn;
     }
 
-    public void registrarLlegadaDesdeCita(Cita cita) {
-        if (cita == null) return;
-        recargarDatos();
-        for (int i = 0; i < cbPacienteCita.getItemCount(); i++) {
-            CitaOTurnoItem item = cbPacienteCita.getItemAt(i);
-            if (item != null && item.cita != null && item.cita.getIdCita().equals(cita.getIdCita())) {
-                cbPacienteCita.setSelectedIndex(i);
-                autollenarDatosDesdeCita();
-                break;
-            }
-        }
-    }
-
-    public void recargarDatos() {
-        // Cargar citas en combo
-        if (cbPacienteCita.getItemCount() == 0) {
-            cbPacienteCita.addItem(new CitaOTurnoItem(null, "--- Ingreso Directo por Urgencia (Sin cita) ---"));
-            for (Cita c : repo.getCitas()) {
-                cbPacienteCita.addItem(new CitaOTurnoItem(c, c.getIdCita() + " - " + c.getNombreMascota() + " (" + c.getNombreCliente() + ")"));
-            }
-        }
-
-        List<PacienteTriaje> todos = repo.getPacientesTriaje();
-        String fTriaje = (String) cbFiltroTriaje.getSelectedItem();
-        String fEstado = (String) cbFiltroEstado.getSelectedItem();
-        String q = txtBuscar.getText().trim().toLowerCase();
-
-        listaActual = todos.stream().filter(p -> {
-            if (fTriaje != null && !fTriaje.startsWith("Todos") && !p.getNivelTriaje().startsWith(fTriaje.substring(0, 4))) return false;
-            if (fEstado != null && !fEstado.startsWith("Todos") && !p.getEstado().equalsIgnoreCase(fEstado)) return false;
-            if (!q.isEmpty()) {
-                boolean match = p.getNombreMascota().toLowerCase().contains(q) ||
-                                p.getNombrePropietario().toLowerCase().contains(q) ||
-                                p.getIdTicket().toLowerCase().contains(q) ||
-                                p.getMotivo().toLowerCase().contains(q);
-                if (!match) return false;
-            }
-            return true;
-        }).toList();
-
-        modeloMonitor.setRowCount(0);
-        for (PacienteTriaje p : listaActual) {
-            modeloMonitor.addRow(new Object[]{
-                    p.getIdTicket(),
-                    p.getHoraLlegadaFormateada(),
-                    p.getNombreMascota(),
-                    p.getNivelTriaje(),
-                    p.getMotivo(),
-                    p.getConsultorioAsignado(),
-                    p.getEstado()
-            });
-        }
-        lblContador.setText(listaActual.size() + " en sala");
-
-        // KPIs
-        long enEspera = todos.stream().filter(p -> "En Espera".equalsIgnoreCase(p.getEstado())).count();
-        long enConsulta = todos.stream().filter(p -> "En Consulta".equalsIgnoreCase(p.getEstado())).count();
-        long criticos = todos.stream().filter(p -> p.getNivelTriaje().toUpperCase().contains("ROJO")).count();
-
-        lblKpiEnEspera.setText(String.valueOf(enEspera));
-        lblKpiEnConsulta.setText(String.valueOf(enConsulta));
-        lblKpiCriticos.setText(String.valueOf(criticos));
-    }
-
-    private void autollenarDatosDesdeCita() {
-        CitaOTurnoItem item = (CitaOTurnoItem) cbPacienteCita.getSelectedItem();
-        if (item != null && item.cita != null) {
-            txtNombreMascota.setText(item.cita.getNombreMascota());
-            txtEspecieRaza.setText(item.cita.getEspecieRaza());
-            txtPropietario.setText(item.cita.getNombreCliente());
-            txtTelefono.setText(item.cita.getTelefonoCliente());
-            txtMotivoTriaje.setText(item.cita.getMotivo());
-            if (item.cita.getVeterinario().contains("Mendoza")) {
-                cbConsultorio.setSelectedItem("Consultorio 1 - Dr. Mendoza");
-            } else {
-                cbConsultorio.setSelectedItem("Consultorio 2 - Dra. Morales");
-            }
-            if ("Emergencia".equalsIgnoreCase(item.cita.getPrioridad())) {
-                rbRojo.setSelected(true);
-            } else if ("Urgente".equalsIgnoreCase(item.cita.getPrioridad())) {
-                rbAmarillo.setSelected(true);
-            } else {
-                rbVerde.setSelected(true);
-            }
-        }
-    }
-
-    private void ingresarPacienteASala() {
-        String mascota = txtNombreMascota.getText().trim();
-        String especie = txtEspecieRaza.getText().trim();
-        String prop = txtPropietario.getText().trim();
-        String motivo = txtMotivoTriaje.getText().trim();
-
-        if (mascota.isEmpty() || especie.isEmpty() || prop.isEmpty() || motivo.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Complete los datos obligatorios del paciente para ingresar a triaje.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        double peso = 10.0;
-        double temp = 38.5;
-        int fc = 90;
-        try {
-            peso = Double.parseDouble(txtPeso.getText().trim());
-            temp = Double.parseDouble(txtTemperatura.getText().trim());
-            fc = Integer.parseInt(txtFrecuenciaCardiaca.getText().trim());
-        } catch (Exception ignored) { }
-
-        String nivel = rbRojo.isSelected() ? "ROJO (Emergencia crítica)" :
-                       rbAmarillo.isSelected() ? "AMARILLO (Urgencia)" : "VERDE (Normal)";
-
-        CitaOTurnoItem cItem = (CitaOTurnoItem) cbPacienteCita.getSelectedItem();
-        String idCita = (cItem != null && cItem.cita != null) ? cItem.cita.getIdCita() : null;
-
-        PacienteTriaje pt = new PacienteTriaje(
-                null,
-                idCita,
-                "VET-" + (100 + (int)(Math.random() * 800)),
-                mascota,
-                especie,
-                prop,
-                txtTelefono.getText().trim(),
-                LocalTime.now(),
-                peso,
-                temp,
-                fc,
-                nivel,
-                motivo,
-                (String) cbConsultorio.getSelectedItem(),
-                "En Espera"
-        );
-        repo.agregarPacienteTriaje(pt);
-
-        JOptionPane.showMessageDialog(this,
-                "Ticket " + pt.getIdTicket() + " generado para " + pt.getNombreMascota() + ".\nClasificación: " + pt.getNivelTriaje() + "\nConsultorio: " + pt.getConsultorioAsignado(),
-                "Ingreso a Sala Registrado", JOptionPane.INFORMATION_MESSAGE);
-
-        limpiarFormulario();
-        recargarDatos();
-    }
-
-    private void limpiarFormulario() {
-        txtNombreMascota.setText("");
-        txtEspecieRaza.setText("");
-        txtPropietario.setText("");
-        txtTelefono.setText("");
-        txtMotivoTriaje.setText("");
-        rbVerde.setSelected(true);
-        cbPacienteCita.setSelectedIndex(0);
-    }
-
-    private void llamarSiguienteTurno() {
-        List<PacienteTriaje> enEspera = repo.getPacientesTriaje().stream()
-                .filter(p -> "En Espera".equalsIgnoreCase(p.getEstado()))
-                .sorted((a, b) -> {
-                    // Orden de prioridad: ROJO primero, luego AMARILLO, luego VERDE
-                    int pa = a.getNivelTriaje().startsWith("ROJO") ? 0 : a.getNivelTriaje().startsWith("AMARILLO") ? 1 : 2;
-                    int pb = b.getNivelTriaje().startsWith("ROJO") ? 0 : b.getNivelTriaje().startsWith("AMARILLO") ? 1 : 2;
-                    if (pa != pb) return Integer.compare(pa, pb);
-                    return a.getHoraLlegada().compareTo(b.getHoraLlegada());
-                }).toList();
-
-        if (enEspera.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay pacientes pendientes en la sala de espera actualmente.", "Sala Vacía", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        PacienteTriaje sig = enEspera.get(0);
-        sig.setEstado("En Consulta");
-        recargarDatos();
-
-        JOptionPane.showMessageDialog(this,
-                "LLAMANDO A CONSULTA:\n\n" +
-                "Ticket: " + sig.getIdTicket() + "\n" +
-                "Paciente: " + sig.getNombreMascota() + " (" + sig.getEspecieRaza() + ")\n" +
-                "Propietario: " + sig.getNombrePropietario() + "\n" +
-                "Triaje: " + sig.getNivelTriaje() + "\n" +
-                "Destino: " + sig.getConsultorioAsignado(),
-                "Llamado a Consulta", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void llamarPacienteSeleccionado() {
-        int row = tablaMonitor.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione un paciente de la tabla para llamar a consultorio.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        PacienteTriaje p = listaActual.get(row);
-        p.setEstado("En Consulta");
-        recargarDatos();
-        JOptionPane.showMessageDialog(this, "Paciente " + p.getNombreMascota() + " llamado al " + p.getConsultorioAsignado() + ".", "Paciente Llamado", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void finalizarAtencionSeleccionada() {
-        int row = tablaMonitor.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione un paciente de la tabla para finalizar atención.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        PacienteTriaje p = listaActual.get(row);
-        p.setEstado("Atendido");
-        recargarDatos();
-        JOptionPane.showMessageDialog(this, "Atención clínica finalizada para el paciente " + p.getNombreMascota() + ".", "Atención Concluida", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void mostrarDetalleTriajeSeleccionado() {
-        int row = tablaMonitor.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) return;
-        PacienteTriaje p = listaActual.get(row);
-
-        String info = "HOJA DE TRIAJE CLÍNICO\n\n" +
-                      "Ticket de Sala: " + p.getIdTicket() + " (Llegada: " + p.getHoraLlegadaFormateada() + " hrs)\n" +
-                      "Paciente: " + p.getNombreMascota() + " (" + p.getEspecieRaza() + ")\n" +
-                      "Propietario: " + p.getNombrePropietario() + " | Contacto: " + p.getTelefonoPropietario() + "\n\n" +
-                      "SIGNOS VITALES REGISTRADOS:\n" +
-                      "• Peso: " + p.getPesoKg() + " kg\n" +
-                      "• Temperatura: " + p.getTemperaturaC() + " °C\n" +
-                      "• Frecuencia Cardíaca: " + p.getFrecuenciaCardiacaPpm() + " ppm\n\n" +
-                      "CLASIFICACIÓN DE TRIAJE:\n" +
-                      "• Prioridad: " + p.getNivelTriaje() + "\n" +
-                      "• Espacio: " + p.getConsultorioAsignado() + "\n" +
-                      "• Estado en Sala: " + p.getEstado() + "\n\n" +
-                      "MOTIVO DE CONSULTA:\n" + p.getMotivo();
-
-        JOptionPane.showMessageDialog(this, info, "Ficha de Triaje - " + p.getIdTicket(), JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private static class CitaOTurnoItem {
-        final Cita cita;
-        final String etiqueta;
-        CitaOTurnoItem(Cita cita, String etiqueta) {
-            this.cita = cita;
-            this.etiqueta = etiqueta;
-        }
-        @Override
-        public String toString() { return etiqueta; }
-    }
-
-    private static class BadgeTriajeRenderer extends DefaultTableCellRenderer {
+    // ==========================================
+    // RENDERIZADORES DE LA TABLA MASTER
+    // ==========================================
+    private static class TicketCellRenderer extends DefaultTableCellRenderer {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            lbl.setHorizontalAlignment(SwingConstants.CENTER);
-            lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-            String t = String.valueOf(value).toUpperCase();
-            if (!isSelected) {
-                if (t.contains("ROJO")) {
-                    lbl.setForeground(new Color(220, 38, 38));
-                } else if (t.contains("AMARILLO")) {
-                    lbl.setForeground(new Color(217, 119, 6));
-                } else {
-                    lbl.setForeground(new Color(22, 163, 74));
-                }
+            JPanel p = new JPanel(new BorderLayout(0, 2));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 8, 6, 6));
+
+            if (value instanceof PacienteTriaje pt) {
+                JLabel lblTicket = new JLabel(pt.getIdTicket());
+                lblTicket.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblTicket.setForeground(isSelected ? table.getSelectionForeground() : COLOR_AZUL_PRIMARIO);
+
+                JLabel lblHora = new JLabel(pt.getHoraLlegadaFormateada() + " hrs");
+                lblHora.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblHora.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                p.add(lblTicket, BorderLayout.NORTH);
+                p.add(lblHora, BorderLayout.CENTER);
             }
-            return lbl;
+            return p;
+        }
+    }
+
+    private static class PacienteCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new BorderLayout(8, 0));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+            if (value instanceof PacienteTriaje pt) {
+                // Avatar circular miniatura
+                JPanel pAvWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
+                pAvWrap.setOpaque(false);
+                JLabel lblAv = new JLabel() {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int w = getWidth();
+                        int h = getHeight();
+                        int d = Math.min(w, h) - 2;
+                        g2.setColor(new Color(224, 242, 254));
+                        g2.fillOval(1, 1, d, d);
+                        g2.setColor(new Color(2, 132, 199));
+                        g2.drawOval(1, 1, d, d);
+                        String ini = pt.getNombreMascota().substring(0, 1).toUpperCase();
+                        g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                        java.awt.FontMetrics fm = g2.getFontMetrics();
+                        g2.drawString(ini, (w - fm.stringWidth(ini)) / 2, (h + fm.getAscent() - fm.getDescent()) / 2);
+                        g2.dispose();
+                    }
+                };
+                lblAv.setPreferredSize(new Dimension(28, 28));
+                pAvWrap.add(lblAv);
+                p.add(pAvWrap, BorderLayout.WEST);
+
+                JPanel pTxt = new JPanel();
+                pTxt.setOpaque(false);
+                pTxt.setLayout(new BoxLayout(pTxt, BoxLayout.Y_AXIS));
+
+                JLabel lblNom = new JLabel(pt.getNombreMascota());
+                lblNom.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblNom.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_TITULO);
+
+                JLabel lblEsp = new JLabel(pt.getEspecieRaza());
+                lblEsp.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblEsp.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                pTxt.add(lblNom);
+                pTxt.add(lblEsp);
+                p.add(pTxt, BorderLayout.CENTER);
+            }
+            return p;
+        }
+    }
+
+    private static class TutorCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new BorderLayout(0, 2));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+            if (value instanceof PacienteTriaje pt) {
+                JLabel lblTutor = new JLabel(pt.getNombrePropietario());
+                lblTutor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblTutor.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_TITULO);
+
+                JLabel lblTel = new JLabel(pt.getTelefonoPropietario());
+                lblTel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblTel.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                p.add(lblTutor, BorderLayout.NORTH);
+                p.add(lblTel, BorderLayout.CENTER);
+            }
+            return p;
+        }
+    }
+
+    private static class BadgeTriajeCellRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+
+            String text = String.valueOf(value);
+            String nt = text.toUpperCase();
+
+            Color bg;
+            Color fg;
+            String label;
+            if (nt.contains("ROJO")) {
+                bg = new Color(254, 226, 226);
+                fg = new Color(185, 28, 28);
+                label = "ROJO (Crítico)";
+            } else if (nt.contains("AMARILLO")) {
+                bg = new Color(254, 243, 199);
+                fg = new Color(180, 83, 9);
+                label = "AMARILLO (Urgente)";
+            } else {
+                bg = new Color(220, 252, 231);
+                fg = new Color(21, 128, 61);
+                label = "VERDE (Normal)";
+            }
+
+            JLabel badge = new JLabel(label, SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(bg);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                    g2.setColor(fg);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                    super.paintComponent(g2);
+                    g2.dispose();
+                }
+            };
+            badge.setOpaque(false);
+            badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            badge.setForeground(fg);
+            badge.setBorder(new EmptyBorder(3, 10, 3, 10));
+
+            p.add(badge);
+            return p;
         }
     }
 
@@ -884,20 +1138,43 @@ public class VistaSalaEsperaTriajePanel extends JPanel {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            lbl.setHorizontalAlignment(SwingConstants.CENTER);
-            lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+
             String st = String.valueOf(value);
-            if (!isSelected) {
-                if ("En Consulta".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(2, 132, 199));
-                } else if ("Atendido".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(100, 116, 139));
-                } else {
-                    lbl.setForeground(new Color(217, 119, 6));
-                }
+            Color bg;
+            Color fg;
+            if ("En Consulta".equalsIgnoreCase(st)) {
+                bg = Ui.TURQUESA_SUAVE;
+                fg = new Color(15, 118, 110);
+            } else if ("Atendido".equalsIgnoreCase(st)) {
+                bg = new Color(241, 245, 249);
+                fg = new Color(100, 116, 139);
+            } else {
+                bg = new Color(254, 243, 199);
+                fg = new Color(180, 83, 9);
             }
-            return lbl;
+
+            JLabel badge = new JLabel(st, SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(bg);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                    super.paintComponent(g2);
+                    g2.dispose();
+                }
+            };
+            badge.setOpaque(false);
+            badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            badge.setForeground(fg);
+            badge.setBorder(new EmptyBorder(3, 10, 3, 10));
+
+            p.add(badge);
+            return p;
         }
     }
 }

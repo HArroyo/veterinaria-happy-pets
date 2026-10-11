@@ -1197,6 +1197,21 @@ public class RepositorioVeterinaria {
         }
     }
 
+    public void guardarPacienteTriaje(PacienteTriaje p) {
+        if (p == null) return;
+        boolean existe = false;
+        for (int i = 0; i < pacientesTriaje.size(); i++) {
+            if (pacientesTriaje.get(i).getIdTicket().equalsIgnoreCase(p.getIdTicket())) {
+                pacientesTriaje.set(i, p);
+                existe = true;
+                break;
+            }
+        }
+        if (!existe) {
+            agregarPacienteTriaje(p);
+        }
+    }
+
     public void actualizarEstadoTriaje(String idTicket, String nuevoEstado) {
         for (PacienteTriaje p : pacientesTriaje) {
             if (p.getIdTicket().equalsIgnoreCase(idTicket)) {
