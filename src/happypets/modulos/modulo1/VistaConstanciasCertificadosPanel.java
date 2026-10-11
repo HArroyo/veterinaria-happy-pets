@@ -2,37 +2,44 @@ package happypets.modulos.modulo1;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import happypets.data.RepositorioVeterinaria;
+import happypets.model.Certificado;
 import happypets.model.Cliente;
 import happypets.model.DocumentoMascota;
 import happypets.model.Mascota;
@@ -40,96 +47,118 @@ import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Vista 3 del Módulo 1: Constancias y Certificados Médicos.
- * Adaptada a la nueva arquitectura web moderna ERP con:
- * - Cabecera con título, subtítulo y botón de emisión.
- * - Barra de búsqueda y selector de tipo de certificado.
- * - 4 Tarjetas KPI de resumen documental del paciente activo.
- * - Tabla con los certificados y constancias oficiales con vista previa e impresión.
+ * Submódulo 1.3: Constancias y Certificados Médicos Oficiales.
+ * Arquitectura Master-Detail con Catálogo Documental y Visor Oficial Digital en Vivo.
+ * - Panel Izquierdo: Directorio de pacientes con búsqueda reactiva + Catálogo de documentos del paciente.
+ * - Panel Derecho: Ficha ejecutiva con micro-KPIs documentales + Visor oficial en vivo de hoja membretada con firma y sello.
  */
 public class VistaConstanciasCertificadosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
+    private static final Color COLOR_TURQUESA = Ui.TURQUESA;
+    private static final Color COLOR_TURQUESA_OSCURO = Ui.TURQUESA_OSCURO;
+    private static final Color COLOR_TURQUESA_SUAVE = Ui.TURQUESA_SUAVE;
+    private static final Color COLOR_TITULO = Ui.TEXTO_TITULO;
+    private static final Color COLOR_MUTED = Ui.TEXTO_MUTED;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
-    private Mascota mascotaActual;
-    private Cliente clienteActual;
-    private List<DocumentoMascota> listaDocumentos;
 
-    // Filtros
-    private JTextField txtBuscar;
+    // Estado del modelo
+    private List<Mascota> listaMascotasCompleta = new ArrayList<>();
+    private List<Mascota> listaMascotasFiltrada = new ArrayList<>();
+    private Mascota mascotaSeleccionada;
+    private Cliente clienteSeleccionado;
+
+    private List<DocumentoMascota> listaDocumentosMascota = new ArrayList<>();
+    private List<DocumentoMascota> listaDocumentosFiltrados = new ArrayList<>();
+    private DocumentoMascota documentoSeleccionado;
+
+    // Componentes del Panel Izquierdo (Master)
+    private JTextField txtBuscarMascota;
+    private JComboBox<String> cbFiltroEspecie;
+    private JLabel lblContadorMascotas;
+    private DefaultListModel<Mascota> modeloListaMascotas;
+    private JList<Mascota> listaMascotas;
+
+    private JLabel lblContadorDocumentos;
     private JComboBox<String> cbTipoDocumento;
+    private DefaultListModel<DocumentoMascota> modeloListaDocumentos;
+    private JList<DocumentoMascota> listaDocumentos;
 
-    // Labels KPI
-    private JLabel lblKpiMascotaVal;
-    private JLabel lblKpiMascotaSub;
-    private JLabel lblKpiClienteVal;
-    private JLabel lblKpiClienteSub;
+    // Componentes del Panel Derecho (Detail - Ficha Ejecutiva)
+    private JPanel panelAvatarMascota;
+    private JLabel lblPetNombre;
+    private JLabel lblPetCodigoBadge;
+    private JLabel lblPetEspecieRaza;
+    private JLabel lblPetEdadSexo;
+    private JLabel lblPetDuenoInfo;
+
+    // Micro-KPIs Documentales
     private JLabel lblKpiTotalVal;
-    private JLabel lblKpiTotalSub;
     private JLabel lblKpiEstadoVal;
-    private JLabel lblKpiEstadoSub;
+    private JLabel lblKpiUltimaFechaVal;
+    private JLabel lblKpiFacultativoVal;
 
-    // Tabla de documentos
-    private JLabel lblContadorDocs;
-    private JTable tablaDocumentos;
-    private DefaultTableModel modeloDocumentos;
+    // Componentes del Visor Oficial Membretado
+    private JPanel cardVisorDocumento;
+    private JLabel lblCertTituloOficial;
+    private JLabel lblCertNumeroRegistro;
+    private JLabel lblCertFechaEmision;
+    private JLabel lblCertEstadoBadge;
+
+    // Filiación del paciente y propietario en el certificado
+    private JLabel lblFiliacionPaciente;
+    private JLabel lblFiliacionDetallePet;
+    private JLabel lblFiliacionPropietario;
+    private JLabel lblFiliacionDetalleDni;
+
+    // Dictamen clínico y vigencia
+    private JLabel lblCertDictamenTexto;
+    private JLabel lblCertMotivoDestino;
+    private JLabel lblCertVigencia;
+    private JLabel lblCertVeterinarioFirma;
+    private JLabel lblCertColegiaturaFirma;
+
+    private JPanel panelSinDocumento;
 
     public VistaConstanciasCertificadosPanel() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 10));
         setOpaque(false);
+        setBorder(new EmptyBorder(12, 16, 14, 16));
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        // 1. Cabecera superior
+        add(crearCabeceraVista(), BorderLayout.NORTH);
 
-        // 1. Cabecera
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(8));
+        // 2. Panel central dividido (Master-Detail 350px / resto)
+        JPanel centralSplit = new JPanel(new BorderLayout(14, 0));
+        centralSplit.setOpaque(false);
 
-        // 2. Barra de filtros de búsqueda y tipo de documento
-        contenido.add(crearBarraFiltros());
-        contenido.add(Box.createVerticalStrut(10));
+        // Columna Izquierda: Directorio de Pacientes + Catálogo Documental
+        centralSplit.add(crearPanelIzquierdoMaster(), BorderLayout.WEST);
 
-        // 3. 4 Tarjetas KPI de resumen documental
-        contenido.add(crearFilaKpiDocumentos());
-        contenido.add(Box.createVerticalStrut(10));
+        // Columna Derecha: Visor de Hoja Membretada Oficial en Vivo
+        centralSplit.add(crearPanelDerechoDossier(), BorderLayout.CENTER);
 
-        // 4. Tabla de documentos y certificados emitidos
-        contenido.add(crearTarjetaTablaDocumentos());
+        add(centralSplit, BorderLayout.CENTER);
 
-        // Wrapper con BorderLayout.NORTH para evitar estiramientos verticales en pantallas maximizadas
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.add(contenido, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(wrapper);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        add(scroll, BorderLayout.CENTER);
-
-        // Cargar paciente por defecto: Rocky (VET-0091)
+        // Cargar datos iniciales
+        recargarMascotas();
         Optional<Mascota> optRocky = repo.buscarMascotaPorCodigoONombre("VET-0091");
         if (optRocky.isPresent()) {
             cargarMascota(optRocky.get());
-        } else {
-            List<Mascota> todas = repo.todasLasMascotas();
-            if (!todas.isEmpty()) cargarMascota(todas.get(0));
+        } else if (!listaMascotasCompleta.isEmpty()) {
+            cargarMascota(listaMascotasCompleta.get(0));
         }
     }
 
+    // =========================================================================
+    // 1. CABECERA DE LA VISTA
+    // =========================================================================
     private JPanel crearCabeceraVista() {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setPreferredSize(new Dimension(0, 40));
-        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        cab.setPreferredSize(new Dimension(0, 42));
 
         JPanel izq = new JPanel();
         izq.setOpaque(false);
@@ -137,11 +166,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
 
         JLabel lblTit = new JLabel("Constancias y Certificados Médicos");
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        lblTit.setForeground(COLOR_TITULO);
 
-        JLabel lblSub = new JLabel("Módulo 1.3 · Emisión, consulta y descarga de constancias sanitarias y certificados oficiales");
+        JLabel lblSub = new JLabel("Módulo 1.3 · Emisión, consulta, validación sanitaria y descarga de certificados veterinarios oficiales");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
+        lblSub.setForeground(COLOR_MUTED);
 
         izq.add(lblTit);
         izq.add(Box.createVerticalStrut(2));
@@ -151,214 +180,201 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
-        JButton btnImprimir = Ui.boton("Imprimir Listado", false);
-        btnImprimir.setIcon(Iconos.crearIconoImprimir(12, COLOR_AZUL_PRIMARIO));
-        btnImprimir.setIconTextGap(4);
-        btnImprimir.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnImprimir.setPreferredSize(new Dimension(btnImprimir.getPreferredSize().width, 28));
-        btnImprimir.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Enviando listado de constancias y certificados a la impresora predeterminada.",
-                "Impresión", JOptionPane.INFORMATION_MESSAGE));
+        JButton btnImprimir = crearBotonAccion("Imprimir Listado", false);
+        btnImprimir.setIcon(Iconos.crearIconoImprimir(13, COLOR_TURQUESA));
+        btnImprimir.setIconTextGap(6);
+        btnImprimir.addActionListener(e -> exportarListadoDocumentos());
 
-        JButton btnEmitir = Ui.boton("+ Emitir Nuevo Certificado", true);
-        btnEmitir.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnEmitir.setPreferredSize(new Dimension(btnEmitir.getPreferredSize().width, 28));
-        btnEmitir.addActionListener(e -> emitirNuevoCertificado());
+        JButton btnExportar = crearBotonAccion("Exportar Reporte", false);
+        btnExportar.setIcon(Iconos.crearIconoDescargar(13, COLOR_TURQUESA));
+        btnExportar.setIconTextGap(6);
+        btnExportar.addActionListener(e -> exportarListadoDocumentos());
+
+        JButton btnEmitir = crearBotonAccion("+ Emitir Nuevo Certificado", true);
+        btnEmitir.setIcon(Iconos.crearIconoCertificado(14, Color.WHITE));
+        btnEmitir.setIconTextGap(6);
+        btnEmitir.addActionListener(e -> abrirEmitirCertificadoDialog());
 
         der.add(btnImprimir);
+        der.add(btnExportar);
         der.add(btnEmitir);
         cab.add(der, BorderLayout.EAST);
 
         return cab;
     }
 
-    private JPanel crearBarraFiltros() {
-        JPanel barra = new JPanel(new BorderLayout(10, 0)) {
+    // =========================================================================
+    // 2. PANEL IZQUIERDO (MASTER): DIRECTORIO + CATÁLOGO DOCUMENTAL
+    // =========================================================================
+    private JPanel crearPanelIzquierdoMaster() {
+        JPanel master = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
                 g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 super.paintComponent(g2);
                 g2.dispose();
             }
         };
-        barra.setOpaque(false);
-        barra.setBorder(new EmptyBorder(3, 10, 3, 10));
-        barra.setPreferredSize(new Dimension(0, 38));
-        barra.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        master.setOpaque(false);
+        master.setPreferredSize(new Dimension(350, 0));
+        master.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        izq.setOpaque(false);
+        // Sub-panel superior: Directorio de Pacientes
+        JPanel panelPacientes = new JPanel(new BorderLayout(0, 6));
+        panelPacientes.setOpaque(false);
 
-        JLabel lblBuscar = new JLabel("Buscar cliente o mascota:");
-        lblBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblBuscar.setForeground(COLOR_TEXTO_MUTED);
-        izq.add(lblBuscar);
+        JPanel topDirectorio = new JPanel(new BorderLayout());
+        topDirectorio.setOpaque(false);
 
-        txtBuscar = new JTextField(12);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtBuscar.setPreferredSize(new Dimension(140, 28));
-        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+        JLabel lblTitPac = new JLabel("DIRECTORIO DE PACIENTES");
+        lblTitPac.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTitPac.setForeground(COLOR_MUTED);
+        topDirectorio.add(lblTitPac, BorderLayout.WEST);
+
+        lblContadorMascotas = new JLabel("0 pacientes");
+        lblContadorMascotas.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblContadorMascotas.setForeground(COLOR_MUTED);
+        topDirectorio.add(lblContadorMascotas, BorderLayout.EAST);
+        panelPacientes.add(topDirectorio, BorderLayout.NORTH);
+
+        // Barra de búsqueda y filtro por especie
+        JPanel panelFiltros = new JPanel(new BorderLayout(6, 0));
+        panelFiltros.setOpaque(false);
+
+        txtBuscarMascota = new JTextField();
+        txtBuscarMascota.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtBuscarMascota.setPreferredSize(new Dimension(190, 28));
+        txtBuscarMascota.setToolTipText("Buscar por nombre, código o raza...");
+        txtBuscarMascota.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COLOR_BORDE, 1),
                 new EmptyBorder(2, 6, 2, 6)
         ));
-        txtBuscar.setToolTipText("Nombre o código...");
-        izq.add(txtBuscar);
+        txtBuscarMascota.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { filtrarMascotas(); }
+            @Override public void removeUpdate(DocumentEvent e) { filtrarMascotas(); }
+            @Override public void changedUpdate(DocumentEvent e) { filtrarMascotas(); }
+        });
+        panelFiltros.add(txtBuscarMascota, BorderLayout.CENTER);
 
-        JButton btnBuscar = Ui.boton("Buscar", false);
-        btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnBuscar.setIcon(Iconos.crearIconoBuscar(13, COLOR_AZUL_PRIMARIO));
-        btnBuscar.setIconTextGap(6);
-        btnBuscar.setPreferredSize(new Dimension(92, 28));
+        cbFiltroEspecie = new JComboBox<>(new String[]{"Todas", "Caninos", "Felinos"});
+        cbFiltroEspecie.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroEspecie.setPreferredSize(new Dimension(86, 28));
+        cbFiltroEspecie.setBackground(Color.WHITE);
+        cbFiltroEspecie.addActionListener(e -> filtrarMascotas());
+        panelFiltros.add(cbFiltroEspecie, BorderLayout.EAST);
+        panelPacientes.add(panelFiltros, BorderLayout.CENTER);
 
-        java.awt.event.ActionListener accionBuscar = e -> buscarClienteOMascota();
-        btnBuscar.addActionListener(accionBuscar);
-        txtBuscar.addActionListener(accionBuscar);
-        izq.add(btnBuscar);
+        // Lista de pacientes
+        modeloListaMascotas = new DefaultListModel<>();
+        listaMascotas = new JList<>(modeloListaMascotas);
+        listaMascotas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listaMascotas.setCellRenderer(new MascotaCellRenderer());
+        listaMascotas.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                Mascota m = listaMascotas.getSelectedValue();
+                if (m != null && (mascotaSeleccionada == null || !m.getCodigo().equals(mascotaSeleccionada.getCodigo()))) {
+                    seleccionarMascotaInterno(m);
+                }
+            }
+        });
 
-        izq.add(Box.createHorizontalStrut(10));
+        JScrollPane scrollPacientes = new JScrollPane(listaMascotas);
+        scrollPacientes.setPreferredSize(new Dimension(320, 180));
+        scrollPacientes.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        scrollPacientes.getVerticalScrollBar().setUnitIncrement(10);
+        panelPacientes.add(scrollPacientes, BorderLayout.SOUTH);
 
-        JLabel lblTipo = new JLabel("Tipo de documento:");
-        lblTipo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblTipo.setForeground(COLOR_TEXTO_MUTED);
-        izq.add(lblTipo);
+        master.add(panelPacientes, BorderLayout.NORTH);
 
+        // Sub-panel central: Catálogo de Documentos Emitidos
+        JPanel panelDocumentos = new JPanel(new BorderLayout(0, 6));
+        panelDocumentos.setOpaque(false);
+        panelDocumentos.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
+
+        JPanel topDocs = new JPanel(new BorderLayout());
+        topDocs.setOpaque(false);
+        topDocs.setBorder(new EmptyBorder(8, 0, 2, 0));
+
+        JLabel lblTitDocs = new JLabel("DOCUMENTOS Y CERTIFICADOS EMITIDOS");
+        lblTitDocs.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTitDocs.setForeground(COLOR_MUTED);
+        topDocs.add(lblTitDocs, BorderLayout.WEST);
+
+        lblContadorDocumentos = new JLabel("0 constancias");
+        lblContadorDocumentos.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblContadorDocumentos.setForeground(COLOR_MUTED);
+        topDocs.add(lblContadorDocumentos, BorderLayout.EAST);
+
+        // Filtro por tipo de documento
         cbTipoDocumento = new JComboBox<>(new String[]{
                 "Todos los documentos",
                 "Tarjeta de vacunación",
-                "Historial de recetas médicas",
-                "Historial clínico",
                 "Certificado de vacunación",
                 "Certificado de salud",
-                "Certificado de desparasitación",
+                "Historial clínico",
+                "Historial de recetas médicas",
                 "Autorización quirúrgica"
         });
         cbTipoDocumento.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbTipoDocumento.setPreferredSize(new Dimension(180, 26));
+        cbTipoDocumento.setPreferredSize(new Dimension(320, 26));
         cbTipoDocumento.setBackground(Color.WHITE);
-        cbTipoDocumento.addActionListener(e -> filtrarDocumentos());
-        izq.add(cbTipoDocumento);
+        cbTipoDocumento.addActionListener(e -> filtrarDocumentosCatalogo());
 
-        barra.add(izq, BorderLayout.WEST);
+        JPanel headerDocs = new JPanel();
+        headerDocs.setOpaque(false);
+        headerDocs.setLayout(new BoxLayout(headerDocs, BoxLayout.Y_AXIS));
+        headerDocs.add(topDocs);
+        headerDocs.add(Box.createVerticalStrut(4));
+        headerDocs.add(cbTipoDocumento);
+        panelDocumentos.add(headerDocs, BorderLayout.NORTH);
 
-        // Selector rápido a la derecha
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 2));
-        der.setOpaque(false);
-
-        JLabel lblAtajos = new JLabel("Pacientes:");
-        lblAtajos.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lblAtajos.setForeground(COLOR_TEXTO_MUTED);
-        der.add(lblAtajos);
-
-        JButton bRocky = Ui.boton("Rocky", false);
-        bRocky.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        bRocky.setPreferredSize(new Dimension(bRocky.getPreferredSize().width, 24));
-        bRocky.addActionListener(e -> repo.buscarMascotaPorCodigoONombre("VET-0091").ifPresent(this::cargarMascota));
-
-        JButton bLuna = Ui.boton("Luna", false);
-        bLuna.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        bLuna.setPreferredSize(new Dimension(bLuna.getPreferredSize().width, 24));
-        bLuna.addActionListener(e -> repo.buscarMascotaPorCodigoONombre("VET-0144").ifPresent(this::cargarMascota));
-
-        JButton bToby = Ui.boton("Toby", false);
-        bToby.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        bToby.setPreferredSize(new Dimension(bToby.getPreferredSize().width, 24));
-        bToby.addActionListener(e -> repo.buscarMascotaPorCodigoONombre("VET-0238").ifPresent(this::cargarMascota));
-
-        der.add(bRocky);
-        der.add(bLuna);
-        der.add(bToby);
-
-        barra.add(der, BorderLayout.EAST);
-        return barra;
-    }
-
-    private JPanel crearFilaKpiDocumentos() {
-        JPanel fila = new JPanel(new GridLayout(1, 4, 16, 0));
-        fila.setOpaque(false);
-
-        lblKpiMascotaVal = new JLabel("Rocky");
-        lblKpiMascotaSub = new JLabel("Canino · Golden Retriever");
-        fila.add(crearCardKpi(lblKpiMascotaVal, lblKpiMascotaSub, "PACIENTE ASOCIADO", Ui.TURQUESA_SUAVE, Iconos.crearIconoHuella(22, COLOR_AZUL_PRIMARIO)));
-
-        lblKpiClienteVal = new JLabel("Carlos Morales");
-        lblKpiClienteSub = new JLabel("DNI: 45892134");
-        fila.add(crearCardKpi(lblKpiClienteVal, lblKpiClienteSub, "PROPIETARIO", new Color(254, 243, 199), Iconos.crearIconoClientes(22, new Color(217, 119, 6))));
-
-        lblKpiTotalVal = new JLabel("4");
-        lblKpiTotalSub = new JLabel("Constancias vigentes");
-        fila.add(crearCardKpi(lblKpiTotalVal, lblKpiTotalSub, "DOCUMENTOS DISPONIBLES", new Color(220, 252, 231), Iconos.crearIconoCertificado(22, new Color(22, 163, 74))));
-
-        lblKpiEstadoVal = new JLabel("VIGENTE");
-        lblKpiEstadoSub = new JLabel("Plan sanitario al día");
-        fila.add(crearCardKpi(lblKpiEstadoVal, lblKpiEstadoSub, "ESTADO SANITARIO", new Color(243, 232, 255), Iconos.crearIconoCandado(22, new Color(147, 51, 234))));
-
-        return fila;
-    }
-
-    private JPanel crearCardKpi(JLabel lblPrincipal, JLabel lblSecundario, String etiqueta, Color colorFondoIco, Icon icono) {
-        JPanel card = new JPanel(new BorderLayout(10, 0)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
+        // Lista de documentos
+        modeloListaDocumentos = new DefaultListModel<>();
+        listaDocumentos = new JList<>(modeloListaDocumentos);
+        listaDocumentos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listaDocumentos.setCellRenderer(new DocumentoCellRenderer());
+        listaDocumentos.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                DocumentoMascota doc = listaDocumentos.getSelectedValue();
+                if (doc != null) {
+                    mostrarDetalleDocumentoEnVivo(doc);
+                }
             }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(10, 12, 10, 12));
+        });
 
-        JLabel badgeIcono = new JLabel(icono, SwingConstants.CENTER) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(colorFondoIco);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        badgeIcono.setPreferredSize(new Dimension(38, 38));
-        card.add(badgeIcono, BorderLayout.WEST);
+        JScrollPane scrollDocs = new JScrollPane(listaDocumentos);
+        scrollDocs.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+        scrollDocs.getVerticalScrollBar().setUnitIncrement(12);
+        panelDocumentos.add(scrollDocs, BorderLayout.CENTER);
 
-        JPanel text = new JPanel();
-        text.setOpaque(false);
-        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+        master.add(panelDocumentos, BorderLayout.CENTER);
 
-        lblPrincipal.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblPrincipal.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblEtq = new JLabel(etiqueta);
-        lblEtq.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lblEtq.setForeground(COLOR_TEXTO_MUTED);
-
-        lblSecundario.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblSecundario.setForeground(COLOR_TEXTO_MUTED);
-
-        text.add(lblEtq);
-        text.add(Box.createVerticalStrut(2));
-        text.add(lblPrincipal);
-        text.add(Box.createVerticalStrut(1));
-        text.add(lblSecundario);
-        card.add(text, BorderLayout.CENTER);
-
-        return card;
+        return master;
     }
 
-    private JPanel crearTarjetaTablaDocumentos() {
+    // =========================================================================
+    // 3. PANEL DERECHO (DETAIL): FICHA EJECUTIVA + VISOR OFICIAL EN VIVO
+    // =========================================================================
+    private JPanel crearPanelDerechoDossier() {
+        JPanel dossier = new JPanel(new BorderLayout(0, 10));
+        dossier.setOpaque(false);
+
+        // Tarjeta 1 (Norte): Ficha Ejecutiva del Paciente & Micro-KPIs Documentales
+        dossier.add(crearFichaEjecutivaPaciente(), BorderLayout.NORTH);
+
+        // Tarjeta 2 (Centro): Hoja Membretada Oficial del Certificado
+        dossier.add(crearCardVisorDocumentoOficial(), BorderLayout.CENTER);
+
+        return dossier;
+    }
+
+    private JPanel crearFichaEjecutivaPaciente() {
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -366,190 +382,945 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
                 g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 super.paintComponent(g2);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(12, 16, 12, 16));
 
-        // Cabecera
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
+        // Parte Superior de la Ficha: Avatar circular + Datos Identificatorios
+        JPanel headerInfo = new JPanel(new BorderLayout(14, 0));
+        headerInfo.setOpaque(false);
 
-        JLabel lblTit = new JLabel("Documentos y Certificados Sanitarios Emitidos");
-        lblTit.setIcon(Iconos.crearIconoCertificado(15, COLOR_AZUL_PRIMARIO));
-        lblTit.setIconTextGap(6);
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-        top.add(lblTit, BorderLayout.WEST);
+        // Avatar circular grande (50px)
+        panelAvatarMascota = crearAvatarCircular(50, "P", COLOR_TURQUESA_SUAVE, COLOR_TURQUESA_OSCURO);
+        JPanel avatarWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        avatarWrapper.setOpaque(false);
+        avatarWrapper.add(panelAvatarMascota);
+        headerInfo.add(avatarWrapper, BorderLayout.WEST);
 
-        lblContadorDocs = new JLabel("4 documentos disponibles");
-        lblContadorDocs.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblContadorDocs.setForeground(COLOR_TEXTO_MUTED);
-        top.add(lblContadorDocs, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
+        // Textos del paciente
+        JPanel datosTxt = new JPanel();
+        datosTxt.setOpaque(false);
+        datosTxt.setLayout(new BoxLayout(datosTxt, BoxLayout.Y_AXIS));
 
-        // Tabla
-        String[] columnas = {"Tipo de Documento", "Descripción / Contenido", "Fecha Actualización", "Disponibilidad", "Estado"};
-        modeloDocumentos = new DefaultTableModel(columnas, 0) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public boolean isCellEditable(int r, int c) { return false; }
-        };
+        JPanel filaTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        filaTitulo.setOpaque(false);
+        filaTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        tablaDocumentos = new JTable(modeloDocumentos);
-        Ui.formatearTabla(tablaDocumentos, new int[]{0, 2, 3, 4}, new int[]{});
+        lblPetNombre = new JLabel("Nombre Mascota");
+        lblPetNombre.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblPetNombre.setForeground(COLOR_TITULO);
+        filaTitulo.add(lblPetNombre);
 
-        tablaDocumentos.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    verDetalleDocumentoSeleccionado();
-                }
-            }
-        });
+        lblPetCodigoBadge = crearBadge("VET-0000", new Color(241, 245, 249), COLOR_TITULO);
+        filaTitulo.add(lblPetCodigoBadge);
 
-        JScrollPane sp = new JScrollPane(tablaDocumentos);
-        sp.setPreferredSize(new Dimension(1100, 210));
-        sp.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        card.add(sp, BorderLayout.CENTER);
+        lblPetEspecieRaza = crearBadge("Especie · Raza", COLOR_TURQUESA_SUAVE, COLOR_TURQUESA_OSCURO);
+        filaTitulo.add(lblPetEspecieRaza);
 
-        // Pie
-        JPanel bot = new JPanel(new BorderLayout());
-        bot.setOpaque(false);
+        lblPetEdadSexo = new JLabel("3 años · Macho");
+        lblPetEdadSexo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblPetEdadSexo.setForeground(COLOR_MUTED);
+        filaTitulo.add(lblPetEdadSexo);
 
-        JLabel lblTip = new JLabel("Doble clic sobre cualquier documento para visualizar la vista oficial de impresión");
-        lblTip.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblTip.setForeground(COLOR_TEXTO_MUTED);
-        bot.add(lblTip, BorderLayout.WEST);
+        lblPetDuenoInfo = new JLabel("Propietario Responsable: - · Tel: -");
+        lblPetDuenoInfo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblPetDuenoInfo.setForeground(new Color(71, 85, 105));
+        lblPetDuenoInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel botBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
-        botBtns.setOpaque(false);
+        datosTxt.add(filaTitulo);
+        datosTxt.add(Box.createVerticalStrut(4));
+        datosTxt.add(lblPetDuenoInfo);
+        headerInfo.add(datosTxt, BorderLayout.CENTER);
 
-        JButton btnVer = Ui.boton("Ver / Imprimir Certificado", true);
-        btnVer.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        btnVer.setPreferredSize(new Dimension(btnVer.getPreferredSize().width, 28));
-        btnVer.addActionListener(e -> verDetalleDocumentoSeleccionado());
+        card.add(headerInfo, BorderLayout.NORTH);
 
-        botBtns.add(btnVer);
-        bot.add(botBtns, BorderLayout.EAST);
+        // Parte Inferior de la Ficha: 4 Micro-KPIs Documentales
+        JPanel filaKpis = new JPanel(new GridLayout(1, 4, 10, 0));
+        filaKpis.setOpaque(false);
+        filaKpis.setBorder(new EmptyBorder(8, 0, 0, 0));
 
-        card.add(bot, BorderLayout.SOUTH);
+        lblKpiTotalVal = new JLabel("4 docs");
+        lblKpiEstadoVal = new JLabel("VIGENTE");
+        lblKpiUltimaFechaVal = new JLabel("10/05/2024");
+        lblKpiFacultativoVal = new JLabel("Dr. R. Mendoza");
+
+        filaKpis.add(crearItemKpi("EXPEDIENTE DIGITAL", lblKpiTotalVal, "Constancias registradas", new Color(240, 253, 250), COLOR_TURQUESA));
+        filaKpis.add(crearItemKpi("ESTADO SANITARIO", lblKpiEstadoVal, "Plan vacunal al día", new Color(240, 253, 244), new Color(22, 163, 74)));
+        filaKpis.add(crearItemKpi("ÚLTIMA CERTIFICACIÓN", lblKpiUltimaFechaVal, "Fecha de emisión oficial", new Color(238, 242, 255), new Color(79, 70, 229)));
+        filaKpis.add(crearItemKpi("MÉDICO VETERINARIO", lblKpiFacultativoVal, "Colegiatura CMVP 8492", new Color(254, 243, 199), new Color(217, 119, 6)));
+
+        card.add(filaKpis, BorderLayout.CENTER);
+
         return card;
     }
 
-    public void cargarMascota(Mascota m) {
-        this.mascotaActual = m;
-        if (m == null) return;
+    private JPanel crearItemKpi(String etiqueta, JLabel lblValor, String sub, Color fondo, Color acento) {
+        JPanel kpi = new JPanel(new BorderLayout(4, 2)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(fondo);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(new Color(acento.getRed(), acento.getGreen(), acento.getBlue(), 60));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        kpi.setOpaque(false);
+        kpi.setBorder(new EmptyBorder(6, 10, 6, 10));
 
-        clienteActual = repo.getClienteDeMascota(m.getCodigo()).orElse(null);
+        JPanel txt = new JPanel();
+        txt.setOpaque(false);
+        txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
 
-        lblKpiMascotaVal.setText(m.getNombre());
-        lblKpiMascotaSub.setText(m.getEspecie() + " · " + m.getRaza() + " (" + m.getCodigo() + ")");
+        JLabel lblE = new JLabel(etiqueta);
+        lblE.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblE.setForeground(COLOR_MUTED);
 
-        if (clienteActual != null) {
-            lblKpiClienteVal.setText(clienteActual.getNombreCompleto());
-            lblKpiClienteSub.setText("DNI: " + clienteActual.getNumeroDocumento() + " · Tel: " + clienteActual.getTelefonoPrincipal());
-        } else {
-            lblKpiClienteVal.setText("Sin propietario");
-            lblKpiClienteSub.setText("-");
-        }
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(COLOR_TITULO);
 
-        listaDocumentos = repo.getDocumentosPorMascota(m.getCodigo());
-        lblKpiTotalVal.setText(String.valueOf(listaDocumentos.size()));
-        lblKpiTotalSub.setText("Documentos vigentes para emisión");
+        JLabel lblS = new JLabel(sub);
+        lblS.setFont(new Font("Segoe UI", Font.PLAIN, 9));
+        lblS.setForeground(COLOR_MUTED);
 
-        lblKpiEstadoVal.setText("VIGENTE");
-        lblKpiEstadoSub.setText("Plan vacunal: " + m.getPlanVacunal());
+        txt.add(lblE);
+        txt.add(Box.createVerticalStrut(1));
+        txt.add(lblValor);
+        txt.add(Box.createVerticalStrut(1));
+        txt.add(lblS);
+        kpi.add(txt, BorderLayout.CENTER);
 
-        filtrarDocumentos();
+        return kpi;
     }
 
-    private void filtrarDocumentos() {
-        modeloDocumentos.setRowCount(0);
-        if (mascotaActual == null || listaDocumentos == null) return;
+    private JPanel crearCardVisorDocumentoOficial() {
+        cardVisorDocumento = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        cardVisorDocumento.setOpaque(false);
+        cardVisorDocumento.setBorder(new EmptyBorder(14, 16, 14, 16));
 
-        String filtroTipo = (String) cbTipoDocumento.getSelectedItem();
+        // Inicializar labels del visor
+        lblCertTituloOficial = new JLabel("CERTIFICADO MÉDICO VETERINARIO OFICIAL");
+        lblCertNumeroRegistro = new JLabel("N.º DE REGISTRO: CERT-2024-0001");
+        lblCertFechaEmision = new JLabel("10/05/2024");
+        lblCertEstadoBadge = crearBadge("OFICIAL · VIGENTE", new Color(220, 252, 231), new Color(22, 163, 74));
 
-        int count = 0;
-        for (DocumentoMascota d : listaDocumentos) {
-            if ("Todos los documentos".equals(filtroTipo) || d.getTipo().equalsIgnoreCase(filtroTipo)) {
-                count++;
-                modeloDocumentos.addRow(new Object[]{
-                        d.getTipo(),
-                        d.getDescripcion(),
-                        d.getFechaActualizacionFormateada(),
-                        d.getDisponibilidadTexto(),
-                        "Oficial · Válido"
-                });
+        lblFiliacionPaciente = new JLabel("-");
+        lblFiliacionDetallePet = new JLabel("-");
+        lblFiliacionPropietario = new JLabel("-");
+        lblFiliacionDetalleDni = new JLabel("-");
+
+        lblCertDictamenTexto = new JLabel("-");
+        lblCertMotivoDestino = new JLabel("-");
+        lblCertVigencia = new JLabel("-");
+        lblCertVeterinarioFirma = new JLabel("Dr. Roberto Mendoza Chávez");
+        lblCertColegiaturaFirma = new JLabel("Médico Veterinario Colegiado · CMVP 8492");
+
+        // Panel alternativo: Estado vacío sin documento
+        panelSinDocumento = new JPanel(new BorderLayout());
+        panelSinDocumento.setOpaque(false);
+
+        JPanel centroVacio = new JPanel();
+        centroVacio.setOpaque(false);
+        centroVacio.setLayout(new BoxLayout(centroVacio, BoxLayout.Y_AXIS));
+
+        JLabel lblIcoVacio = new JLabel(Iconos.crearIconoCertificado(40, COLOR_MUTED));
+        lblIcoVacio.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel lblTitVacio = new JLabel("No hay certificados o constancias seleccionadas");
+        lblTitVacio.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblTitVacio.setForeground(COLOR_TITULO);
+        lblTitVacio.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel lblSubVacio = new JLabel("Seleccione un documento en el catálogo izquierdo o emita un nuevo certificado para este paciente.");
+        lblSubVacio.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblSubVacio.setForeground(COLOR_MUTED);
+        lblSubVacio.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton btnEmitirPrimer = crearBotonAccion("+ Emitir Primer Certificado", true);
+        btnEmitirPrimer.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnEmitirPrimer.addActionListener(e -> abrirEmitirCertificadoDialog());
+
+        centroVacio.add(Box.createVerticalGlue());
+        centroVacio.add(lblIcoVacio);
+        centroVacio.add(Box.createVerticalStrut(8));
+        centroVacio.add(lblTitVacio);
+        centroVacio.add(Box.createVerticalStrut(4));
+        centroVacio.add(lblSubVacio);
+        centroVacio.add(Box.createVerticalStrut(12));
+        centroVacio.add(btnEmitirPrimer);
+        centroVacio.add(Box.createVerticalGlue());
+
+        panelSinDocumento.add(centroVacio, BorderLayout.CENTER);
+
+        return cardVisorDocumento;
+    }
+
+    private void mostrarDetalleDocumentoEnVivo(DocumentoMascota doc) {
+        this.documentoSeleccionado = doc;
+        if (doc == null) {
+            mostrarEstadoSinDocumentos();
+            return;
+        }
+
+        cardVisorDocumento.removeAll();
+        cardVisorDocumento.setLayout(new BorderLayout(0, 10));
+
+        // 1. Cabecera del visor (Membrete de la clínica + Botones de impresión)
+        JPanel headerMembrete = new JPanel(new BorderLayout());
+        headerMembrete.setOpaque(false);
+        headerMembrete.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
+        headerMembrete.setPreferredSize(new Dimension(0, 48));
+
+        JPanel membreteTxt = new JPanel();
+        membreteTxt.setOpaque(false);
+        membreteTxt.setLayout(new BoxLayout(membreteTxt, BoxLayout.Y_AXIS));
+
+        JPanel logoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        logoRow.setOpaque(false);
+        logoRow.add(new JLabel(Iconos.crearIconoCertificado(18, COLOR_TURQUESA)));
+        JLabel lblClinica = new JLabel("CLÍNICA VETERINARIA HAPPY PETS S.A.C.");
+        lblClinica.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblClinica.setForeground(COLOR_TURQUESA_OSCURO);
+        logoRow.add(lblClinica);
+        logoRow.add(Box.createHorizontalStrut(6));
+        logoRow.add(crearBadge("RUC: 20601234567", new Color(241, 245, 249), COLOR_MUTED));
+
+        JLabel lblLegal = new JLabel("Registro Sanitario SENASA / CMVP #8492 · Av. San Borja Sur 482 - Lima · Tel: (01) 432-9980");
+        lblLegal.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblLegal.setForeground(COLOR_MUTED);
+
+        membreteTxt.add(logoRow);
+        membreteTxt.add(Box.createVerticalStrut(2));
+        membreteTxt.add(lblLegal);
+        headerMembrete.add(membreteTxt, BorderLayout.CENTER);
+
+        JPanel derBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
+        derBtns.setOpaque(false);
+
+        JButton btnImprimirCert = crearBotonAccion("Imprimir Certificado", true);
+        btnImprimirCert.setIcon(Iconos.crearIconoImprimir(12, Color.WHITE));
+        btnImprimirCert.setIconTextGap(6);
+        btnImprimirCert.addActionListener(e -> imprimirCertificadoSeleccionado());
+        derBtns.add(btnImprimirCert);
+
+        JButton btnExportarPdf = crearBotonAccion("Descargar PDF", false);
+        btnExportarPdf.setIcon(Iconos.crearIconoDescargar(12, COLOR_TURQUESA));
+        btnExportarPdf.setIconTextGap(6);
+        btnExportarPdf.addActionListener(e -> imprimirCertificadoSeleccionado());
+        derBtns.add(btnExportarPdf);
+
+        headerMembrete.add(derBtns, BorderLayout.EAST);
+        cardVisorDocumento.add(headerMembrete, BorderLayout.NORTH);
+
+        // 2. Cuerpo de la Hoja Oficial del Certificado (Scrollable)
+        JPanel hoja = new JPanel();
+        hoja.setOpaque(false);
+        hoja.setLayout(new BoxLayout(hoja, BoxLayout.Y_AXIS));
+        hoja.setBorder(new EmptyBorder(10, 16, 10, 16));
+
+        // Título del Certificado
+        JPanel bannerTitulo = new JPanel(new BorderLayout());
+        bannerTitulo.setOpaque(false);
+        bannerTitulo.setBorder(new EmptyBorder(4, 0, 12, 0));
+
+        JPanel bannerCentro = new JPanel();
+        bannerCentro.setOpaque(false);
+        bannerCentro.setLayout(new BoxLayout(bannerCentro, BoxLayout.Y_AXIS));
+
+        String tituloCert = doc.getTipo().toUpperCase();
+        if (!tituloCert.contains("CERTIFICADO") && !tituloCert.contains("CONSTANCIA")) {
+            tituloCert = "CERTIFICADO OFICIAL: " + tituloCert;
+        }
+
+        lblCertTituloOficial.setText(tituloCert);
+        lblCertTituloOficial.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblCertTituloOficial.setForeground(COLOR_TITULO);
+        lblCertTituloOficial.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        String numCert = "DOC-0001";
+        String motivoDest = "Control Sanitario Periódico";
+        String vetEmisor = doc.getVeterinarioEmisor() != null ? doc.getVeterinarioEmisor() : "Dr. Roberto Mendoza Chávez (CMVP 8492)";
+
+        if (doc instanceof Certificado cert) {
+            if (cert.getNumeroCertificado() != null) numCert = cert.getNumeroCertificado();
+            if (cert.getMotivoDestino() != null) motivoDest = cert.getMotivoDestino();
+        } else if (doc.getCodigo() != null) {
+            numCert = doc.getCodigo();
+        }
+
+        lblCertNumeroRegistro.setText("CÓDIGO DE REGISTRO DOCUMENTAL: " + numCert + "   ·   EMISIÓN: " + doc.getFechaActualizacionFormateada());
+        lblCertNumeroRegistro.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblCertNumeroRegistro.setForeground(COLOR_MUTED);
+        lblCertNumeroRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        bannerCentro.add(lblCertTituloOficial);
+        bannerCentro.add(Box.createVerticalStrut(3));
+        bannerCentro.add(lblCertNumeroRegistro);
+        bannerTitulo.add(bannerCentro, BorderLayout.CENTER);
+
+        hoja.add(bannerTitulo);
+
+        // Cuadro 1: Filiación del Paciente y Propietario (2 Columnas)
+        JPanel filaFiliacion = new JPanel(new GridLayout(1, 2, 12, 0));
+        filaFiliacion.setOpaque(false);
+        filaFiliacion.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+
+        String petTxt = mascotaSeleccionada != null ? mascotaSeleccionada.getNombre() + " (" + mascotaSeleccionada.getCodigo() + ")" : "Paciente N/D";
+        String petSub = mascotaSeleccionada != null ? mascotaSeleccionada.getEspecie() + " · " + mascotaSeleccionada.getRaza() + " · " + mascotaSeleccionada.getSexo() + " (" + mascotaSeleccionada.getEdadTexto() + ")" : "-";
+        filaFiliacion.add(crearCajaFiliacion("DATOS DEL PACIENTE VETERINARIO", petTxt, petSub));
+
+        String cliTxt = clienteSeleccionado != null ? clienteSeleccionado.getNombreCompleto() : "Titular N/D";
+        String cliSub = clienteSeleccionado != null ? "DNI: " + clienteSeleccionado.getNumeroDocumento() + " · Tel: " + clienteSeleccionado.getTelefonoPrincipal() : "-";
+        filaFiliacion.add(crearCajaFiliacion("PROPIETARIO / TITULAR RESPONSABLE", cliTxt, cliSub));
+
+        hoja.add(filaFiliacion);
+        hoja.add(Box.createVerticalStrut(10));
+
+        // Cuadro 2: Dictamen Sanitario Oficial
+        String dictamen = doc.getDescripcion();
+        if (dictamen == null || dictamen.trim().isEmpty()) {
+            dictamen = "Se certifica que el ejemplar ha sido examinado clínicamente, encontrándose en óptimas condiciones de salud e higiene.";
+        }
+        hoja.add(crearBloqueDictamenSanitario("CERTIFICACIÓN CLÍNICA Y DICTAMEN FACULTATIVO", dictamen));
+        hoja.add(Box.createVerticalStrut(10));
+
+        // Cuadro 3: Vigencia, Motivo y Cláusulas
+        JPanel filaVigencia = new JPanel(new GridLayout(1, 2, 12, 0));
+        filaVigencia.setOpaque(false);
+        filaVigencia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
+
+        filaVigencia.add(crearCajaFiliacion("MOTIVO / DESTINO OFICIAL", motivoDest, "Válido ante autoridades sanitarias, aerolíneas y entidades municipales"));
+        String vigenciaStr = doc.getFechaVencimiento() != null ? "Válido hasta: " + doc.getFechaVencimiento().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "Válido por 30 días calendario";
+        filaVigencia.add(crearCajaFiliacion("VIGENCIA DEL DOCUMENTO", vigenciaStr, "Certificación formal respaldada por Historia Clínica"));
+        hoja.add(filaVigencia);
+        hoja.add(Box.createVerticalStrut(12));
+
+        // Cuadro 4: Sello y Firma Digital del Médico Colegiado
+        JPanel panelFirma = new JPanel(new BorderLayout());
+        panelFirma.setOpaque(false);
+        panelFirma.setBorder(new EmptyBorder(8, 0, 4, 0));
+
+        JPanel selloCentro = new JPanel();
+        selloCentro.setOpaque(false);
+        selloCentro.setLayout(new BoxLayout(selloCentro, BoxLayout.Y_AXIS));
+
+        JLabel lblLineaFirma = new JLabel("________________________________________________");
+        lblLineaFirma.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblLineaFirma.setForeground(new Color(148, 163, 184));
+        lblLineaFirma.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblCertVeterinarioFirma.setText(vetEmisor);
+        lblCertVeterinarioFirma.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblCertVeterinarioFirma.setForeground(COLOR_TITULO);
+        lblCertVeterinarioFirma.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblCertColegiaturaFirma.setText("Médico Veterinario Colegiado · CMVP #8492");
+        lblCertColegiaturaFirma.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblCertColegiaturaFirma.setForeground(COLOR_MUTED);
+        lblCertColegiaturaFirma.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel lblValidezBadge = crearBadge("DOCUMENTO OFICIAL DIGITALIZADO · VÁLIDO Y VIGENTE", new Color(220, 252, 231), new Color(22, 163, 74));
+        lblValidezBadge.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        selloCentro.add(lblLineaFirma);
+        selloCentro.add(Box.createVerticalStrut(3));
+        selloCentro.add(lblCertVeterinarioFirma);
+        selloCentro.add(Box.createVerticalStrut(1));
+        selloCentro.add(lblCertColegiaturaFirma);
+        selloCentro.add(Box.createVerticalStrut(8));
+        selloCentro.add(lblValidezBadge);
+
+        panelFirma.add(selloCentro, BorderLayout.CENTER);
+        hoja.add(panelFirma);
+
+        JScrollPane scrollHoja = new JScrollPane(hoja);
+        scrollHoja.setBorder(null);
+        scrollHoja.setOpaque(false);
+        scrollHoja.getViewport().setOpaque(false);
+        scrollHoja.getVerticalScrollBar().setUnitIncrement(14);
+        cardVisorDocumento.add(scrollHoja, BorderLayout.CENTER);
+
+        cardVisorDocumento.revalidate();
+        cardVisorDocumento.repaint();
+    }
+
+    private JPanel crearCajaFiliacion(String titulo, String principal, String secundario) {
+        JPanel caja = new JPanel(new BorderLayout(4, 2)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        caja.setOpaque(false);
+        caja.setBorder(new EmptyBorder(8, 12, 8, 12));
+
+        JLabel lblT = new JLabel(titulo);
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblT.setForeground(COLOR_MUTED);
+
+        JLabel lblP = new JLabel(principal);
+        lblP.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblP.setForeground(COLOR_TITULO);
+
+        JLabel lblS = new JLabel(secundario);
+        lblS.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblS.setForeground(new Color(71, 85, 105));
+
+        JPanel cuerpo = new JPanel();
+        cuerpo.setOpaque(false);
+        cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
+        cuerpo.add(lblP);
+        cuerpo.add(Box.createVerticalStrut(2));
+        cuerpo.add(lblS);
+
+        caja.add(lblT, BorderLayout.NORTH);
+        caja.add(cuerpo, BorderLayout.CENTER);
+        return caja;
+    }
+
+    private JPanel crearBloqueDictamenSanitario(String titulo, String texto) {
+        JPanel bloque = new JPanel(new BorderLayout(0, 6)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(240, 253, 250));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(new Color(153, 246, 228));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        bloque.setOpaque(false);
+        bloque.setBorder(new EmptyBorder(10, 14, 10, 14));
+        bloque.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+
+        JLabel lblT = new JLabel(titulo);
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblT.setForeground(new Color(15, 118, 110));
+        bloque.add(lblT, BorderLayout.NORTH);
+
+        JLabel lblTexto = new JLabel("<html><body style='width: 580px; font-family: Segoe UI; font-size: 11px; color: #0f172a; line-height: 1.4;'>" + texto + "</body></html>");
+        bloque.add(lblTexto, BorderLayout.CENTER);
+
+        return bloque;
+    }
+
+    private void mostrarEstadoSinDocumentos() {
+        this.documentoSeleccionado = null;
+        cardVisorDocumento.removeAll();
+        cardVisorDocumento.setLayout(new BorderLayout());
+        cardVisorDocumento.add(panelSinDocumento, BorderLayout.CENTER);
+        cardVisorDocumento.revalidate();
+        cardVisorDocumento.repaint();
+    }
+
+    // =========================================================================
+    // 4. LÓGICA DE DATOS Y CARGA
+    // =========================================================================
+
+    public void cargarMascota(Mascota m) {
+        if (m == null) return;
+        recargarMascotas();
+        for (int i = 0; i < modeloListaMascotas.size(); i++) {
+            if (modeloListaMascotas.get(i).getCodigo().equalsIgnoreCase(m.getCodigo())) {
+                listaMascotas.setSelectedIndex(i);
+                listaMascotas.ensureIndexIsVisible(i);
+                return;
             }
         }
-        lblContadorDocs.setText(count + " documento(s) disponible(s)");
+        seleccionarMascotaInterno(m);
     }
 
-    private void buscarClienteOMascota() {
-        String query = txtBuscar.getText().trim();
-        if (query.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese el nombre o código de la mascota a consultar.", "Búsqueda", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        Optional<Mascota> optM = repo.buscarMascotaPorCodigoONombre(query);
-        if (optM.isPresent()) {
-            cargarMascota(optM.get());
-            return;
-        }
-        Optional<Cliente> optC = repo.buscarClientePorDniOApellido(query);
-        if (optC.isPresent() && !optC.get().getMascotas().isEmpty()) {
-            cargarMascota(optC.get().getMascotas().get(0));
-            return;
-        }
-        JOptionPane.showMessageDialog(this, "No se encontró ningún registro coincidente con: " + query, "No Encontrado", JOptionPane.WARNING_MESSAGE);
+    private void recargarMascotas() {
+        listaMascotasCompleta = repo.todasLasMascotas();
+        filtrarMascotas();
     }
 
-    private void verDetalleDocumentoSeleccionado() {
-        int row = tablaDocumentos.getSelectedRow();
-        if (row < 0 || listaDocumentos == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un documento en la tabla para visualizarlo.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        String tipo = (String) modeloDocumentos.getValueAt(row, 0);
-        DocumentoMascota doc = listaDocumentos.stream().filter(d -> d.getTipo().equals(tipo)).findFirst().orElse(null);
-        if (doc != null) {
-            DetalleDocumentoDialog dlg = new DetalleDocumentoDialog(null, doc, mascotaActual, clienteActual);
-            dlg.setVisible(true);
+    private void filtrarMascotas() {
+        String query = txtBuscarMascota != null ? txtBuscarMascota.getText().trim().toLowerCase() : "";
+        String especie = cbFiltroEspecie != null ? (String) cbFiltroEspecie.getSelectedItem() : "Todas";
+
+        listaMascotasFiltrada = listaMascotasCompleta.stream().filter(m -> {
+            boolean coincideTexto = query.isEmpty()
+                    || m.getNombre().toLowerCase().contains(query)
+                    || m.getCodigo().toLowerCase().contains(query)
+                    || (m.getRaza() != null && m.getRaza().toLowerCase().contains(query));
+
+            boolean coincideEspecie = "Todas".equals(especie)
+                    || ("Caninos".equals(especie) && "Canino".equalsIgnoreCase(m.getEspecie()))
+                    || ("Felinos".equals(especie) && "Felino".equalsIgnoreCase(m.getEspecie()));
+
+            return coincideTexto && coincideEspecie;
+        }).collect(Collectors.toList());
+
+        if (modeloListaMascotas != null) {
+            modeloListaMascotas.clear();
+            for (Mascota m : listaMascotasFiltrada) {
+                modeloListaMascotas.addElement(m);
+            }
+            lblContadorMascotas.setText(listaMascotasFiltrada.size() + " pacientes");
         }
     }
 
-    private void emitirNuevoCertificado() {
-        if (mascotaActual == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione primero una mascota para emitirle una constancia o certificado.", "Aviso", JOptionPane.WARNING_MESSAGE);
+    private void seleccionarMascotaInterno(Mascota m) {
+        this.mascotaSeleccionada = m;
+        this.clienteSeleccionado = repo.getClienteDeMascota(m.getCodigo()).orElse(null);
+
+        // Actualizar datos de la Ficha Ejecutiva
+        lblPetNombre.setText(m.getNombre());
+        lblPetCodigoBadge.setText(m.getCodigo());
+        lblPetEspecieRaza.setText(m.getEspecie() + " · " + m.getRaza());
+        lblPetEdadSexo.setText(m.getEdadTexto() + " · " + m.getSexo());
+
+        if (clienteSeleccionado != null) {
+            lblPetDuenoInfo.setText("Propietario Responsable: " + clienteSeleccionado.getNombreCompleto()
+                    + " (DNI: " + clienteSeleccionado.getNumeroDocumento() + " · Cel: " + clienteSeleccionado.getTelefonoPrincipal() + ")");
+        } else {
+            lblPetDuenoInfo.setText("Propietario Responsable: Sin titular registrado");
+        }
+
+        // Actualizar Avatar circular grande dinámico
+        String inicial = m.getNombre() != null && !m.getNombre().isEmpty() ? m.getNombre().substring(0, 1).toUpperCase() : "P";
+        actualizarAvatarCircular(panelAvatarMascota, inicial, COLOR_TURQUESA_SUAVE, COLOR_TURQUESA_OSCURO);
+
+        // Cargar lista de documentos de la mascota
+        listaDocumentosMascota = repo.getDocumentosPorMascota(m.getCodigo());
+
+        // Actualizar Micro-KPIs documentales
+        lblKpiTotalVal.setText(listaDocumentosMascota.size() + " constancias");
+        lblKpiEstadoVal.setText("VIGENTE");
+
+        if (!listaDocumentosMascota.isEmpty()) {
+            DocumentoMascota ultimo = listaDocumentosMascota.get(listaDocumentosMascota.size() - 1);
+            lblKpiUltimaFechaVal.setText(ultimo.getFechaActualizacionFormateada());
+            if (ultimo.getVeterinarioEmisor() != null) {
+                lblKpiFacultativoVal.setText(ultimo.getVeterinarioEmisor());
+            } else {
+                lblKpiFacultativoVal.setText("Dr. R. Mendoza");
+            }
+        } else {
+            lblKpiUltimaFechaVal.setText("-");
+            lblKpiFacultativoVal.setText("-");
+        }
+
+        filtrarDocumentosCatalogo();
+    }
+
+    private void filtrarDocumentosCatalogo() {
+        modeloListaDocumentos.clear();
+        if (mascotaSeleccionada == null || listaDocumentosMascota == null) {
+            mostrarEstadoSinDocumentos();
             return;
         }
-        String[] opciones = {
-                "Certificado de Salud General",
-                "Constancia de Vacunación",
-                "Certificado de Desparasitación",
-                "Autorización Quirúrgica"
+
+        String filtroTipo = cbTipoDocumento != null ? (String) cbTipoDocumento.getSelectedItem() : "Todos los documentos";
+
+        listaDocumentosFiltrados = new ArrayList<>();
+        for (DocumentoMascota d : listaDocumentosMascota) {
+            if ("Todos los documentos".equals(filtroTipo) || d.getTipo().equalsIgnoreCase(filtroTipo)) {
+                listaDocumentosFiltrados.add(d);
+                modeloListaDocumentos.addElement(d);
+            }
+        }
+
+        lblContadorDocumentos.setText(listaDocumentosFiltrados.size() + " constancias");
+
+        if (!listaDocumentosFiltrados.isEmpty()) {
+            listaDocumentos.setSelectedIndex(0);
+            mostrarDetalleDocumentoEnVivo(listaDocumentosFiltrados.get(0));
+        } else {
+            mostrarEstadoSinDocumentos();
+        }
+    }
+
+    // =========================================================================
+    // 5. ACCIONES Y DIÁLOGOS
+    // =========================================================================
+
+    private void abrirEmitirCertificadoDialog() {
+        if (mascotaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione primero un paciente en el directorio.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        FormularioCertificadoDialog dlg = new FormularioCertificadoDialog(
+                SwingUtilities.getWindowAncestor(this),
+                mascotaSeleccionada,
+                null,
+                nuevoDoc -> {
+                    seleccionarMascotaInterno(mascotaSeleccionada);
+                    for (int i = 0; i < modeloListaDocumentos.size(); i++) {
+                        if (modeloListaDocumentos.get(i).getCodigo().equals(nuevoDoc.getCodigo())) {
+                            listaDocumentos.setSelectedIndex(i);
+                            listaDocumentos.ensureIndexIsVisible(i);
+                            break;
+                        }
+                    }
+                    JOptionPane.showMessageDialog(this,
+                            "Documento '" + nuevoDoc.getTipo() + "' emitido exitosamente.",
+                            "Certificado Emitido", JOptionPane.INFORMATION_MESSAGE);
+                }
+        );
+        dlg.setVisible(true);
+    }
+
+    private void imprimirCertificadoSeleccionado() {
+        if (documentoSeleccionado == null || mascotaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un documento para visualizar e imprimir.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String tipo = documentoSeleccionado.getTipo().toUpperCase();
+        String[][] datos = new String[][]{
+                {"1", tipo, mascotaSeleccionada.getNombre() + " (" + mascotaSeleccionada.getCodigo() + ")", clienteSeleccionado != null ? clienteSeleccionado.getNombreCompleto() : "N/D", documentoSeleccionado.getFechaActualizacionFormateada()},
+                {"2", "Dictamen Facultativo", documentoSeleccionado.getDescripcion(), documentoSeleccionado.getVeterinarioEmisor() != null ? documentoSeleccionado.getVeterinarioEmisor() : "Dr. R. Mendoza (CMVP 8492)", "Vigente"}
         };
-        String tipo = (String) JOptionPane.showInputDialog(this, "Seleccione el tipo de documento a emitir:", "Emitir Documento Oficial", JOptionPane.QUESTION_MESSAGE, null, opciones, opciones[0]);
-        if (tipo != null) {
-            String desc = JOptionPane.showInputDialog(this, "Observaciones / Detalles clínicos para el documento:", "Observaciones", JOptionPane.QUESTION_MESSAGE);
-            String docId = "DOC-00" + (listaDocumentos != null ? (listaDocumentos.size() + 1) : 1);
-            DocumentoMascota nuevo = new DocumentoMascota(
-                    docId,
-                    mascotaActual.getCodigo(),
-                    tipo,
-                    desc != null && !desc.trim().isEmpty() ? desc : "Emitido conforme a revisión médica",
-                    LocalDate.now(),
-                    true
-            );
-            repo.agregarDocumento(nuevo);
-            cargarMascota(mascotaActual);
-            JOptionPane.showMessageDialog(this, "Documento '" + tipo + "' emitido exitosamente para " + mascotaActual.getNombre() + ".", "Emisión Exitosa", JOptionPane.INFORMATION_MESSAGE);
+
+        Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                tipo,
+                "Paciente: " + mascotaSeleccionada.getNombre() + " (" + mascotaSeleccionada.getEspecieRaza() + ") | Propietario: " + (clienteSeleccionado != null ? clienteSeleccionado.getNombreCompleto() : "N/D"),
+                "Fecha Emisión: " + documentoSeleccionado.getFechaActualizacionFormateada() + " | Registro: " + documentoSeleccionado.getCodigo(),
+                new String[]{"N°", "Concepto", "Paciente / Detalle", "Médico Veterinario", "Estado"},
+                datos,
+                "DOCUMENTO OFICIAL DIGITAL VETERINARIA HAPPY PETS S.A.C.",
+                "Certificado_" + mascotaSeleccionada.getNombre() + "_" + documentoSeleccionado.getCodigo()
+        );
+    }
+
+    private void exportarListadoDocumentos() {
+        if (mascotaSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un paciente para exportar su listado de certificados.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<DocumentoMascota> docs = repo.getDocumentosPorMascota(mascotaSeleccionada.getCodigo());
+        String[][] datos = new String[docs.size()][4];
+        for (int i = 0; i < docs.size(); i++) {
+            DocumentoMascota d = docs.get(i);
+            datos[i][0] = d.getCodigo();
+            datos[i][1] = d.getTipo();
+            datos[i][2] = d.getFechaActualizacionFormateada();
+            datos[i][3] = d.isDisponible() ? "Oficial · Vigente" : "Archivado";
+        }
+
+        Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "RELACIÓN DE CONSTANCIAS Y CERTIFICADOS EMITIDOS",
+                "Paciente: " + mascotaSeleccionada.getNombre() + " (" + mascotaSeleccionada.getEspecieRaza() + ") | Código: " + mascotaSeleccionada.getCodigo(),
+                "Propietario: " + (clienteSeleccionado != null ? clienteSeleccionado.getNombreCompleto() : "N/D") + " | Total Documentos: " + docs.size(),
+                new String[]{"Código", "Tipo de Documento", "Fecha Emisión", "Estado"},
+                datos,
+                "EXPEDIENTE DOCUMENTAL SANITARIO COMPLETO",
+                "Certificados_" + mascotaSeleccionada.getNombre()
+        );
+    }
+
+    // =========================================================================
+    // 6. COMPONENTES GRÁFICOS PERSONALIZADOS (AVATARES Y RENDERERS)
+    // =========================================================================
+
+    private JPanel crearAvatarCircular(int diametro, String texto, Color fondo, Color textoColor) {
+        JPanel avatar = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int d = Math.min(getWidth(), getHeight()) - 2;
+                int x = (getWidth() - d) / 2;
+                int y = (getHeight() - d) / 2;
+
+                Color bg = (Color) getClientProperty("fondo");
+                if (bg == null) bg = fondo;
+                Color fg = (Color) getClientProperty("textoColor");
+                if (fg == null) fg = textoColor;
+                String txt = (String) getClientProperty("texto");
+                if (txt == null) txt = texto;
+
+                g2.setColor(bg);
+                g2.fillOval(x, y, d, d);
+                g2.setColor(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 60));
+                g2.drawOval(x, y, d, d);
+                g2.setColor(fg);
+                g2.setFont(new Font("Segoe UI", Font.BOLD, diametro >= 40 ? 18 : 13));
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = x + (d - fm.stringWidth(txt)) / 2;
+                int ty = y + (d - fm.getHeight()) / 2 + fm.getAscent();
+                g2.drawString(txt, tx, ty);
+                g2.dispose();
+            }
+        };
+        avatar.setOpaque(false);
+        avatar.setPreferredSize(new Dimension(diametro, diametro));
+        avatar.setMinimumSize(new Dimension(diametro, diametro));
+        avatar.setMaximumSize(new Dimension(diametro, diametro));
+        avatar.putClientProperty("texto", texto);
+        avatar.putClientProperty("fondo", fondo);
+        avatar.putClientProperty("textoColor", textoColor);
+        return avatar;
+    }
+
+    private void actualizarAvatarCircular(JPanel avatar, String texto, Color fondo, Color textoColor) {
+        avatar.putClientProperty("texto", texto);
+        avatar.putClientProperty("fondo", fondo);
+        avatar.putClientProperty("textoColor", textoColor);
+        avatar.repaint();
+    }
+
+    private JLabel crearBadge(String texto, Color fondo, Color textoColor) {
+        JLabel badge = new JLabel(texto) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        badge.setForeground(textoColor);
+        badge.setBackground(fondo);
+        badge.setOpaque(false);
+        badge.setBorder(new EmptyBorder(3, 8, 3, 8));
+        return badge;
+    }
+
+    private JButton crearBotonAccion(String texto, boolean primario) {
+        JButton btn = new JButton(texto) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (primario) {
+                    g2.setColor(getModel().isRollover() ? COLOR_TURQUESA_OSCURO : COLOR_TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                if (!primario) {
+                    g2.setColor(COLOR_BORDE);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                }
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btn.setForeground(primario ? Color.WHITE : COLOR_TITULO);
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width + 16, 28));
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
+        return btn;
+    }
+
+    // =========================================================================
+    // 7. RENDERERS DE LISTA (MASCOTA & DOCUMENTO)
+    // =========================================================================
+
+    private class MascotaCellRenderer extends JPanel implements ListCellRenderer<Mascota> {
+        private static final long serialVersionUID = 1L;
+        private final JLabel lblAvatar;
+        private final JLabel lblNombre;
+        private final JLabel lblDetalle;
+        private final JLabel lblDueno;
+
+        public MascotaCellRenderer() {
+            setLayout(new BorderLayout(8, 0));
+            setBorder(new EmptyBorder(6, 8, 6, 8));
+            setOpaque(true);
+
+            lblAvatar = new JLabel("", SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    int d = Math.min(getWidth(), getHeight()) - 2;
+                    int x = (getWidth() - d) / 2;
+                    int y = (getHeight() - d) / 2;
+                    g2.setColor(COLOR_TURQUESA_SUAVE);
+                    g2.fillOval(x, y, d, d);
+                    g2.setColor(COLOR_TURQUESA_OSCURO);
+                    g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                    FontMetrics fm = g2.getFontMetrics();
+                    String t = getText();
+                    int tx = x + (d - fm.stringWidth(t)) / 2;
+                    int ty = y + (d - fm.getHeight()) / 2 + fm.getAscent();
+                    g2.drawString(t, tx, ty);
+                    g2.dispose();
+                }
+            };
+            lblAvatar.setPreferredSize(new Dimension(32, 32));
+            lblAvatar.setMinimumSize(new Dimension(32, 32));
+            lblAvatar.setMaximumSize(new Dimension(32, 32));
+            lblAvatar.setOpaque(false);
+
+            JPanel avatarWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
+            avatarWrap.setOpaque(false);
+            avatarWrap.add(lblAvatar);
+            add(avatarWrap, BorderLayout.WEST);
+
+            JPanel txt = new JPanel();
+            txt.setOpaque(false);
+            txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
+
+            lblNombre = new JLabel();
+            lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            lblNombre.setForeground(COLOR_TITULO);
+
+            lblDetalle = new JLabel();
+            lblDetalle.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            lblDetalle.setForeground(COLOR_MUTED);
+
+            lblDueno = new JLabel();
+            lblDueno.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            lblDueno.setForeground(new Color(100, 116, 139));
+
+            txt.add(lblNombre);
+            txt.add(lblDetalle);
+            txt.add(lblDueno);
+            add(txt, BorderLayout.CENTER);
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList<? extends Mascota> list, Mascota m, int index, boolean isSelected, boolean cellHasFocus) {
+            if (m != null) {
+                String ini = m.getNombre() != null && !m.getNombre().isEmpty() ? m.getNombre().substring(0, 1).toUpperCase() : "P";
+                lblAvatar.setText(ini);
+                lblNombre.setText(m.getNombre() + " (" + m.getCodigo() + ")");
+                lblDetalle.setText(m.getEspecie() + " · " + m.getRaza());
+
+                Cliente cl = repo.getClienteDeMascota(m.getCodigo()).orElse(null);
+                lblDueno.setText("Dueño: " + (cl != null ? cl.getNombreCompleto() : "Sin asignar"));
+            }
+
+            if (isSelected) {
+                setBackground(COLOR_TURQUESA_SUAVE);
+                setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(COLOR_TURQUESA, 1),
+                        new EmptyBorder(5, 7, 5, 7)
+                ));
+            } else {
+                setBackground(Color.WHITE);
+                setBorder(new EmptyBorder(6, 8, 6, 8));
+            }
+            return this;
+        }
+    }
+
+    private class DocumentoCellRenderer extends JPanel implements ListCellRenderer<DocumentoMascota> {
+        private static final long serialVersionUID = 1L;
+        private final JLabel lblIconoDoc;
+        private final JLabel lblNombreDoc;
+        private final JLabel lblDetalleDoc;
+        private final JLabel lblBadgeVigencia;
+
+        public DocumentoCellRenderer() {
+            setLayout(new BorderLayout(8, 2));
+            setBorder(new EmptyBorder(8, 10, 8, 10));
+            setOpaque(true);
+
+            lblIconoDoc = new JLabel(Iconos.crearIconoCertificado(20, COLOR_TURQUESA));
+            JPanel icoWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
+            icoWrap.setOpaque(false);
+            icoWrap.add(lblIconoDoc);
+            add(icoWrap, BorderLayout.WEST);
+
+            JPanel center = new JPanel();
+            center.setOpaque(false);
+            center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+
+            lblNombreDoc = new JLabel();
+            lblNombreDoc.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            lblNombreDoc.setForeground(COLOR_TITULO);
+
+            lblDetalleDoc = new JLabel();
+            lblDetalleDoc.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            lblDetalleDoc.setForeground(COLOR_MUTED);
+
+            center.add(lblNombreDoc);
+            center.add(Box.createVerticalStrut(1));
+            center.add(lblDetalleDoc);
+            add(center, BorderLayout.CENTER);
+
+            lblBadgeVigencia = crearBadge("Oficial", new Color(220, 252, 231), new Color(22, 163, 74));
+            JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 4));
+            der.setOpaque(false);
+            der.add(lblBadgeVigencia);
+            add(der, BorderLayout.EAST);
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList<? extends DocumentoMascota> list, DocumentoMascota doc, int index, boolean isSelected, boolean cellHasFocus) {
+            if (doc != null) {
+                lblNombreDoc.setText(doc.getTipo());
+                String code = doc instanceof Certificado cert && cert.getNumeroCertificado() != null ? cert.getNumeroCertificado() : doc.getCodigo();
+                lblDetalleDoc.setText(code + " · " + doc.getFechaActualizacionFormateada());
+                lblBadgeVigencia.setText(doc.isDisponible() ? "Vigente" : "Archivado");
+
+                if (doc.isDisponible()) {
+                    lblBadgeVigencia.setBackground(new Color(220, 252, 231));
+                    lblBadgeVigencia.setForeground(new Color(22, 163, 74));
+                } else {
+                    lblBadgeVigencia.setBackground(new Color(241, 245, 249));
+                    lblBadgeVigencia.setForeground(COLOR_MUTED);
+                }
+            }
+
+            if (isSelected) {
+                setBackground(COLOR_TURQUESA_SUAVE);
+                setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(COLOR_TURQUESA, 1),
+                        new EmptyBorder(7, 9, 7, 9)
+                ));
+            } else {
+                setBackground(Color.WHITE);
+                setBorder(new EmptyBorder(8, 10, 8, 10));
+            }
+            return this;
         }
     }
 }
