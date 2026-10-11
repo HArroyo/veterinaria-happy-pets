@@ -10,7 +10,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
@@ -27,9 +29,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -45,11 +49,8 @@ import happypets.ui.Ui;
 
 /**
  * Submódulo 3.4: Laboratorio Clínico y Diagnóstico por Imágenes.
- * Diseñado según el wireframe oficial (Pág. 6):
- * 1. Nueva Solicitud (Órdenes diagnósticas para laboratorio e imágenes).
- * 2. Registro de Resultados analíticos (hemograma, bioquímica, citología).
- * 3. Visor e Informe de Imágenes Diagnósticas (Radiología y Ecografía).
- * 4. Historial clínico de estudios con filtros y exportación.
+ * Arquitectura Master-Detail (Opción A) con catálogo analítico en vivo,
+ * workstation de informes radiológicos y emisión de certificados diagnósticos.
  */
 public class VistaLaboratorioImagenesPanel extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -61,75 +62,54 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
+    // Filtros
+    private JComboBox<String> cbFiltroCategoria;
+    private JComboBox<String> cbFiltroEstado;
+    private JTextField txtBuscar;
+
     // KPIs
     private JLabel lblKpiTotalOrdenes;
     private JLabel lblKpiLaboratorio;
     private JLabel lblKpiImagenes;
     private JLabel lblKpiCompletados;
 
-    // Formulario Solicitud
-    private JComboBox<PacienteItem> cbPacienteSol;
-    private JTextField txtTutorSol;
-    private JComboBox<String> cbCategoriaSol;
-    private JComboBox<String> cbTipoEstudioSol;
-    private JComboBox<String> cbPrioridadSol;
-    private JTextField txtVetSol;
-    private JTextField txtMotivoSol;
-
-    // Formulario Resultado
-    private JTextField txtPacienteRes;
-    private JTextField txtEstudioRes;
-    private JTextField txtResponsableRes;
-    private JTextArea txtValoresRes;
-    private JTextArea txtInterpretacionRes;
-    private JComboBox<String> cbEstadoRes;
-
-    // Visor de Imagen Diagnóstica
-    private JPanel panelPreviewRx;
-    private JTextField txtEstudioImg;
-    private JTextArea txtInformeImg;
-
-    // Historial
+    // Master Table
     private JTable tablaHistorial;
     private DefaultTableModel modeloHistorial;
-    private JTextField txtBuscarHistorial;
     private JLabel lblContadorHistorial;
     private List<OrdenLaboratorio> listaActual;
+
+    // Right Detail Hub (Workstation Diagnóstica)
+    private JPanel panelDetalleHub;
+    private OrdenLaboratorio ordenSeleccionada;
 
     public VistaLaboratorioImagenesPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
+        setBorder(new EmptyBorder(12, 16, 14, 16));
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        // 1. Cabecera superior y KPIs
+        JPanel panelNorte = new JPanel();
+        panelNorte.setOpaque(false);
+        panelNorte.setLayout(new BoxLayout(panelNorte, BoxLayout.Y_AXIS));
 
-        // 1. Cabecera
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(8));
+        panelNorte.add(crearCabeceraVista());
+        panelNorte.add(Box.createVerticalStrut(10));
+        panelNorte.add(crearFilaKpis());
+        panelNorte.add(Box.createVerticalStrut(10));
 
-        // 2. Fila de KPIs
-        contenido.add(crearFilaKpis());
-        contenido.add(Box.createVerticalStrut(10));
+        add(panelNorte, BorderLayout.NORTH);
 
-        // 3. Fila Superior: Nueva Solicitud y Registrar Resultado
-        contenido.add(crearFilaSolicitudYResultado());
-        contenido.add(Box.createVerticalStrut(12));
+        // 2. Split Master-Detail Central (58% Master / 42% Detail)
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetailWrapper());
+        splitPane.setOpaque(false);
+        splitPane.setBorder(null);
+        splitPane.setContinuousLayout(true);
+        splitPane.setDividerSize(8);
+        splitPane.setResizeWeight(0.58);
+        splitPane.setDividerLocation(675);
 
-        // 4. Fila Inferior: Visor de Imágenes e Historial de Estudios
-        contenido.add(crearFilaImagenYHistorial());
-
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.add(contenido, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(wrapper);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        add(scroll, BorderLayout.CENTER);
+        add(splitPane, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -137,16 +117,18 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
     private JPanel crearCabeceraVista() {
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
+        cab.setPreferredSize(new Dimension(0, 42));
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel titulo = new JLabel("Laboratorio Clínico e Imágenes Diagnósticas");
+        JLabel titulo = new JLabel("Laboratorio Clínico y Diagnóstico por Imágenes");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
         titulo.setForeground(COLOR_TEXTO_TITULO);
 
-        JLabel subtitulo = new JLabel("Módulo 3.4 · Órdenes diagnósticas, procesamiento de muestras, informes radiológicos y ecografías");
+        JLabel subtitulo = new JLabel("Módulo 3.4 · Órdenes diagnósticas, procesamiento de muestras, informes radiológicos e imágenes PACS");
         subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         subtitulo.setForeground(COLOR_TEXTO_MUTED);
 
@@ -155,300 +137,114 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         izq.add(subtitulo);
         cab.add(izq, BorderLayout.CENTER);
 
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         der.setOpaque(false);
 
-        JButton btnRefrescar = crearBotonWeb("↻ Actualizar Laboratorio", false, () -> recargarDatos());
-        der.add(btnRefrescar);
+        JLabel badgePACS = new JLabel("Visor Digital PACS / LIS: Conectado") {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(240, 253, 250));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(new Color(153, 246, 228));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        badgePACS.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        badgePACS.setForeground(new Color(15, 118, 110));
+        badgePACS.setBorder(new EmptyBorder(5, 10, 5, 10));
+
+        JButton btnNuevo = crearBotonAccion("+ Nueva Orden Diagnóstica", true);
+        btnNuevo.setIcon(Iconos.crearIconoMicroscopio(13, Color.WHITE));
+        btnNuevo.setIconTextGap(6);
+        btnNuevo.addActionListener(e -> abrirModalNuevaOrden(null));
+
+        der.add(badgePACS);
+        der.add(btnNuevo);
 
         cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
     private JPanel crearFilaKpis() {
-        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        JPanel fila = new JPanel(new GridLayout(1, 4, 10, 0));
         fila.setOpaque(false);
+        fila.setPreferredSize(new Dimension(0, 56));
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 56));
 
-        lblKpiTotalOrdenes = new JLabel("4", SwingConstants.LEFT);
-        lblKpiLaboratorio = new JLabel("2", SwingConstants.LEFT);
-        lblKpiImagenes = new JLabel("2", SwingConstants.LEFT);
-        lblKpiCompletados = new JLabel("4", SwingConstants.LEFT);
+        lblKpiTotalOrdenes = new JLabel("0");
+        lblKpiLaboratorio = new JLabel("0");
+        lblKpiImagenes = new JLabel("0");
+        lblKpiCompletados = new JLabel("0");
 
-        fila.add(crearCardKpi(lblKpiTotalOrdenes, "ÓRDENES DIAGNÓSTICAS", Ui.TURQUESA_SUAVE, COLOR_AZUL_PRIMARIO, Iconos.crearIconoFactura(20, COLOR_AZUL_PRIMARIO)));
-        fila.add(crearCardKpi(lblKpiLaboratorio, "LABORATORIO CLÍNICO", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoMicroscopio(20, new Color(147, 51, 234))));
-        fila.add(crearCardKpi(lblKpiImagenes, "RAYOS X Y ECOGRAFÍAS", new Color(254, 243, 199), new Color(217, 119, 6), Iconos.crearIconoRx(20, new Color(217, 119, 6))));
-        fila.add(crearCardKpi(lblKpiCompletados, "RESULTADOS EMITIDOS", new Color(220, 252, 231), new Color(22, 163, 74), Iconos.crearIconoCheck(20, new Color(22, 163, 74))));
+        fila.add(crearCardKpi(lblKpiTotalOrdenes, "ESTUDIOS TOTALES", Ui.TURQUESA_SUAVE, COLOR_AZUL_PRIMARIO, Iconos.crearIconoMicroscopio(18, COLOR_AZUL_PRIMARIO)));
+        fila.add(crearCardKpi(lblKpiLaboratorio, "LABORATORIO CLÍNICO", new Color(224, 242, 254), new Color(2, 132, 199), Iconos.crearIconoJeringa(18, new Color(2, 132, 199))));
+        fila.add(crearCardKpi(lblKpiImagenes, "RAYOS X / ECOGRAFÍA", new Color(243, 232, 255), new Color(147, 51, 234), Iconos.crearIconoHistorial(18, new Color(147, 51, 234))));
+        fila.add(crearCardKpi(lblKpiCompletados, "INFORMES COMPLETADOS", new Color(220, 252, 231), new Color(22, 163, 74), Iconos.crearIconoCheck(18, new Color(22, 163, 74))));
 
         return fila;
     }
 
-    private JPanel crearCardKpi(JLabel lblValor, String etiqueta, Color colorFondoIco, Color colorIco, Icon icono) {
-        JPanel card = new JPanel(new BorderLayout(10, 0)) {
+    private JPanel crearCardKpi(JLabel lblVal, String etiqueta, Color bgIco, Color fgIco, Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(8, 12, 8, 12));
-
-        JLabel iconBox = new JLabel(icono, SwingConstants.CENTER) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(colorFondoIco);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        iconBox.setPreferredSize(new Dimension(36, 36));
-        card.add(iconBox, BorderLayout.WEST);
-
-        JPanel centro = new JPanel();
-        centro.setOpaque(false);
-        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
-
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblValor.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblSub = new JLabel(etiqueta);
-        lblSub.setFont(new Font("Segoe UI", Font.BOLD, 9));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-
-        centro.add(lblValor);
-        centro.add(lblSub);
-        card.add(centro, BorderLayout.CENTER);
-
-        return card;
-    }
-
-    private JPanel crearFilaSolicitudYResultado() {
-        JPanel fila = new JPanel(new GridLayout(1, 2, 14, 0));
-        fila.setOpaque(false);
-
-        fila.add(crearCardNuevaSolicitud());
-        fila.add(crearCardRegistrarResultado());
-
-        return fila;
-    }
-
-    private JPanel crearCardNuevaSolicitud() {
-        JPanel card = new JPanel(new BorderLayout()) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 super.paintComponent(g2);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(6, 12, 6, 12));
 
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-
-        JLabel tit = new JLabel("1) Nueva Solicitud (Orden Diagnóstica)", SwingConstants.LEFT);
-        tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tit.setForeground(COLOR_TEXTO_TITULO);
-        tit.setHorizontalAlignment(SwingConstants.LEFT);
-        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(tit);
-        form.add(Box.createVerticalStrut(8));
-
-        cbPacienteSol = new JComboBox<>();
-        cbPacienteSol.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbPacienteSol.setBackground(Color.WHITE);
-        cbPacienteSol.setPreferredSize(new Dimension(0, 26));
-        cbPacienteSol.addActionListener(e -> autocompletarTutorSol());
-        form.add(crearFilaCampo("Paciente (Nombre / Código) *", cbPacienteSol));
-        form.add(Box.createVerticalStrut(4));
-
-        txtTutorSol = crearCampoTexto(false);
-        form.add(crearFilaCampo("Tutor / Contacto", txtTutorSol));
-        form.add(Box.createVerticalStrut(4));
-
-        JPanel filaTipo = new JPanel(new GridLayout(1, 2, 8, 0));
-        filaTipo.setOpaque(false);
-        filaTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        filaTipo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        cbCategoriaSol = new JComboBox<>(new String[]{"Laboratorio Clínico", "Diagnóstico por Imágenes"});
-        cbCategoriaSol.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbCategoriaSol.setBackground(Color.WHITE);
-
-        String[] estudios = {
-                "Hemograma Completo Automatizado",
-                "Perfil Bioquímico Hepato-Renal",
-                "Radiografía de Tórax (LL / VD)",
-                "Ecografía Abdominal Completa",
-                "Urianálisis Completo + Sedimento",
-                "Citología por Punción / Biopsia",
-                "Raspado Cutáneo / Tricograma"
-        };
-        cbTipoEstudioSol = new JComboBox<>(estudios);
-        cbTipoEstudioSol.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbTipoEstudioSol.setBackground(Color.WHITE);
-
-        filaTipo.add(crearFilaCampo("Categoría *", cbCategoriaSol));
-        filaTipo.add(crearFilaCampo("Tipo de Examen *", cbTipoEstudioSol));
-        form.add(filaTipo);
-        form.add(Box.createVerticalStrut(4));
-
-        JPanel filaPrio = new JPanel(new GridLayout(1, 2, 8, 0));
-        filaPrio.setOpaque(false);
-        filaPrio.setAlignmentX(Component.LEFT_ALIGNMENT);
-        filaPrio.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        cbPrioridadSol = new JComboBox<>(new String[]{"Normal", "Urgente", "Emergencia"});
-        cbPrioridadSol.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbPrioridadSol.setBackground(Color.WHITE);
-
-        txtVetSol = crearCampoTexto(true);
-        txtVetSol.setText("Dra. Camila Morales");
-
-        filaPrio.add(crearFilaCampo("Prioridad Diagnóstica", cbPrioridadSol));
-        filaPrio.add(crearFilaCampo("Veterinario Solicitante", txtVetSol));
-        form.add(filaPrio);
-        form.add(Box.createVerticalStrut(4));
-
-        txtMotivoSol = crearCampoTexto(true);
-        txtMotivoSol.setText("Decaimiento, vómitos y pérdida de apetito. Descartar proceso infeccioso.");
-        form.add(crearFilaCampo("Motivo / Sospecha Clínica *", txtMotivoSol));
-        form.add(Box.createVerticalStrut(10));
-
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        btnRow.setOpaque(false);
-        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        JButton btnSol = crearBotonWeb("🔬 Generar Solicitud", true, () -> generarNuevaSolicitud());
-        btnRow.add(btnSol);
-        form.add(btnRow);
-
-        card.add(form, BorderLayout.NORTH);
-        return card;
-    }
-
-    private JPanel crearCardRegistrarResultado() {
-        JPanel card = new JPanel(new BorderLayout()) {
+        JLabel badge = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                g2.setColor(bgIco);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                 super.paintComponent(g2);
                 g2.dispose();
             }
         };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        badge.setPreferredSize(new Dimension(36, 36));
+        card.add(badge, BorderLayout.WEST);
 
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        JPanel pText = new JPanel();
+        pText.setOpaque(false);
+        pText.setLayout(new BoxLayout(pText, BoxLayout.Y_AXIS));
 
-        JLabel tit = new JLabel("2) Registrar Resultado y Procesamiento", SwingConstants.LEFT);
-        tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tit.setForeground(COLOR_TEXTO_TITULO);
-        tit.setHorizontalAlignment(SwingConstants.LEFT);
-        tit.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(tit);
-        form.add(Box.createVerticalStrut(8));
+        JLabel lblEtq = new JLabel(etiqueta);
+        lblEtq.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblEtq.setForeground(COLOR_TEXTO_MUTED);
 
-        JPanel fila1 = new JPanel(new GridLayout(1, 2, 8, 0));
-        fila1.setOpaque(false);
-        fila1.setAlignmentX(Component.LEFT_ALIGNMENT);
-        fila1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        txtPacienteRes = crearCampoTexto(false);
-        txtPacienteRes.setText("Rocky (Golden Retriever)");
-        txtEstudioRes = crearCampoTexto(false);
-        txtEstudioRes.setText("Hemograma Completo");
-        fila1.add(crearFilaCampo("Paciente", txtPacienteRes));
-        fila1.add(crearFilaCampo("Examen Clínico", txtEstudioRes));
-        form.add(fila1);
-        form.add(Box.createVerticalStrut(4));
+        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblVal.setForeground(COLOR_TEXTO_TITULO);
 
-        JPanel fila2 = new JPanel(new GridLayout(1, 2, 8, 0));
-        fila2.setOpaque(false);
-        fila2.setAlignmentX(Component.LEFT_ALIGNMENT);
-        fila2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        txtResponsableRes = crearCampoTexto(true);
-        txtResponsableRes.setText("Lab. Central - Lic. P. Torres");
-        cbEstadoRes = new JComboBox<>(new String[]{"Completado", "En Proceso", "Muestra insuficiente"});
-        cbEstadoRes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        cbEstadoRes.setBackground(Color.WHITE);
+        pText.add(lblEtq);
+        pText.add(Box.createVerticalStrut(2));
+        pText.add(lblVal);
+        card.add(pText, BorderLayout.CENTER);
 
-        fila2.add(crearFilaCampo("Responsable del Procesamiento", txtResponsableRes));
-        fila2.add(crearFilaCampo("Estado del Resultado", cbEstadoRes));
-        form.add(fila2);
-        form.add(Box.createVerticalStrut(4));
-
-        txtValoresRes = new JTextArea(3, 20);
-        txtValoresRes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtValoresRes.setLineWrap(true);
-        txtValoresRes.setWrapStyleWord(true);
-        txtValoresRes.setText("Leucocitos: 18.2 mil/uL (Ref: 6.0-17.0) [ELEVADO]\nHematocrito: 42% (Ref: 37-55%)\nPlaquetas: 245 mil/uL (Ref: 200-500 mil)\nNeutrófilos en banda: 4%");
-        txtValoresRes.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(3, 6, 3, 6)
-        ));
-        form.add(crearFilaArea("Resultados / Valores Analíticos Obtenidos", txtValoresRes, 55));
-        form.add(Box.createVerticalStrut(4));
-
-        txtInterpretacionRes = new JTextArea(2, 20);
-        txtInterpretacionRes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtInterpretacionRes.setLineWrap(true);
-        txtInterpretacionRes.setWrapStyleWord(true);
-        txtInterpretacionRes.setText("Leucocitosis leve con desviación a la izquierda compatible con proceso inflamatorio/infeccioso agudo gastrointestinal.");
-        txtInterpretacionRes.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(3, 6, 3, 6)
-        ));
-        form.add(crearFilaArea("Interpretación Médica y Observaciones", txtInterpretacionRes, 42));
-        form.add(Box.createVerticalStrut(8));
-
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        btnRow.setOpaque(false);
-        btnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        JButton btnGuardar = crearBotonWeb("💾 Guardar Resultado", true, () -> guardarResultadoActual());
-        btnRow.add(btnGuardar);
-        form.add(btnRow);
-
-        card.add(form, BorderLayout.NORTH);
         return card;
     }
 
-    private JPanel crearFilaImagenYHistorial() {
-        JPanel fila = new JPanel(new GridLayout(1, 2, 14, 0));
-        fila.setOpaque(false);
-
-        fila.add(crearCardVisorImagenes());
-        fila.add(crearCardHistorialExamenes());
-
-        return fila;
-    }
-
-    private JPanel crearCardVisorImagenes() {
+    // ==========================================
+    // PANEL MASTER (TABLA DE ÓRDENES)
+    // ==========================================
+    private JPanel crearPanelMaster() {
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -464,123 +260,66 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
-        JLabel tit = new JLabel("3) Imágenes Diagnósticas (Radiología y Ecografía)");
-        tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tit.setForeground(COLOR_TEXTO_TITULO);
-        card.add(tit, BorderLayout.NORTH);
+        // Barra de filtros
+        JPanel topFiltros = new JPanel(new BorderLayout(8, 0));
+        topFiltros.setOpaque(false);
 
-        JPanel cuerpo = new JPanel(new BorderLayout(10, 0));
-        cuerpo.setOpaque(false);
+        JPanel izqFiltros = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        izqFiltros.setOpaque(false);
 
-        // Visor simulado de placa radiográfica
-        panelPreviewRx = new JPanel() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // Fondo oscuro de negativo radiológico
-                g2.setColor(new Color(15, 23, 42));
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+        JLabel lblCat = new JLabel("Categoría:");
+        lblCat.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblCat.setForeground(COLOR_TEXTO_MUTED);
+        izqFiltros.add(lblCat);
 
-                // Silueta torácica / costillas estilizadas
-                g2.setColor(new Color(148, 163, 184, 130));
-                int cx = getWidth() / 2;
-                int cy = getHeight() / 2;
-                // Columna vertebral
-                g2.fillRoundRect(cx - 3, 20, 6, getHeight() - 40, 4, 4);
-                // Costillas
-                for (int i = 35; i < getHeight() - 40; i += 18) {
-                    g2.drawArc(cx - 55, i, 50, 20, 0, 180);
-                    g2.drawArc(cx + 5, i, 50, 20, 0, 180);
-                }
-                // Silueta cardíaca
-                g2.setColor(new Color(241, 245, 249, 160));
-                g2.fillOval(cx - 16, cy - 10, 32, 42);
+        cbFiltroCategoria = new JComboBox<>(new String[]{"Todas las Categorías", "Laboratorio Clínico", "Diagnóstico por Imágenes"});
+        cbFiltroCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroCategoria.setBackground(Color.WHITE);
+        cbFiltroCategoria.setPreferredSize(new Dimension(150, 28));
+        cbFiltroCategoria.addActionListener(e -> filtrarDatos());
+        izqFiltros.add(cbFiltroCategoria);
 
-                // Marcador R / X
-                g2.setColor(new Color(56, 189, 248));
-                g2.setFont(new Font("Segoe UI", Font.BOLD, 11));
-                g2.drawString("RAYOS X DIGITAL - VET", 12, 22);
+        JLabel lblEs = new JLabel("Estado:");
+        lblEs.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblEs.setForeground(COLOR_TEXTO_MUTED);
+        izqFiltros.add(lblEs);
 
-                g2.dispose();
-            }
-        };
-        panelPreviewRx.setPreferredSize(new Dimension(170, 160));
-        cuerpo.add(panelPreviewRx, BorderLayout.WEST);
+        cbFiltroEstado = new JComboBox<>(new String[]{"Todos los Estados", "Completado", "En Proceso", "Solicitado"});
+        cbFiltroEstado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        cbFiltroEstado.setBackground(Color.WHITE);
+        cbFiltroEstado.setPreferredSize(new Dimension(130, 28));
+        cbFiltroEstado.addActionListener(e -> filtrarDatos());
+        izqFiltros.add(cbFiltroEstado);
 
-        // Informe Radiológico a la derecha
-        JPanel infoDer = new JPanel();
-        infoDer.setOpaque(false);
-        infoDer.setLayout(new BoxLayout(infoDer, BoxLayout.Y_AXIS));
+        topFiltros.add(izqFiltros, BorderLayout.WEST);
 
-        txtEstudioImg = crearCampoTexto(false);
-        txtEstudioImg.setText("Luna · Radiografía de Tórax (LL / VD)");
-        infoDer.add(crearFilaCampo("Estudio en Visor", txtEstudioImg));
-        infoDer.add(Box.createVerticalStrut(4));
+        JPanel derFiltros = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        derFiltros.setOpaque(false);
 
-        txtInformeImg = new JTextArea(4, 20);
-        txtInformeImg.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtInformeImg.setLineWrap(true);
-        txtInformeImg.setWrapStyleWord(true);
-        txtInformeImg.setText("Silueta cardíaca conservada de tamaño normal (VHS: 7.4v). Patrón bronquial leve difuso en campos caudales. Sin evidencia de neumotórax ni derrame pleural. Sugiere bronquitis alérgica.");
-        txtInformeImg.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(3, 6, 3, 6)
+        txtBuscar = new JTextField(12);
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtBuscar.setPreferredSize(new Dimension(125, 28));
+        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                new EmptyBorder(2, 6, 2, 6)
         ));
-        infoDer.add(crearFilaArea("Informe Radiológico / Ecográfico", txtInformeImg, 75));
-        infoDer.add(Box.createVerticalStrut(6));
+        txtBuscar.addActionListener(e -> filtrarDatos());
+        derFiltros.add(txtBuscar);
 
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        btnRow.setOpaque(false);
-        JButton btnGuardarInforme = crearBotonWeb("📋 Guardar Informe", false, () -> {
-            JOptionPane.showMessageDialog(this, "Informe de imagenología clínica actualizado correctamente.", "Informe Guardado", JOptionPane.INFORMATION_MESSAGE);
-        });
-        btnRow.add(btnGuardarInforme);
-        infoDer.add(btnRow);
+        JButton btnB = crearBotonAccion("Buscar", false);
+        btnB.setIcon(Iconos.crearIconoBuscar(12, COLOR_AZUL_PRIMARIO));
+        btnB.setIconTextGap(4);
+        btnB.setPreferredSize(new Dimension(84, 28));
+        btnB.addActionListener(e -> filtrarDatos());
+        derFiltros.add(btnB);
 
-        cuerpo.add(infoDer, BorderLayout.CENTER);
-        card.add(cuerpo, BorderLayout.CENTER);
+        topFiltros.add(derFiltros, BorderLayout.EAST);
+        card.add(topFiltros, BorderLayout.NORTH);
 
-        return card;
-    }
-
-    private JPanel crearCardHistorialExamenes() {
-        JPanel card = new JPanel(new BorderLayout(0, 8)) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-
-        JLabel tit = new JLabel("4) Historial de Órdenes y Resultados");
-        tit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tit.setForeground(COLOR_TEXTO_TITULO);
-        top.add(tit, BorderLayout.WEST);
-
-        lblContadorHistorial = new JLabel("Cargando órdenes...");
-        lblContadorHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblContadorHistorial.setForeground(COLOR_TEXTO_MUTED);
-        top.add(lblContadorHistorial, BorderLayout.EAST);
-
-        card.add(top, BorderLayout.NORTH);
-
-        String[] columnas = {"ID", "Fecha", "Paciente", "Examen", "Categoría", "Prioridad", "Estado"};
+        // Tabla Master
+        String[] columnas = {"Código / Fecha", "Paciente / Especie", "Tutor / Teléfono", "Estudio Solicitado", "Prioridad", "Estado"};
         modeloHistorial = new DefaultTableModel(columnas, 0) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -588,97 +327,676 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
         };
 
         tablaHistorial = new JTable(modeloHistorial);
-        Ui.formatearTabla(tablaHistorial, new int[]{0, 1, 4, 5, 6}, new int[]{});
+        tablaHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        Ui.formatearTabla(tablaHistorial, new int[]{0, 4, 5}, new int[]{});
+        tablaHistorial.setRowHeight(48);
+        tablaHistorial.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        tablaHistorial.getColumnModel().getColumn(0).setPreferredWidth(75);
-        tablaHistorial.getColumnModel().getColumn(1).setPreferredWidth(75);
-        tablaHistorial.getColumnModel().getColumn(2).setPreferredWidth(85);
-        tablaHistorial.getColumnModel().getColumn(3).setPreferredWidth(160);
-        tablaHistorial.getColumnModel().getColumn(6).setCellRenderer(new BadgeEstadoLabRenderer());
+        tablaHistorial.getColumnModel().getColumn(0).setPreferredWidth(100);
+        tablaHistorial.getColumnModel().getColumn(1).setPreferredWidth(125);
+        tablaHistorial.getColumnModel().getColumn(2).setPreferredWidth(110);
+        tablaHistorial.getColumnModel().getColumn(3).setPreferredWidth(155);
+        tablaHistorial.getColumnModel().getColumn(4).setPreferredWidth(90);
+        tablaHistorial.getColumnModel().getColumn(5).setPreferredWidth(95);
+
+        tablaHistorial.getColumnModel().getColumn(0).setCellRenderer(new CodigoFechaOrdenRenderer());
+        tablaHistorial.getColumnModel().getColumn(1).setCellRenderer(new PacienteOrdenRenderer());
+        tablaHistorial.getColumnModel().getColumn(2).setCellRenderer(new TutorOrdenRenderer());
+        tablaHistorial.getColumnModel().getColumn(3).setCellRenderer(new EstudioOrdenRenderer());
+        tablaHistorial.getColumnModel().getColumn(4).setCellRenderer(new BadgePrioridadRenderer());
+        tablaHistorial.getColumnModel().getColumn(5).setCellRenderer(new BadgeEstadoOrdenRenderer());
+
+        tablaHistorial.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tablaHistorial.getSelectedRow();
+                if (row >= 0 && row < listaActual.size()) {
+                    ordenSeleccionada = listaActual.get(row);
+                } else {
+                    ordenSeleccionada = null;
+                }
+                actualizarPanelDetalle();
+            }
+        });
 
         tablaHistorial.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                cargarOrdenSeleccionada();
+                if (e.getClickCount() == 2 && ordenSeleccionada != null) {
+                    abrirModalEditarOrden(ordenSeleccionada);
+                }
             }
         });
 
         JScrollPane sp = new JScrollPane(tablaHistorial);
         sp.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        sp.setPreferredSize(new Dimension(500, 150));
+        sp.getViewport().setBackground(Color.WHITE);
         card.add(sp, BorderLayout.CENTER);
 
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
-        bot.setOpaque(false);
+        // Barra inferior del Master
+        JPanel botMaster = new JPanel(new BorderLayout());
+        botMaster.setOpaque(false);
 
-        JButton btnVerReporte = crearBotonWeb("📄 Reporte Completo", false, () -> verReporteDiagnosticoCompleto());
-        bot.add(btnVerReporte);
-        card.add(bot, BorderLayout.SOUTH);
+        lblContadorHistorial = new JLabel("0 estudios registrados");
+        lblContadorHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblContadorHistorial.setForeground(COLOR_TEXTO_MUTED);
+        botMaster.add(lblContadorHistorial, BorderLayout.WEST);
 
+        JLabel lblDobleClic = new JLabel("Doble clic en una fila para modificar o ingresar resultados");
+        lblDobleClic.setFont(new Font("Segoe UI", Font.ITALIC, 10));
+        lblDobleClic.setForeground(COLOR_TEXTO_MUTED);
+        botMaster.add(lblDobleClic, BorderLayout.EAST);
+
+        card.add(botMaster, BorderLayout.SOUTH);
         return card;
     }
 
-    private JPanel crearFilaCampo(String etiqueta, Component campo) {
-        JPanel p = new JPanel(new BorderLayout(0, 2));
+    // ==========================================
+    // PANEL DETAIL (WORKSTATION DIAGNÓSTICA)
+    // ==========================================
+    private JPanel crearPanelDetailWrapper() {
+        panelDetalleHub = new JPanel(new BorderLayout());
+        panelDetalleHub.setOpaque(false);
+        actualizarPanelDetalle();
+        return panelDetalleHub;
+    }
+
+    private void actualizarPanelDetalle() {
+        panelDetalleHub.removeAll();
+
+        if (ordenSeleccionada == null) {
+            panelDetalleHub.add(crearEstadoVacioDetalle(), BorderLayout.CENTER);
+        } else {
+            panelDetalleHub.add(crearCardDetalleOrden(ordenSeleccionada), BorderLayout.CENTER);
+        }
+
+        panelDetalleHub.revalidate();
+        panelDetalleHub.repaint();
+    }
+
+    private JPanel crearEstadoVacioDetalle() {
+        JPanel card = new JPanel(new BorderLayout()) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(30, 20, 30, 20));
+
+        JPanel centro = new JPanel();
+        centro.setOpaque(false);
+        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
+
+        JLabel ico = new JLabel(Iconos.crearIconoMicroscopio(48, new Color(148, 163, 184)));
+        ico.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel tit = new JLabel("Workstation de Laboratorio e Imágenes");
+        tit.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        tit.setForeground(COLOR_TEXTO_TITULO);
+        tit.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel msg = new JLabel("<html><center>Seleccione una orden en la tabla para examinar los valores analíticos, visor radiográfico/ecográfico, interpretación patológica y emisión del informe oficial.</center></html>");
+        msg.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        msg.setForeground(COLOR_TEXTO_MUTED);
+        msg.setAlignmentX(Component.CENTER_ALIGNMENT);
+        msg.setMaximumSize(new Dimension(320, 80));
+
+        centro.add(Box.createVerticalGlue());
+        centro.add(ico);
+        centro.add(Box.createVerticalStrut(12));
+        centro.add(tit);
+        centro.add(Box.createVerticalStrut(6));
+        centro.add(msg);
+        centro.add(Box.createVerticalGlue());
+
+        card.add(centro, BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel crearCardDetalleOrden(OrdenLaboratorio o) {
+        JPanel card = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(12, 16, 12, 16));
+
+        // 1. Cabecera con Avatar Circular, Datos y Banner de Estado
+        JPanel pTop = new JPanel();
+        pTop.setOpaque(false);
+        pTop.setLayout(new BoxLayout(pTop, BoxLayout.Y_AXIS));
+
+        JPanel pFilaAvatar = new JPanel(new BorderLayout(12, 0));
+        pFilaAvatar.setOpaque(false);
+
+        // Circular Avatar seguro
+        boolean esImagen = o.getCategoria().contains("Imágenes");
+        JPanel pAvatarWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        pAvatarWrap.setOpaque(false);
+        JLabel lblAvatar = new JLabel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth();
+                int h = getHeight();
+                int d = Math.min(w, h) - 2;
+                int x = (w - d) / 2;
+                int y = (h - d) / 2;
+
+                g2.setColor(esImagen ? new Color(243, 232, 255) : new Color(224, 242, 254));
+                g2.fillOval(x, y, d, d);
+                g2.setColor(esImagen ? new Color(147, 51, 234) : COLOR_AZUL_PRIMARIO);
+                g2.setStroke(new java.awt.BasicStroke(2.0f));
+                g2.drawOval(x, y, d, d);
+
+                String ini = o.getNombreMascota().substring(0, Math.min(2, o.getNombreMascota().length())).toUpperCase();
+                g2.setFont(new Font("Segoe UI", Font.BOLD, 18));
+                g2.setColor(esImagen ? new Color(109, 40, 217) : new Color(15, 118, 110));
+                java.awt.FontMetrics fm = g2.getFontMetrics();
+                int tx = (w - fm.stringWidth(ini)) / 2;
+                int ty = (h + fm.getAscent() - fm.getDescent()) / 2;
+                g2.drawString(ini, tx, ty);
+                g2.dispose();
+            }
+        };
+        lblAvatar.setPreferredSize(new Dimension(54, 54));
+        pAvatarWrap.add(lblAvatar);
+        pFilaAvatar.add(pAvatarWrap, BorderLayout.WEST);
+
+        // Datos del paciente
+        JPanel pInfoPaciente = new JPanel();
+        pInfoPaciente.setOpaque(false);
+        pInfoPaciente.setLayout(new BoxLayout(pInfoPaciente, BoxLayout.Y_AXIS));
+
+        JLabel lblNom = new JLabel(o.getNombreMascota() + "  (" + o.getIdOrden() + ")");
+        lblNom.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        lblNom.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblEsp = new JLabel(o.getEspecieRaza() + " · Tutor: " + o.getNombreTutor());
+        lblEsp.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblEsp.setForeground(COLOR_TEXTO_MUTED);
+
+        JLabel lblDet = new JLabel(o.getCategoria() + "  |  " + o.getTipoEstudio());
+        lblDet.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblDet.setForeground(COLOR_TEXTO_MUTED);
+
+        pInfoPaciente.add(lblNom);
+        pInfoPaciente.add(Box.createVerticalStrut(2));
+        pInfoPaciente.add(lblEsp);
+        pInfoPaciente.add(Box.createVerticalStrut(2));
+        pInfoPaciente.add(lblDet);
+        pFilaAvatar.add(pInfoPaciente, BorderLayout.CENTER);
+
+        pTop.add(pFilaAvatar);
+        pTop.add(Box.createVerticalStrut(8));
+
+        // Banner de Estado Diagnóstico
+        JPanel bannerEstado = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(241, 245, 249));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        bannerEstado.setOpaque(false);
+        bannerEstado.setBorder(new EmptyBorder(6, 12, 6, 12));
+
+        JLabel lblEstTexto = new JLabel("ESTADO: " + o.getEstado().toUpperCase());
+        lblEstTexto.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblEstTexto.setForeground("Completado".equalsIgnoreCase(o.getEstado()) ? new Color(22, 163, 74) :
+                                  "En Proceso".equalsIgnoreCase(o.getEstado()) ? new Color(2, 132, 199) : new Color(217, 119, 6));
+        lblEstTexto.setIcon(Iconos.crearIconoCheck(13, lblEstTexto.getForeground()));
+        lblEstTexto.setIconTextGap(6);
+        bannerEstado.add(lblEstTexto, BorderLayout.WEST);
+
+        JLabel lblPrio = new JLabel("Prioridad: " + o.getPrioridad().toUpperCase() + "  |  Fecha: " + o.getFechaSolicitudFormateada());
+        lblPrio.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblPrio.setForeground("Urgente".equalsIgnoreCase(o.getPrioridad()) || "Emergencia".equalsIgnoreCase(o.getPrioridad()) ? new Color(220, 38, 38) : COLOR_TEXTO_TITULO);
+        bannerEstado.add(lblPrio, BorderLayout.EAST);
+
+        pTop.add(bannerEstado);
+        card.add(pTop, BorderLayout.NORTH);
+
+        // 2. Centro con Scroll interno: Telemetría + Visor/Resultados + Conclusiones
+        ScrollablePanel pCentro = new ScrollablePanel();
+        pCentro.setOpaque(false);
+        pCentro.setLayout(new BoxLayout(pCentro, BoxLayout.Y_AXIS));
+
+        // Grid 4 Métricas (2x2)
+        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridMetricas.setOpaque(false);
+        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+
+        gridMetricas.add(crearWidgetLab("CATEGORÍA", o.getCategoria().contains("Imágenes") ? "Imágenes PACS" : "Lab. Clínico", "Especialidad",
+                o.getCategoria().contains("Imágenes") ? new Color(147, 51, 234) : COLOR_AZUL_PRIMARIO));
+        gridMetricas.add(crearWidgetLab("VETERINARIO SOLICITANTE", o.getVeterinarioSolicitante(), "Médico Titular", new Color(15, 118, 110)));
+        gridMetricas.add(crearWidgetLab("ESPECIALISTA RESPONSABLE", o.getResponsableProcesamiento(), "Procesamiento", new Color(100, 116, 139)));
+        gridMetricas.add(crearWidgetLab("FECHA RESULTADO", o.getFechaResultadoFormateada(), o.getEstado(),
+                "Completado".equalsIgnoreCase(o.getEstado()) ? new Color(22, 163, 74) : new Color(217, 119, 6)));
+
+        gridMetricas.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pCentro.add(gridMetricas);
+        pCentro.add(Box.createVerticalStrut(8));
+
+        // Cuadro de Estudio y Sospecha Clínica
+        JPanel pEstudio = crearCajaSeccion("ESTUDIO DIAGNÓSTICO Y MOTIVO DE CONSULTA",
+                "<b>Estudio:</b> <span style='color:#0f766e;'><b>" + o.getTipoEstudio() + "</b></span><br>" +
+                "<b>Motivo / Sospecha Clínica:</b> " + o.getMotivoSospecha());
+        pEstudio.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pCentro.add(pEstudio);
+        pCentro.add(Box.createVerticalStrut(8));
+
+        // Si es imagen, mostramos simulación del visor PACS oscuro
+        if (esImagen) {
+            JPanel pVisorRx = crearVisorDigitalRx(o);
+            pVisorRx.setAlignmentX(Component.LEFT_ALIGNMENT);
+            pCentro.add(pVisorRx);
+            pCentro.add(Box.createVerticalStrut(8));
+        }
+
+        // Valores analíticos cuantitativos
+        JPanel pValores = crearCajaSeccion("HALLAZGOS CUANTITATIVOS Y PARÁMETROS",
+                o.getResultadoValores() != null && !o.getResultadoValores().isEmpty() ? o.getResultadoValores() : "En espera de procesamiento en laboratorio.");
+        pValores.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pCentro.add(pValores);
+        pCentro.add(Box.createVerticalStrut(8));
+
+        // Informe e interpretación
+        JPanel pInforme = crearCajaSeccion("INFORME MÉDICO E INTERPRETACIÓN CLÍNICA",
+                "<b>Informe Detallado:</b><br>" + o.getInformeDetallado() + "<br><br>" +
+                "<b>Conclusión Diagnóstica:</b> <span style='color:#0f766e;'><b>" + o.getConclusionesRecomendaciones() + "</b></span>");
+        pInforme.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pCentro.add(pInforme);
+        pCentro.add(Box.createVerticalGlue());
+
+        JScrollPane spCentro = new JScrollPane(pCentro);
+        spCentro.setBorder(null);
+        spCentro.setOpaque(false);
+        spCentro.getViewport().setOpaque(false);
+        spCentro.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        spCentro.getVerticalScrollBar().setUnitIncrement(12);
+        card.add(spCentro, BorderLayout.CENTER);
+
+        // 3. Footer: Dock de Acciones Rápidas (1-clic)
+        JPanel pBotones = new JPanel(new GridLayout(2, 2, 8, 8));
+        pBotones.setOpaque(false);
+
+        JButton btnReporte = crearBotonAccion("Emitir Informe Oficial", true);
+        btnReporte.setIcon(Iconos.crearIconoFactura(13, Color.WHITE));
+        btnReporte.setIconTextGap(6);
+        btnReporte.addActionListener(e -> emitirInformeOficial(o));
+
+        JButton btnEditar = crearBotonAccion("Cargar / Editar Resultados", false);
+        btnEditar.setIcon(Iconos.crearIconoEditar(13, COLOR_AZUL_PRIMARIO));
+        btnEditar.setIconTextGap(6);
+        btnEditar.addActionListener(e -> abrirModalEditarOrden(o));
+
+        JButton btnEstado = crearBotonAccion("Cambiar Estado", false);
+        btnEstado.setIcon(Iconos.crearIconoCheck(13, new Color(22, 163, 74)));
+        btnEstado.setIconTextGap(6);
+        btnEstado.addActionListener(e -> cambiarEstadoOrden(o));
+
+        JButton btnNuevaMascota = crearBotonAccion("+ Nueva para Mascota", false);
+        btnNuevaMascota.setIcon(Iconos.crearIconoMicroscopio(13, new Color(100, 116, 139)));
+        btnNuevaMascota.setIconTextGap(6);
+        btnNuevaMascota.addActionListener(e -> {
+            Optional<Mascota> optM = repo.todasLasMascotas().stream()
+                    .filter(m -> m.getCodigo().equalsIgnoreCase(o.getCodigoMascota()))
+                    .findFirst();
+            abrirModalNuevaOrden(optM.orElse(null));
+        });
+
+        pBotones.add(btnReporte);
+        pBotones.add(btnEditar);
+        pBotones.add(btnEstado);
+        pBotones.add(btnNuevaMascota);
+
+        card.add(pBotones, BorderLayout.SOUTH);
+        return card;
+    }
+
+    private JPanel crearVisorDigitalRx(OrdenLaboratorio o) {
+        JPanel pVisor = new JPanel(new BorderLayout(0, 6)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // Fondo oscuro radiológico médico
+                g2.setColor(new Color(15, 23, 42));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(new Color(51, 65, 85));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+
+                // Cuadrícula y silueta médica
+                g2.setColor(new Color(30, 41, 59));
+                for (int x = 20; x < getWidth(); x += 30) g2.drawLine(x, 10, x, getHeight() - 10);
+                for (int y = 20; y < getHeight(); y += 25) g2.drawLine(10, y, getWidth() - 10, y);
+
+                g2.dispose();
+            }
+        };
+        pVisor.setPreferredSize(new Dimension(0, 125));
+        pVisor.setMaximumSize(new Dimension(Integer.MAX_VALUE, 125));
+        pVisor.setBorder(new EmptyBorder(8, 12, 8, 12));
+
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setOpaque(false);
+
+        JLabel lblDicom = new JLabel("VISOR DIGITAL PACS · " + o.getTipoEstudio().toUpperCase());
+        lblDicom.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblDicom.setForeground(new Color(148, 163, 184));
+        topBar.add(lblDicom, BorderLayout.WEST);
+
+        JLabel lblProy = new JLabel("Proyección: Lat-Lat / VD · Calibración 100%");
+        lblProy.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblProy.setForeground(new Color(45, 212, 191));
+        topBar.add(lblProy, BorderLayout.EAST);
+        pVisor.add(topBar, BorderLayout.NORTH);
+
+        JPanel centerInfo = new JPanel();
+        centerInfo.setOpaque(false);
+        centerInfo.setLayout(new BoxLayout(centerInfo, BoxLayout.Y_AXIS));
+
+        JLabel lblEstudio = new JLabel(o.getNombreMascota() + " · " + o.getEspecieRaza() + " (" + o.getIdOrden() + ")");
+        lblEstudio.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblEstudio.setForeground(Color.WHITE);
+
+        JLabel lblInfo = new JLabel("<html><span style='color:#94a3b8;'>Estudio radiográfico digitalizado de alta resolución. Contraste y densidad ósea/tejidos blandos en rango óptimo.</span></html>");
+        lblInfo.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblInfo.setForeground(new Color(203, 213, 225));
+
+        centerInfo.add(Box.createVerticalGlue());
+        centerInfo.add(lblEstudio);
+        centerInfo.add(Box.createVerticalStrut(4));
+        centerInfo.add(lblInfo);
+        centerInfo.add(Box.createVerticalGlue());
+        pVisor.add(centerInfo, BorderLayout.CENTER);
+
+        return pVisor;
+    }
+
+    private JPanel crearCajaSeccion(String titulo, String contenidoHtml) {
+        JPanel p = new JPanel(new BorderLayout(0, 4)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
         p.setOpaque(false);
-        p.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lbl.setForeground(new Color(71, 85, 105));
-        lbl.setHorizontalAlignment(SwingConstants.LEFT);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.add(lbl, BorderLayout.NORTH);
-        p.add(campo, BorderLayout.CENTER);
+        p.setBorder(new EmptyBorder(8, 10, 8, 10));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(COLOR_TEXTO_MUTED);
+
+        JLabel lblCont = new JLabel("<html><body style='width: 310px;'>" + contenidoHtml + "</body></html>");
+        lblCont.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblCont.setForeground(COLOR_TEXTO_TITULO);
+
+        p.add(lblTit, BorderLayout.NORTH);
+        p.add(lblCont, BorderLayout.CENTER);
         return p;
     }
 
-    private JPanel crearFilaArea(String etiqueta, JTextArea area, int altura) {
-        JPanel p = new JPanel(new BorderLayout(0, 2));
-        p.setOpaque(false);
-        p.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, altura + 22));
-        JLabel lbl = new JLabel(etiqueta, SwingConstants.LEFT);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        lbl.setForeground(new Color(71, 85, 105));
-        lbl.setHorizontalAlignment(SwingConstants.LEFT);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.add(lbl, BorderLayout.NORTH);
+    private JPanel crearWidgetLab(String titulo, String valor, String status, Color colorStatus) {
+        JPanel w = new JPanel(new BorderLayout(2, 2)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(250, 250, 250));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(COLOR_BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        w.setOpaque(false);
+        w.setBorder(new EmptyBorder(5, 8, 5, 8));
 
-        JScrollPane sp = new JScrollPane(area);
-        sp.setPreferredSize(new Dimension(0, altura));
-        sp.setBorder(null);
-        p.add(sp, BorderLayout.CENTER);
-        return p;
+        JLabel lblT = new JLabel(titulo);
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblT.setForeground(COLOR_TEXTO_MUTED);
+
+        JLabel lblV = new JLabel(valor);
+        lblV.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblV.setForeground(COLOR_TEXTO_TITULO);
+
+        JLabel lblS = new JLabel(status);
+        lblS.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblS.setForeground(colorStatus);
+
+        w.add(lblT, BorderLayout.NORTH);
+        w.add(lblV, BorderLayout.CENTER);
+        w.add(lblS, BorderLayout.SOUTH);
+
+        return w;
     }
 
-    private JTextField crearCampoTexto(boolean editable) {
-        JTextField tf = new JTextField();
-        tf.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        tf.setPreferredSize(new Dimension(0, 26));
-        tf.setEditable(editable);
-        tf.setBackground(editable ? Color.WHITE : new Color(241, 245, 249));
-        tf.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(COLOR_BORDE, 1),
-                new EmptyBorder(2, 6, 2, 6)
-        ));
-        return tf;
+    // ==========================================
+    // OPERACIONES Y NEGOCIO
+    // ==========================================
+    public void cargarMascota(Mascota m) {
+        if (m == null) return;
+        recargarDatos();
+
+        for (OrdenLaboratorio o : listaActual) {
+            if (m.getCodigo().equalsIgnoreCase(o.getCodigoMascota())) {
+                seleccionarOrden(o);
+                return;
+            }
+        }
+
+        abrirModalNuevaOrden(m);
     }
 
-    private JButton crearBotonWeb(String texto, boolean primario, Runnable accion) {
+    private void abrirModalNuevaOrden(Mascota mInicial) {
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        FormularioOrdenLaboratorioDialog dlg = new FormularioOrdenLaboratorioDialog(parent, null, mInicial, guardada -> {
+            recargarDatos();
+            seleccionarOrden(guardada);
+            JOptionPane.showMessageDialog(this,
+                    "Orden " + guardada.getIdOrden() + " generada con éxito para " + guardada.getNombreMascota() + ".\n" +
+                    "Estudio: " + guardada.getTipoEstudio(),
+                    "Solicitud Creada", JOptionPane.INFORMATION_MESSAGE);
+        });
+        dlg.setVisible(true);
+    }
+
+    private void abrirModalEditarOrden(OrdenLaboratorio o) {
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        FormularioOrdenLaboratorioDialog dlg = new FormularioOrdenLaboratorioDialog(parent, o, null, guardada -> {
+            recargarDatos();
+            seleccionarOrden(guardada);
+            JOptionPane.showMessageDialog(this,
+                    "Resultados e informe de " + guardada.getIdOrden() + " actualizados con éxito.",
+                    "Estudio Actualizado", JOptionPane.INFORMATION_MESSAGE);
+        });
+        dlg.setVisible(true);
+    }
+
+    private void cambiarEstadoOrden(OrdenLaboratorio o) {
+        String[] opciones = {"Completado", "En Proceso", "Solicitado"};
+        int sel = JOptionPane.showOptionDialog(
+                this,
+                "Seleccione el estado de procesamiento para el estudio " + o.getIdOrden() + ":",
+                "Actualizar Estado de Estudio",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                Iconos.crearIconoMicroscopio(24, COLOR_AZUL_PRIMARIO),
+                opciones,
+                o.getEstado()
+        );
+
+        if (sel >= 0 && sel < opciones.length) {
+            String nuevoEstado = opciones[sel];
+            o.setEstado(nuevoEstado);
+            if ("Completado".equalsIgnoreCase(nuevoEstado) && o.getFechaResultado() == null) {
+                o.setFechaResultado(LocalDate.now());
+            }
+            repo.guardarOrdenLaboratorio(o);
+            recargarDatos();
+            seleccionarOrden(o);
+            JOptionPane.showMessageDialog(this,
+                    "Estado actualizado a: " + nuevoEstado,
+                    "Estado Modificado", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void emitirInformeOficial(OrdenLaboratorio o) {
+        String[][] datos = new String[][]{
+                {"1", "Estudio Diagnóstico Solicitado", o.getTipoEstudio(), "Categoría: " + o.getCategoria() + " · Prioridad: " + o.getPrioridad()},
+                {"2", "Veterinario Tratante Solicitante", o.getVeterinarioSolicitante(), "Motivo / Sospecha: " + o.getMotivoSospecha()},
+                {"3", "Valores Cuantitativos / Parámetros", o.getResultadoValores(), "Procesado por: " + o.getResponsableProcesamiento()},
+                {"4", "Informe Descriptivo e Interpretación", o.getInformeDetallado(), "Fecha Entrega: " + o.getFechaResultadoFormateada()},
+                {"5", "Conclusión y Diagnóstico Definitivo", o.getConclusionesRecomendaciones(), "Dictamen médico validado"}
+        };
+
+        Ui.mostrarVisorReporte(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "INFORME OFICIAL DE LABORATORIO E IMÁGENES DIAGNÓSTICAS",
+                "Paciente: " + o.getNombreMascota() + " (" + o.getEspecieRaza() + ") | Tutor: " + o.getNombreTutor() + " | Fecha Solicitud: " + o.getFechaSolicitudFormateada(),
+                "Estudio: " + o.getTipoEstudio() + " | Estado: " + o.getEstado() + " | Responsable: " + o.getResponsableProcesamiento(),
+                new String[]{"Ítem", "Parámetro / Concepto", "Detalle de Resultados", "Validación"},
+                datos,
+                "CENTRO DIAGNÓSTICO INTEGRAL · HAPPY PETS HOSPITAL VETERINARIO",
+                "InformeDiagnostico_" + o.getNombreMascota()
+        );
+    }
+
+    public void recargarDatos() {
+        filtrarDatos();
+    }
+
+    private void filtrarDatos() {
+        List<OrdenLaboratorio> todas = repo.getOrdenesLaboratorio();
+        String fCat = cbFiltroCategoria != null ? (String) cbFiltroCategoria.getSelectedItem() : "Todas";
+        String fEst = cbFiltroEstado != null ? (String) cbFiltroEstado.getSelectedItem() : "Todos";
+        String q = (txtBuscar != null && txtBuscar.getText() != null) ? txtBuscar.getText().trim().toLowerCase() : "";
+
+        listaActual = todas.stream().filter(o -> {
+            if (fCat != null && !fCat.startsWith("Todas") && !o.getCategoria().equalsIgnoreCase(fCat)) return false;
+            if (fEst != null && !fEst.startsWith("Todos") && !o.getEstado().equalsIgnoreCase(fEst)) return false;
+            if (!q.isEmpty()) {
+                boolean match = o.getIdOrden().toLowerCase().contains(q) ||
+                                o.getNombreMascota().toLowerCase().contains(q) ||
+                                o.getNombreTutor().toLowerCase().contains(q) ||
+                                o.getTipoEstudio().toLowerCase().contains(q) ||
+                                o.getVeterinarioSolicitante().toLowerCase().contains(q);
+                if (!match) return false;
+            }
+            return true;
+        }).toList();
+
+        modeloHistorial.setRowCount(0);
+        for (OrdenLaboratorio o : listaActual) {
+            modeloHistorial.addRow(new Object[]{
+                    o,
+                    o,
+                    o,
+                    o,
+                    o.getPrioridad(),
+                    o.getEstado()
+            });
+        }
+
+        lblContadorHistorial.setText(listaActual.size() + " estudios registrados en la base diagnóstica");
+
+        // KPIs
+        long labs = todas.stream().filter(o -> o.getCategoria().toLowerCase().contains("laboratorio")).count();
+        long imgs = todas.stream().filter(o -> o.getCategoria().toLowerCase().contains("imágenes")).count();
+        long compl = todas.stream().filter(o -> "Completado".equalsIgnoreCase(o.getEstado())).count();
+
+        lblKpiTotalOrdenes.setText(String.valueOf(todas.size()));
+        lblKpiLaboratorio.setText(String.valueOf(labs));
+        lblKpiImagenes.setText(String.valueOf(imgs));
+        lblKpiCompletados.setText(String.valueOf(compl));
+
+        if (ordenSeleccionada != null) {
+            seleccionarOrden(ordenSeleccionada);
+        } else if (!listaActual.isEmpty()) {
+            seleccionarFila(0);
+        } else {
+            ordenSeleccionada = null;
+            actualizarPanelDetalle();
+        }
+    }
+
+    private void seleccionarOrden(OrdenLaboratorio o) {
+        if (o == null) return;
+        for (int i = 0; i < listaActual.size(); i++) {
+            if (listaActual.get(i).getIdOrden().equalsIgnoreCase(o.getIdOrden())) {
+                seleccionarFila(i);
+                return;
+            }
+        }
+        actualizarPanelDetalle();
+    }
+
+    private void seleccionarFila(int fila) {
+        if (fila >= 0 && fila < tablaHistorial.getRowCount()) {
+            tablaHistorial.setRowSelectionInterval(fila, fila);
+            tablaHistorial.scrollRectToVisible(tablaHistorial.getCellRect(fila, 0, true));
+            ordenSeleccionada = listaActual.get(fila);
+        } else {
+            ordenSeleccionada = null;
+        }
+        actualizarPanelDetalle();
+    }
+
+    private JButton crearBotonAccion(String texto, boolean primario) {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (primario) {
+                boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
+                if (esPrimario) {
                     g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                if (!primario) {
+                if (!esPrimario) {
                     g2.setColor(COLOR_BORDE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
@@ -689,190 +1007,258 @@ public class VistaLaboratorioImagenesPanel extends JPanel {
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
-                return new Dimension(d.width + 16, 28);
+                return new Dimension(d.width + 12, 30);
             }
         };
+        btn.putClientProperty("primario", primario);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-        btn.addActionListener(e -> accion.run());
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
         return btn;
     }
 
-    public void recargarDatos() {
-        if (cbPacienteSol.getItemCount() == 0) {
-            for (Mascota m : repo.todasLasMascotas()) {
-                cbPacienteSol.addItem(new PacienteItem(m));
-            }
-            autocompletarTutorSol();
-        }
-
-        listaActual = repo.getOrdenesLaboratorio();
-        modeloHistorial.setRowCount(0);
-
-        for (OrdenLaboratorio o : listaActual) {
-            modeloHistorial.addRow(new Object[]{
-                    o.getIdOrden(),
-                    o.getFechaSolicitudFormateada(),
-                    o.getNombreMascota(),
-                    o.getTipoEstudio(),
-                    o.getCategoria(),
-                    o.getPrioridad(),
-                    o.getEstado()
-            });
-        }
-
-        lblContadorHistorial.setText(listaActual.size() + " órdenes procesadas");
-
-        // KPIs
-        long labs = listaActual.stream().filter(o -> o.getCategoria().contains("Laboratorio")).count();
-        long imgs = listaActual.stream().filter(o -> o.getCategoria().contains("Imágenes")).count();
-        long compl = listaActual.stream().filter(o -> "Completado".equalsIgnoreCase(o.getEstado())).count();
-
-        lblKpiTotalOrdenes.setText(String.valueOf(listaActual.size()));
-        lblKpiLaboratorio.setText(String.valueOf(labs));
-        lblKpiImagenes.setText(String.valueOf(imgs));
-        lblKpiCompletados.setText(String.valueOf(compl));
+    // ==========================================
+    // INNER CLASSES Y RENDERIZADORES
+    // ==========================================
+    private static class ScrollablePanel extends JPanel implements Scrollable {
+        private static final long serialVersionUID = 1L;
+        public ScrollablePanel() { super(); }
+        public ScrollablePanel(java.awt.LayoutManager layout) { super(layout); }
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) { return 48; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 
-    private void autocompletarTutorSol() {
-        PacienteItem item = (PacienteItem) cbPacienteSol.getSelectedItem();
-        if (item != null && item.mascota != null) {
-            repo.getClienteDeMascota(item.mascota.getCodigo()).ifPresent(c -> {
-                txtTutorSol.setText(c.getNombreCompleto() + " (" + c.getTelefonoPrincipal() + ")");
-            });
-        }
-    }
-
-    private void generarNuevaSolicitud() {
-        PacienteItem pi = (PacienteItem) cbPacienteSol.getSelectedItem();
-        if (pi == null || pi.mascota == null) return;
-        Mascota m = pi.mascota;
-        Optional<Cliente> optC = repo.getClienteDeMascota(m.getCodigo());
-
-        OrdenLaboratorio o = new OrdenLaboratorio(
-                null,
-                (String) cbCategoriaSol.getSelectedItem(),
-                (String) cbTipoEstudioSol.getSelectedItem(),
-                m.getCodigo(),
-                m.getNombre(),
-                m.getEspecie() + " · " + m.getRaza(),
-                optC.map(Cliente::getNombreCompleto).orElse("Tutor"),
-                optC.map(Cliente::getTelefonoPrincipal).orElse(""),
-                LocalDate.now(),
-                (String) cbPrioridadSol.getSelectedItem(),
-                txtVetSol.getText().trim(),
-                txtMotivoSol.getText().trim(),
-                null,
-                "Lab. Central Veterinario",
-                "Muestra biológica ingresada al analizador automatizado. Pendiente de emisión.",
-                "Pendiente de informe por el especialista.",
-                "En evaluación clínica.",
-                "En Proceso"
-        );
-
-        repo.guardarOrdenLaboratorio(o);
-        JOptionPane.showMessageDialog(this,
-                "Orden diagnóstica " + o.getIdOrden() + " generada exitosamente para " + m.getNombre() + " (" + o.getTipoEstudio() + ").",
-                "Solicitud Creada", JOptionPane.INFORMATION_MESSAGE);
-
-        recargarDatos();
-    }
-
-    private void cargarOrdenSeleccionada() {
-        int row = tablaHistorial.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) return;
-        OrdenLaboratorio o = listaActual.get(row);
-
-        txtPacienteRes.setText(o.getNombreMascota() + " (" + o.getEspecieRaza() + ")");
-        txtEstudioRes.setText(o.getTipoEstudio());
-        txtResponsableRes.setText(o.getResponsableProcesamiento());
-        cbEstadoRes.setSelectedItem(o.getEstado());
-        txtValoresRes.setText(o.getResultadoValores());
-        txtInterpretacionRes.setText(o.getConclusionesRecomendaciones());
-
-        if (o.getCategoria().contains("Imágenes")) {
-            txtEstudioImg.setText(o.getNombreMascota() + " · " + o.getTipoEstudio());
-            txtInformeImg.setText(o.getInformeDetallado() != null && !o.getInformeDetallado().isEmpty() ? o.getInformeDetallado() : o.getResultadoValores());
-        }
-    }
-
-    private void guardarResultadoActual() {
-        int row = tablaHistorial.getSelectedRow();
-        if (row >= 0 && row < listaActual.size()) {
-            OrdenLaboratorio o = listaActual.get(row);
-            o.setResponsableProcesamiento(txtResponsableRes.getText().trim());
-            o.setResultadoValores(txtValoresRes.getText().trim());
-            o.setConclusionesRecomendaciones(txtInterpretacionRes.getText().trim());
-            o.setEstado((String) cbEstadoRes.getSelectedItem());
-            o.setFechaResultado(LocalDate.now());
-            recargarDatos();
-        }
-
-        JOptionPane.showMessageDialog(this,
-                "Resultado diagnóstico y valores analíticos almacenados correctamente en el expediente clínico.",
-                "Resultado Guardado", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void verReporteDiagnosticoCompleto() {
-        int row = tablaHistorial.getSelectedRow();
-        if (row < 0 || row >= listaActual.size()) {
-            JOptionPane.showMessageDialog(this, "Seleccione un estudio del historial para visualizar su reporte completo.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        OrdenLaboratorio o = listaActual.get(row);
-
-        String[][] datos = new String[][]{
-            {"1", "Examen Solicitado", o.getTipoEstudio(), o.getCategoria(), o.getPrioridad()},
-            {"2", "Resultados y Valores", o.getResultadoValores(), "Especialista: " + o.getResponsableProcesamiento(), o.getEstado()},
-            {"3", "Conclusiones Médicas", o.getConclusionesRecomendaciones(), "Fecha: " + o.getFechaResultadoFormateada(), "Validado"}
-        };
-
-        Ui.mostrarVisorReporte(
-            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
-            "INFORME DIAGNÓSTICO CLÍNICO Y LABORATORIO",
-            "Paciente: " + o.getNombreMascota() + " (" + o.getEspecieRaza() + ") | Tutor: " + o.getNombreTutor(),
-            "Código Orden: " + o.getIdOrden() + " | Solicitante: " + o.getVeterinarioSolicitante(),
-            new String[]{"N°", "Sección", "Hallazgos / Parámetros", "Responsable / Control", "Estado"},
-            datos,
-            "INFORME DIAGNÓSTICO CERTIFICADO · HAPPY PETS",
-            "InformeLab_" + o.getIdOrden()
-        );
-    }
-
-    private static class PacienteItem {
-        final Mascota mascota;
-        PacienteItem(Mascota mascota) { this.mascota = mascota; }
-        @Override
-        public String toString() {
-            return mascota != null ? mascota.getCodigo() + " - " + mascota.getNombre() + " (" + mascota.getEspecie() + " · " + mascota.getRaza() + ")" : "-";
-        }
-    }
-
-    private static class BadgeEstadoLabRenderer extends DefaultTableCellRenderer {
+    private static class CodigoFechaOrdenRenderer extends DefaultTableCellRenderer {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            lbl.setHorizontalAlignment(SwingConstants.CENTER);
-            lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
-            String st = String.valueOf(value);
-            if (!isSelected) {
-                if ("Completado".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(22, 163, 74));
-                } else if ("En Proceso".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(2, 132, 199));
-                } else if ("Solicitado".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(217, 119, 6));
-                } else if ("Muestra insuficiente".equalsIgnoreCase(st)) {
-                    lbl.setForeground(new Color(220, 38, 38));
-                }
+            JPanel p = new JPanel(new BorderLayout(0, 2));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 8, 6, 6));
+
+            if (value instanceof OrdenLaboratorio o) {
+                JLabel lblCod = new JLabel(o.getIdOrden());
+                lblCod.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblCod.setForeground(isSelected ? table.getSelectionForeground() : COLOR_AZUL_PRIMARIO);
+
+                JLabel lblFec = new JLabel(o.getFechaSolicitudFormateada());
+                lblFec.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblFec.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                p.add(lblCod, BorderLayout.NORTH);
+                p.add(lblFec, BorderLayout.CENTER);
             }
-            return lbl;
+            return p;
+        }
+    }
+
+    private static class PacienteOrdenRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new BorderLayout(8, 0));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+            if (value instanceof OrdenLaboratorio o) {
+                boolean esImg = o.getCategoria().contains("Imágenes");
+                JPanel pAvWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
+                pAvWrap.setOpaque(false);
+                JLabel lblAv = new JLabel() {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int w = getWidth();
+                        int h = getHeight();
+                        int d = Math.min(w, h) - 2;
+                        int x = (w - d) / 2;
+                        int y = (h - d) / 2;
+
+                        g2.setColor(esImg ? new Color(243, 232, 255) : new Color(224, 242, 254));
+                        g2.fillOval(x, y, d, d);
+                        g2.setColor(esImg ? new Color(147, 51, 234) : COLOR_AZUL_PRIMARIO);
+                        g2.drawOval(x, y, d, d);
+
+                        String ini = o.getNombreMascota().substring(0, 1).toUpperCase();
+                        g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                        g2.setColor(esImg ? new Color(147, 51, 234) : COLOR_AZUL_PRIMARIO);
+                        java.awt.FontMetrics fm = g2.getFontMetrics();
+                        int tx = (w - fm.stringWidth(ini)) / 2;
+                        int ty = (h + fm.getAscent() - fm.getDescent()) / 2;
+                        g2.drawString(ini, tx, ty);
+                        g2.dispose();
+                    }
+                };
+                lblAv.setPreferredSize(new Dimension(30, 30));
+                pAvWrap.add(lblAv);
+
+                JPanel pDat = new JPanel(new BorderLayout(0, 2));
+                pDat.setOpaque(false);
+                JLabel lblNom = new JLabel(o.getNombreMascota());
+                lblNom.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblNom.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_TITULO);
+
+                JLabel lblEsp = new JLabel(o.getEspecieRaza());
+                lblEsp.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblEsp.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                pDat.add(lblNom, BorderLayout.NORTH);
+                pDat.add(lblEsp, BorderLayout.CENTER);
+
+                p.add(pAvWrap, BorderLayout.WEST);
+                p.add(pDat, BorderLayout.CENTER);
+            }
+            return p;
+        }
+    }
+
+    private static class TutorOrdenRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new BorderLayout(0, 2));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+            if (value instanceof OrdenLaboratorio o) {
+                JLabel lblTutor = new JLabel(o.getNombreTutor());
+                lblTutor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblTutor.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_TITULO);
+
+                JLabel lblTel = new JLabel(o.getTelefonoTutor());
+                lblTel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblTel.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                p.add(lblTutor, BorderLayout.NORTH);
+                p.add(lblTel, BorderLayout.CENTER);
+            }
+            return p;
+        }
+    }
+
+    private static class EstudioOrdenRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new BorderLayout(0, 2));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            p.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+            if (value instanceof OrdenLaboratorio o) {
+                JLabel lblEst = new JLabel(o.getTipoEstudio());
+                lblEst.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblEst.setForeground(isSelected ? table.getSelectionForeground() : new Color(15, 118, 110));
+
+                JLabel lblCat = new JLabel(o.getCategoria() + " · " + o.getVeterinarioSolicitante());
+                lblCat.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                lblCat.setForeground(isSelected ? table.getSelectionForeground() : COLOR_TEXTO_MUTED);
+
+                p.add(lblEst, BorderLayout.NORTH);
+                p.add(lblCat, BorderLayout.CENTER);
+            }
+            return p;
+        }
+    }
+
+    private static class BadgePrioridadRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+
+            String st = String.valueOf(value);
+            Color bg;
+            Color fg;
+            if ("Urgente".equalsIgnoreCase(st) || "Emergencia".equalsIgnoreCase(st)) {
+                bg = new Color(254, 226, 226);
+                fg = new Color(220, 38, 38);
+            } else {
+                bg = new Color(241, 245, 249);
+                fg = new Color(100, 116, 139);
+            }
+
+            JLabel badge = new JLabel(st, SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(bg);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                    g2.setColor(fg);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                    super.paintComponent(g2);
+                    g2.dispose();
+                }
+            };
+            badge.setOpaque(false);
+            badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            badge.setForeground(fg);
+            badge.setBorder(new EmptyBorder(3, 8, 3, 8));
+
+            p.add(badge);
+            return p;
+        }
+    }
+
+    private static class BadgeEstadoOrdenRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+            p.setOpaque(true);
+            p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+
+            String st = String.valueOf(value);
+            Color bg;
+            Color fg;
+            if ("Completado".equalsIgnoreCase(st)) {
+                bg = new Color(220, 252, 231);
+                fg = new Color(22, 163, 74);
+            } else if ("En Proceso".equalsIgnoreCase(st)) {
+                bg = new Color(224, 242, 254);
+                fg = new Color(2, 132, 199);
+            } else {
+                bg = new Color(254, 243, 199);
+                fg = new Color(217, 119, 6);
+            }
+
+            JLabel badge = new JLabel(st, SwingConstants.CENTER) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(bg);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                    g2.setColor(fg);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                    super.paintComponent(g2);
+                    g2.dispose();
+                }
+            };
+            badge.setOpaque(false);
+            badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            badge.setForeground(fg);
+            badge.setBorder(new EmptyBorder(3, 8, 3, 8));
+
+            p.add(badge);
+            return p;
         }
     }
 }
