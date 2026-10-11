@@ -443,6 +443,39 @@ public class FormularioReservaCitaDialog extends JDialog {
         return btn;
     }
 
+    public void preseleccionarDatos(LocalDate fecha, String hora, String espacioODoctor) {
+        if (fecha != null && txtFecha != null) {
+            txtFecha.setText(fecha.format(Cita.FECHA_FORMATTER));
+        }
+        if (hora != null && cbHora != null) {
+            for (int i = 0; i < cbHora.getItemCount(); i++) {
+                if (cbHora.getItemAt(i).startsWith(hora)) {
+                    cbHora.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        if (espacioODoctor != null && cbDoctor != null) {
+            for (int i = 0; i < cbDoctor.getItemCount(); i++) {
+                String item = cbDoctor.getItemAt(i);
+                if (espacioODoctor.contains("Mendoza") && item.contains("Mendoza")) {
+                    cbDoctor.setSelectedIndex(i);
+                    break;
+                } else if (espacioODoctor.contains("Morales") && item.contains("Morales")) {
+                    cbDoctor.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        if (espacioODoctor != null && cbServicio != null) {
+            if (espacioODoctor.contains("Quirófano") || espacioODoctor.contains("Cirugía")) {
+                cbServicio.setSelectedItem("Cirugía / Quirófano");
+            } else if (espacioODoctor.contains("Grooming") || espacioODoctor.contains("Peluquería")) {
+                cbServicio.setSelectedItem("Grooming / Peluquería");
+            }
+        }
+    }
+
     public boolean isGuardado() {
         return guardado;
     }
