@@ -11,16 +11,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.awt.geom.Ellipse2D;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,8 +29,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -40,19 +44,12 @@ import happypets.ui.Ui;
 
 /**
  * Submódulo 5.1: Catálogo de Productos y Fármacos.
- * Basado en el wireframe oficial (Pág. 1) y especificaciones ERP Happy Pets:
- * - Registro maestro de medicamentos, biológicos, alimentos clínicos y material quirúrgico.
- * - Validación de venta bajo receta médica retenida y cadena de frío (2°C - 8°C).
- * - Control de márgenes comerciales (precio de compra vs venta).
- * - Emisión de fichas técnicas oficiales y etiquetas de dispensación farmacéutica.
+ * Arquitectura Master-Detail (58% / 42%) - Opción A Recomendada:
+ * - Master Table: Catálogo maestro, stock en tiempo real, alertas de reposición, filtros por categoría.
+ * - Live Product Hub: Telemetría 2x2, especificaciones farmacológicas, cadena de frío, trazabilidad y acciones 1-click.
  */
 public class VistaCatalogoProductosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -62,59 +59,63 @@ public class VistaCatalogoProductosPanel extends JPanel {
     private JLabel lblKpiBajoStock;
     private JLabel lblKpiRecetaRetenida;
 
-    // Formulario de Producto
-    private JTextField txtCodigo;
-    private JTextField txtNombre;
-    private JComboBox<String> cbCategoria;
-    private JTextField txtPrincipioActivo;
-    private JTextField txtPresentacion;
-    private JComboBox<String> cbEspecie;
-    private JTextField txtPrecioCosto;
-    private JTextField txtPrecioVenta;
-    private JTextField txtStockActual;
-    private JTextField txtStockMinimo;
-    private JCheckBox chkReceta;
-    private JCheckBox chkCadenaFrio;
-    private JTextField txtProveedor;
-
-    // Tabla y Filtros
+    // Master Table & Filtros
     private JTextField txtBuscar;
-    private JComboBox<String> cbFiltroCategoria;
+    private String categoriaFiltroSeleccionada = "TODOS";
+    private JPanel panelPillsCategoria;
     private JTable tablaProductos;
     private DefaultTableModel modeloProductos;
-    private JLabel lblContadorProductos;
-    private List<ProductoFarmacia> listaActual;
+    private List<ProductoFarmacia> listaProductosFiltrada = new ArrayList<>();
+    private ProductoFarmacia productoSeleccionado;
+
+    // Live Product Hub Componentes
+    private JPanel panelHubDetalle;
+    private JPanel panelHubVacio;
+    private JPanel contenedorPadre;
+    private JLabel lblHubAvatar;
+    private JLabel lblHubNombre;
+    private JLabel lblHubCodigo;
+    private JLabel lblHubBadgeCategoria;
+    private JLabel lblHubBadgeEstado;
+
+    // Telemetría 2x2
+    private JLabel lblHubStockActual;
+    private JLabel lblHubPrecioVenta;
+    private JLabel lblHubPrecioCosto;
+    private JLabel lblHubMargen;
+
+    // Secciones descriptivas
+    private JLabel lblHubPrincipioActivo;
+    private JLabel lblHubPresentacion;
+    private JLabel lblHubEspecies;
+    private JLabel lblHubChipReceta;
+    private JLabel lblHubChipCadenaFrio;
+    private JLabel lblHubLoteVigente;
+    private JLabel lblHubFechaCaducidad;
+    private JLabel lblHubProveedor;
+    private JTextArea txtHubPosologiaIndicacion;
 
     public VistaCatalogoProductosPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        JPanel panelContenido = new JPanel();
+        panelContenido.setOpaque(false);
+        panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
+        panelContenido.setBorder(new EmptyBorder(12, 18, 14, 18));
 
-        // 1. Cabecera
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(8));
+        // 1. Cabecera Principal
+        panelContenido.add(crearCabeceraVista());
+        panelContenido.add(Box.createVerticalStrut(10));
 
         // 2. Fila de KPIs
-        contenido.add(crearFilaKpis());
-        contenido.add(Box.createVerticalStrut(10));
+        panelContenido.add(crearFilaKpis());
+        panelContenido.add(Box.createVerticalStrut(12));
 
-        // 3. Doble Columna: Formulario y Catálogo
-        contenido.add(crearDobleColumna());
+        // 3. Contenedor Master-Detail (58% / 42%)
+        panelContenido.add(crearSplitMasterDetail());
 
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.add(contenido, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(wrapper);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        add(scroll, BorderLayout.CENTER);
+        add(panelContenido, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -129,11 +130,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JLabel titulo = new JLabel("Catálogo de Productos y Fármacos Veterinarios");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        titulo.setForeground(COLOR_TEXTO_TITULO);
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel subtitulo = new JLabel("Módulo 5.1 · Registro maestro de medicamentos, biológicos, alimentos clínicos, insumos y control de precios");
+        JLabel subtitulo = new JLabel("Módulo 5.1 · Registro maestro de medicamentos, biológicos, insumos clínicos y control de precios");
         subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        subtitulo.setForeground(COLOR_TEXTO_MUTED);
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
         izq.add(titulo);
         izq.add(Box.createVerticalStrut(2));
@@ -143,39 +144,49 @@ public class VistaCatalogoProductosPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
-        JLabel badgeFarmacia = new JLabel(" Regencia Farmacéutica Activa · Happy Pets ", SwingConstants.CENTER);
-        badgeFarmacia.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeFarmacia.setForeground(Ui.TURQUESA_PROFUNDO);
-        badgeFarmacia.setOpaque(true);
-        badgeFarmacia.setBackground(Ui.TURQUESA_SUAVE);
-        badgeFarmacia.setBorder(BorderFactory.createCompoundBorder(
+        JLabel badgeRegencia = new JLabel("Regencia Farmacéutica Activa · Happy Pets", SwingConstants.CENTER);
+        badgeRegencia.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        badgeRegencia.setForeground(Ui.TURQUESA_PROFUNDO);
+        badgeRegencia.setOpaque(true);
+        badgeRegencia.setBackground(Ui.TURQUESA_SUAVE);
+        badgeRegencia.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
-        der.add(badgeFarmacia);
+        der.add(badgeRegencia);
+
+        JButton btnNuevo = crearBotonAccion("Nuevo Producto", Iconos.crearIconoPildora(14, Color.WHITE), true);
+        btnNuevo.addActionListener(e -> abrirModalNuevoProducto());
+        btnNuevo.setPreferredSize(new Dimension(165, 32));
+        der.add(btnNuevo);
+
+        JButton btnRefrescar = crearBotonAccion("Actualizar", false);
+        btnRefrescar.addActionListener(e -> recargarDatos());
+        btnRefrescar.setPreferredSize(new Dimension(100, 32));
+        der.add(btnRefrescar);
 
         cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
     private JPanel crearFilaKpis() {
-        JPanel kpis = new JPanel(new GridLayout(1, 4, 10, 0));
-        kpis.setOpaque(false);
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
 
         lblKpiTotalProductos = new JLabel("0", SwingConstants.LEFT);
-        lblKpiValorInventario = new JLabel("S/. 0", SwingConstants.LEFT);
+        lblKpiValorInventario = new JLabel("S/. 0.00", SwingConstants.LEFT);
         lblKpiBajoStock = new JLabel("0", SwingConstants.LEFT);
         lblKpiRecetaRetenida = new JLabel("0", SwingConstants.LEFT);
 
-        kpis.add(crearTarjetaKpi("Productos Registrados", lblKpiTotalProductos, "Catálogo farmacéutico activo", new Color(14, 165, 233), Iconos.crearIconoPildora(18, new Color(14, 165, 233))));
-        kpis.add(crearTarjetaKpi("Valorización Stock (PVP)", lblKpiValorInventario, "Total inventario disponible", new Color(16, 185, 129), Iconos.crearIconoFactura(16, new Color(16, 185, 129))));
-        kpis.add(crearTarjetaKpi("Alerta de Reposición", lblKpiBajoStock, "Stock menor al mínimo", new Color(245, 158, 11), Iconos.crearIconoAlertaMerma(16, new Color(245, 158, 11))));
-        kpis.add(crearTarjetaKpi("Fármacos Controlados", lblKpiRecetaRetenida, "Venta bajo receta médica", new Color(147, 51, 234), Iconos.crearIconoDocumento(16, new Color(147, 51, 234))));
+        fila.add(crearTarjetaKpi("Productos Registrados", lblKpiTotalProductos, "Catálogo farmacéutico activo", new Color(14, 165, 233), Iconos.crearIconoPildora(18, new Color(14, 165, 233))));
+        fila.add(crearTarjetaKpi("Valorización Stock (PVP)", lblKpiValorInventario, "Inventario disponible valorizado", new Color(16, 185, 129), Iconos.crearIconoFactura(16, new Color(16, 185, 129))));
+        fila.add(crearTarjetaKpi("Alerta de Reposición", lblKpiBajoStock, "Stock menor o igual al mínimo", new Color(245, 158, 11), Iconos.crearIconoAlertaMerma(16, new Color(245, 158, 11))));
+        fila.add(crearTarjetaKpi("Fármacos Controlados", lblKpiRecetaRetenida, "Venta bajo receta médica", new Color(147, 51, 234), Iconos.crearIconoDocumento(16, new Color(147, 51, 234))));
 
-        return kpis;
+        return fila;
     }
 
-    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color colorAcento, Icon icono) {
+    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color acento, Icon icono) {
         JPanel card = new JPanel(new BorderLayout(8, 4)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -184,7 +195,7 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
+                g2.setColor(Ui.BORDE_SUAVE);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
             }
@@ -198,14 +209,14 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        t.setForeground(COLOR_TEXTO_MUTED);
+        t.setForeground(Ui.TEXTO_MUTED);
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblValor.setForeground(COLOR_TEXTO_TITULO);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
         JLabel sub = new JLabel(subtitulo);
         sub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        sub.setForeground(COLOR_TEXTO_MUTED);
+        sub.setForeground(Ui.TEXTO_MUTED);
 
         izq.add(t);
         izq.add(Box.createVerticalStrut(2));
@@ -224,247 +235,23 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return card;
     }
 
-    private JPanel crearDobleColumna() {
-        JPanel fila = new JPanel(new BorderLayout(14, 0));
-        fila.setOpaque(false);
+    private JPanel crearSplitMasterDetail() {
+        JPanel split = new JPanel(new BorderLayout(14, 0));
+        split.setOpaque(false);
 
-        // Columna Izquierda: Formulario
-        JPanel colIzquierda = crearPanelFormularioProducto();
-        colIzquierda.setPreferredSize(new Dimension(420, 560));
-        fila.add(colIzquierda, BorderLayout.WEST);
+        // Master Panel (58%)
+        JPanel panelMaster = crearPanelMaster();
+        split.add(panelMaster, BorderLayout.CENTER);
 
-        // Columna Derecha: Catálogo y Búsqueda
-        JPanel colDerecha = crearPanelCatalogoTabla();
-        fila.add(colDerecha, BorderLayout.CENTER);
+        // Detail Live Hub (42%)
+        JPanel panelDetail = crearPanelDetail();
+        panelDetail.setPreferredSize(new Dimension(460, 560));
+        split.add(panelDetail, BorderLayout.EAST);
 
-        return fila;
+        return split;
     }
 
-    private JPanel crearPanelFormularioProducto() {
-        JPanel card = new JPanel(new BorderLayout()) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-
-        // Título del formulario
-        JLabel lblTitulo = new JLabel("Formulario de Producto / Fármaco");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTitulo.setForeground(COLOR_TEXTO_TITULO);
-        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(lblTitulo);
-
-        JLabel lblSub = new JLabel("Definición de atributos clínicos, presentación y valores comerciales");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(lblSub);
-        form.add(Box.createVerticalStrut(10));
-
-        // Código y Categoría en Grid
-        JPanel gridCodCat = new JPanel(new GridLayout(1, 2, 8, 0));
-        gridCodCat.setOpaque(false);
-        gridCodCat.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridCodCat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pCod = new JPanel();
-        pCod.setOpaque(false);
-        pCod.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCod.setLayout(new BoxLayout(pCod, BoxLayout.Y_AXIS));
-        pCod.add(crearEtiquetaCampo("Código Producto:"));
-        txtCodigo = new JTextField();
-        estilizarControl(txtCodigo);
-        pCod.add(txtCodigo);
-        gridCodCat.add(pCod);
-
-        JPanel pCat = new JPanel();
-        pCat.setOpaque(false);
-        pCat.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCat.setLayout(new BoxLayout(pCat, BoxLayout.Y_AXIS));
-        pCat.add(crearEtiquetaCampo("Categoría:"));
-        cbCategoria = new JComboBox<>(new String[]{
-                "Antiparasitario",
-                "Antibiótico",
-                "Analgésico / AINE",
-                "Vacuna / Biológico",
-                "Alimento Clínico",
-                "Anestésico / Controlado",
-                "Material Quirúrgico / Insumo"
-        });
-        estilizarControl(cbCategoria);
-        pCat.add(cbCategoria);
-        gridCodCat.add(pCat);
-
-        form.add(gridCodCat);
-        form.add(Box.createVerticalStrut(6));
-
-        // Nombre Comercial
-        form.add(crearEtiquetaCampo("Nombre Comercial del Producto:"));
-        txtNombre = new JTextField();
-        estilizarControl(txtNombre);
-        form.add(txtNombre);
-        form.add(Box.createVerticalStrut(6));
-
-        // Principio Activo y Presentación
-        JPanel gridPrincPres = new JPanel(new GridLayout(1, 2, 8, 0));
-        gridPrincPres.setOpaque(false);
-        gridPrincPres.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridPrincPres.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pPrinc = new JPanel();
-        pPrinc.setOpaque(false);
-        pPrinc.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pPrinc.setLayout(new BoxLayout(pPrinc, BoxLayout.Y_AXIS));
-        pPrinc.add(crearEtiquetaCampo("Principio Activo:"));
-        txtPrincipioActivo = new JTextField();
-        estilizarControl(txtPrincipioActivo);
-        pPrinc.add(txtPrincipioActivo);
-        gridPrincPres.add(pPrinc);
-
-        JPanel pPres = new JPanel();
-        pPres.setOpaque(false);
-        pPres.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pPres.setLayout(new BoxLayout(pPres, BoxLayout.Y_AXIS));
-        pPres.add(crearEtiquetaCampo("Presentación / Envase:"));
-        txtPresentacion = new JTextField();
-        estilizarControl(txtPresentacion);
-        pPres.add(txtPresentacion);
-        gridPrincPres.add(pPres);
-
-        form.add(gridPrincPres);
-        form.add(Box.createVerticalStrut(6));
-
-        // Especie Destino y Proveedor
-        JPanel gridEspProv = new JPanel(new GridLayout(1, 2, 8, 0));
-        gridEspProv.setOpaque(false);
-        gridEspProv.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridEspProv.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pEsp = new JPanel();
-        pEsp.setOpaque(false);
-        pEsp.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pEsp.setLayout(new BoxLayout(pEsp, BoxLayout.Y_AXIS));
-        pEsp.add(crearEtiquetaCampo("Especie Destino:"));
-        cbEspecie = new JComboBox<>(new String[]{"Canino", "Felino", "Mixto Canino/Felino"});
-        estilizarControl(cbEspecie);
-        pEsp.add(cbEspecie);
-        gridEspProv.add(pEsp);
-
-        JPanel pProv = new JPanel();
-        pProv.setOpaque(false);
-        pProv.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pProv.setLayout(new BoxLayout(pProv, BoxLayout.Y_AXIS));
-        pProv.add(crearEtiquetaCampo("Laboratorio / Proveedor:"));
-        txtProveedor = new JTextField("Laboratorios Zoetis Perú S.A.C.");
-        estilizarControl(txtProveedor);
-        pProv.add(txtProveedor);
-        gridEspProv.add(pProv);
-
-        form.add(gridEspProv);
-        form.add(Box.createVerticalStrut(6));
-
-        // Precios y Stock (Grid 4 columnas)
-        JPanel gridPrecios = new JPanel(new GridLayout(1, 4, 6, 0));
-        gridPrecios.setOpaque(false);
-        gridPrecios.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridPrecios.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pCosto = new JPanel();
-        pCosto.setOpaque(false);
-        pCosto.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCosto.setLayout(new BoxLayout(pCosto, BoxLayout.Y_AXIS));
-        pCosto.add(crearEtiquetaCampo("Costo S/.:"));
-        txtPrecioCosto = new JTextField("30.00");
-        estilizarControl(txtPrecioCosto);
-        pCosto.add(txtPrecioCosto);
-        gridPrecios.add(pCosto);
-
-        JPanel pVenta = new JPanel();
-        pVenta.setOpaque(false);
-        pVenta.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pVenta.setLayout(new BoxLayout(pVenta, BoxLayout.Y_AXIS));
-        pVenta.add(crearEtiquetaCampo("Venta S/.:"));
-        txtPrecioVenta = new JTextField("50.00");
-        estilizarControl(txtPrecioVenta);
-        pVenta.add(txtPrecioVenta);
-        gridPrecios.add(pVenta);
-
-        JPanel pStock = new JPanel();
-        pStock.setOpaque(false);
-        pStock.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pStock.setLayout(new BoxLayout(pStock, BoxLayout.Y_AXIS));
-        pStock.add(crearEtiquetaCampo("Stock Actual:"));
-        txtStockActual = new JTextField("20");
-        estilizarControl(txtStockActual);
-        pStock.add(txtStockActual);
-        gridPrecios.add(pStock);
-
-        JPanel pMin = new JPanel();
-        pMin.setOpaque(false);
-        pMin.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pMin.setLayout(new BoxLayout(pMin, BoxLayout.Y_AXIS));
-        pMin.add(crearEtiquetaCampo("Stock Mín.:"));
-        txtStockMinimo = new JTextField("5");
-        estilizarControl(txtStockMinimo);
-        pMin.add(txtStockMinimo);
-        gridPrecios.add(pMin);
-
-        form.add(gridPrecios);
-        form.add(Box.createVerticalStrut(8));
-
-        // Checkboxes Regulatorios
-        JPanel pCheckboxes = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-        pCheckboxes.setOpaque(false);
-        pCheckboxes.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCheckboxes.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
-
-        chkReceta = new JCheckBox("Venta Bajo Receta Retenida");
-        chkReceta.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        chkReceta.setForeground(new Color(126, 34, 206));
-        chkReceta.setOpaque(false);
-
-        chkCadenaFrio = new JCheckBox("Cadena de Frío (2°C - 8°C)");
-        chkCadenaFrio.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        chkCadenaFrio.setForeground(new Color(3, 105, 161));
-        chkCadenaFrio.setOpaque(false);
-
-        pCheckboxes.add(chkReceta);
-        pCheckboxes.add(chkCadenaFrio);
-        form.add(pCheckboxes);
-        form.add(Box.createVerticalStrut(12));
-
-        // Botones de acción del formulario
-        JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pBotones.setOpaque(false);
-        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-
-        JButton btnLimpiar = crearBoton("Nuevo / Limpiar", false, this::limpiarFormulario);
-        JButton btnGuardar = crearBoton("Guardar Producto", true, this::guardarProducto);
-
-        pBotones.add(btnLimpiar);
-        pBotones.add(btnGuardar);
-        form.add(pBotones);
-
-        card.add(form, BorderLayout.CENTER);
-        return card;
-    }
-
-    private JPanel crearPanelCatalogoTabla() {
+    private JPanel crearPanelMaster() {
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -473,435 +260,805 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
+                g2.setColor(Ui.BORDE_SUAVE);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
-        // Cabecera superior con buscador y filtro
-        JPanel top = new JPanel(new BorderLayout(8, 0));
-        top.setOpaque(false);
+        // Filtros Superiores (Búsqueda + Pills de Categoría)
+        JPanel panelFiltros = new JPanel();
+        panelFiltros.setOpaque(false);
+        panelFiltros.setLayout(new BoxLayout(panelFiltros, BoxLayout.Y_AXIS));
 
-        JPanel izq = new JPanel();
-        izq.setOpaque(false);
-        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
+        JPanel filaBusqueda = new JPanel(new BorderLayout(8, 0));
+        filaBusqueda.setOpaque(false);
 
-        JLabel lblTit = new JLabel("Inventario Maestro de Fármacos e Insumos");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        filaBusqueda.add(lblBuscar, BorderLayout.WEST);
 
-        lblContadorProductos = new JLabel("0 productos listados");
-        lblContadorProductos.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblContadorProductos.setForeground(COLOR_TEXTO_MUTED);
-
-        izq.add(lblTit);
-        izq.add(Box.createVerticalStrut(1));
-        izq.add(lblContadorProductos);
-        top.add(izq, BorderLayout.WEST);
-
-        // Barra de búsqueda y categoría
-        JPanel derFiltros = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        derFiltros.setOpaque(false);
-
-        txtBuscar = new JTextField(12);
-        txtBuscar.setText("Buscar producto...");
-        estilizarControl(txtBuscar);
-        txtBuscar.addFocusListener(new java.awt.event.FocusAdapter() {
-            @Override public void focusGained(java.awt.event.FocusEvent e) { if ("Buscar producto...".equals(txtBuscar.getText())) txtBuscar.setText(""); }
-            @Override public void focusLost(java.awt.event.FocusEvent e) { if (txtBuscar.getText().trim().isEmpty()) txtBuscar.setText("Buscar producto..."); }
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.setPreferredSize(new Dimension(200, 28));
+        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_INPUT, 1, true),
+                new EmptyBorder(2, 8, 2, 8)
+        ));
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { filtrarProductos(); }
+            @Override public void removeUpdate(DocumentEvent e) { filtrarProductos(); }
+            @Override public void changedUpdate(DocumentEvent e) { filtrarProductos(); }
         });
-        txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override public void keyReleased(java.awt.event.KeyEvent e) { filtrarTabla(); }
-        });
-        derFiltros.add(txtBuscar);
+        filaBusqueda.add(txtBuscar, BorderLayout.CENTER);
+        panelFiltros.add(filaBusqueda);
+        panelFiltros.add(Box.createVerticalStrut(8));
 
-        cbFiltroCategoria = new JComboBox<>(new String[]{
-                "Todas las Categorías",
-                "Antiparasitario",
-                "Antibiótico",
-                "Analgésico / AINE",
-                "Vacuna / Biológico",
-                "Alimento Clínico",
-                "Anestésico / Controlado",
-                "Material Quirúrgico / Insumo"
-        });
-        estilizarControl(cbFiltroCategoria);
-        cbFiltroCategoria.addActionListener(e -> filtrarTabla());
-        derFiltros.add(cbFiltroCategoria);
+        // Pills de Categoría
+        panelPillsCategoria = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        panelPillsCategoria.setOpaque(false);
+        String[] categorias = {"TODOS", "Antibiótico", "Antiparasitario", "Analgésico / AINE", "Vacuna / Biológico", "Alimento Clínico", "Material Quirúrgico"};
+        for (String c : categorias) {
+            JButton pill = crearBotonPill(c, c.equalsIgnoreCase(categoriaFiltroSeleccionada));
+            pill.addActionListener(e -> {
+                categoriaFiltroSeleccionada = c;
+                actualizarPills();
+                filtrarProductos();
+            });
+            panelPillsCategoria.add(pill);
+        }
+        panelFiltros.add(panelPillsCategoria);
 
-        top.add(derFiltros, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
+        card.add(panelFiltros, BorderLayout.NORTH);
 
-        // Tabla de Productos
-        String[] columnas = {"Código", "Producto / Fármaco", "Categoría", "Especie", "Stock", "P. Venta", "Control", "Estado"};
+        // Tabla Master
+        String[] columnas = {"Código", "Ítem / Nombre", "Categoría", "Stock Disp.", "PVP S/.", "Estado"};
         modeloProductos = new DefaultTableModel(columnas, 0) {
             private static final long serialVersionUID = 1L;
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override public boolean isCellEditable(int row, int col) { return false; }
         };
 
         tablaProductos = new JTable(modeloProductos);
-        Ui.formatearTabla(tablaProductos, new int[]{0, 2, 3, 6, 7}, new int[]{4, 5});
+        tablaProductos.setRowHeight(48);
+        tablaProductos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        tablaProductos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaProductos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaProductos.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaProductos.getTableHeader().setForeground(new Color(71, 85, 105));
+        tablaProductos.setShowVerticalLines(false);
+        tablaProductos.setGridColor(new Color(241, 245, 249));
 
-        tablaProductos.getColumnModel().getColumn(0).setPreferredWidth(65);
-        tablaProductos.getColumnModel().getColumn(1).setPreferredWidth(170);
-        tablaProductos.getColumnModel().getColumn(2).setPreferredWidth(100);
+        // Anchos de columna
+        tablaProductos.getColumnModel().getColumn(0).setPreferredWidth(75);
+        tablaProductos.getColumnModel().getColumn(1).setPreferredWidth(210);
+        tablaProductos.getColumnModel().getColumn(2).setPreferredWidth(110);
         tablaProductos.getColumnModel().getColumn(3).setPreferredWidth(80);
-        tablaProductos.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tablaProductos.getColumnModel().getColumn(5).setPreferredWidth(65);
-        tablaProductos.getColumnModel().getColumn(6).setPreferredWidth(85);
-        tablaProductos.getColumnModel().getColumn(7).setPreferredWidth(85);
+        tablaProductos.getColumnModel().getColumn(4).setPreferredWidth(70);
+        tablaProductos.getColumnModel().getColumn(5).setPreferredWidth(85);
 
-        // Renderizador de Estado
-        tablaProductos.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+        // Renderers
+        tablaProductos.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                l.setForeground(isSelected ? table.getSelectionForeground() : Ui.TURQUESA_PROFUNDO);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
-                String st = value != null ? value.toString() : "";
-                if ("Disponible".equalsIgnoreCase(st)) {
-                    l.setForeground(Ui.COLOR_EXITO);
-                    l.setBackground(new Color(209, 250, 229));
-                } else if ("Bajo Stock".equalsIgnoreCase(st)) {
-                    l.setForeground(new Color(245, 158, 11));
-                    l.setBackground(new Color(254, 243, 199));
-                } else {
-                    l.setForeground(Ui.COLOR_PELIGRO);
-                    l.setBackground(new Color(254, 226, 226));
-                }
-                l.setOpaque(true);
                 return l;
             }
         });
 
-        JScrollPane scrollTabla = new JScrollPane(tablaProductos);
-        scrollTabla.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        scrollTabla.getViewport().setBackground(Color.WHITE);
-        card.add(scrollTabla, BorderLayout.CENTER);
+        tablaProductos.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
 
-        // Barra inferior de acciones
-        JPanel pAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pAcciones.setOpaque(false);
+                String nombre = value != null ? value.toString() : "";
+                String letra = !nombre.isEmpty() ? nombre.substring(0, 1).toUpperCase() : "P";
 
-        JButton btnEditar = crearBoton("Editar Datos", false, this::cargarParaEdicion);
-        btnEditar.setIcon(Iconos.crearIconoLapiz(14, COLOR_AZUL_PRIMARIO));
+                JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(new Color(224, 242, 254));
+                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.setColor(new Color(186, 230, 253));
+                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(30, 30));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(new Color(2, 132, 199));
 
-        JButton btnProspecto = crearBoton("Ficha Técnica / Prospecto", false, this::mostrarProspectoClinico);
-        btnProspecto.setIcon(Iconos.crearIconoDocumento(14, new Color(99, 102, 241)));
+                JLabel lblNombre = new JLabel(nombre);
+                lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-        JButton btnEtiqueta = crearBoton("Etiqueta Dispensación", false, this::generarEtiquetaDispensacion);
-        btnEtiqueta.setIcon(Iconos.crearIconoImprimir(14, new Color(16, 185, 129)));
+                cell.add(avatar);
+                cell.add(lblNombre);
+                return cell;
+            }
+        });
 
-        JButton btnEliminar = crearBoton("Eliminar", false, this::eliminarProducto);
-        btnEliminar.setIcon(Iconos.crearIconoCruzMedica(14, new Color(220, 38, 38)));
+        tablaProductos.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setHorizontalAlignment(SwingConstants.CENTER);
+                String estado = value != null ? value.toString() : "";
+                if ("Agotado".equalsIgnoreCase(estado)) {
+                    l.setForeground(Ui.COLOR_PELIGRO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                } else if ("Bajo Stock".equalsIgnoreCase(estado)) {
+                    l.setForeground(Ui.COLOR_ADVERTENCIA);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                } else {
+                    l.setForeground(Ui.COLOR_EXITO);
+                    l.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                }
+                return l;
+            }
+        });
 
-        pAcciones.add(btnEditar);
-        pAcciones.add(btnProspecto);
-        pAcciones.add(btnEtiqueta);
-        pAcciones.add(btnEliminar);
+        tablaProductos.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tablaProductos.getSelectedRow();
+                if (row >= 0 && row < listaProductosFiltrada.size()) {
+                    mostrarDetalleProducto(listaProductosFiltrada.get(row));
+                }
+            }
+        });
 
-        card.add(pAcciones, BorderLayout.SOUTH);
+        JScrollPane sp = new JScrollPane(tablaProductos);
+        sp.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        sp.getViewport().setBackground(Color.WHITE);
+        card.add(sp, BorderLayout.CENTER);
+
         return card;
     }
 
-    private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto, SwingConstants.LEFT);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        l.setForeground(new Color(71, 85, 105));
-        l.setBorder(new EmptyBorder(0, 0, 2, 0));
-        l.setHorizontalAlignment(SwingConstants.LEFT);
-        l.setAlignmentX(Component.LEFT_ALIGNMENT);
-        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
-        return l;
+    private JPanel crearPanelDetail() {
+        contenedorPadre = new JPanel(new BorderLayout());
+        contenedorPadre.setOpaque(false);
+
+        // Panel Estado Vacío
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione un producto del catálogo para ver su ficha técnica", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        // Panel Detalle Activo
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // 1. Cabecera del Hub
+        JPanel cabHub = new JPanel(new BorderLayout(10, 0));
+        cabHub.setOpaque(false);
+
+        lblHubAvatar = new JLabel("P", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int diametro = Math.min(getWidth(), getHeight()) - 2;
+                if (diametro > 0) {
+                    g2.setColor(new Color(224, 242, 254));
+                    g2.fill(new Ellipse2D.Double(1, 1, diametro, diametro));
+                    g2.setColor(Ui.TURQUESA);
+                    g2.draw(new Ellipse2D.Double(1, 1, diametro, diametro));
+                }
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
+        cabHub.add(lblHubAvatar, BorderLayout.WEST);
+
+        JPanel infoMed = new JPanel();
+        infoMed.setOpaque(false);
+        infoMed.setLayout(new BoxLayout(infoMed, BoxLayout.Y_AXIS));
+
+        lblHubNombre = new JLabel("Nombre Producto");
+        lblHubNombre.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblHubNombre.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubCodigo = new JLabel("PROD-000 · Categ");
+        lblHubCodigo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubCodigo.setForeground(Ui.TEXTO_MUTED);
+
+        infoMed.add(lblHubNombre);
+        infoMed.add(Box.createVerticalStrut(2));
+        infoMed.add(lblHubCodigo);
+        cabHub.add(infoMed, BorderLayout.CENTER);
+
+        lblHubBadgeEstado = new JLabel("Disponible", SwingConstants.CENTER);
+        lblHubBadgeEstado.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubBadgeEstado.setOpaque(true);
+        lblHubBadgeEstado.setBackground(Ui.TURQUESA_SUAVE);
+        lblHubBadgeEstado.setForeground(Ui.TURQUESA_PROFUNDO);
+        lblHubBadgeEstado.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
+                new EmptyBorder(3, 8, 3, 8)
+        ));
+        cabHub.add(lblHubBadgeEstado, BorderLayout.EAST);
+        panelHubDetalle.add(cabHub, BorderLayout.NORTH);
+
+        // 2. Contenido Scrollable
+        ScrollablePanel scrollContent = new ScrollablePanel();
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+        scrollContent.setOpaque(false);
+
+        // Telemetría 2x2
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridTelemetria.setOpaque(false);
+
+        lblHubStockActual = new JLabel("0 un.");
+        lblHubPrecioVenta = new JLabel("S/. 0.00");
+        lblHubPrecioCosto = new JLabel("S/. 0.00");
+        lblHubMargen = new JLabel("0.0%");
+
+        gridTelemetria.add(crearCajaTelemetria("STOCK DISPONIBLE", lblHubStockActual, new Color(14, 165, 233)));
+        gridTelemetria.add(crearCajaTelemetria("PRECIO PVP (VENTA)", lblHubPrecioVenta, new Color(16, 185, 129)));
+        gridTelemetria.add(crearCajaTelemetria("PRECIO COSTO", lblHubPrecioCosto, new Color(100, 116, 139)));
+        gridTelemetria.add(crearCajaTelemetria("MARGEN ESTIMADO", lblHubMargen, new Color(147, 51, 234)));
+
+        scrollContent.add(gridTelemetria);
+        scrollContent.add(Box.createVerticalStrut(10));
+
+        // Ficha Farmacológica
+        JPanel seccionFarmaco = crearSeccionDetalle("ESPECIFICACIONES FARMACOLÓGICAS");
+        lblHubPrincipioActivo = new JLabel("-");
+        lblHubPresentacion = new JLabel("-");
+        lblHubEspecies = new JLabel("-");
+
+        seccionFarmaco.add(crearFilaDato("Principio Activo:", lblHubPrincipioActivo));
+        seccionFarmaco.add(crearFilaDato("Presentación / Forma:", lblHubPresentacion));
+        seccionFarmaco.add(crearFilaDato("Especies Recomendadas:", lblHubEspecies));
+        scrollContent.add(seccionFarmaco);
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Requisitos Sanitarios & Conservación
+        JPanel seccionSanitaria = crearSeccionDetalle("CONDICIONES SANITARIAS & CONSERVACIÓN");
+        JPanel filaChips = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        filaChips.setOpaque(false);
+
+        lblHubChipReceta = new JLabel("Receta Médica");
+        lblHubChipReceta.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubChipReceta.setOpaque(true);
+        lblHubChipReceta.setBorder(new EmptyBorder(2, 6, 2, 6));
+
+        lblHubChipCadenaFrio = new JLabel("Cadena de Frío");
+        lblHubChipCadenaFrio.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubChipCadenaFrio.setOpaque(true);
+        lblHubChipCadenaFrio.setBorder(new EmptyBorder(2, 6, 2, 6));
+
+        filaChips.add(lblHubChipReceta);
+        filaChips.add(lblHubChipCadenaFrio);
+        seccionSanitaria.add(filaChips);
+        scrollContent.add(seccionSanitaria);
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Trazabilidad de Lote & Laboratorio
+        JPanel seccionTrazabilidad = crearSeccionDetalle("TRAZABILIDAD DE LOTE & PROVEEDOR");
+        lblHubLoteVigente = new JLabel("-");
+        lblHubFechaCaducidad = new JLabel("-");
+        lblHubProveedor = new JLabel("-");
+
+        seccionTrazabilidad.add(crearFilaDato("Lote Vigente:", lblHubLoteVigente));
+        seccionTrazabilidad.add(crearFilaDato("Fecha de Vencimiento:", lblHubFechaCaducidad));
+        seccionTrazabilidad.add(crearFilaDato("Laboratorio / Proveedor:", lblHubProveedor));
+        scrollContent.add(seccionTrazabilidad);
+
+        JScrollPane spHub = new JScrollPane(scrollContent);
+        spHub.setBorder(null);
+        spHub.setOpaque(false);
+        spHub.getViewport().setOpaque(false);
+        spHub.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        spHub.getVerticalScrollBar().setUnitIncrement(16);
+        panelHubDetalle.add(spHub, BorderLayout.CENTER);
+
+        // 3. Barra de Acciones Rápidas (1-Click)
+        JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
+        barraAcciones.setOpaque(false);
+
+        JButton btnAjustar = crearBotonAccion("Ajustar Stock", Iconos.crearIconoCajaAlmacen(14, Color.WHITE), true);
+        btnAjustar.addActionListener(e -> realizarAjusteRapidoStock());
+
+        JButton btnFicha = crearBotonAccion("Ficha Farmacéutica", Iconos.crearIconoDocumento(14, new Color(37, 99, 235)), false);
+        btnFicha.addActionListener(e -> emitirFichaTecnica());
+
+        JButton btnEtiqueta = crearBotonAccion("Etiqueta Dispensación", Iconos.crearIconoImprimir(14, new Color(147, 51, 234)), false);
+        btnEtiqueta.addActionListener(e -> imprimirEtiquetaTermica());
+
+        JButton btnEditar = crearBotonAccion("Editar / Baja", Iconos.crearIconoLapiz(14, new Color(100, 116, 139)), false);
+        btnEditar.addActionListener(e -> abrirModalEditar());
+
+        barraAcciones.add(btnAjustar);
+        barraAcciones.add(btnFicha);
+        barraAcciones.add(btnEtiqueta);
+        barraAcciones.add(btnEditar);
+
+        panelHubDetalle.add(barraAcciones, BorderLayout.SOUTH);
+
+        contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
+        return contenedorPadre;
     }
 
-    private void estilizarControl(Component c) {
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
-        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
-        if (c instanceof javax.swing.JComponent jc) {
-            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private JPanel crearCajaTelemetria(String titulo, JLabel lblValor, Color colorAcento) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(colorAcento);
+
+        c.add(t);
+        c.add(Box.createVerticalStrut(2));
+        c.add(lblValor);
+        return c;
+    }
+
+    private JPanel crearSeccionDetalle(String titulo) {
+        JPanel sec = new JPanel();
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setOpaque(false);
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                new EmptyBorder(6, 10, 6, 10)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_PROFUNDO);
+        t.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        sec.add(t);
+        sec.add(Box.createVerticalStrut(4));
+        return sec;
+    }
+
+    private JPanel crearFilaDato(String etiqueta, JLabel lblValor) {
+        JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 1));
+        fila.setOpaque(false);
+        fila.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblE = new JLabel(etiqueta);
+        lblE.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblE.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblValor.setForeground(Ui.TEXTO_REGULAR);
+
+        fila.add(lblE);
+        fila.add(lblValor);
+        return fila;
+    }
+
+    public void recargarDatos() {
+        filtrarProductos();
+        actualizarKpis();
+    }
+
+    private void actualizarKpis() {
+        List<ProductoFarmacia> todos = repo.getProductosFarmacia();
+        lblKpiTotalProductos.setText(String.valueOf(todos.size()));
+
+        double valorTotal = 0;
+        int bajoStock = 0;
+        int recetas = 0;
+
+        for (ProductoFarmacia p : todos) {
+            valorTotal += (p.getStockActual() * p.getPrecioVenta());
+            if (p.getStockActual() <= p.getStockMinimo()) {
+                bajoStock++;
+            }
+            if (p.isRequiereReceta()) {
+                recetas++;
+            }
         }
-        if (c instanceof JTextField) {
-            ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(COLOR_BORDE, 1, true),
-                    new EmptyBorder(2, 6, 2, 6)
-            ));
-        } else if (c instanceof JComboBox) {
-            c.setBackground(Color.WHITE);
+
+        lblKpiValorInventario.setText(String.format("S/. %.2f", valorTotal));
+        lblKpiBajoStock.setText(String.valueOf(bajoStock));
+        lblKpiRecetaRetenida.setText(String.valueOf(recetas));
+    }
+
+    private void filtrarProductos() {
+        String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+        List<ProductoFarmacia> todos = repo.getProductosFarmacia();
+        listaProductosFiltrada.clear();
+
+        for (ProductoFarmacia p : todos) {
+            boolean coincideCategoria = "TODOS".equalsIgnoreCase(categoriaFiltroSeleccionada)
+                    || p.getCategoria().equalsIgnoreCase(categoriaFiltroSeleccionada);
+            if (!coincideCategoria) continue;
+
+            if (!query.isEmpty()) {
+                boolean match = p.getCodigo().toLowerCase().contains(query)
+                        || p.getNombre().toLowerCase().contains(query)
+                        || p.getPrincipioActivo().toLowerCase().contains(query)
+                        || p.getProveedor().toLowerCase().contains(query);
+                if (!match) continue;
+            }
+
+            listaProductosFiltrada.add(p);
+        }
+
+        modeloProductos.setRowCount(0);
+        for (ProductoFarmacia p : listaProductosFiltrada) {
+            modeloProductos.addRow(new Object[]{
+                    p.getCodigo(),
+                    p.getNombre(),
+                    p.getCategoria(),
+                    p.getStockActual() + " / " + p.getStockMinimo(),
+                    String.format("%.2f", p.getPrecioVenta()),
+                    p.getEstado()
+            });
+        }
+
+        if (!listaProductosFiltrada.isEmpty()) {
+            tablaProductos.setRowSelectionInterval(0, 0);
+            mostrarDetalleProducto(listaProductosFiltrada.get(0));
+        } else {
+            productoSeleccionado = null;
+            contenedorPadre.removeAll();
+            contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
+            contenedorPadre.revalidate();
+            contenedorPadre.repaint();
         }
     }
 
-    private JButton crearBoton(String texto, boolean primario, Runnable accion) {
+    private void mostrarDetalleProducto(ProductoFarmacia p) {
+        this.productoSeleccionado = p;
+        contenedorPadre.removeAll();
+        contenedorPadre.add(panelHubDetalle, BorderLayout.CENTER);
+
+        String letra = !p.getNombre().isEmpty() ? p.getNombre().substring(0, 1).toUpperCase() : "P";
+        lblHubAvatar.setText(letra);
+
+        lblHubNombre.setText(p.getNombre());
+        lblHubCodigo.setText(p.getCodigo() + " · " + p.getCategoria());
+
+        // Estado Badge
+        lblHubBadgeEstado.setText(p.getEstado());
+        if ("Agotado".equalsIgnoreCase(p.getEstado())) {
+            lblHubBadgeEstado.setBackground(new Color(254, 226, 226));
+            lblHubBadgeEstado.setForeground(Ui.COLOR_PELIGRO);
+        } else if ("Bajo Stock".equalsIgnoreCase(p.getEstado())) {
+            lblHubBadgeEstado.setBackground(new Color(254, 243, 199));
+            lblHubBadgeEstado.setForeground(Ui.COLOR_ADVERTENCIA);
+        } else {
+            lblHubBadgeEstado.setBackground(Ui.TURQUESA_SUAVE);
+            lblHubBadgeEstado.setForeground(Ui.TURQUESA_PROFUNDO);
+        }
+
+        // Telemetría
+        lblHubStockActual.setText(p.getStockActual() + " (" + p.getPresentacion() + ")");
+        lblHubStockActual.setForeground(p.getStockActual() <= p.getStockMinimo() ? Ui.COLOR_PELIGRO : new Color(14, 165, 233));
+        lblHubPrecioVenta.setText(String.format("S/. %.2f", p.getPrecioVenta()));
+        lblHubPrecioCosto.setText(String.format("S/. %.2f", p.getPrecioCosto()));
+
+        double costo = p.getPrecioCosto();
+        double pvp = p.getPrecioVenta();
+        double margenPct = costo > 0 ? ((pvp - costo) / costo) * 100.0 : 0.0;
+        lblHubMargen.setText(String.format("%.1f%% (+S/. %.2f)", margenPct, (pvp - costo)));
+
+        // Farmacología
+        lblHubPrincipioActivo.setText(p.getPrincipioActivo());
+        lblHubPresentacion.setText(p.getPresentacion());
+        lblHubEspecies.setText(p.getEspecieDestino());
+
+        // Chips Sanitarios
+        if (p.isRequiereReceta()) {
+            lblHubChipReceta.setText("[OK] Receta Retenida Obligatoria");
+            lblHubChipReceta.setBackground(new Color(243, 232, 255));
+            lblHubChipReceta.setForeground(new Color(126, 34, 206));
+        } else {
+            lblHubChipReceta.setText("Venta Libre Veterinaria");
+            lblHubChipReceta.setBackground(new Color(241, 245, 249));
+            lblHubChipReceta.setForeground(new Color(100, 116, 139));
+        }
+
+        if (p.isCadenaFrio()) {
+            lblHubChipCadenaFrio.setText("[OK] Cadena de Frío (2°C - 8°C)");
+            lblHubChipCadenaFrio.setBackground(new Color(224, 242, 254));
+            lblHubChipCadenaFrio.setForeground(new Color(2, 132, 199));
+        } else {
+            lblHubChipCadenaFrio.setText("Temperatura Ambiente");
+            lblHubChipCadenaFrio.setBackground(new Color(241, 245, 249));
+            lblHubChipCadenaFrio.setForeground(new Color(100, 116, 139));
+        }
+
+        // Trazabilidad
+        lblHubLoteVigente.setText(p.getLoteActual());
+
+        long diasRestantes = ChronoUnit.DAYS.between(LocalDate.now(), p.getFechaVencimiento());
+        String caducidadTexto = p.getFechaVencimientoFormateada() + " (" + diasRestantes + " días)";
+        lblHubFechaCaducidad.setText(caducidadTexto);
+        lblHubFechaCaducidad.setForeground(diasRestantes <= 60 ? Ui.COLOR_PELIGRO : Ui.TEXTO_REGULAR);
+
+        lblHubProveedor.setText(p.getProveedor());
+
+        contenedorPadre.revalidate();
+        contenedorPadre.repaint();
+    }
+
+    private void abrirModalNuevoProducto() {
+        FormularioProductoFarmaciaDialog dlg = new FormularioProductoFarmaciaDialog(
+                (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this)
+        );
+        dlg.setVisible(true);
+        if (dlg.isGuardadoExitoso()) {
+            recargarDatos();
+        }
+    }
+
+    private void abrirModalEditar() {
+        if (productoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un producto para editar o eliminar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Object[] opciones = {"Editar Datos", "Dar de Baja / Eliminar", "Cancelar"};
+        int res = JOptionPane.showOptionDialog(this,
+                "¿Qué acción desea realizar sobre " + productoSeleccionado.getNombre() + " (" + productoSeleccionado.getCodigo() + ")?",
+                "Gestión de Producto",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opciones,
+                opciones[0]);
+
+        if (res == 0) {
+            FormularioProductoFarmaciaDialog dlg = new FormularioProductoFarmaciaDialog(
+                    (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this),
+                    productoSeleccionado
+            );
+            dlg.setVisible(true);
+            if (dlg.isGuardadoExitoso()) {
+                recargarDatos();
+            }
+        } else if (res == 1) {
+            int conf = JOptionPane.showConfirmDialog(this,
+                    "¿Está seguro de eliminar " + productoSeleccionado.getNombre() + " del catálogo?",
+                    "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+            if (conf == JOptionPane.YES_OPTION) {
+                repo.eliminarProductoFarmacia(productoSeleccionado.getCodigo());
+                recargarDatos();
+            }
+        }
+    }
+
+    private void realizarAjusteRapidoStock() {
+        if (productoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un producto para ajustar stock.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String cantStr = JOptionPane.showInputDialog(this,
+                "Ajuste rápido de inventario para " + productoSeleccionado.getNombre() + ":\n" +
+                "Stock actual: " + productoSeleccionado.getStockActual() + " " + productoSeleccionado.getPresentacion() + "\n\n" +
+                "Ingrese delta de cantidad (positivo para ingreso, negativo para egreso):",
+                "10");
+
+        if (cantStr != null && !cantStr.trim().isEmpty()) {
+            try {
+                int delta = Integer.parseInt(cantStr.trim());
+                repo.actualizarStockProducto(productoSeleccionado.getCodigo(), delta);
+                recargarDatos();
+                JOptionPane.showMessageDialog(this,
+                        "Stock actualizado. Nuevo stock disponible: " + productoSeleccionado.getStockActual(),
+                        "Ajuste Exitoso", JOptionPane.INFORMATION_MESSAGE);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Debe ingresar un número entero válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void emitirFichaTecnica() {
+        if (productoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un producto para generar la ficha técnica.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        long diasVenc = ChronoUnit.DAYS.between(LocalDate.now(), productoSeleccionado.getFechaVencimiento());
+
+        String ficha = "FICHA TÉCNICA FARMACÉUTICA Y CONTROL DE DISPENSACIÓN\n" +
+                "HAPPY PETS - SERVICIO DE FARMACIA VETERINARIA ESPECIALIZADA\n" +
+                "=========================================================================\n\n" +
+                "CÓDIGO INTERNO   : " + productoSeleccionado.getCodigo() + "\n" +
+                "PRODUCTO         : " + productoSeleccionado.getNombre() + "\n" +
+                "CATEGORÍA        : " + productoSeleccionado.getCategoria() + "\n" +
+                "PRINCIPIO ACTIVO : " + productoSeleccionado.getPrincipioActivo() + "\n" +
+                "PRESENTACIÓN     : " + productoSeleccionado.getPresentacion() + "\n" +
+                "ESPECIE DESTINO  : " + productoSeleccionado.getEspecieDestino() + "\n\n" +
+                "PARÁMETROS FINANCIEROS Y DISPONIBILIDAD:\n" +
+                "• Stock Actual   : " + productoSeleccionado.getStockActual() + " unidades\n" +
+                "• Stock Mínimo   : " + productoSeleccionado.getStockMinimo() + " unidades de seguridad\n" +
+                "• Precio Costo   : S/. " + String.format("%.2f", productoSeleccionado.getPrecioCosto()) + "\n" +
+                "• Precio Venta   : S/. " + String.format("%.2f", productoSeleccionado.getPrecioVenta()) + "\n" +
+                "• Estado Actual  : " + productoSeleccionado.getEstado() + "\n\n" +
+                "TRAZABILIDAD Y CADUCIDAD:\n" +
+                "• Lote Activo    : " + productoSeleccionado.getLoteActual() + "\n" +
+                "• Vencimiento    : " + productoSeleccionado.getFechaVencimientoFormateada() + " (" + diasVenc + " días restantes)\n" +
+                "• Proveedor      : " + productoSeleccionado.getProveedor() + "\n" +
+                "• Cadena de Frío : " + (productoSeleccionado.isCadenaFrio() ? "ESTRICTA 2°C - 8°C (Refrigeración)" : "Temperatura ambiente") + "\n" +
+                "• Control Receta : " + (productoSeleccionado.isRequiereReceta() ? "FÁRMACO CONTROLADO - Requiere receta médica" : "Venta libre veterinaria") + "\n\n" +
+                "__________________________             __________________________\n" +
+                "  Regente Farmacéutico                  Dirección Médica Happy Pets\n";
+
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Ficha Técnica - " + productoSeleccionado.getCodigo(),
+                "FICHA TÉCNICA FARMACÉUTICA",
+                ficha,
+                "Ficha_Tecnica_" + productoSeleccionado.getCodigo()
+        );
+    }
+
+    private void imprimirEtiquetaTermica() {
+        if (productoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un producto para generar etiqueta de farmacia.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String etiqueta = "========================================\n" +
+                "      FARMACIA VETERINARIA HAPPY PETS   \n" +
+                "   Av. Primavera 1230 - Tel: 984 552 110\n" +
+                "========================================\n\n" +
+                "PRODUCTO : " + productoSeleccionado.getNombre() + "\n" +
+                "COMP.    : " + productoSeleccionado.getPrincipioActivo() + "\n" +
+                "PRES.    : " + productoSeleccionado.getPresentacion() + "\n" +
+                "LOTE     : " + productoSeleccionado.getLoteActual() + "  |  VENC: " + productoSeleccionado.getFechaVencimientoFormateada() + "\n" +
+                "PVP      : S/. " + String.format("%.2f", productoSeleccionado.getPrecioVenta()) + "\n" +
+                "ESPECIE  : " + productoSeleccionado.getEspecieDestino() + "\n\n" +
+                "CONSERVACIÓN: " + (productoSeleccionado.isCadenaFrio() ? "Refrigerar 2°C - 8°C" : "Lugar fresco y seco") + "\n" +
+                "CONDICIÓN   : " + (productoSeleccionado.isRequiereReceta() ? "Venta bajo receta retenida" : "Uso veterinario libre") + "\n\n" +
+                "POSOLOGÍA: Según indicación médica veterinaria.\n" +
+                "========================================\n";
+
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Etiqueta Farmacia - " + productoSeleccionado.getCodigo(),
+                "ETIQUETA TÉRMICA DE DISPENSACIÓN",
+                etiqueta,
+                "Etiqueta_" + productoSeleccionado.getCodigo()
+        );
+    }
+
+    private JButton crearBotonPill(String texto, boolean activo) {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (primario) {
-                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
+                boolean act = Boolean.TRUE.equals(getClientProperty("activo"));
+                if (act) {
+                    g2.setColor(Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.setColor(act ? Ui.TURQUESA_OSCURO : Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        btn.putClientProperty("activo", activo);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(activo ? Color.WHITE : new Color(71, 85, 105));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(3, 10, 3, 10));
+        return btn;
+    }
+
+    private void actualizarPills() {
+        for (Component c : panelPillsCategoria.getComponents()) {
+            if (c instanceof JButton) {
+                JButton b = (JButton) c;
+                boolean act = b.getText().equalsIgnoreCase(categoriaFiltroSeleccionada);
+                b.putClientProperty("activo", act);
+                b.setForeground(act ? Color.WHITE : new Color(71, 85, 105));
+                b.repaint();
+            }
+        }
+    }
+
+    private JButton crearBotonAccion(String texto, boolean primario) {
+        return crearBotonAccion(texto, null, primario);
+    }
+
+    private JButton crearBotonAccion(String texto, Icon icono, boolean primario) {
+        JButton btn = new JButton(texto) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
+                if (esPrimario) {
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                if (!primario) {
+                if (!esPrimario) {
                     g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
-                super.paintComponent(g2);
+                super.paintComponent(g);
                 g2.dispose();
             }
 
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
-                return new Dimension(d.width + 16, 28);
+                return new Dimension(d.width + 12, 30);
             }
         };
+        if (icono != null) {
+            btn.setIcon(icono);
+            btn.setIconTextGap(6);
+        }
+        btn.putClientProperty("primario", primario);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-        btn.addActionListener(e -> accion.run());
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
         return btn;
     }
 
-    public void recargarDatos() {
-        listaActual = repo.getProductosFarmacia();
-        filtrarTabla();
-
-        // KPIs
-        long bajo = listaActual.stream().filter(p -> p.getStockActual() <= p.getStockMinimo()).count();
-        long receta = listaActual.stream().filter(ProductoFarmacia::isRequiereReceta).count();
-        double valorStock = listaActual.stream().mapToDouble(p -> p.getStockActual() * p.getPrecioVenta()).sum();
-
-        lblKpiTotalProductos.setText(String.valueOf(listaActual.size()));
-        lblKpiValorInventario.setText("S/. " + String.format("%.0f", valorStock));
-        lblKpiBajoStock.setText(String.valueOf(bajo));
-        lblKpiRecetaRetenida.setText(String.valueOf(receta));
-
-        if (txtCodigo.getText().trim().isEmpty()) {
-            txtCodigo.setText("PROD-" + String.format("%03d", listaActual.size() + 1));
-        }
-    }
-
-    private void filtrarTabla() {
-        if (listaActual == null) return;
-        modeloProductos.setRowCount(0);
-
-        String texto = txtBuscar != null && !"Buscar producto...".equals(txtBuscar.getText()) ? txtBuscar.getText().trim().toLowerCase() : "";
-        String catFiltro = cbFiltroCategoria != null ? (String) cbFiltroCategoria.getSelectedItem() : "Todas las Categorías";
-
-        int cont = 0;
-        for (ProductoFarmacia p : listaActual) {
-            if (!"Todas las Categorías".equalsIgnoreCase(catFiltro)) {
-                if (!p.getCategoria().equalsIgnoreCase(catFiltro)) continue;
-            }
-            if (!texto.isEmpty()) {
-                boolean match = p.getCodigo().toLowerCase().contains(texto) ||
-                        p.getNombre().toLowerCase().contains(texto) ||
-                        p.getPrincipioActivo().toLowerCase().contains(texto) ||
-                        p.getCategoria().toLowerCase().contains(texto);
-                if (!match) continue;
-            }
-
-            cont++;
-            String control = (p.isRequiereReceta() ? "Receta" : "Libre") + (p.isCadenaFrio() ? " · Frío" : "");
-
-            modeloProductos.addRow(new Object[]{
-                    p.getCodigo(),
-                    p.getNombre(),
-                    p.getCategoria(),
-                    p.getEspecieDestino(),
-                    p.getStockActual() + " un.",
-                    "S/. " + String.format("%.2f", p.getPrecioVenta()),
-                    control,
-                    p.getEstado()
-            });
-        }
-        lblContadorProductos.setText(cont + " productos coincidentes");
-    }
-
-    private void guardarProducto() {
-        String cod = txtCodigo.getText().trim();
-        String nom = txtNombre.getText().trim();
-        if (cod.isEmpty() || nom.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Complete el código y nombre comercial del producto.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        double costo = 20.0;
-        double venta = 35.0;
-        int stock = 10;
-        int min = 5;
-
-        try { costo = Double.parseDouble(txtPrecioCosto.getText().trim()); } catch (Exception ignored) {}
-        try { venta = Double.parseDouble(txtPrecioVenta.getText().trim()); } catch (Exception ignored) {}
-        try { stock = Integer.parseInt(txtStockActual.getText().trim()); } catch (Exception ignored) {}
-        try { min = Integer.parseInt(txtStockMinimo.getText().trim()); } catch (Exception ignored) {}
-
-        ProductoFarmacia p = new ProductoFarmacia(
-                cod,
-                nom,
-                (String) cbCategoria.getSelectedItem(),
-                txtPrincipioActivo.getText().trim(),
-                txtPresentacion.getText().trim(),
-                (String) cbEspecie.getSelectedItem(),
-                chkReceta.isSelected(),
-                chkCadenaFrio.isSelected(),
-                costo,
-                venta,
-                stock,
-                min,
-                "LOT-2024-NVO",
-                null,
-                txtProveedor.getText().trim(),
-                "Disponible"
-        );
-
-        repo.guardarProductoFarmacia(p);
-        recargarDatos();
-        limpiarFormulario();
-
-        JOptionPane.showMessageDialog(this, "Producto " + nom + " guardado con éxito en el catálogo.", "Catálogo Actualizado", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void cargarParaEdicion() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto de la tabla para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String cod = (String) modeloProductos.getValueAt(fila, 0);
-        Optional<ProductoFarmacia> opt = repo.getProductosFarmacia().stream().filter(p -> p.getCodigo().equalsIgnoreCase(cod)).findFirst();
-        if (!opt.isPresent()) return;
-
-        ProductoFarmacia p = opt.get();
-        txtCodigo.setText(p.getCodigo());
-        txtNombre.setText(p.getNombre());
-        cbCategoria.setSelectedItem(p.getCategoria());
-        txtPrincipioActivo.setText(p.getPrincipioActivo());
-        txtPresentacion.setText(p.getPresentacion());
-        cbEspecie.setSelectedItem(p.getEspecieDestino());
-        txtPrecioCosto.setText(String.format("%.2f", p.getPrecioCosto()));
-        txtPrecioVenta.setText(String.format("%.2f", p.getPrecioVenta()));
-        txtStockActual.setText(String.valueOf(p.getStockActual()));
-        txtStockMinimo.setText(String.valueOf(p.getStockMinimo()));
-        chkReceta.setSelected(p.isRequiereReceta());
-        chkCadenaFrio.setSelected(p.isCadenaFrio());
-        txtProveedor.setText(p.getProveedor());
-    }
-
-    private void eliminarProducto() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para dar de baja.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String cod = (String) modeloProductos.getValueAt(fila, 0);
-        int r = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar del catálogo el producto " + cod + "?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
-        if (r == JOptionPane.YES_OPTION) {
-            repo.eliminarProductoFarmacia(cod);
-            recargarDatos();
-            limpiarFormulario();
-        }
-    }
-
-    private void mostrarProspectoClinico() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un fármaco para consultar su prospecto y ficha técnica.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String cod = (String) modeloProductos.getValueAt(fila, 0);
-        Optional<ProductoFarmacia> opt = repo.getProductosFarmacia().stream().filter(p -> p.getCodigo().equalsIgnoreCase(cod)).findFirst();
-        if (!opt.isPresent()) return;
-
-        ProductoFarmacia p = opt.get();
-        String prospecto = "FICHA TÉCNICA Y FARMACOVIGILANCIA VETERINARIA\n" +
-                "HAPPY PETS - SERVICIO DE FARMACIA Y DISPENSACIÓN REGULADA\n" +
-                "=========================================================================\n\n" +
-                "CÓDIGO INTERNO   : " + p.getCodigo() + "\n" +
-                "PRODUCTO / MARCA : " + p.getNombre() + "\n" +
-                "CATEGORÍA        : " + p.getCategoria() + "\n" +
-                "PRINCIPIO ACTIVO : " + p.getPrincipioActivo() + "\n" +
-                "PRESENTACIÓN     : " + p.getPresentacion() + "\n" +
-                "ESPECIE DESTINO  : " + p.getEspecieDestino() + "\n\n" +
-                "CONDICIONES DE CONSERVACIÓN Y VENTA:\n" +
-                "  • Dispensación : " + (p.isRequiereReceta() ? "VENTA EXCLUSIVA BAJO RECETA RETENIDA" : "VENTA LIBRE MOSTRADOR") + "\n" +
-                "  • Temperatura  : " + (p.isCadenaFrio() ? "REFRIGERACIÓN ESTRICTA (2°C A 8°C - NO CONGELAR)" : "AMBIENTE (MENOR A 25°C, LUGAR SECO Y FRESCO)") + "\n" +
-                "  • Laboratorio  : " + p.getProveedor() + "\n\n" +
-                "INDICACIONES TERAPÉUTICAS:\n" +
-                "Indicado en la prevención y tratamiento según prescripción del Médico Veterinario Colegiado.\n" +
-                "Mantener fuera del alcance de los niños y de animales domésticos sin indicación médica.\n" +
-                "=========================================================================\n" +
-                "Dirección Técnica Farmacéutica · Happy Pets Clínicas Veterinarias";
-
-        Ui.mostrarVisorReporte(
-                javax.swing.SwingUtilities.getWindowAncestor(this),
-                "Ficha Técnica - " + p.getCodigo(),
-                "FARMACOVIGILANCIA VETERINARIA · " + p.getNombre(),
-                prospecto,
-                "FichaTecnica_" + p.getCodigo()
-        );
-    }
-
-    private void generarEtiquetaDispensacion() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para generar la etiqueta de dispensación clínica.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String cod = (String) modeloProductos.getValueAt(fila, 0);
-        Optional<ProductoFarmacia> opt = repo.getProductosFarmacia().stream().filter(p -> p.getCodigo().equalsIgnoreCase(cod)).findFirst();
-        if (!opt.isPresent()) return;
-
-        ProductoFarmacia p = opt.get();
-        String etiqueta = "╔═══════════════════════════════════════════════════════╗\n" +
-                "║             VETERINARIA HAPPY PETS S.A.C.            ║\n" +
-                "║        Av. Primavera 1230, Surco - Tel. 984 552 110   ║\n" +
-                "╠═══════════════════════════════════════════════════════╣\n" +
-                "║ PACIENTE: ____________________  TUTOR: ______________ ║\n" +
-                "║ FECHA   : " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "        MÉDICO: Dr(a). Veterinario/a ║\n" +
-                "╠═══════════════════════════════════════════════════════╣\n" +
-                "║ MEDICAMENTO: " + String.format("%-39s", p.getNombre()) + "║\n" +
-                "║ DOSIS: _______________________ FRECUENCIA: __________ ║\n" +
-                "║ VÍA  : [ ] Oral  [ ] Tópica  [ ] Subcutánea  DURACIÓN: ║\n" +
-                "╠═══════════════════════════════════════════════════════╣\n" +
-                "║ CONSERVACIÓN: " + (p.isCadenaFrio() ? "MANTENER REFRIGERADO (2°C - 8°C)       " : "CONSERVAR EN LUGAR SECO Y FRESCO        ") + "║\n" +
-                "╚═══════════════════════════════════════════════════════╝";
-
-        Ui.mostrarVisorReporte(
-                javax.swing.SwingUtilities.getWindowAncestor(this),
-                "Etiqueta de Dispensación - " + p.getCodigo(),
-                "FARMACIA HAPPY PETS · " + p.getNombre(),
-                etiqueta,
-                "Etiqueta_" + p.getCodigo()
-        );
-    }
-
-    private void limpiarFormulario() {
-        txtCodigo.setText("PROD-" + String.format("%03d", repo.getProductosFarmacia().size() + 1));
-        txtNombre.setText("");
-        txtPrincipioActivo.setText("");
-        txtPresentacion.setText("");
-        txtPrecioCosto.setText("20.00");
-        txtPrecioVenta.setText("35.00");
-        txtStockActual.setText("10");
-        txtStockMinimo.setText("5");
-        chkReceta.setSelected(false);
-        chkCadenaFrio.setSelected(false);
-        tablaProductos.clearSelection();
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }

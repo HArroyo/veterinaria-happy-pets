@@ -1645,6 +1645,18 @@ public class RepositorioVeterinaria {
         actualizarStockProducto(a.getCodigoProducto(), delta);
     }
 
+    public void eliminarMovimientoStock(String idMovimiento) {
+        movimientosStock.removeIf(m -> m.getIdMovimiento().equalsIgnoreCase(idMovimiento));
+    }
+
+    public void eliminarOrdenCompra(String idOrden) {
+        ordenesCompra.removeIf(oc -> oc.getIdOrden().equalsIgnoreCase(idOrden));
+    }
+
+    public void eliminarAjusteMerma(String idAjuste) {
+        ajustesMermas.removeIf(a -> a.getIdAjuste().equalsIgnoreCase(idAjuste));
+    }
+
     // ==========================================
     // MÓDULO 6: FINANZAS Y VENTAS
     // ==========================================

@@ -11,50 +11,42 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.awt.geom.Ellipse2D;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.AjusteMerma;
-import happypets.model.ProductoFarmacia;
 import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 5.4: Ajustes y Mermas.
- * Basado en el wireframe oficial (Pág. 2) y normativas sanitarias veterinarias:
- * - Registro de bajas por caducidad de lotes, roturas accidentales y fallas de cadena de frío.
- * - Descuento automático de stock en inventario y Kardex.
- * - Valorización financiera de pérdidas por mermas en farmacia.
- * - Generación de Acta Oficial de Destrucción Sanitaria y Baja de Fármacos.
+ * Submódulo 5.4: Ajustes de Inventario y Registro de Mermas.
+ * Arquitectura Master-Detail (58% / 42%) - Opción A Recomendada:
+ * - Master Table: Registro de bajas por caducidad, roturas, fallas de cadena de frío y ajustes físicos.
+ * - Live Merma Hub: Telemetría de pérdida financiera, trazabilidad de lote, causas sanitarias y Acta Oficial de Destrucción.
  */
 public class VistaAjustesMermasPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_AZUL_PRIMARIO = Ui.TURQUESA;
-    private static final Color COLOR_TEXTO_TITULO = new Color(30, 41, 59);
-    private static final Color COLOR_TEXTO_MUTED = new Color(100, 116, 139);
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
@@ -64,53 +56,58 @@ public class VistaAjustesMermasPanel extends JPanel {
     private JLabel lblKpiLotesCaducados;
     private JLabel lblKpiRegularizaciones;
 
-    // Formulario de Ajuste
-    private JComboBox<ProductoItem> cbProducto;
-    private JTextField txtLote;
-    private JComboBox<String> cbTipo;
-    private JTextField txtCantidad;
-    private JTextField txtCostoUnitario;
-    private JTextField txtPerdidaCalculada;
-    private JTextArea txtMotivo;
-    private JTextField txtAutorizadoPor;
-
-    // Tabla de Ajustes
-    private JComboBox<String> cbFiltroTipo;
+    // Master Table & Filtros
+    private JTextField txtBuscar;
+    private String tipoFiltroSeleccionado = "TODOS";
+    private JPanel panelPillsTipo;
     private JTable tablaAjustes;
     private DefaultTableModel modeloAjustes;
-    private JLabel lblContadorAjustes;
-    private List<AjusteMerma> listaActual;
+    private List<AjusteMerma> listaAjustesFiltrada = new ArrayList<>();
+    private AjusteMerma ajusteSeleccionado;
+
+    // Live Merma Hub Componentes
+    private JPanel panelHubDetalle;
+    private JPanel panelHubVacio;
+    private JPanel contenedorPadre;
+    private JLabel lblHubAvatar;
+    private JLabel lblHubProducto;
+    private JLabel lblHubIdAjuste;
+    private JLabel lblHubBadgeTipo;
+
+    // Telemetría 2x2
+    private JLabel lblHubPerdida;
+    private JLabel lblHubCantidad;
+    private JLabel lblHubCostoUnitario;
+    private JLabel lblHubFecha;
+
+    // Secciones descriptivas
+    private JLabel lblHubCodigoProd;
+    private JLabel lblHubLote;
+    private JLabel lblHubAutorizadoPor;
+    private JLabel lblHubEstado;
+    private JLabel lblHubMotivo;
 
     public VistaAjustesMermasPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JPanel contenido = new JPanel();
-        contenido.setOpaque(false);
-        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
-        contenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        JPanel panelContenido = new JPanel();
+        panelContenido.setOpaque(false);
+        panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
+        panelContenido.setBorder(new EmptyBorder(12, 18, 14, 18));
 
-        // 1. Cabecera
-        contenido.add(crearCabeceraVista());
-        contenido.add(Box.createVerticalStrut(8));
+        // 1. Cabecera Principal
+        panelContenido.add(crearCabeceraVista());
+        panelContenido.add(Box.createVerticalStrut(10));
 
         // 2. Fila de KPIs
-        contenido.add(crearFilaKpis());
-        contenido.add(Box.createVerticalStrut(10));
+        panelContenido.add(crearFilaKpis());
+        panelContenido.add(Box.createVerticalStrut(12));
 
-        // 3. Doble Columna: Formulario y Tabla de Historial
-        contenido.add(crearDobleColumna());
+        // 3. Contenedor Master-Detail (58% / 42%)
+        panelContenido.add(crearSplitMasterDetail());
 
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.add(contenido, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(wrapper);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        add(scroll, BorderLayout.CENTER);
+        add(panelContenido, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -123,13 +120,13 @@ public class VistaAjustesMermasPanel extends JPanel {
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel titulo = new JLabel("Ajustes de Inventario y Control de Mermas");
+        JLabel titulo = new JLabel("Ajustes de Inventario y Registro de Mermas");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        titulo.setForeground(COLOR_TEXTO_TITULO);
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel subtitulo = new JLabel("Módulo 5.4 · Registro de bajas por caducidad, roturas, descarte biológico y regularización de inventario físico");
+        JLabel subtitulo = new JLabel("Módulo 5.4 · Registro de bajas por caducidad, roturas accidentales, auditoría física y actas de descarte");
         subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        subtitulo.setForeground(COLOR_TEXTO_MUTED);
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
         izq.add(titulo);
         izq.add(Box.createVerticalStrut(2));
@@ -139,39 +136,49 @@ public class VistaAjustesMermasPanel extends JPanel {
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
-        JLabel badgeAuditoria = new JLabel(" Protocolo de Descarte Sanitario & Farmacovigilancia ", SwingConstants.CENTER);
-        badgeAuditoria.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeAuditoria.setForeground(Ui.TURQUESA_PROFUNDO);
-        badgeAuditoria.setOpaque(true);
-        badgeAuditoria.setBackground(Ui.TURQUESA_SUAVE);
-        badgeAuditoria.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1, true),
+        JLabel badgeMerma = new JLabel("Control Sanitario Activo · Happy Pets", SwingConstants.CENTER);
+        badgeMerma.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        badgeMerma.setForeground(new Color(185, 28, 28));
+        badgeMerma.setOpaque(true);
+        badgeMerma.setBackground(new Color(254, 226, 226));
+        badgeMerma.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(254, 202, 202), 1, true),
                 new EmptyBorder(4, 10, 4, 10)
         ));
-        der.add(badgeAuditoria);
+        der.add(badgeMerma);
+
+        JButton btnNuevo = crearBotonAccion("Registrar Merma", Iconos.crearIconoAlertaMerma(14, Color.WHITE), true);
+        btnNuevo.addActionListener(e -> abrirModalNuevaMerma());
+        btnNuevo.setPreferredSize(new Dimension(165, 32));
+        der.add(btnNuevo);
+
+        JButton btnRefrescar = crearBotonAccion("Actualizar", false);
+        btnRefrescar.addActionListener(e -> recargarDatos());
+        btnRefrescar.setPreferredSize(new Dimension(100, 32));
+        der.add(btnRefrescar);
 
         cab.add(der, BorderLayout.EAST);
         return cab;
     }
 
     private JPanel crearFilaKpis() {
-        JPanel kpis = new JPanel(new GridLayout(1, 4, 10, 0));
-        kpis.setOpaque(false);
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
 
         lblKpiTotalAjustes = new JLabel("0", SwingConstants.LEFT);
-        lblKpiPerdidaTotal = new JLabel("S/. 0", SwingConstants.LEFT);
+        lblKpiPerdidaTotal = new JLabel("S/. 0.00", SwingConstants.LEFT);
         lblKpiLotesCaducados = new JLabel("0", SwingConstants.LEFT);
         lblKpiRegularizaciones = new JLabel("0", SwingConstants.LEFT);
 
-        kpis.add(crearTarjetaKpi("Ajustes Registrados", lblKpiTotalAjustes, "Transacciones de ajuste", new Color(14, 165, 233), Iconos.crearIconoAlertaMerma(18, new Color(14, 165, 233))));
-        kpis.add(crearTarjetaKpi("Pérdida Valorizada (Mes)", lblKpiPerdidaTotal, "Impacto económico neto", new Color(220, 38, 38), Iconos.crearIconoFactura(16, new Color(220, 38, 38))));
-        kpis.add(crearTarjetaKpi("Lotes Caducados", lblKpiLotesCaducados, "Bajas por vencimiento", new Color(245, 158, 11), Iconos.crearIconoReloj(16, new Color(245, 158, 11))));
-        kpis.add(crearTarjetaKpi("Conteo Físico / Regulariz.", lblKpiRegularizaciones, "Diferencias de stock", new Color(16, 185, 129), Iconos.crearIconoCheck(16, new Color(16, 185, 129))));
+        fila.add(crearTarjetaKpi("Mermas Registradas", lblKpiTotalAjustes, "Historial de bajas y descartes", new Color(14, 165, 233), Iconos.crearIconoDocumento(18, new Color(14, 165, 233))));
+        fila.add(crearTarjetaKpi("Pérdida Financiera", lblKpiPerdidaTotal, "Valorización total de pérdidas", new Color(239, 68, 68), Iconos.crearIconoAlertaMerma(16, new Color(239, 68, 68))));
+        fila.add(crearTarjetaKpi("Bajas por Vencimiento", lblKpiLotesCaducados, "Fármacos caducados retirados", new Color(245, 158, 11), Iconos.crearIconoCampana(16, new Color(245, 158, 11))));
+        fila.add(crearTarjetaKpi("Ajustes Físicos", lblKpiRegularizaciones, "Regularización de inventario", new Color(147, 51, 234), Iconos.crearIconoCajaAlmacen(16, new Color(147, 51, 234))));
 
-        return kpis;
+        return fila;
     }
 
-    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color colorAcento, Icon icono) {
+    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color acento, Icon icono) {
         JPanel card = new JPanel(new BorderLayout(8, 4)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -180,7 +187,7 @@ public class VistaAjustesMermasPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
+                g2.setColor(Ui.BORDE_SUAVE);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
             }
@@ -194,14 +201,14 @@ public class VistaAjustesMermasPanel extends JPanel {
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        t.setForeground(COLOR_TEXTO_MUTED);
+        t.setForeground(Ui.TEXTO_MUTED);
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        lblValor.setForeground(COLOR_TEXTO_TITULO);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
         JLabel sub = new JLabel(subtitulo);
         sub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        sub.setForeground(COLOR_TEXTO_MUTED);
+        sub.setForeground(Ui.TEXTO_MUTED);
 
         izq.add(t);
         izq.add(Box.createVerticalStrut(2));
@@ -220,185 +227,21 @@ public class VistaAjustesMermasPanel extends JPanel {
         return card;
     }
 
-    private JPanel crearDobleColumna() {
-        JPanel fila = new JPanel(new BorderLayout(14, 0));
-        fila.setOpaque(false);
+    private JPanel crearSplitMasterDetail() {
+        JPanel split = new JPanel(new BorderLayout(14, 0));
+        split.setOpaque(false);
 
-        // Columna Izquierda: Formulario (420px)
-        JPanel colIzquierda = crearPanelFormularioAjuste();
-        colIzquierda.setPreferredSize(new Dimension(420, 560));
-        fila.add(colIzquierda, BorderLayout.WEST);
+        JPanel panelMaster = crearPanelMaster();
+        split.add(panelMaster, BorderLayout.CENTER);
 
-        // Columna Derecha: Historial de Ajustes
-        JPanel colDerecha = crearPanelHistorialTabla();
-        fila.add(colDerecha, BorderLayout.CENTER);
+        JPanel panelDetail = crearPanelDetail();
+        panelDetail.setPreferredSize(new Dimension(460, 560));
+        split.add(panelDetail, BorderLayout.EAST);
 
-        return fila;
+        return split;
     }
 
-    private JPanel crearPanelFormularioAjuste() {
-        JPanel card = new JPanel(new BorderLayout()) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
-                g2.dispose();
-            }
-        };
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
-
-        JPanel form = new JPanel();
-        form.setOpaque(false);
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-
-        // Título del formulario
-        JLabel lblTitulo = new JLabel("Registro de Ajuste / Merma");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTitulo.setForeground(COLOR_TEXTO_TITULO);
-        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(lblTitulo);
-
-        JLabel lblSub = new JLabel("Baja formal de medicamentos con afectación de stock y cálculo de pérdida");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(lblSub);
-        form.add(Box.createVerticalStrut(10));
-
-        // Producto
-        form.add(crearEtiquetaCampo("Producto a Ajustar:"));
-        cbProducto = new JComboBox<>();
-        estilizarControl(cbProducto);
-        cbProducto.addActionListener(e -> autocompletarDatosProducto());
-        form.add(cbProducto);
-        form.add(Box.createVerticalStrut(6));
-
-        // Lote y Tipo en Grid
-        JPanel gridLoteTipo = new JPanel(new GridLayout(1, 2, 8, 0));
-        gridLoteTipo.setOpaque(false);
-        gridLoteTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridLoteTipo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pLote = new JPanel();
-        pLote.setOpaque(false);
-        pLote.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pLote.setLayout(new BoxLayout(pLote, BoxLayout.Y_AXIS));
-        pLote.add(crearEtiquetaCampo("Número de Lote:"));
-        txtLote = new JTextField("LOT-2024-88A");
-        estilizarControl(txtLote);
-        pLote.add(txtLote);
-        gridLoteTipo.add(pLote);
-
-        JPanel pTipo = new JPanel();
-        pTipo.setOpaque(false);
-        pTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pTipo.setLayout(new BoxLayout(pTipo, BoxLayout.Y_AXIS));
-        pTipo.add(crearEtiquetaCampo("Tipo de Ajuste:"));
-        cbTipo = new JComboBox<>(new String[]{
-                "Merma por Rotura / Deterioro",
-                "Vencimiento de Lote",
-                "Falla Cadena de Frío",
-                "Ajuste Físico Negativo (- Faltante)",
-                "Ajuste Físico Positivo (+ Sobrante)"
-        });
-        estilizarControl(cbTipo);
-        pTipo.add(cbTipo);
-        gridLoteTipo.add(pTipo);
-
-        form.add(gridLoteTipo);
-        form.add(Box.createVerticalStrut(6));
-
-        // Cantidad, Costo Unitario y Pérdida
-        JPanel gridValores = new JPanel(new GridLayout(1, 3, 6, 0));
-        gridValores.setOpaque(false);
-        gridValores.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gridValores.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-
-        JPanel pCant = new JPanel();
-        pCant.setOpaque(false);
-        pCant.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCant.setLayout(new BoxLayout(pCant, BoxLayout.Y_AXIS));
-        pCant.add(crearEtiquetaCampo("Cantidad:"));
-        txtCantidad = new JTextField("2");
-        estilizarControl(txtCantidad);
-        txtCantidad.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override public void keyReleased(java.awt.event.KeyEvent e) { recalcularPerdida(); }
-        });
-        pCant.add(txtCantidad);
-        gridValores.add(pCant);
-
-        JPanel pCosto = new JPanel();
-        pCosto.setOpaque(false);
-        pCosto.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pCosto.setLayout(new BoxLayout(pCosto, BoxLayout.Y_AXIS));
-        pCosto.add(crearEtiquetaCampo("Costo Unit. S/.:"));
-        txtCostoUnitario = new JTextField("25.00");
-        estilizarControl(txtCostoUnitario);
-        txtCostoUnitario.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override public void keyReleased(java.awt.event.KeyEvent e) { recalcularPerdida(); }
-        });
-        pCosto.add(txtCostoUnitario);
-        gridValores.add(pCosto);
-
-        JPanel pPerd = new JPanel();
-        pPerd.setOpaque(false);
-        pPerd.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pPerd.setLayout(new BoxLayout(pPerd, BoxLayout.Y_AXIS));
-        pPerd.add(crearEtiquetaCampo("Pérdida S/.:"));
-        txtPerdidaCalculada = new JTextField("50.00");
-        estilizarControl(txtPerdidaCalculada);
-        txtPerdidaCalculada.setEditable(false);
-        pPerd.add(txtPerdidaCalculada);
-        gridValores.add(pPerd);
-
-        form.add(gridValores);
-        form.add(Box.createVerticalStrut(6));
-
-        // Motivo Detallado
-        form.add(crearEtiquetaCampo("Motivo Detallado de la Merma:"));
-        txtMotivo = new JTextArea(3, 20);
-        txtMotivo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        txtMotivo.setLineWrap(true);
-        txtMotivo.setWrapStyleWord(true);
-        txtMotivo.setText("Lote caducado retirado de estantes de farmacia para descarte seguro.");
-        JScrollPane spMotivo = new JScrollPane(txtMotivo);
-        spMotivo.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        spMotivo.setPreferredSize(new Dimension(spMotivo.getPreferredSize().width, 60));
-        spMotivo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(spMotivo);
-        form.add(Box.createVerticalStrut(6));
-
-        // Autorizado Por
-        form.add(crearEtiquetaCampo("Autorizado por (Director Médico / Regente):"));
-        txtAutorizadoPor = new JTextField("Dr. Carlos Vargas (Director Médico)");
-        estilizarControl(txtAutorizadoPor);
-        form.add(txtAutorizadoPor);
-        form.add(Box.createVerticalStrut(14));
-
-        // Botones de acción
-        JPanel pBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pBotones.setOpaque(false);
-        pBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pBotones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-
-        JButton btnLimpiar = crearBoton("Limpiar", false, this::limpiarFormulario);
-        JButton btnGuardar = crearBoton("Registrar Ajuste / Baja", true, this::guardarAjuste);
-
-        pBotones.add(btnLimpiar);
-        pBotones.add(btnGuardar);
-        form.add(pBotones);
-
-        card.add(form, BorderLayout.CENTER);
-        return card;
-    }
-
-    private JPanel crearPanelHistorialTabla() {
+    private JPanel crearPanelMaster() {
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -407,336 +250,719 @@ public class VistaAjustesMermasPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(COLOR_BORDE);
+                g2.setColor(Ui.BORDE_SUAVE);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
-        // Cabecera superior
-        JPanel top = new JPanel(new BorderLayout(8, 0));
-        top.setOpaque(false);
+        // Filtros Superiores
+        JPanel panelFiltros = new JPanel();
+        panelFiltros.setOpaque(false);
+        panelFiltros.setLayout(new BoxLayout(panelFiltros, BoxLayout.Y_AXIS));
 
-        JPanel izq = new JPanel();
-        izq.setOpaque(false);
-        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
+        JPanel filaBusqueda = new JPanel(new BorderLayout(8, 0));
+        filaBusqueda.setOpaque(false);
 
-        JLabel lblTit = new JLabel("Historial de Bajas, Mermas y Descarte Sanitario");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        filaBusqueda.add(lblBuscar, BorderLayout.WEST);
 
-        lblContadorAjustes = new JLabel("0 registros de ajuste");
-        lblContadorAjustes.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lblContadorAjustes.setForeground(COLOR_TEXTO_MUTED);
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.setPreferredSize(new Dimension(200, 28));
+        txtBuscar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_INPUT, 1, true),
+                new EmptyBorder(2, 8, 2, 8)
+        ));
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { filtrarAjustes(); }
+            @Override public void removeUpdate(DocumentEvent e) { filtrarAjustes(); }
+            @Override public void changedUpdate(DocumentEvent e) { filtrarAjustes(); }
+        });
+        filaBusqueda.add(txtBuscar, BorderLayout.CENTER);
+        panelFiltros.add(filaBusqueda);
+        panelFiltros.add(Box.createVerticalStrut(8));
 
-        izq.add(lblTit);
-        izq.add(Box.createVerticalStrut(1));
-        izq.add(lblContadorAjustes);
-        top.add(izq, BorderLayout.WEST);
+        // Pills de Tipo
+        panelPillsTipo = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        panelPillsTipo.setOpaque(false);
+        String[] tipos = {"TODOS", "Vencimiento", "Rotura", "Cadena de Frío", "Ajuste"};
+        for (String t : tipos) {
+            JButton pill = crearBotonPill(t, t.equalsIgnoreCase(tipoFiltroSeleccionado));
+            pill.addActionListener(e -> {
+                tipoFiltroSeleccionado = t;
+                actualizarPills();
+                filtrarAjustes();
+            });
+            panelPillsTipo.add(pill);
+        }
+        panelFiltros.add(panelPillsTipo);
 
-        // Filtro por tipo
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        der.setOpaque(false);
+        card.add(panelFiltros, BorderLayout.NORTH);
 
-        JLabel lblFiltro = new JLabel("Tipo:");
-        lblFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblFiltro.setForeground(COLOR_TEXTO_MUTED);
-        der.add(lblFiltro);
-
-        cbFiltroTipo = new JComboBox<>(new String[]{"Todos", "Vencimiento", "Rotura", "Ajuste Físico"});
-        estilizarControl(cbFiltroTipo);
-        cbFiltroTipo.addActionListener(e -> filtrarTabla());
-        der.add(cbFiltroTipo);
-
-        top.add(der, BorderLayout.EAST);
-        card.add(top, BorderLayout.NORTH);
-
-        // Tabla
-        String[] columnas = {"ID", "Fecha", "Producto", "Lote", "Tipo Merma", "Cant.", "Pérdida S/.", "Autorizado Por", "Estado"};
+        // Tabla Master
+        String[] columnas = {"ID Ajuste", "Fármaco / Producto", "Causal de Baja", "Cantidad", "Pérdida S/.", "Lote", "Fecha"};
         modeloAjustes = new DefaultTableModel(columnas, 0) {
             private static final long serialVersionUID = 1L;
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override public boolean isCellEditable(int row, int col) { return false; }
         };
 
         tablaAjustes = new JTable(modeloAjustes);
-        Ui.formatearTabla(tablaAjustes, new int[]{0, 1, 3, 4, 8}, new int[]{5, 6});
+        tablaAjustes.setRowHeight(48);
+        tablaAjustes.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        tablaAjustes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaAjustes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaAjustes.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaAjustes.getTableHeader().setForeground(new Color(71, 85, 105));
+        tablaAjustes.setShowVerticalLines(false);
+        tablaAjustes.setGridColor(new Color(241, 245, 249));
 
-        tablaAjustes.getColumnModel().getColumn(0).setPreferredWidth(65);
-        tablaAjustes.getColumnModel().getColumn(1).setPreferredWidth(70);
+        // Anchos de columna
+        tablaAjustes.getColumnModel().getColumn(0).setPreferredWidth(85);
+        tablaAjustes.getColumnModel().getColumn(1).setPreferredWidth(175);
         tablaAjustes.getColumnModel().getColumn(2).setPreferredWidth(140);
-        tablaAjustes.getColumnModel().getColumn(3).setPreferredWidth(85);
-        tablaAjustes.getColumnModel().getColumn(4).setPreferredWidth(140);
-        tablaAjustes.getColumnModel().getColumn(5).setPreferredWidth(45);
+        tablaAjustes.getColumnModel().getColumn(3).setPreferredWidth(60);
+        tablaAjustes.getColumnModel().getColumn(4).setPreferredWidth(75);
+        tablaAjustes.getColumnModel().getColumn(5).setPreferredWidth(80);
         tablaAjustes.getColumnModel().getColumn(6).setPreferredWidth(75);
-        tablaAjustes.getColumnModel().getColumn(7).setPreferredWidth(120);
-        tablaAjustes.getColumnModel().getColumn(8).setPreferredWidth(110);
 
-        // Renderizador de Estado
-        tablaAjustes.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
+        // Renderers
+        tablaAjustes.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                l.setForeground(isSelected ? table.getSelectionForeground() : Ui.TURQUESA_PROFUNDO);
                 l.setHorizontalAlignment(SwingConstants.CENTER);
-                l.setForeground(Ui.COLOR_EXITO);
-                l.setBackground(new Color(209, 250, 229));
-                l.setOpaque(true);
                 return l;
             }
         });
 
-        JScrollPane scroll = new JScrollPane(tablaAjustes);
-        scroll.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
-        scroll.getViewport().setBackground(Color.WHITE);
-        card.add(scroll, BorderLayout.CENTER);
+        tablaAjustes.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
 
-        // Barra inferior de acciones
-        JPanel pAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pAcciones.setOpaque(false);
+                String nombre = value != null ? value.toString() : "";
+                String letra = !nombre.isEmpty() ? nombre.substring(0, 1).toUpperCase() : "A";
 
-        JButton btnActaBaja = crearBoton("Acta de Destrucción Sanitaria", true, this::imprimirActaDestruccion);
-        btnActaBaja.setIcon(Iconos.crearIconoDocumento(14, Color.WHITE));
-        pAcciones.add(btnActaBaja);
+                JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(new Color(254, 226, 226));
+                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.setColor(new Color(254, 202, 202));
+                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(30, 30));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(Ui.COLOR_PELIGRO);
 
-        card.add(pAcciones, BorderLayout.SOUTH);
+                JLabel lblNombre = new JLabel(nombre);
+                lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+                cell.add(avatar);
+                cell.add(lblNombre);
+                return cell;
+            }
+        });
+
+        tablaAjustes.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                String tipo = value != null ? value.toString() : "";
+                if (tipo.contains("Vencimiento") || tipo.contains("Frío")) {
+                    l.setForeground(Ui.COLOR_PELIGRO);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                } else if (tipo.contains("Rotura")) {
+                    l.setForeground(Ui.COLOR_ADVERTENCIA);
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                } else {
+                    l.setForeground(new Color(147, 51, 234));
+                    l.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                }
+                return l;
+            }
+        });
+
+        tablaAjustes.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tablaAjustes.getSelectedRow();
+                if (row >= 0 && row < listaAjustesFiltrada.size()) {
+                    mostrarDetalleAjuste(listaAjustesFiltrada.get(row));
+                }
+            }
+        });
+
+        JScrollPane sp = new JScrollPane(tablaAjustes);
+        sp.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        sp.getViewport().setBackground(Color.WHITE);
+        card.add(sp, BorderLayout.CENTER);
+
         return card;
     }
 
-    private JLabel crearEtiquetaCampo(String texto) {
-        JLabel l = new JLabel(texto, SwingConstants.LEFT);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        l.setForeground(new Color(71, 85, 105));
-        l.setBorder(new EmptyBorder(0, 0, 2, 0));
-        l.setHorizontalAlignment(SwingConstants.LEFT);
-        l.setAlignmentX(Component.LEFT_ALIGNMENT);
-        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
-        return l;
+    private JPanel crearPanelDetail() {
+        contenedorPadre = new JPanel(new BorderLayout());
+        contenedorPadre.setOpaque(false);
+
+        // Panel Estado Vacío
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione un registro de merma para visualizar la causal y el acta de baja", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        // Panel Detalle Activo
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // 1. Cabecera del Hub
+        JPanel cabHub = new JPanel(new BorderLayout(10, 0));
+        cabHub.setOpaque(false);
+
+        lblHubAvatar = new JLabel("A", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int diametro = Math.min(getWidth(), getHeight()) - 2;
+                if (diametro > 0) {
+                    g2.setColor(new Color(254, 226, 226));
+                    g2.fill(new Ellipse2D.Double(1, 1, diametro, diametro));
+                    g2.setColor(Ui.COLOR_PELIGRO);
+                    g2.draw(new Ellipse2D.Double(1, 1, diametro, diametro));
+                }
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setForeground(Ui.COLOR_PELIGRO);
+        cabHub.add(lblHubAvatar, BorderLayout.WEST);
+
+        JPanel infoMed = new JPanel();
+        infoMed.setOpaque(false);
+        infoMed.setLayout(new BoxLayout(infoMed, BoxLayout.Y_AXIS));
+
+        lblHubProducto = new JLabel("Producto");
+        lblHubProducto.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblHubProducto.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubIdAjuste = new JLabel("AJU-2024-00 · Lote");
+        lblHubIdAjuste.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubIdAjuste.setForeground(Ui.TEXTO_MUTED);
+
+        infoMed.add(lblHubProducto);
+        infoMed.add(Box.createVerticalStrut(2));
+        infoMed.add(lblHubIdAjuste);
+        cabHub.add(infoMed, BorderLayout.CENTER);
+
+        lblHubBadgeTipo = new JLabel("Merma", SwingConstants.CENTER);
+        lblHubBadgeTipo.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubBadgeTipo.setOpaque(true);
+        lblHubBadgeTipo.setBackground(new Color(254, 226, 226));
+        lblHubBadgeTipo.setForeground(Ui.COLOR_PELIGRO);
+        lblHubBadgeTipo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(254, 202, 202), 1, true),
+                new EmptyBorder(3, 8, 3, 8)
+        ));
+        cabHub.add(lblHubBadgeTipo, BorderLayout.EAST);
+        panelHubDetalle.add(cabHub, BorderLayout.NORTH);
+
+        // 2. Contenido Scrollable
+        ScrollablePanel scrollContent = new ScrollablePanel();
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+        scrollContent.setOpaque(false);
+
+        // Telemetría 2x2
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridTelemetria.setOpaque(false);
+
+        lblHubPerdida = new JLabel("S/. 0.00");
+        lblHubCantidad = new JLabel("0 un.");
+        lblHubCostoUnitario = new JLabel("S/. 0.00");
+        lblHubFecha = new JLabel("-");
+
+        gridTelemetria.add(crearCajaTelemetria("PÉRDIDA VALORIZADA", lblHubPerdida, Ui.COLOR_PELIGRO));
+        gridTelemetria.add(crearCajaTelemetria("CANTIDAD DESCARGADA", lblHubCantidad, new Color(14, 165, 233)));
+        gridTelemetria.add(crearCajaTelemetria("COSTO ADQUISICIÓN", lblHubCostoUnitario, new Color(100, 116, 139)));
+        gridTelemetria.add(crearCajaTelemetria("FECHA DE BAJA", lblHubFecha, Ui.TURQUESA_PROFUNDO));
+
+        scrollContent.add(gridTelemetria);
+        scrollContent.add(Box.createVerticalStrut(10));
+
+        // Causal Sanitaria
+        JPanel seccionMotivo = crearSeccionDetalle("CAUSAL SANITARIA & DICTAMEN MÉDICO");
+        lblHubMotivo = new JLabel("-");
+        lblHubMotivo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubMotivo.setForeground(Ui.TEXTO_REGULAR);
+        seccionMotivo.add(lblHubMotivo);
+        scrollContent.add(seccionMotivo);
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Trazabilidad de Lote
+        JPanel seccionLote = crearSeccionDetalle("TRAZABILIDAD DE LOTE & ALMACÉN");
+        lblHubCodigoProd = new JLabel("-");
+        lblHubLote = new JLabel("-");
+
+        seccionLote.add(crearFilaDato("Código de Producto:", lblHubCodigoProd));
+        seccionLote.add(crearFilaDato("Número de Lote:", lblHubLote));
+        scrollContent.add(seccionLote);
+        scrollContent.add(Box.createVerticalStrut(8));
+
+        // Autorización
+        JPanel seccionAutor = crearSeccionDetalle("AUTORIZACIÓN & AUDITORÍA");
+        lblHubAutorizadoPor = new JLabel("-");
+        lblHubEstado = new JLabel("-");
+
+        seccionAutor.add(crearFilaDato("Autorizado Por:", lblHubAutorizadoPor));
+        seccionAutor.add(crearFilaDato("Estado del Ajuste:", lblHubEstado));
+        scrollContent.add(seccionAutor);
+
+        JScrollPane spHub = new JScrollPane(scrollContent);
+        spHub.setBorder(null);
+        spHub.setOpaque(false);
+        spHub.getViewport().setOpaque(false);
+        spHub.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        spHub.getVerticalScrollBar().setUnitIncrement(16);
+        panelHubDetalle.add(spHub, BorderLayout.CENTER);
+
+        // 3. Barra de Acciones Rápidas (1-Click)
+        JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
+        barraAcciones.setOpaque(false);
+
+        JButton btnActa = crearBotonAccion("Acta Destrucción", Iconos.crearIconoDocumento(14, Color.WHITE), true);
+        btnActa.addActionListener(e -> emitirActaDestruccion());
+
+        JButton btnCertificado = crearBotonAccion("Certificado Baja", Iconos.crearIconoCertificado(14, new Color(37, 99, 235)), false);
+        btnCertificado.addActionListener(e -> emitirCertificadoMerma());
+
+        JButton btnAuditoria = crearBotonAccion("Notificar Auditoría", Iconos.crearIconoCampana(14, Ui.COLOR_ADVERTENCIA), false);
+        btnAuditoria.addActionListener(e -> notificarAuditoria());
+
+        JButton btnAnular = crearBotonAccion("Anular Registro", Iconos.crearIconoLapiz(14, new Color(100, 116, 139)), false);
+        btnAnular.addActionListener(e -> anularMerma());
+
+        barraAcciones.add(btnActa);
+        barraAcciones.add(btnCertificado);
+        barraAcciones.add(btnAuditoria);
+        barraAcciones.add(btnAnular);
+
+        panelHubDetalle.add(barraAcciones, BorderLayout.SOUTH);
+
+        contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
+        return contenedorPadre;
     }
 
-    private void estilizarControl(Component c) {
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        c.setPreferredSize(new Dimension(c.getPreferredSize().width, 27));
-        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 27));
-        if (c instanceof javax.swing.JComponent jc) {
-            jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private JPanel crearCajaTelemetria(String titulo, JLabel lblValor, Color colorAcento) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setForeground(colorAcento);
+
+        c.add(t);
+        c.add(Box.createVerticalStrut(2));
+        c.add(lblValor);
+        return c;
+    }
+
+    private JPanel crearSeccionDetalle(String titulo) {
+        JPanel sec = new JPanel();
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setOpaque(false);
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                new EmptyBorder(6, 10, 6, 10)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_PROFUNDO);
+        t.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        sec.add(t);
+        sec.add(Box.createVerticalStrut(4));
+        return sec;
+    }
+
+    private JPanel crearFilaDato(String etiqueta, JLabel lblValor) {
+        JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 1));
+        fila.setOpaque(false);
+        fila.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblE = new JLabel(etiqueta);
+        lblE.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblE.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblValor.setForeground(Ui.TEXTO_REGULAR);
+
+        fila.add(lblE);
+        fila.add(lblValor);
+        return fila;
+    }
+
+    public void recargarDatos() {
+        filtrarAjustes();
+        actualizarKpis();
+    }
+
+    private void actualizarKpis() {
+        List<AjusteMerma> todos = repo.getAjustesMermas();
+        lblKpiTotalAjustes.setText(String.valueOf(todos.size()));
+
+        double perdida = 0;
+        int vencidos = 0;
+        int reg = 0;
+
+        for (AjusteMerma a : todos) {
+            perdida += a.getPerdidaValorizada();
+            if (a.getTipo().contains("Vencimiento")) vencidos++;
+            if (a.getTipo().contains("Ajuste")) reg++;
         }
-        if (c instanceof JTextField) {
-            ((JTextField) c).setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(COLOR_BORDE, 1, true),
-                    new EmptyBorder(2, 6, 2, 6)
-            ));
-        } else if (c instanceof JComboBox) {
-            c.setBackground(Color.WHITE);
+
+        lblKpiPerdidaTotal.setText(String.format("S/. %.2f", perdida));
+        lblKpiLotesCaducados.setText(String.valueOf(vencidos));
+        lblKpiRegularizaciones.setText(String.valueOf(reg));
+    }
+
+    private void filtrarAjustes() {
+        String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+        List<AjusteMerma> todos = repo.getAjustesMermas();
+        listaAjustesFiltrada.clear();
+
+        for (AjusteMerma a : todos) {
+            boolean coincideTipo = "TODOS".equalsIgnoreCase(tipoFiltroSeleccionado)
+                    || a.getTipo().toLowerCase().contains(tipoFiltroSeleccionado.toLowerCase());
+            if (!coincideTipo) continue;
+
+            if (!query.isEmpty()) {
+                boolean match = a.getIdAjuste().toLowerCase().contains(query)
+                        || a.getNombreProducto().toLowerCase().contains(query)
+                        || a.getNumeroLote().toLowerCase().contains(query)
+                        || a.getMotivoDetallado().toLowerCase().contains(query)
+                        || a.getAutorizadoPor().toLowerCase().contains(query);
+                if (!match) continue;
+            }
+
+            listaAjustesFiltrada.add(a);
+        }
+
+        modeloAjustes.setRowCount(0);
+        for (AjusteMerma a : listaAjustesFiltrada) {
+            modeloAjustes.addRow(new Object[]{
+                    a.getIdAjuste(),
+                    a.getNombreProducto(),
+                    a.getTipo(),
+                    a.getCantidad() + " un.",
+                    String.format("%.2f", a.getPerdidaValorizada()),
+                    a.getNumeroLote(),
+                    a.getFechaFormateada()
+            });
+        }
+
+        if (!listaAjustesFiltrada.isEmpty()) {
+            tablaAjustes.setRowSelectionInterval(0, 0);
+            mostrarDetalleAjuste(listaAjustesFiltrada.get(0));
+        } else {
+            ajusteSeleccionado = null;
+            contenedorPadre.removeAll();
+            contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
+            contenedorPadre.revalidate();
+            contenedorPadre.repaint();
         }
     }
 
-    private JButton crearBoton(String texto, boolean primario, Runnable accion) {
+    private void mostrarDetalleAjuste(AjusteMerma a) {
+        this.ajusteSeleccionado = a;
+        contenedorPadre.removeAll();
+        contenedorPadre.add(panelHubDetalle, BorderLayout.CENTER);
+
+        String letra = !a.getNombreProducto().isEmpty() ? a.getNombreProducto().substring(0, 1).toUpperCase() : "A";
+        lblHubAvatar.setText(letra);
+
+        lblHubProducto.setText(a.getNombreProducto());
+        lblHubIdAjuste.setText(a.getIdAjuste() + " · Lote: " + a.getNumeroLote());
+
+        // Badge Tipo
+        lblHubBadgeTipo.setText(a.getTipo());
+        if (a.getTipo().contains("Vencimiento") || a.getTipo().contains("Frío")) {
+            lblHubBadgeTipo.setBackground(new Color(254, 226, 226));
+            lblHubBadgeTipo.setForeground(Ui.COLOR_PELIGRO);
+        } else if (a.getTipo().contains("Rotura")) {
+            lblHubBadgeTipo.setBackground(new Color(254, 243, 199));
+            lblHubBadgeTipo.setForeground(new Color(217, 119, 6));
+        } else {
+            lblHubBadgeTipo.setBackground(new Color(243, 232, 255));
+            lblHubBadgeTipo.setForeground(new Color(126, 34, 206));
+        }
+
+        // Telemetría
+        lblHubPerdida.setText(String.format("S/. %.2f", a.getPerdidaValorizada()));
+        lblHubCantidad.setText(a.getCantidad() + " unidades");
+        lblHubCostoUnitario.setText(String.format("S/. %.2f", a.getCostoUnitario()));
+        lblHubFecha.setText(a.getFechaFormateada());
+
+        // Secciones
+        lblHubMotivo.setText("<html>" + a.getMotivoDetallado() + "</html>");
+        lblHubCodigoProd.setText(a.getCodigoProducto());
+        lblHubLote.setText(a.getNumeroLote());
+        lblHubAutorizadoPor.setText(a.getAutorizadoPor());
+        lblHubEstado.setText(a.getEstado());
+
+        contenedorPadre.revalidate();
+        contenedorPadre.repaint();
+    }
+
+    private void abrirModalNuevaMerma() {
+        FormularioAjusteMermaDialog dlg = new FormularioAjusteMermaDialog(
+                (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this)
+        );
+        dlg.setVisible(true);
+        if (dlg.isGuardadoExitoso()) {
+            recargarDatos();
+        }
+    }
+
+    private void emitirActaDestruccion() {
+        if (ajusteSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro de merma para emitir el acta.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String acta = "ACTA OFICIAL DE DESTRUCCIÓN SANITARIA Y BAJA DE MEDICAMENTOS VETERINARIOS\n" +
+                "CLÍNICA & HOSPITAL VETERINARIO HAPPY PETS S.A.C.\n" +
+                "=========================================================================\n\n" +
+                "CÓDIGO DE ACTA   : " + ajusteSeleccionado.getIdAjuste() + "\n" +
+                "FECHA DE BAJA    : " + ajusteSeleccionado.getFechaFormateada() + "\n" +
+                "CAUSAL SANITARIA : " + ajusteSeleccionado.getTipo() + "\n\n" +
+                "DATOS DEL PRODUCTO DADO DE BAJA:\n" +
+                "• Nombre Fármaco : " + ajusteSeleccionado.getNombreProducto() + "\n" +
+                "• Código Interno : " + ajusteSeleccionado.getCodigoProducto() + "\n" +
+                "• Lote de Fab.   : " + ajusteSeleccionado.getNumeroLote() + "\n" +
+                "• Cantidad Total : " + ajusteSeleccionado.getCantidad() + " unidades físicas\n" +
+                "• Costo Unitario : S/. " + String.format("%.2f", ajusteSeleccionado.getCostoUnitario()) + "\n" +
+                "• PÉRDIDA VALOR. : S/. " + String.format("%.2f", ajusteSeleccionado.getPerdidaValorizada()) + "\n\n" +
+                "CIRCUNSTANCIAS Y MOTIVO:\n" +
+                ajusteSeleccionado.getMotivoDetallado() + "\n\n" +
+                "DICTAMEN ÉTICO Y SANITARIO:\n" +
+                "En cumplimiento con las normativas sanitarias vigentes y las buenas prácticas de almacenamiento (BPA),\n" +
+                "se procede con la desnaturalización e incineración controlada de los fármacos inhabilitados.\n\n" +
+                "__________________________             __________________________\n" +
+                "  Regente Farmacéutico                  Dirección Médica Happy Pets\n" +
+                "  Colegiatura N°: ________               " + ajusteSeleccionado.getAutorizadoPor() + "\n";
+
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Acta Destrucción - " + ajusteSeleccionado.getIdAjuste(),
+                "ACTA OFICIAL DE DESTRUCCIÓN SANITARIA",
+                acta,
+                "Acta_Destruccion_" + ajusteSeleccionado.getIdAjuste()
+        );
+    }
+
+    private void emitirCertificadoMerma() {
+        if (ajusteSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para generar certificado de baja contable.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String certificado = "CERTIFICADO DE DESCARGO Y BAJA CONTABLE DE INVENTARIO\n" +
+                "HAPPY PETS - AUDITORÍA Y CONTROL FINANCIERO\n" +
+                "=========================================================================\n\n" +
+                "REFERENCIA REGISTRO : " + ajusteSeleccionado.getIdAjuste() + "\n" +
+                "FECHA CONTABLE      : " + ajusteSeleccionado.getFechaFormateada() + "\n" +
+                "PRODUCTO AFECTADO   : " + ajusteSeleccionado.getNombreProducto() + " (" + ajusteSeleccionado.getCodigoProducto() + ")\n" +
+                "LOTE DE REGISTRO    : " + ajusteSeleccionado.getNumeroLote() + "\n" +
+                "CANTIDAD AJUSTADA   : " + ajusteSeleccionado.getCantidad() + " unidades\n" +
+                "PÉRDIDA PATRIMONIAL : S/. " + String.format("%.2f", ajusteSeleccionado.getPerdidaValorizada()) + "\n" +
+                "ESTADO PROCESO      : " + ajusteSeleccionado.getEstado() + "\n\n" +
+                "RESPONSABLE DE APROBACIÓN:\n" +
+                ajusteSeleccionado.getAutorizadoPor() + "\n\n" +
+                "__________________________\n" +
+                "   Auditoría Financiera\n";
+
+        Ui.mostrarVisorReporte(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Certificado Baja - " + ajusteSeleccionado.getIdAjuste(),
+                "CERTIFICADO DE BAJA PATRIMONIAL",
+                certificado,
+                "Certificado_Baja_" + ajusteSeleccionado.getIdAjuste()
+        );
+    }
+
+    private void notificarAuditoria() {
+        if (ajusteSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para notificar a auditoría.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String msg = "Notificación de Merma emitida para Auditoría Interna:\n" +
+                "ID: " + ajusteSeleccionado.getIdAjuste() + " | Producto: " + ajusteSeleccionado.getNombreProducto() +
+                "\nPérdida: S/. " + String.format("%.2f", ajusteSeleccionado.getPerdidaValorizada()) +
+                " (" + ajusteSeleccionado.getCantidad() + " un.)\nCausal: " + ajusteSeleccionado.getTipo();
+
+        JOptionPane.showMessageDialog(this, msg, "Notificación a Auditoría Enviada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void anularMerma() {
+        if (ajusteSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para anular.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int conf = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de anular el registro de merma " + ajusteSeleccionado.getIdAjuste() + "?\n" +
+                "Producto: " + ajusteSeleccionado.getNombreProducto() + "\nPérdida: S/. " + String.format("%.2f", ajusteSeleccionado.getPerdidaValorizada()),
+                "Confirmar Anulación", JOptionPane.YES_NO_OPTION);
+
+        if (conf == JOptionPane.YES_OPTION) {
+            repo.eliminarAjusteMerma(ajusteSeleccionado.getIdAjuste());
+            recargarDatos();
+            JOptionPane.showMessageDialog(this, "Registro de merma anulado exitosamente.", "Anulación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private JButton crearBotonPill(String texto, boolean activo) {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (primario) {
-                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : COLOR_AZUL_PRIMARIO);
+                boolean act = Boolean.TRUE.equals(getClientProperty("activo"));
+                if (act) {
+                    g2.setColor(Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.setColor(act ? Ui.TURQUESA_OSCURO : Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        btn.putClientProperty("activo", activo);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(activo ? Color.WHITE : new Color(71, 85, 105));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(3, 10, 3, 10));
+        return btn;
+    }
+
+    private void actualizarPills() {
+        for (Component c : panelPillsTipo.getComponents()) {
+            if (c instanceof JButton) {
+                JButton b = (JButton) c;
+                boolean act = b.getText().equalsIgnoreCase(tipoFiltroSeleccionado);
+                b.putClientProperty("activo", act);
+                b.setForeground(act ? Color.WHITE : new Color(71, 85, 105));
+                b.repaint();
+            }
+        }
+    }
+
+    private JButton crearBotonAccion(String texto, boolean primario) {
+        return crearBotonAccion(texto, null, primario);
+    }
+
+    private JButton crearBotonAccion(String texto, Icon icono, boolean primario) {
+        JButton btn = new JButton(texto) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                boolean esPrimario = Boolean.TRUE.equals(getClientProperty("primario"));
+                if (esPrimario) {
+                    g2.setColor(getModel().isRollover() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
                 } else {
                     g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
                 }
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                if (!primario) {
+                if (!esPrimario) {
                     g2.setColor(Ui.BORDE_SUAVE);
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 }
-                super.paintComponent(g2);
+                super.paintComponent(g);
                 g2.dispose();
             }
 
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
-                return new Dimension(d.width + 16, 28);
+                return new Dimension(d.width + 12, 30);
             }
         };
+        if (icono != null) {
+            btn.setIcon(icono);
+            btn.setIconTextGap(6);
+        }
+        btn.putClientProperty("primario", primario);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setOpaque(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(5, 12, 5, 12));
-        btn.addActionListener(e -> accion.run());
+        btn.setBorder(new EmptyBorder(4, 10, 4, 10));
         return btn;
     }
 
-    public void recargarDatos() {
-        if (cbProducto.getItemCount() == 0) {
-            for (ProductoFarmacia p : repo.getProductosFarmacia()) {
-                cbProducto.addItem(new ProductoItem(p));
-            }
-            autocompletarDatosProducto();
-        }
-
-        listaActual = repo.getAjustesMermas();
-        filtrarTabla();
-
-        // KPIs
-        double perdidaTotal = listaActual.stream().filter(a -> !a.getTipo().contains("Positivo")).mapToDouble(AjusteMerma::getPerdidaValorizada).sum();
-        long caducados = listaActual.stream().filter(a -> a.getTipo().contains("Vencimiento")).count();
-        long regulariz = listaActual.stream().filter(a -> a.getTipo().contains("Físico")).count();
-
-        lblKpiTotalAjustes.setText(String.valueOf(listaActual.size()));
-        lblKpiPerdidaTotal.setText("S/. " + String.format("%.2f", perdidaTotal));
-        lblKpiLotesCaducados.setText(String.valueOf(caducados));
-        lblKpiRegularizaciones.setText(String.valueOf(regulariz));
-    }
-
-    private void autocompletarDatosProducto() {
-        ProductoItem item = (ProductoItem) cbProducto.getSelectedItem();
-        if (item != null && item.producto != null) {
-            txtLote.setText(item.producto.getLoteActual());
-            txtCostoUnitario.setText(String.format("%.2f", item.producto.getPrecioCosto()));
-            recalcularPerdida();
-        }
-    }
-
-    private void recalcularPerdida() {
-        try {
-            int c = Integer.parseInt(txtCantidad.getText().trim());
-            double u = Double.parseDouble(txtCostoUnitario.getText().trim());
-            txtPerdidaCalculada.setText(String.format("%.2f", c * u));
-        } catch (Exception ignored) {}
-    }
-
-    private void filtrarTabla() {
-        if (listaActual == null) return;
-        modeloAjustes.setRowCount(0);
-        String filtro = cbFiltroTipo != null ? (String) cbFiltroTipo.getSelectedItem() : "Todos";
-
-        int cont = 0;
-        for (AjusteMerma a : listaActual) {
-            if (!"Todos".equalsIgnoreCase(filtro)) {
-                if (!a.getTipo().toLowerCase().contains(filtro.toLowerCase())) continue;
-            }
-
-            cont++;
-            modeloAjustes.addRow(new Object[]{
-                    a.getIdAjuste(),
-                    a.getFechaFormateada(),
-                    a.getNombreProducto(),
-                    a.getNumeroLote(),
-                    a.getTipo(),
-                    a.getCantidad(),
-                    "S/. " + String.format("%.2f", a.getPerdidaValorizada()),
-                    a.getAutorizadoPor(),
-                    a.getEstado()
-            });
-        }
-        lblContadorAjustes.setText(cont + " ajustes mostrados");
-    }
-
-    private void guardarAjuste() {
-        ProductoItem pi = (ProductoItem) cbProducto.getSelectedItem();
-        if (pi == null || pi.producto == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar el ajuste.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int cant = 1;
-        double costo = 20.0;
-        try { cant = Integer.parseInt(txtCantidad.getText().trim()); } catch (Exception ignored) {}
-        try { costo = Double.parseDouble(txtCostoUnitario.getText().trim()); } catch (Exception ignored) {}
-
-        String tipo = (String) cbTipo.getSelectedItem();
-        if (!tipo.contains("Positivo") && pi.producto.getStockActual() < cant) {
-            JOptionPane.showMessageDialog(this, "La cantidad a dar de baja (" + cant + ") supera el stock actual disponible (" + pi.producto.getStockActual() + ").", "Stock Insuficiente", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        AjusteMerma a = new AjusteMerma(
-                null,
-                LocalDate.now(),
-                pi.producto.getCodigo(),
-                pi.producto.getNombre(),
-                txtLote.getText().trim(),
-                tipo,
-                cant,
-                costo,
-                cant * costo,
-                txtMotivo.getText().trim(),
-                txtAutorizadoPor.getText().trim(),
-                "Aprobado y Descargado"
-        );
-
-        repo.guardarAjusteMerma(a);
-        recargarDatos();
-        limpiarFormulario();
-
-        JOptionPane.showMessageDialog(this,
-                "Ajuste de inventario registrado con éxito.\n\n" +
-                        "Producto: " + a.getNombreProducto() + "\n" +
-                        "Tipo: " + a.getTipo() + " (" + a.getCantidad() + " un.)\n" +
-                        "Impacto Económico: S/. " + String.format("%.2f", a.getPerdidaValorizada()) + "\n" +
-                        "Stock de almacén actualizado automáticamente.",
-                "Ajuste Procesado", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void imprimirActaDestruccion() {
-        int fila = tablaAjustes.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de ajuste para emitir el Acta de Destrucción.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String idAjuste = (String) modeloAjustes.getValueAt(fila, 0);
-        Optional<AjusteMerma> opt = repo.getAjustesMermas().stream().filter(a -> a.getIdAjuste().equalsIgnoreCase(idAjuste)).findFirst();
-        if (!opt.isPresent()) return;
-
-        AjusteMerma a = opt.get();
-        String acta = "ACTA OFICIAL DE DESTRUCCIÓN SANITARIA Y BAJA DE FÁRMACOS VETERINARIOS\n" +
-                "CLÍNICA VETERINARIA HAPPY PETS S.A.C. · DIRECCIÓN TÉCNICA\n" +
-                "=========================================================================\n\n" +
-                "EXPEDIENTE DE MERMA: " + a.getIdAjuste() + "\n" +
-                "FECHA DE ACTA      : " + a.getFechaFormateada() + "\n" +
-                "AUTORIZADO POR     : " + a.getAutorizadoPor() + "\n\n" +
-                "DATOS DEL PRODUCTO DADO DE BAJA:\n" +
-                "  • Código Producto: " + a.getCodigoProducto() + "\n" +
-                "  • Nombre Fármaco : " + a.getNombreProducto() + "\n" +
-                "  • Lote Afectado  : " + a.getNumeroLote() + "\n" +
-                "  • Causal de Baja : " + a.getTipo() + "\n" +
-                "  • Cantidad Dada  : " + a.getCantidad() + " unidades físicas\n" +
-                "  • Costo Unitario : S/. " + String.format("%.2f", a.getCostoUnitario()) + "\n" +
-                "  • PÉRDIDA TOTAL  : S/. " + String.format("%.2f", a.getPerdidaValorizada()) + "\n\n" +
-                "DESCRIPCIÓN DEL MOTIVO TÉCNICO:\n" +
-                a.getMotivoDetallado() + "\n\n" +
-                "PROCEDIMIENTO DE DISPOSICIÓN FINAL:\n" +
-                "Se procede a la inactivación física y entrega a empresa operadora de residuos biocontaminados,\n" +
-                "en estricto cumplimiento de las normas de farmacovigilancia y sanidad animal.\n\n" +
-                "__________________________             __________________________\n" +
-                "    Regente Farmacéutico                    Director Médico Veterinario\n" +
-                "  CQVP Matrícula Nº 4120                     Colegio Médico Veterinario\n";
-
-        Ui.mostrarVisorReporte(
-                javax.swing.SwingUtilities.getWindowAncestor(this),
-                "Acta de Destrucción Sanitaria - " + a.getIdAjuste(),
-                "BAJA DE FÁRMACOS Y MERMAS · " + a.getNombreProducto(),
-                acta,
-                "Acta_Destruccion_" + a.getIdAjuste()
-        );
-    }
-
-    private void limpiarFormulario() {
-        txtCantidad.setText("1");
-        txtMotivo.setText("Baja regularizada por auditoría.");
-    }
-
-    private static class ProductoItem {
-        final ProductoFarmacia producto;
-        ProductoItem(ProductoFarmacia p) { this.producto = p; }
-        @Override public String toString() {
-            if (producto == null) return "Seleccione...";
-            return producto.getCodigo() + " - " + producto.getNombre();
-        }
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }
