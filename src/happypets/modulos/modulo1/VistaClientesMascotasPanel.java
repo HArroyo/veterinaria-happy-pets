@@ -1268,16 +1268,47 @@ public class VistaClientesMascotasPanel extends JPanel {
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                     g2.setColor(isSelected ? COLOR_TURQUESA : new Color(203, 213, 225));
-                    g2.fillOval(0, 0, getWidth(), getHeight());
+                    
+                    int diametro = Math.min(getWidth(), getHeight());
+                    if (diametro > 34) {
+                        diametro = 34;
+                    }
+                    int x = (getWidth() - diametro) / 2;
+                    int y = (getHeight() - diametro) / 2;
+                    g2.fillOval(x, y, diametro, diametro);
+                    
                     super.paintComponent(g2);
                     g2.dispose();
                 }
+
+                @Override
+                public Dimension getPreferredSize() {
+                    return new Dimension(34, 34);
+                }
+
+                @Override
+                public Dimension getMinimumSize() {
+                    return new Dimension(34, 34);
+                }
+
+                @Override
+                public Dimension getMaximumSize() {
+                    return new Dimension(34, 34);
+                }
             };
-            lblAvatar.setPreferredSize(new Dimension(34, 34));
+            lblAvatar.setHorizontalAlignment(SwingConstants.CENTER);
+            lblAvatar.setVerticalAlignment(SwingConstants.CENTER);
             lblAvatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
             lblAvatar.setForeground(Color.WHITE);
-            add(lblAvatar, BorderLayout.WEST);
+
+            JPanel pAvatarWrapper = new JPanel(new java.awt.GridBagLayout());
+            pAvatarWrapper.setOpaque(false);
+            pAvatarWrapper.setPreferredSize(new Dimension(38, 38));
+            pAvatarWrapper.setMinimumSize(new Dimension(38, 38));
+            pAvatarWrapper.add(lblAvatar);
+            add(pAvatarWrapper, BorderLayout.WEST);
 
             // Centro: Nombre y datos
             JPanel mid = new JPanel();
