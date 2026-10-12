@@ -84,7 +84,7 @@ public class VistaHospitalizacionPanel extends JPanel {
     private JLabel lblHubTemp;
     private JLabel lblHubFC;
     private JLabel lblHubTarifa;
-    private JLabel lblHubDiagnostico;
+    private JTextArea lblHubDiagnostico;
     private JLabel lblHubVeterinario;
     private JLabel lblHubTutor;
     private JLabel lblHubTelefono;
@@ -111,7 +111,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetail());
-        splitPane.setResizeWeight(0.58);
+        splitPane.setResizeWeight(1.0);
         splitPane.setDividerSize(6);
         splitPane.setBorder(new EmptyBorder(0, 16, 12, 16));
         splitPane.setOpaque(false);
@@ -450,7 +450,9 @@ public class VistaHospitalizacionPanel extends JPanel {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
+        card.setPreferredSize(new Dimension(360, 0));
+        card.setMinimumSize(new Dimension(320, 0));
 
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
@@ -459,11 +461,11 @@ public class VistaHospitalizacionPanel extends JPanel {
         lblVacio.setForeground(Ui.TEXTO_MUTED);
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
-        panelHubDetalle = new JPanel(new BorderLayout(0, 10));
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8));
         panelHubDetalle.setOpaque(false);
 
         // 1. Cabecera del Hub
-        JPanel topHub = new JPanel(new BorderLayout(10, 0));
+        JPanel topHub = new JPanel(new BorderLayout(8, 0));
         topHub.setOpaque(false);
 
         lblHubAvatar = new JLabel() {
@@ -481,9 +483,9 @@ public class VistaHospitalizacionPanel extends JPanel {
                 g2.dispose();
             }
         };
-        lblHubAvatar.setPreferredSize(new Dimension(54, 54));
+        lblHubAvatar.setPreferredSize(new Dimension(42, 42));
         lblHubAvatar.setHorizontalAlignment(SwingConstants.CENTER);
-        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblHubAvatar.setForeground(Ui.COLOR_PELIGRO);
         topHub.add(lblHubAvatar, BorderLayout.WEST);
 
@@ -492,11 +494,11 @@ public class VistaHospitalizacionPanel extends JPanel {
         centroTit.setLayout(new BoxLayout(centroTit, BoxLayout.Y_AXIS));
 
         lblHubNombreMascota = new JLabel("Nombre Paciente");
-        lblHubNombreMascota.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblHubNombreMascota.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblHubNombreMascota.setForeground(Ui.TEXTO_TITULO);
 
         lblHubSubtituloMascota = new JLabel("Especie · Raza · Código");
-        lblHubSubtituloMascota.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblHubSubtituloMascota.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblHubSubtituloMascota.setForeground(Ui.TEXTO_MUTED);
 
         centroTit.add(lblHubNombreMascota);
@@ -505,24 +507,34 @@ public class VistaHospitalizacionPanel extends JPanel {
         topHub.add(centroTit, BorderLayout.CENTER);
 
         lblHubBadgeBox = new JLabel("BOX 01 · UCI", SwingConstants.CENTER);
-        lblHubBadgeBox.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubBadgeBox.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lblHubBadgeBox.setOpaque(true);
         lblHubBadgeBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(4, 10, 4, 10)
+                new EmptyBorder(3, 8, 3, 8)
         ));
         topHub.add(lblHubBadgeBox, BorderLayout.EAST);
         panelHubDetalle.add(topHub, BorderLayout.NORTH);
 
         // 2. Contenido Central Estructurado
-        ScrollablePanel hubBody = new ScrollablePanel();
+        ScrollablePanel hubBody = new ScrollablePanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         hubBody.setLayout(new BoxLayout(hubBody, BoxLayout.Y_AXIS));
         hubBody.setOpaque(false);
 
         // 2x2 Constantes Vitales
-        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 6, 6));
         gridMetricas.setOpaque(false);
-        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+        gridMetricas.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblHubPeso = new JLabel("-", SwingConstants.CENTER);
         lblHubTemp = new JLabel("-", SwingConstants.CENTER);
@@ -534,15 +546,20 @@ public class VistaHospitalizacionPanel extends JPanel {
         gridMetricas.add(crearCajaMetrica("FRECUENCIA CARDÍACA", lblHubFC, new Color(217, 119, 6)));
         gridMetricas.add(crearCajaMetrica("TARIFA DIARIA S/.", lblHubTarifa, new Color(22, 163, 74)));
         hubBody.add(gridMetricas);
-        hubBody.add(Box.createVerticalStrut(10));
+        hubBody.add(vGap(8));
 
         // Diagnóstico & Médico
-        lblHubDiagnostico = new JLabel("-");
-        lblHubDiagnostico.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblHubDiagnostico = new JTextArea("-");
+        lblHubDiagnostico.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblHubDiagnostico.setForeground(Ui.COLOR_PELIGRO);
+        lblHubDiagnostico.setLineWrap(true);
+        lblHubDiagnostico.setWrapStyleWord(true);
+        lblHubDiagnostico.setEditable(false);
+        lblHubDiagnostico.setOpaque(false);
+        lblHubDiagnostico.setBorder(null);
 
         lblHubVeterinario = new JLabel("-");
-        lblHubVeterinario.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblHubVeterinario.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblHubVeterinario.setForeground(Ui.TEXTO_TITULO);
 
         lblHubTutor = new JLabel("-");
@@ -559,7 +576,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         secDiag.add(crearItemLinea("Tutor Titular:", lblHubTutor));
         secDiag.add(crearItemLinea("Teléfono Emergencia:", lblHubTelefono));
         hubBody.add(secDiag);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Fluidoterapia & Vía
         txtHubFluidoterapia = new JTextArea(2, 20);
@@ -568,10 +585,11 @@ public class VistaHospitalizacionPanel extends JPanel {
         txtHubFluidoterapia.setWrapStyleWord(true);
         txtHubFluidoterapia.setEditable(false);
         txtHubFluidoterapia.setOpaque(false);
+        txtHubFluidoterapia.setAlignmentX(Component.LEFT_ALIGNMENT);
         JPanel secFlu = crearSeccionCard("FLUIDOTERAPIA & VÍA DE INFUSIÓN");
         secFlu.add(txtHubFluidoterapia);
         hubBody.add(secFlu);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Medicación Activa
         txtHubMedicacion = new JTextArea(2, 20);
@@ -580,10 +598,11 @@ public class VistaHospitalizacionPanel extends JPanel {
         txtHubMedicacion.setWrapStyleWord(true);
         txtHubMedicacion.setEditable(false);
         txtHubMedicacion.setOpaque(false);
+        txtHubMedicacion.setAlignmentX(Component.LEFT_ALIGNMENT);
         JPanel secMed = crearSeccionCard("MEDICAMENTOS INTRAHOSPITALARIOS ACTIVOS");
         secMed.add(txtHubMedicacion);
         hubBody.add(secMed);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Evolución Diaria
         txtHubEvolucion = new JTextArea(3, 20);
@@ -592,6 +611,7 @@ public class VistaHospitalizacionPanel extends JPanel {
         txtHubEvolucion.setWrapStyleWord(true);
         txtHubEvolucion.setEditable(false);
         txtHubEvolucion.setOpaque(false);
+        txtHubEvolucion.setAlignmentX(Component.LEFT_ALIGNMENT);
         JPanel secEvo = crearSeccionCard("EVOLUCIÓN & NOTAS DE ENFERMERÍA 24/7");
         secEvo.add(txtHubEvolucion);
         hubBody.add(secEvo);
@@ -607,6 +627,8 @@ public class VistaHospitalizacionPanel extends JPanel {
         // 3. Barra Inferior de Acciones Rápidas
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
+        barraAcciones.setPreferredSize(new Dimension(0, 62));
+        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
 
         JButton btnAlta = crearBotonAccion("Dar Alta Médica", Iconos.crearIconoCheck(14, Color.WHITE), true);
         btnAlta.addActionListener(e -> darAltaMedicaSeleccionada());
@@ -637,13 +659,13 @@ public class VistaHospitalizacionPanel extends JPanel {
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(6, 8, 6, 8)
+                new EmptyBorder(4, 8, 4, 8)
         ));
         JLabel lblEt = new JLabel(etiqueta);
-        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 8));
         lblEt.setForeground(Ui.TEXTO_MUTED);
 
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblValor.setForeground(colorValor);
 
         c.add(lblEt);
@@ -653,32 +675,67 @@ public class VistaHospitalizacionPanel extends JPanel {
     }
 
     private JPanel crearSeccionCard(String titulo) {
-        JPanel sec = new JPanel();
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         sec.setOpaque(false);
         sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
         sec.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(8, 10, 8, 10)
+                new EmptyBorder(6, 10, 6, 10)
         ));
         sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
         t.setForeground(Ui.TURQUESA_OSCURO);
-        sec.add(t);
+        header.add(t);
+
+        sec.add(header);
         sec.add(Box.createVerticalStrut(4));
         return sec;
     }
 
     private JPanel crearItemLinea(String label, Component valor) {
-        JPanel p = new JPanel(new BorderLayout(6, 0));
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(label);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         l.setForeground(Ui.TEXTO_MUTED);
         p.add(l, BorderLayout.WEST);
         p.add(valor, BorderLayout.CENTER);
         return p;
+    }
+
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
     }
 
     public void recargarDatos() {

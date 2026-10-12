@@ -29,7 +29,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -93,7 +95,7 @@ public class VistaControlStockLotesPanel extends JPanel {
     private JLabel lblHubResponsable;
     private JLabel lblHubStockPrevio;
     private JLabel lblHubObservacion;
-    private JLabel lblHubProtocoloFefo;
+    private JTextArea lblHubProtocoloFefo;
 
     public VistaControlStockLotesPanel() {
         setLayout(new BorderLayout());
@@ -242,29 +244,12 @@ public class VistaControlStockLotesPanel extends JPanel {
         return card;
     }
 
-    private JPanel crearSplitMasterDetail() {
-        JPanel split = new JPanel(new GridBagLayout());
+    private JSplitPane crearSplitMasterDetail() {
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetail());
+        split.setResizeWeight(1.0);
+        split.setDividerSize(6);
+        split.setBorder(null);
         split.setOpaque(false);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 1.0;
-
-        // Master Panel (54%)
-        gbc.gridx = 0;
-        gbc.weightx = 0.54;
-        gbc.insets = new Insets(0, 0, 0, 12);
-        split.add(crearPanelMaster(), gbc);
-
-        // Detail Live Hub (46%)
-        gbc.gridx = 1;
-        gbc.weightx = 0.46;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        JPanel panelDetail = crearPanelDetail();
-        panelDetail.setPreferredSize(new Dimension(490, 560));
-        panelDetail.setMinimumSize(new Dimension(450, 500));
-        split.add(panelDetail, gbc);
-
         return split;
     }
 
@@ -449,12 +434,14 @@ public class VistaControlStockLotesPanel extends JPanel {
     private JPanel crearPanelDetail() {
         contenedorPadre = new JPanel(new BorderLayout());
         contenedorPadre.setOpaque(false);
+        contenedorPadre.setPreferredSize(new Dimension(360, 0));
+        contenedorPadre.setMinimumSize(new Dimension(320, 0));
 
         // Panel Estado Vacío
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
-        JLabel lblVacio = new JLabel("Seleccione un registro del Kardex para inspeccionar su trazabilidad", SwingConstants.CENTER);
-        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        JLabel lblVacio = new JLabel("<html><center>Seleccione un registro del Kardex<br>para inspeccionar su trazabilidad.</center></html>", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblVacio.setForeground(Ui.TEXTO_MUTED);
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
@@ -466,17 +453,17 @@ public class VistaControlStockLotesPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.setColor(Ui.BORDE_SUAVE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
                 g2.dispose();
             }
         };
         panelHubDetalle.setOpaque(false);
-        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
+        panelHubDetalle.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // 1. Cabecera del Hub
-        JPanel cabHub = new JPanel(new BorderLayout(10, 0));
+        JPanel cabHub = new JPanel(new BorderLayout(8, 0));
         cabHub.setOpaque(false);
 
         lblHubAvatar = new JLabel("M", SwingConstants.CENTER) {
@@ -496,8 +483,8 @@ public class VistaControlStockLotesPanel extends JPanel {
                 g2.dispose();
             }
         };
-        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
-        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setPreferredSize(new Dimension(42, 42));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
         cabHub.add(lblHubAvatar, BorderLayout.WEST);
 
@@ -531,14 +518,24 @@ public class VistaControlStockLotesPanel extends JPanel {
         panelHubDetalle.add(cabHub, BorderLayout.NORTH);
 
         // 2. Contenido Scrollable
-        ScrollablePanel scrollContent = new ScrollablePanel();
+        ScrollablePanel scrollContent = new ScrollablePanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
         scrollContent.setOpaque(false);
 
         // Telemetría 2x2
-        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 6, 6));
         gridTelemetria.setOpaque(false);
-        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+        gridTelemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblHubCantidad = new JLabel("+0 un.");
         lblHubStockPosterior = new JLabel("0 un.");
@@ -551,44 +548,66 @@ public class VistaControlStockLotesPanel extends JPanel {
         gridTelemetria.add(crearCajaTelemetria("FECHA MOVIMIENTO", lblHubFechaMovimiento, Ui.TURQUESA_PROFUNDO));
 
         scrollContent.add(gridTelemetria);
-        scrollContent.add(Box.createVerticalStrut(8));
+        scrollContent.add(vGap(8));
 
         // Trazabilidad
-        JPanel seccionLote = crearSeccionDetalle("TRAZABILIDAD DE LOTE & FARMACOPEA");
+        JPanel seccionLote = crearSeccionCard("TRAZABILIDAD DE LOTE & FARMACOPEA");
         lblHubCodigoProd = new JLabel("-");
-        lblHubLote = new JLabel("-");
-        lblHubFechaVenc = new JLabel("-");
+        lblHubCodigoProd.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubCodigoProd.setForeground(Ui.TURQUESA_PROFUNDO);
 
-        seccionLote.add(crearFilaDato("Código Producto:", lblHubCodigoProd));
-        seccionLote.add(Box.createVerticalStrut(3));
-        seccionLote.add(crearFilaDato("Número de Lote:", lblHubLote));
-        seccionLote.add(Box.createVerticalStrut(3));
-        seccionLote.add(crearFilaDato("Fecha de Vencimiento:", lblHubFechaVenc));
+        lblHubLote = new JLabel("-");
+        lblHubLote.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubLote.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubFechaVenc = new JLabel("-");
+        lblHubFechaVenc.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubFechaVenc.setForeground(Ui.TEXTO_TITULO);
+
+        seccionLote.add(crearItemLinea("Código Producto:", lblHubCodigoProd));
+        seccionLote.add(vGap(3));
+        seccionLote.add(crearItemLinea("Número de Lote:", lblHubLote));
+        seccionLote.add(vGap(3));
+        seccionLote.add(crearItemLinea("Fecha de Vencimiento:", lblHubFechaVenc));
         scrollContent.add(seccionLote);
-        scrollContent.add(Box.createVerticalStrut(8));
+        scrollContent.add(vGap(6));
 
         // Auditoría
-        JPanel seccionAuditoria = crearSeccionDetalle("AUDITORÍA DE MOVIMIENTO & ALMACÉN");
+        JPanel seccionAuditoria = crearSeccionCard("AUDITORÍA DE MOVIMIENTO & ALMACÉN");
         lblHubResponsable = new JLabel("-");
-        lblHubStockPrevio = new JLabel("-");
-        lblHubObservacion = new JLabel("-");
+        lblHubResponsable.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubResponsable.setForeground(Ui.TEXTO_TITULO);
 
-        seccionAuditoria.add(crearFilaDato("Responsable / Regente:", lblHubResponsable));
-        seccionAuditoria.add(Box.createVerticalStrut(3));
-        seccionAuditoria.add(crearFilaDato("Stock Previo Operación:", lblHubStockPrevio));
-        seccionAuditoria.add(Box.createVerticalStrut(3));
-        seccionAuditoria.add(crearFilaDato("Referencia / Doc.:", lblHubObservacion));
+        lblHubStockPrevio = new JLabel("-");
+        lblHubStockPrevio.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubStockPrevio.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubObservacion = new JLabel("-");
+        lblHubObservacion.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubObservacion.setForeground(Ui.TEXTO_MUTED);
+
+        seccionAuditoria.add(crearItemLinea("Responsable / Regente:", lblHubResponsable));
+        seccionAuditoria.add(vGap(3));
+        seccionAuditoria.add(crearItemLinea("Stock Previo Operación:", lblHubStockPrevio));
+        seccionAuditoria.add(vGap(3));
+        seccionAuditoria.add(crearItemLinea("Referencia / Doc.:", lblHubObservacion));
         scrollContent.add(seccionAuditoria);
-        scrollContent.add(Box.createVerticalStrut(8));
+        scrollContent.add(vGap(6));
 
         // Protocolo Sanitario
-        JPanel seccionFefo = crearSeccionDetalle("DISPENSACIÓN FEFO (FIRST EXPIRED, FIRST OUT)");
-        lblHubProtocoloFefo = new JLabel("Lote validado bajo política FEFO. Cumple normativa sanitaria.");
+        JPanel seccionFefo = crearSeccionCard("DISPENSACIÓN FEFO (FIRST EXPIRED, FIRST OUT)");
+        lblHubProtocoloFefo = new JTextArea("Lote validado bajo política FEFO. Cumple normativa sanitaria.");
         lblHubProtocoloFefo.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblHubProtocoloFefo.setForeground(new Color(22, 163, 74));
+        lblHubProtocoloFefo.setLineWrap(true);
+        lblHubProtocoloFefo.setWrapStyleWord(true);
+        lblHubProtocoloFefo.setEditable(false);
+        lblHubProtocoloFefo.setOpaque(false);
+        lblHubProtocoloFefo.setBorder(null);
+        lblHubProtocoloFefo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         seccionFefo.add(lblHubProtocoloFefo);
         scrollContent.add(seccionFefo);
-        scrollContent.add(Box.createVerticalGlue());
 
         JScrollPane spHub = new JScrollPane(scrollContent);
         spHub.setBorder(null);
@@ -601,8 +620,8 @@ public class VistaControlStockLotesPanel extends JPanel {
         // 3. Barra de Acciones Rápidas (1-Click)
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
-        barraAcciones.setPreferredSize(new Dimension(0, 72));
-        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
+        barraAcciones.setPreferredSize(new Dimension(0, 62));
+        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
 
         JButton btnComprobante = crearBotonAccion("Nota de Almacén", Iconos.crearIconoDocumento(14, Color.WHITE), true);
         btnComprobante.addActionListener(e -> emitirNotaAlmacen());
@@ -632,15 +651,15 @@ public class VistaControlStockLotesPanel extends JPanel {
         c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                new EmptyBorder(6, 10, 6, 10)
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(4, 8, 4, 8)
         ));
 
         JLabel t = new JLabel(titulo);
-        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setFont(new Font("Segoe UI", Font.BOLD, 8));
         t.setForeground(Ui.TEXTO_MUTED);
 
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblValor.setForeground(colorAcento);
 
         c.add(t);
@@ -649,43 +668,68 @@ public class VistaControlStockLotesPanel extends JPanel {
         return c;
     }
 
-    private JPanel crearSeccionDetalle(String titulo) {
-        JPanel sec = new JPanel();
+    private JPanel crearSeccionCard(String titulo) {
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
+        sec.setOpaque(false);
         sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
-        sec.setBackground(new Color(248, 250, 252));
         sec.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                new EmptyBorder(8, 12, 8, 12)
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(6, 10, 6, 10)
         ));
+        sec.setBackground(Color.WHITE);
         sec.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        t.setForeground(Ui.TURQUESA_PROFUNDO);
-        t.setAlignmentX(Component.LEFT_ALIGNMENT);
+        t.setForeground(Ui.TURQUESA_OSCURO);
+        header.add(t);
 
-        sec.add(t);
-        sec.add(Box.createVerticalStrut(5));
+        sec.add(header);
+        sec.add(vGap(4));
         return sec;
     }
 
-    private JPanel crearFilaDato(String etiqueta, JLabel lblValor) {
-        JPanel fila = new JPanel(new BorderLayout(8, 0));
-        fila.setOpaque(false);
-        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
-        fila.setAlignmentX(Component.LEFT_ALIGNMENT);
+    private JPanel crearItemLinea(String label, Component valor) {
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
+        p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel l = new JLabel(label);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        l.setForeground(Ui.TEXTO_MUTED);
+        p.add(l, BorderLayout.WEST);
+        p.add(valor, BorderLayout.CENTER);
+        return p;
+    }
 
-        JLabel lblE = new JLabel(etiqueta);
-        lblE.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblE.setForeground(Ui.TEXTO_MUTED);
-        lblE.setPreferredSize(new Dimension(130, 20));
-
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblValor.setForeground(Ui.TEXTO_TITULO);
-
-        fila.add(lblE, BorderLayout.WEST);
-        fila.add(lblValor, BorderLayout.CENTER);
-        return fila;
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
     }
 
     public void recargarDatos() {

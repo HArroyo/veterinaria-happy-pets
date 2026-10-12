@@ -103,7 +103,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetail());
-        splitPane.setResizeWeight(0.58);
+        splitPane.setResizeWeight(1.0);
         splitPane.setDividerSize(6);
         splitPane.setBorder(new EmptyBorder(0, 16, 12, 16));
         splitPane.setOpaque(false);
@@ -392,7 +392,9 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
+        card.setPreferredSize(new Dimension(360, 0));
+        card.setMinimumSize(new Dimension(320, 0));
 
         // Panel Vacío (cuando no hay selección)
         panelHubVacio = new JPanel(new BorderLayout());
@@ -403,11 +405,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
         // Panel con Detalle Activo
-        panelHubDetalle = new JPanel(new BorderLayout(0, 10));
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8));
         panelHubDetalle.setOpaque(false);
 
         // 1. Cabecera del Hub
-        JPanel topHub = new JPanel(new BorderLayout(10, 0));
+        JPanel topHub = new JPanel(new BorderLayout(8, 0));
         topHub.setOpaque(false);
 
         lblHubAvatar = new JLabel() {
@@ -425,9 +427,9 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
                 g2.dispose();
             }
         };
-        lblHubAvatar.setPreferredSize(new Dimension(54, 54));
+        lblHubAvatar.setPreferredSize(new Dimension(42, 42));
         lblHubAvatar.setHorizontalAlignment(SwingConstants.CENTER);
-        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblHubAvatar.setForeground(Ui.TURQUESA);
         topHub.add(lblHubAvatar, BorderLayout.WEST);
 
@@ -459,14 +461,24 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         panelHubDetalle.add(topHub, BorderLayout.NORTH);
 
         // 2. Contenido Central Estructurado
-        ScrollablePanel hubBody = new ScrollablePanel();
+        ScrollablePanel hubBody = new ScrollablePanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         hubBody.setLayout(new BoxLayout(hubBody, BoxLayout.Y_AXIS));
         hubBody.setOpaque(false);
 
         // 2x2 Telemetría / Métricas clave
-        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 6, 6));
         gridMetricas.setOpaque(false);
-        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+        gridMetricas.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblHubHora = new JLabel("-", SwingConstants.CENTER);
         lblHubPrecio = new JLabel("-", SwingConstants.CENTER);
@@ -478,7 +490,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         gridMetricas.add(crearCajaMetrica("GROOMER ASIGNADO", lblHubEstilista, Ui.TEXTO_TITULO));
         gridMetricas.add(crearCajaMetrica("PACIENTE / ESPECIE", lblHubEspecie, Ui.TEXTO_MUTED));
         hubBody.add(gridMetricas);
-        hubBody.add(Box.createVerticalStrut(10));
+        hubBody.add(vGap(8));
 
         // Servicio & Tutor
         lblHubServicio = new JLabel("-");
@@ -498,7 +510,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         secServicio.add(crearItemLinea("Tutor Titular:", lblHubTutor));
         secServicio.add(crearItemLinea("Teléfono Contacto:", lblHubTelefono));
         hubBody.add(secServicio);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Checklist Sanitario
         panelHubChecklistBadges = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
@@ -506,7 +518,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         JPanel secChecklist = crearSeccionCard("CHECKLIST SANITARIO DE ADMISIÓN");
         secChecklist.add(panelHubChecklistBadges);
         hubBody.add(secChecklist);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Cosmética & Productos
         lblHubCosmetica = new JLabel("-");
@@ -515,7 +527,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         JPanel secCosmetica = crearSeccionCard("COSMÉTICA & CHAMPÚS ESPECIALES");
         secCosmetica.add(lblHubCosmetica);
         hubBody.add(secCosmetica);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Observaciones y Conducta
         txtHubObservaciones = new JTextArea(3, 20);
@@ -539,6 +551,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         // 3. Barra Inferior de Acciones Rápidas
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
+        barraAcciones.setPreferredSize(new Dimension(0, 62));
+        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
 
         JButton btnAvanzar = crearBotonAccion("Avanzar Etapa", Iconos.crearIconoCheck(14, Color.WHITE), true);
         btnAvanzar.addActionListener(e -> avanzarEtapaServicio());
@@ -569,13 +583,13 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(6, 8, 6, 8)
+                new EmptyBorder(4, 8, 4, 8)
         ));
         JLabel lblEt = new JLabel(etiqueta);
-        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 8));
         lblEt.setForeground(Ui.TEXTO_MUTED);
 
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblValor.setForeground(colorValor);
 
         c.add(lblEt);
@@ -585,32 +599,67 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
     }
 
     private JPanel crearSeccionCard(String titulo) {
-        JPanel sec = new JPanel();
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         sec.setOpaque(false);
         sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
         sec.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(8, 10, 8, 10)
+                new EmptyBorder(6, 10, 6, 10)
         ));
         sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
         t.setForeground(Ui.TURQUESA_OSCURO);
-        sec.add(t);
-        sec.add(Box.createVerticalStrut(6));
+        header.add(t);
+
+        sec.add(header);
+        sec.add(Box.createVerticalStrut(4));
         return sec;
     }
 
     private JPanel crearItemLinea(String label, Component valor) {
-        JPanel p = new JPanel(new BorderLayout(6, 0));
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(label);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         l.setForeground(Ui.TEXTO_MUTED);
         p.add(l, BorderLayout.WEST);
         p.add(valor, BorderLayout.CENTER);
         return p;
+    }
+
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
     }
 
     public void recargarDatos() {

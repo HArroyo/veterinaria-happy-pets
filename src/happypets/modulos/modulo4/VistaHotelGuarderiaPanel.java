@@ -101,7 +101,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, crearPanelMaster(), crearPanelDetail());
-        splitPane.setResizeWeight(0.58);
+        splitPane.setResizeWeight(1.0);
         splitPane.setDividerSize(6);
         splitPane.setBorder(new EmptyBorder(0, 16, 12, 16));
         splitPane.setOpaque(false);
@@ -389,7 +389,9 @@ public class VistaHotelGuarderiaPanel extends JPanel {
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 14, 12, 14));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
+        card.setPreferredSize(new Dimension(360, 0));
+        card.setMinimumSize(new Dimension(320, 0));
 
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
@@ -398,11 +400,11 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         lblVacio.setForeground(Ui.TEXTO_MUTED);
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
-        panelHubDetalle = new JPanel(new BorderLayout(0, 10));
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8));
         panelHubDetalle.setOpaque(false);
 
         // 1. Cabecera del Hub
-        JPanel topHub = new JPanel(new BorderLayout(10, 0));
+        JPanel topHub = new JPanel(new BorderLayout(8, 0));
         topHub.setOpaque(false);
 
         lblHubAvatar = new JLabel() {
@@ -420,9 +422,9 @@ public class VistaHotelGuarderiaPanel extends JPanel {
                 g2.dispose();
             }
         };
-        lblHubAvatar.setPreferredSize(new Dimension(54, 54));
+        lblHubAvatar.setPreferredSize(new Dimension(42, 42));
         lblHubAvatar.setHorizontalAlignment(SwingConstants.CENTER);
-        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblHubAvatar.setForeground(Ui.TURQUESA);
         topHub.add(lblHubAvatar, BorderLayout.WEST);
 
@@ -454,14 +456,24 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         panelHubDetalle.add(topHub, BorderLayout.NORTH);
 
         // 2. Contenido Central Estructurado
-        ScrollablePanel hubBody = new ScrollablePanel();
+        ScrollablePanel hubBody = new ScrollablePanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         hubBody.setLayout(new BoxLayout(hubBody, BoxLayout.Y_AXIS));
         hubBody.setOpaque(false);
 
         // 2x2 Telemetría de Estadía
-        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 6, 6));
         gridMetricas.setOpaque(false);
-        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+        gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+        gridMetricas.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblHubNoches = new JLabel("-", SwingConstants.CENTER);
         lblHubTarifaNoche = new JLabel("-", SwingConstants.CENTER);
@@ -473,7 +485,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         gridMetricas.add(crearCajaMetrica("TOTAL LIQUIDACIÓN", lblHubTotal, new Color(22, 163, 74)));
         gridMetricas.add(crearCajaMetrica("BAÑO DE SALIDA", lblHubBanoSalida, new Color(147, 51, 234)));
         hubBody.add(gridMetricas);
-        hubBody.add(Box.createVerticalStrut(10));
+        hubBody.add(vGap(8));
 
         // Tutor & Cronograma
         lblHubTutor = new JLabel("-");
@@ -493,7 +505,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         secTutor.add(crearItemLinea("Teléfono Emergencia 24H:", lblHubEmergencia));
         secTutor.add(crearItemLinea("Fechas Check-In / Out:", lblHubFechasEstadia));
         hubBody.add(secTutor);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Nutrición & Dieta
         lblHubDieta = new JLabel("-");
@@ -502,7 +514,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         JPanel secDieta = crearSeccionCard("PLAN DE NUTRICIÓN & DIETA SUPERVISADA");
         secDieta.add(lblHubDieta);
         hubBody.add(secDieta);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Recreación y Paseos
         lblHubPaseos = new JLabel("-");
@@ -511,7 +523,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         JPanel secPaseos = crearSeccionCard("CRONOGRAMA DE PASEOS & RECREACIÓN");
         secPaseos.add(lblHubPaseos);
         hubBody.add(secPaseos);
-        hubBody.add(Box.createVerticalStrut(8));
+        hubBody.add(vGap(6));
 
         // Medicación & Cuidados Particulares
         txtHubMedicacion = new JTextArea(2, 20);
@@ -535,6 +547,8 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         // 3. Barra Inferior de Acciones Rápidas
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
+        barraAcciones.setPreferredSize(new Dimension(0, 62));
+        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
 
         JButton btnCheckout = crearBotonAccion("Registrar Check-Out", Iconos.crearIconoCheck(14, Color.WHITE), true);
         btnCheckout.addActionListener(e -> realizarCheckout());
@@ -565,13 +579,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(6, 8, 6, 8)
+                new EmptyBorder(4, 8, 4, 8)
         ));
         JLabel lblEt = new JLabel(etiqueta);
-        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        lblEt.setFont(new Font("Segoe UI", Font.BOLD, 8));
         lblEt.setForeground(Ui.TEXTO_MUTED);
 
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblValor.setForeground(colorValor);
 
         c.add(lblEt);
@@ -581,32 +595,67 @@ public class VistaHotelGuarderiaPanel extends JPanel {
     }
 
     private JPanel crearSeccionCard(String titulo) {
-        JPanel sec = new JPanel();
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         sec.setOpaque(false);
         sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
         sec.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
-                new EmptyBorder(8, 10, 8, 10)
+                new EmptyBorder(6, 10, 6, 10)
         ));
         sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
         t.setForeground(Ui.TURQUESA_OSCURO);
-        sec.add(t);
+        header.add(t);
+
+        sec.add(header);
         sec.add(Box.createVerticalStrut(4));
         return sec;
     }
 
     private JPanel crearItemLinea(String label, Component valor) {
-        JPanel p = new JPanel(new BorderLayout(6, 0));
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(label);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         l.setForeground(Ui.TEXTO_MUTED);
         p.add(l, BorderLayout.WEST);
         p.add(valor, BorderLayout.CENTER);
         return p;
+    }
+
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
     }
 
     public void recargarDatos() {
