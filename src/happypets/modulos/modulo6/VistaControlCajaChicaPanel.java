@@ -31,7 +31,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
@@ -90,10 +92,10 @@ public class VistaControlCajaChicaPanel extends JPanel {
     private JLabel lblHubTipoTransaccion;
 
     // Secciones de Detalle
-    private JLabel lblHubResponsable;
-    private JLabel lblHubComprobante;
-    private JLabel lblHubConcepto;
-    private JLabel lblHubSaldoActualCaja;
+    private JTextArea lblHubResponsable;
+    private JTextArea lblHubComprobante;
+    private JTextArea lblHubConcepto;
+    private JTextArea lblHubSaldoActualCaja;
 
     private MovimientoCajaChica movimientoSeleccionado;
 
@@ -236,26 +238,17 @@ public class VistaControlCajaChicaPanel extends JPanel {
         return card;
     }
 
-    private JPanel crearSplitMasterDetail() {
-        JPanel split = new JPanel(new GridBagLayout());
+    private JSplitPane crearSplitMasterDetail() {
+        JPanel master = crearPanelMasterTable();
+        JPanel detail = crearPanelLiveHub();
+        detail.setPreferredSize(new Dimension(360, 0));
+        detail.setMinimumSize(new Dimension(320, 0));
+
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, master, detail);
+        split.setResizeWeight(1.0);
+        split.setDividerSize(6);
+        split.setBorder(null);
         split.setOpaque(false);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 1.0;
-
-        // 58% Tabla Maestra Izquierda
-        gbc.gridx = 0;
-        gbc.weightx = 0.58;
-        gbc.insets = new java.awt.Insets(0, 0, 0, 12);
-        split.add(crearPanelMasterTable(), gbc);
-
-        // 42% Live Hub Derecha
-        gbc.gridx = 1;
-        gbc.weightx = 0.42;
-        gbc.insets = new java.awt.Insets(0, 0, 0, 0);
-        split.add(crearPanelLiveHub(), gbc);
-
         return split;
     }
 
@@ -471,7 +464,7 @@ public class VistaControlCajaChicaPanel extends JPanel {
             }
         };
         panelHubDetalle.setOpaque(false);
-        panelHubDetalle.setBorder(new EmptyBorder(12, 14, 12, 14));
+        panelHubDetalle.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         // 1. Cabecera del Hub
         JPanel cabHub = new JPanel(new BorderLayout(10, 0));
@@ -494,8 +487,8 @@ public class VistaControlCajaChicaPanel extends JPanel {
                 g2.dispose();
             }
         };
-        lblHubAvatar.setPreferredSize(new Dimension(46, 46));
-        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblHubAvatar.setPreferredSize(new Dimension(42, 42));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 17));
         lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
         cabHub.add(lblHubAvatar, BorderLayout.WEST);
 
@@ -504,7 +497,7 @@ public class VistaControlCajaChicaPanel extends JPanel {
         titulosHub.setLayout(new BoxLayout(titulosHub, BoxLayout.Y_AXIS));
 
         lblHubTitulo = new JLabel("Concepto de la Operación");
-        lblHubTitulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblHubTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblHubTitulo.setForeground(Ui.TEXTO_TITULO);
 
         lblHubSubtitulo = new JLabel("CCH-001 · Responsable: Juan Pérez");
@@ -512,29 +505,39 @@ public class VistaControlCajaChicaPanel extends JPanel {
         lblHubSubtitulo.setForeground(Ui.TEXTO_MUTED);
 
         titulosHub.add(lblHubTitulo);
-        titulosHub.add(Box.createVerticalStrut(2));
+        titulosHub.add(vGap(2));
         titulosHub.add(lblHubSubtitulo);
         cabHub.add(titulosHub, BorderLayout.CENTER);
 
         lblHubChipTipo = new JLabel("  Ingreso  ");
-        lblHubChipTipo.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubChipTipo.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lblHubChipTipo.setForeground(Ui.COLOR_EXITO);
         lblHubChipTipo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(187, 247, 208), 1),
-                new EmptyBorder(4, 8, 4, 8)
+                BorderFactory.createLineBorder(new Color(187, 247, 208), 1, true),
+                new EmptyBorder(3, 8, 3, 8)
         ));
         cabHub.add(lblHubChipTipo, BorderLayout.EAST);
         panelHubDetalle.add(cabHub, BorderLayout.NORTH);
 
-        // 2. Centro con Telemetría 2x2 y Especificaciones
-        JPanel centroHub = new JPanel();
+        // 2. Contenido Scrollable
+        ScrollablePanel centroHub = new ScrollablePanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
         centroHub.setOpaque(false);
         centroHub.setLayout(new BoxLayout(centroHub, BoxLayout.Y_AXIS));
 
         // Telemetría 2x2
-        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 6, 6));
         gridTelemetria.setOpaque(false);
-        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 115));
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+        gridTelemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblHubMontoOperado = new JLabel("S/. 0.00");
         lblHubSaldoResultante = new JLabel("S/. 0.00");
@@ -547,47 +550,54 @@ public class VistaControlCajaChicaPanel extends JPanel {
         gridTelemetria.add(crearCardMiniTelemetria("TIPO TRANSACCIÓN", lblHubTipoTransaccion, Ui.TEXTO_MUTED));
 
         centroHub.add(gridTelemetria);
-        centroHub.add(Box.createVerticalStrut(8));
+        centroHub.add(vGap(8));
 
         // Especificaciones
-        centroHub.add(crearSeccionTitulo("AUDITORÍA DE CAJA & RESPONSABLE"));
-        lblHubResponsable = new JLabel("Responsable de Turno: -");
-        lblHubResponsable.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblHubComprobante = new JLabel("Comprobante de Respaldo: -");
-        lblHubComprobante.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        centroHub.add(lblHubResponsable);
-        centroHub.add(lblHubComprobante);
-        centroHub.add(Box.createVerticalStrut(8));
+        JPanel seccionAuditoria = crearSeccionCard("AUDITORÍA DE CAJA & RESPONSABLE");
+        lblHubResponsable = new JTextArea("-");
+        configurarTextAreaItem(lblHubResponsable);
+        lblHubComprobante = new JTextArea("-");
+        configurarTextAreaItem(lblHubComprobante);
+        seccionAuditoria.add(crearItemLinea("Responsable:", lblHubResponsable));
+        seccionAuditoria.add(vGap(3));
+        seccionAuditoria.add(crearItemLinea("Comprobante:", lblHubComprobante));
+        centroHub.add(seccionAuditoria);
+        centroHub.add(vGap(6));
 
-        centroHub.add(crearSeccionTitulo("CONCILIACIÓN & JUSTIFICACIÓN CONTABLE"));
-        lblHubConcepto = new JLabel("Detalle: -");
-        lblHubConcepto.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblHubSaldoActualCaja = new JLabel("Saldo Total de Caja: S/. 0.00");
-        lblHubSaldoActualCaja.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        centroHub.add(lblHubConcepto);
-        centroHub.add(lblHubSaldoActualCaja);
+        JPanel seccionConciliacion = crearSeccionCard("CONCILIACIÓN & JUSTIFICACIÓN CONTABLE");
+        lblHubConcepto = new JTextArea("-");
+        configurarTextAreaItem(lblHubConcepto);
+        lblHubSaldoActualCaja = new JTextArea("-");
+        configurarTextAreaItem(lblHubSaldoActualCaja);
+        seccionConciliacion.add(crearItemLinea("Detalle:", lblHubConcepto));
+        seccionConciliacion.add(vGap(3));
+        seccionConciliacion.add(crearItemLinea("Saldo en Caja:", lblHubSaldoActualCaja));
+        centroHub.add(seccionConciliacion);
 
-        panelHubDetalle.add(centroHub, BorderLayout.CENTER);
+        JScrollPane spHub = new JScrollPane(centroHub);
+        spHub.setBorder(null);
+        spHub.setOpaque(false);
+        spHub.getViewport().setOpaque(false);
+        spHub.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        spHub.getVerticalScrollBar().setUnitIncrement(16);
+        panelHubDetalle.add(spHub, BorderLayout.CENTER);
 
         // 3. Footer con 4 Botones de Acción 1-click
-        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         gridAcciones.setOpaque(false);
-        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+        gridAcciones.setPreferredSize(new Dimension(0, 62));
+        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
 
-        JButton btnValePDF = Ui.boton("Vale de Caja PDF", true);
-        btnValePDF.setIcon(Iconos.crearIconoFactura(14, Color.WHITE));
+        JButton btnValePDF = crearBotonAccion("Vale de Caja PDF", Iconos.crearIconoFactura(14, Color.WHITE), true);
         btnValePDF.addActionListener(e -> emitirValePDF());
 
-        JButton btnArqueoModal = Ui.boton("Arqueo Físico", false);
-        btnArqueoModal.setIcon(Iconos.crearIconoCajaChica(14, Ui.TEXTO_TITULO));
+        JButton btnArqueoModal = crearBotonAccion("Arqueo Físico", Iconos.crearIconoCajaChica(14, Ui.TEXTO_TITULO), false);
         btnArqueoModal.addActionListener(e -> realizarArqueoFisico());
 
-        JButton btnCierreTurno = Ui.boton("Cierre de Turno", false);
-        btnCierreTurno.setIcon(Iconos.crearIconoExportar(14, Ui.TURQUESA_OSCURO));
+        JButton btnCierreTurno = crearBotonAccion("Cierre de Turno", Iconos.crearIconoExportar(14, Ui.TURQUESA_OSCURO), false);
         btnCierreTurno.addActionListener(e -> emitirCierreTurnoPDF());
 
-        JButton btnAnular = Ui.boton("Anular Movimiento", false);
-        btnAnular.setIcon(Iconos.crearIconoAlertaMerma(14, Ui.COLOR_PELIGRO));
+        JButton btnAnular = crearBotonAccion("Anular Movimiento", Iconos.crearIconoAlertaMerma(14, Ui.COLOR_PELIGRO), false);
         btnAnular.addActionListener(e -> anularMovimientoSeleccionado());
 
         gridAcciones.add(btnValePDF);
@@ -602,35 +612,132 @@ public class VistaControlCajaChicaPanel extends JPanel {
     }
 
     private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
-        JPanel c = new JPanel(new BorderLayout());
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
-                new EmptyBorder(6, 8, 6, 8)
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(4, 8, 4, 8)
         ));
 
         JLabel t = new JLabel(titulo);
-        t.setFont(new Font("Segoe UI", Font.BOLD, 9));
+        t.setFont(new Font("Segoe UI", Font.BOLD, 8));
         t.setForeground(Ui.TEXTO_MUTED);
 
-        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblValor.setForeground(colorValor);
 
-        c.add(t, BorderLayout.NORTH);
-        c.add(lblValor, BorderLayout.CENTER);
+        c.add(t);
+        c.add(vGap(2));
+        c.add(lblValor);
         return c;
     }
 
-    private JPanel crearSeccionTitulo(String titulo) {
-        JPanel s = new JPanel(new BorderLayout(6, 0));
-        s.setOpaque(false);
-        JLabel l = new JLabel(titulo);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        l.setForeground(Ui.TURQUESA_PROFUNDO);
-        s.add(l, BorderLayout.WEST);
-        s.add(new JSeparator(), BorderLayout.CENTER);
-        s.setBorder(new EmptyBorder(4, 0, 4, 0));
-        return s;
+    private JPanel crearSeccionCard(String titulo) {
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
+        sec.setOpaque(false);
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(6, 10, 6, 10)
+        ));
+        sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_OSCURO);
+        header.add(t);
+
+        sec.add(header);
+        sec.add(vGap(4));
+        return sec;
+    }
+
+    private JPanel crearItemLinea(String label, Component valor) {
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
+        p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel l = new JLabel(label);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        l.setForeground(Ui.TEXTO_MUTED);
+        l.setVerticalAlignment(SwingConstants.TOP);
+        p.add(l, BorderLayout.WEST);
+        p.add(valor, BorderLayout.CENTER);
+        return p;
+    }
+
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
+    }
+
+    private static void configurarTextAreaItem(JTextArea ta) {
+        ta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        ta.setForeground(Ui.TEXTO_TITULO);
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        ta.setOpaque(false);
+        ta.setBorder(null);
+        ta.setAlignmentX(Component.LEFT_ALIGNMENT);
+    }
+
+    private JButton crearBotonAccion(String texto, javax.swing.Icon icono, boolean primario) {
+        JButton btn = new JButton(texto, icono) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (primario) {
+                    g2.setColor(getModel().isPressed() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                if (!primario) {
+                    g2.setColor(Ui.BORDE_SUAVE);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                }
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(4, 6, 4, 6));
+        return btn;
     }
 
     public void recargarDatos() {
@@ -730,10 +837,10 @@ public class VistaControlCajaChicaPanel extends JPanel {
         lblHubFechaOperacion.setText(m.getFecha() != null ? m.getFecha().format(FORMATO_FECHA) : "-");
         lblHubTipoTransaccion.setText(m.getTipo());
 
-        lblHubResponsable.setText("Responsable: " + m.getResponsable());
-        lblHubComprobante.setText("Comprobante: " + m.getComprobante());
-        lblHubConcepto.setText("Detalle: " + m.getConcepto());
-        lblHubSaldoActualCaja.setText(String.format("Saldo Total en Custodia: S/. %.2f", repo.getSaldoActualCajaChica()));
+        lblHubResponsable.setText(m.getResponsable());
+        lblHubComprobante.setText(m.getComprobante());
+        lblHubConcepto.setText(m.getConcepto());
+        lblHubSaldoActualCaja.setText(String.format("S/. %.2f", repo.getSaldoActualCajaChica()));
 
         panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
         panelHubContenido.revalidate();
@@ -892,5 +999,14 @@ public class VistaControlCajaChicaPanel extends JPanel {
             repo.eliminarMovimientoCajaChica(movimientoSeleccionado.getIdMovimiento());
             recargarDatos();
         }
+    }
+
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }
