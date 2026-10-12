@@ -9,7 +9,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.time.LocalDate;
@@ -240,15 +243,27 @@ public class VistaControlStockLotesPanel extends JPanel {
     }
 
     private JPanel crearSplitMasterDetail() {
-        JPanel split = new JPanel(new BorderLayout(14, 0));
+        JPanel split = new JPanel(new GridBagLayout());
         split.setOpaque(false);
 
-        JPanel panelMaster = crearPanelMaster();
-        split.add(panelMaster, BorderLayout.CENTER);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
+        // Master Panel (54%)
+        gbc.gridx = 0;
+        gbc.weightx = 0.54;
+        gbc.insets = new Insets(0, 0, 0, 12);
+        split.add(crearPanelMaster(), gbc);
+
+        // Detail Live Hub (46%)
+        gbc.gridx = 1;
+        gbc.weightx = 0.46;
+        gbc.insets = new Insets(0, 0, 0, 0);
         JPanel panelDetail = crearPanelDetail();
-        panelDetail.setPreferredSize(new Dimension(460, 560));
-        split.add(panelDetail, BorderLayout.EAST);
+        panelDetail.setPreferredSize(new Dimension(490, 560));
+        panelDetail.setMinimumSize(new Dimension(450, 500));
+        split.add(panelDetail, gbc);
 
         return split;
     }
@@ -523,6 +538,7 @@ public class VistaControlStockLotesPanel extends JPanel {
         // Telemetría 2x2
         JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
         gridTelemetria.setOpaque(false);
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
         lblHubCantidad = new JLabel("+0 un.");
         lblHubStockPosterior = new JLabel("0 un.");
@@ -535,7 +551,7 @@ public class VistaControlStockLotesPanel extends JPanel {
         gridTelemetria.add(crearCajaTelemetria("FECHA MOVIMIENTO", lblHubFechaMovimiento, Ui.TURQUESA_PROFUNDO));
 
         scrollContent.add(gridTelemetria);
-        scrollContent.add(Box.createVerticalStrut(10));
+        scrollContent.add(Box.createVerticalStrut(8));
 
         // Trazabilidad
         JPanel seccionLote = crearSeccionDetalle("TRAZABILIDAD DE LOTE & FARMACOPEA");
@@ -544,7 +560,9 @@ public class VistaControlStockLotesPanel extends JPanel {
         lblHubFechaVenc = new JLabel("-");
 
         seccionLote.add(crearFilaDato("Código Producto:", lblHubCodigoProd));
+        seccionLote.add(Box.createVerticalStrut(3));
         seccionLote.add(crearFilaDato("Número de Lote:", lblHubLote));
+        seccionLote.add(Box.createVerticalStrut(3));
         seccionLote.add(crearFilaDato("Fecha de Vencimiento:", lblHubFechaVenc));
         scrollContent.add(seccionLote);
         scrollContent.add(Box.createVerticalStrut(8));
@@ -556,18 +574,21 @@ public class VistaControlStockLotesPanel extends JPanel {
         lblHubObservacion = new JLabel("-");
 
         seccionAuditoria.add(crearFilaDato("Responsable / Regente:", lblHubResponsable));
-        seccionAuditoria.add(crearFilaDato("Stock Previo a la Operación:", lblHubStockPrevio));
-        seccionAuditoria.add(crearFilaDato("Referencia / Observación:", lblHubObservacion));
+        seccionAuditoria.add(Box.createVerticalStrut(3));
+        seccionAuditoria.add(crearFilaDato("Stock Previo Operación:", lblHubStockPrevio));
+        seccionAuditoria.add(Box.createVerticalStrut(3));
+        seccionAuditoria.add(crearFilaDato("Referencia / Doc.:", lblHubObservacion));
         scrollContent.add(seccionAuditoria);
         scrollContent.add(Box.createVerticalStrut(8));
 
         // Protocolo Sanitario
         JPanel seccionFefo = crearSeccionDetalle("DISPENSACIÓN FEFO (FIRST EXPIRED, FIRST OUT)");
         lblHubProtocoloFefo = new JLabel("Lote validado bajo política FEFO. Cumple normativa sanitaria.");
-        lblHubProtocoloFefo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblHubProtocoloFefo.setForeground(Ui.TEXTO_REGULAR);
+        lblHubProtocoloFefo.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblHubProtocoloFefo.setForeground(new Color(22, 163, 74));
         seccionFefo.add(lblHubProtocoloFefo);
         scrollContent.add(seccionFefo);
+        scrollContent.add(Box.createVerticalGlue());
 
         JScrollPane spHub = new JScrollPane(scrollContent);
         spHub.setBorder(null);
@@ -580,6 +601,8 @@ public class VistaControlStockLotesPanel extends JPanel {
         // 3. Barra de Acciones Rápidas (1-Click)
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
+        barraAcciones.setPreferredSize(new Dimension(0, 72));
+        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
 
         JButton btnComprobante = crearBotonAccion("Nota de Almacén", Iconos.crearIconoDocumento(14, Color.WHITE), true);
         btnComprobante.addActionListener(e -> emitirNotaAlmacen());
@@ -610,7 +633,7 @@ public class VistaControlStockLotesPanel extends JPanel {
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                new EmptyBorder(6, 8, 6, 8)
+                new EmptyBorder(6, 10, 6, 10)
         ));
 
         JLabel t = new JLabel(titulo);
@@ -629,11 +652,12 @@ public class VistaControlStockLotesPanel extends JPanel {
     private JPanel crearSeccionDetalle(String titulo) {
         JPanel sec = new JPanel();
         sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
-        sec.setOpaque(false);
+        sec.setBackground(new Color(248, 250, 252));
         sec.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                new EmptyBorder(6, 10, 6, 10)
+                new EmptyBorder(8, 12, 8, 12)
         ));
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
@@ -641,24 +665,26 @@ public class VistaControlStockLotesPanel extends JPanel {
         t.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         sec.add(t);
-        sec.add(Box.createVerticalStrut(4));
+        sec.add(Box.createVerticalStrut(5));
         return sec;
     }
 
     private JPanel crearFilaDato(String etiqueta, JLabel lblValor) {
-        JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 1));
+        JPanel fila = new JPanel(new BorderLayout(8, 0));
         fila.setOpaque(false);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
         fila.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblE = new JLabel(etiqueta);
         lblE.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblE.setForeground(Ui.TEXTO_MUTED);
+        lblE.setPreferredSize(new Dimension(130, 20));
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblValor.setForeground(Ui.TEXTO_REGULAR);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        fila.add(lblE);
-        fila.add(lblValor);
+        fila.add(lblE, BorderLayout.WEST);
+        fila.add(lblValor, BorderLayout.CENTER);
         return fila;
     }
 

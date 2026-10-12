@@ -9,7 +9,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -85,7 +89,7 @@ public class VistaAjustesMermasPanel extends JPanel {
     private JLabel lblHubLote;
     private JLabel lblHubAutorizadoPor;
     private JLabel lblHubEstado;
-    private JLabel lblHubMotivo;
+    private JTextArea txtHubMotivo;
 
     public VistaAjustesMermasPanel() {
         setLayout(new BorderLayout());
@@ -235,15 +239,27 @@ public class VistaAjustesMermasPanel extends JPanel {
     }
 
     private JPanel crearSplitMasterDetail() {
-        JPanel split = new JPanel(new BorderLayout(14, 0));
+        JPanel split = new JPanel(new GridBagLayout());
         split.setOpaque(false);
 
-        JPanel panelMaster = crearPanelMaster();
-        split.add(panelMaster, BorderLayout.CENTER);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
+        // Master Panel (54%)
+        gbc.gridx = 0;
+        gbc.weightx = 0.54;
+        gbc.insets = new Insets(0, 0, 0, 12);
+        split.add(crearPanelMaster(), gbc);
+
+        // Detail Live Hub (46%)
+        gbc.gridx = 1;
+        gbc.weightx = 0.46;
+        gbc.insets = new Insets(0, 0, 0, 0);
         JPanel panelDetail = crearPanelDetail();
-        panelDetail.setPreferredSize(new Dimension(460, 560));
-        split.add(panelDetail, BorderLayout.EAST);
+        panelDetail.setPreferredSize(new Dimension(490, 560));
+        panelDetail.setMinimumSize(new Dimension(450, 500));
+        split.add(panelDetail, gbc);
 
         return split;
     }
@@ -518,6 +534,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         // Telemetría 2x2
         JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 8, 8));
         gridTelemetria.setOpaque(false);
+        gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
         lblHubPerdida = new JLabel("S/. 0.00");
         lblHubCantidad = new JLabel("0 un.");
@@ -530,14 +547,21 @@ public class VistaAjustesMermasPanel extends JPanel {
         gridTelemetria.add(crearCajaTelemetria("FECHA DE BAJA", lblHubFecha, Ui.TURQUESA_PROFUNDO));
 
         scrollContent.add(gridTelemetria);
-        scrollContent.add(Box.createVerticalStrut(10));
+        scrollContent.add(Box.createVerticalStrut(8));
 
         // Causal Sanitaria
         JPanel seccionMotivo = crearSeccionDetalle("CAUSAL SANITARIA & DICTAMEN MÉDICO");
-        lblHubMotivo = new JLabel("-");
-        lblHubMotivo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblHubMotivo.setForeground(Ui.TEXTO_REGULAR);
-        seccionMotivo.add(lblHubMotivo);
+        txtHubMotivo = new JTextArea("-");
+        txtHubMotivo.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        txtHubMotivo.setForeground(Ui.TEXTO_TITULO);
+        txtHubMotivo.setLineWrap(true);
+        txtHubMotivo.setWrapStyleWord(true);
+        txtHubMotivo.setRows(2);
+        txtHubMotivo.setPreferredSize(new Dimension(380, 34));
+        txtHubMotivo.setOpaque(false);
+        txtHubMotivo.setEditable(false);
+        txtHubMotivo.setFocusable(false);
+        seccionMotivo.add(txtHubMotivo);
         scrollContent.add(seccionMotivo);
         scrollContent.add(Box.createVerticalStrut(8));
 
@@ -547,6 +571,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         lblHubLote = new JLabel("-");
 
         seccionLote.add(crearFilaDato("Código de Producto:", lblHubCodigoProd));
+        seccionLote.add(Box.createVerticalStrut(3));
         seccionLote.add(crearFilaDato("Número de Lote:", lblHubLote));
         scrollContent.add(seccionLote);
         scrollContent.add(Box.createVerticalStrut(8));
@@ -557,8 +582,10 @@ public class VistaAjustesMermasPanel extends JPanel {
         lblHubEstado = new JLabel("-");
 
         seccionAutor.add(crearFilaDato("Autorizado Por:", lblHubAutorizadoPor));
+        seccionAutor.add(Box.createVerticalStrut(3));
         seccionAutor.add(crearFilaDato("Estado del Ajuste:", lblHubEstado));
         scrollContent.add(seccionAutor);
+        scrollContent.add(Box.createVerticalGlue());
 
         JScrollPane spHub = new JScrollPane(scrollContent);
         spHub.setBorder(null);
@@ -571,6 +598,8 @@ public class VistaAjustesMermasPanel extends JPanel {
         // 3. Barra de Acciones Rápidas (1-Click)
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
+        barraAcciones.setPreferredSize(new Dimension(0, 72));
+        barraAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
 
         JButton btnActa = crearBotonAccion("Acta Destrucción", Iconos.crearIconoDocumento(14, Color.WHITE), true);
         btnActa.addActionListener(e -> emitirActaDestruccion());
@@ -601,7 +630,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         c.setBackground(new Color(248, 250, 252));
         c.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                new EmptyBorder(6, 8, 6, 8)
+                new EmptyBorder(6, 10, 6, 10)
         ));
 
         JLabel t = new JLabel(titulo);
@@ -620,11 +649,12 @@ public class VistaAjustesMermasPanel extends JPanel {
     private JPanel crearSeccionDetalle(String titulo) {
         JPanel sec = new JPanel();
         sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
-        sec.setOpaque(false);
+        sec.setBackground(new Color(248, 250, 252));
         sec.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                new EmptyBorder(6, 10, 6, 10)
+                new EmptyBorder(8, 12, 8, 12)
         ));
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titulo);
         t.setFont(new Font("Segoe UI", Font.BOLD, 10));
@@ -632,24 +662,26 @@ public class VistaAjustesMermasPanel extends JPanel {
         t.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         sec.add(t);
-        sec.add(Box.createVerticalStrut(4));
+        sec.add(Box.createVerticalStrut(5));
         return sec;
     }
 
     private JPanel crearFilaDato(String etiqueta, JLabel lblValor) {
-        JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 1));
+        JPanel fila = new JPanel(new BorderLayout(8, 0));
         fila.setOpaque(false);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
         fila.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblE = new JLabel(etiqueta);
         lblE.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblE.setForeground(Ui.TEXTO_MUTED);
+        lblE.setPreferredSize(new Dimension(130, 20));
 
         lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblValor.setForeground(Ui.TEXTO_REGULAR);
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        fila.add(lblE);
-        fila.add(lblValor);
+        fila.add(lblE, BorderLayout.WEST);
+        fila.add(lblValor, BorderLayout.CENTER);
         return fila;
     }
 
@@ -755,7 +787,7 @@ public class VistaAjustesMermasPanel extends JPanel {
         lblHubFecha.setText(a.getFechaFormateada());
 
         // Secciones
-        lblHubMotivo.setText("<html>" + a.getMotivoDetallado() + "</html>");
+        txtHubMotivo.setText(a.getMotivoDetallado());
         lblHubCodigoProd.setText(a.getCodigoProducto());
         lblHubLote.setText(a.getNumeroLote());
         lblHubAutorizadoPor.setText(a.getAutorizadoPor());
