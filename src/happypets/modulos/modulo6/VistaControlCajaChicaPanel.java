@@ -101,23 +101,28 @@ public class VistaControlCajaChicaPanel extends JPanel {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JPanel panelContenido = new JPanel();
-        panelContenido.setOpaque(false);
-        panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
-        panelContenido.setBorder(new EmptyBorder(12, 18, 14, 18));
+        // Panel Superior Fijo (Cabecera + KPIs)
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 18, 10, 18));
 
         // 1. Cabecera Principal
-        panelContenido.add(crearCabeceraVista());
-        panelContenido.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(10));
 
         // 2. Fila de KPIs
-        panelContenido.add(crearFilaKpis());
-        panelContenido.add(Box.createVerticalStrut(12));
+        panelSuperior.add(crearFilaKpis());
+
+        add(panelSuperior, BorderLayout.NORTH);
 
         // 3. Contenedor Master-Detail (58% / 42%)
-        panelContenido.add(crearSplitMasterDetail());
+        JPanel panelCentro = new JPanel(new BorderLayout());
+        panelCentro.setOpaque(false);
+        panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
+        panelCentro.add(crearSplitMasterDetail(), BorderLayout.CENTER);
 
-        add(panelContenido, BorderLayout.CENTER);
+        add(panelCentro, BorderLayout.CENTER);
 
         recargarDatos();
     }
@@ -161,6 +166,7 @@ public class VistaControlCajaChicaPanel extends JPanel {
         der.add(btnActualizar);
 
         cab.add(der, BorderLayout.EAST);
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         return cab;
     }
 
