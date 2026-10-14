@@ -7,6 +7,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
@@ -24,6 +25,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -419,15 +421,15 @@ public class VistaTablerosMandoPanel extends JPanel {
 
         pnlBarras.add(crearBarraEficiencia(
                 "Ocupación de Quirófanos", "78%", 78,
-                "28 cirugías realizadas esta semana", new Color(14, 165, 233)
+                "28 cirugías realizadas esta semana", Ui.TURQUESA_OSCURO
         ));
         pnlBarras.add(crearBarraEficiencia(
                 "Puntualidad en Consultas", "92%", 92,
-                "Tiempo medio de espera: 8.4 min", new Color(16, 185, 129)
+                "Tiempo medio de espera: 8.4 min", Ui.TURQUESA
         ));
         pnlBarras.add(crearBarraEficiencia(
                 "Pacientes Recurrentes (Check-ups)", "65%", 65,
-                "412 vacunas y desparasitaciones", new Color(99, 102, 241)
+                "412 vacunas y desparasitaciones", Ui.TURQUESA_PROFUNDO
         ));
         panelEficienciaCard.add(pnlBarras, BorderLayout.CENTER);
 
@@ -481,13 +483,40 @@ public class VistaTablerosMandoPanel extends JPanel {
         top.add(lblP, BorderLayout.EAST);
         pnl.add(top, BorderLayout.NORTH);
 
-        // Fila intermedia: Barra de progreso a ancho completo
-        JProgressBar bar = new JProgressBar(0, 100);
-        bar.setValue(porcentajeVal);
+        // Fila intermedia: Barra de progreso vectorial antialiased estilizada con la paleta de HappyPets
+        JComponent bar = new JComponent() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth();
+                int h = getHeight();
+                int arc = h;
+
+                // Canal de fondo suave
+                g2.setColor(new Color(241, 245, 249));
+                g2.fillRoundRect(0, 0, w, h, arc, arc);
+
+                // Relleno de progreso con gradiente turquesa institucional
+                int fillW = Math.max(0, (int) Math.round((w * Math.min(100, Math.max(0, porcentajeVal))) / 100.0));
+                if (fillW > 0) {
+                    GradientPaint gp = new GradientPaint(
+                            0, 0, barColor,
+                            fillW, 0, new Color(
+                                    Math.min(255, barColor.getRed() + 25),
+                                    Math.min(255, barColor.getGreen() + 25),
+                                    Math.min(255, barColor.getBlue() + 25)
+                            )
+                    );
+                    g2.setPaint(gp);
+                    g2.fillRoundRect(0, 0, fillW, h, arc, arc);
+                }
+                g2.dispose();
+            }
+        };
         bar.setPreferredSize(new Dimension(100, 7));
-        bar.setForeground(barColor);
-        bar.setBackground(new Color(241, 245, 249));
-        bar.setBorderPainted(false);
+        bar.setMinimumSize(new Dimension(50, 7));
         pnl.add(bar, BorderLayout.CENTER);
 
         // Fila inferior: Detalle alineado a la izquierda bajo la barra
