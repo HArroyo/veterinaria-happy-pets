@@ -386,44 +386,50 @@ public class VistaTablerosMandoPanel extends JPanel {
         gbc.weightx = 0.35;
         gbc.insets = new Insets(0, 0, 0, 0);
 
-        JPanel panelEficienciaCard = new JPanel();
-        panelEficienciaCard.setLayout(new BoxLayout(panelEficienciaCard, BoxLayout.Y_AXIS));
+        JPanel panelEficienciaCard = new JPanel(new BorderLayout(0, 14));
         panelEficienciaCard.setBackground(Color.WHITE);
         panelEficienciaCard.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
                 BorderFactory.createEmptyBorder(14, 16, 14, 16)
         ));
 
+        // Cabecera alineada a la izquierda
+        JPanel pnlHead = new JPanel();
+        pnlHead.setLayout(new BoxLayout(pnlHead, BoxLayout.Y_AXIS));
+        pnlHead.setOpaque(false);
+
         JLabel lblTitEf = new JLabel("Métricas de Eficiencia (Mayo 2024)");
         lblTitEf.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblEficienciaEstilo(panelEficienciaCard, lblTitEf);
+        lblTitEf.setForeground(new Color(15, 23, 42));
+        lblTitEf.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblSubEf = new JLabel("Rendimiento asistencial y optimización de recursos");
         lblSubEf.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblSubEf.setForeground(new Color(100, 116, 139));
-        panelEficienciaCard.add(lblSubEf);
-        panelEficienciaCard.add(Box.createVerticalStrut(14));
+        lblSubEf.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Métrica 1
-        panelEficienciaCard.add(crearBarraEficiencia(
+        pnlHead.add(lblTitEf);
+        pnlHead.add(Box.createVerticalStrut(2));
+        pnlHead.add(lblSubEf);
+        panelEficienciaCard.add(pnlHead, BorderLayout.NORTH);
+
+        // Contenedor de barras de métricas en columna vertical
+        JPanel pnlBarras = new JPanel(new GridLayout(3, 1, 0, 12));
+        pnlBarras.setOpaque(false);
+
+        pnlBarras.add(crearBarraEficiencia(
                 "Ocupación de Quirófanos", "78%", 78,
                 "28 cirugías realizadas esta semana", new Color(14, 165, 233)
         ));
-        panelEficienciaCard.add(Box.createVerticalStrut(12));
-
-        // Métrica 2
-        panelEficienciaCard.add(crearBarraEficiencia(
+        pnlBarras.add(crearBarraEficiencia(
                 "Puntualidad en Consultas", "92%", 92,
                 "Tiempo medio de espera: 8.4 min", new Color(16, 185, 129)
         ));
-        panelEficienciaCard.add(Box.createVerticalStrut(12));
-
-        // Métrica 3
-        panelEficienciaCard.add(crearBarraEficiencia(
+        pnlBarras.add(crearBarraEficiencia(
                 "Pacientes Recurrentes (Check-ups)", "65%", 65,
                 "412 vacunas y desparasitaciones", new Color(99, 102, 241)
         ));
-        panelEficienciaCard.add(Box.createVerticalStrut(14));
+        panelEficienciaCard.add(pnlBarras, BorderLayout.CENTER);
 
         // Auditoría / Estado óptimo
         JPanel pnlAuditoria = new JPanel(new BorderLayout(8, 4));
@@ -443,7 +449,7 @@ public class VistaTablerosMandoPanel extends JPanel {
         lblAudDesc.setForeground(new Color(71, 85, 105));
         pnlAuditoria.add(lblAudDesc, BorderLayout.CENTER);
 
-        panelEficienciaCard.add(pnlAuditoria);
+        panelEficienciaCard.add(pnlAuditoria, BorderLayout.SOUTH);
 
         panel.add(panelEficienciaCard, gbc);
         return panel;
@@ -457,11 +463,10 @@ public class VistaTablerosMandoPanel extends JPanel {
 
     private JPanel crearBarraEficiencia(String titulo, String porcentajeStr, int porcentajeVal,
                                         String detalle, Color barColor) {
-        JPanel pnl = new JPanel();
-        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+        JPanel pnl = new JPanel(new BorderLayout(0, 4));
         pnl.setOpaque(false);
-        pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        // Fila superior: Título a la izquierda, porcentaje a la derecha
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -474,25 +479,22 @@ public class VistaTablerosMandoPanel extends JPanel {
         lblP.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblP.setForeground(barColor);
         top.add(lblP, BorderLayout.EAST);
-        pnl.add(top);
+        pnl.add(top, BorderLayout.NORTH);
 
-        pnl.add(Box.createVerticalStrut(4));
-
+        // Fila intermedia: Barra de progreso a ancho completo
         JProgressBar bar = new JProgressBar(0, 100);
         bar.setValue(porcentajeVal);
         bar.setPreferredSize(new Dimension(100, 7));
-        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 7));
         bar.setForeground(barColor);
         bar.setBackground(new Color(241, 245, 249));
         bar.setBorderPainted(false);
-        pnl.add(bar);
+        pnl.add(bar, BorderLayout.CENTER);
 
-        pnl.add(Box.createVerticalStrut(3));
-
+        // Fila inferior: Detalle alineado a la izquierda bajo la barra
         JLabel lblD = new JLabel(detalle);
         lblD.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblD.setForeground(new Color(100, 116, 139));
-        pnl.add(lblD);
+        pnl.add(lblD, BorderLayout.SOUTH);
 
         return pnl;
     }

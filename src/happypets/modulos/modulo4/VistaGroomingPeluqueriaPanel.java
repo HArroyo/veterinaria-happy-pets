@@ -69,6 +69,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
     private ServicioGrooming servicioSeleccionado = null;
 
     // Live Detail Hub
+    private JPanel panelHubContenido;
     private JPanel panelHubVacio;
     private JPanel panelHubDetalle;
     private JLabel lblHubAvatar;
@@ -311,7 +312,7 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
         tablaGrooming.getColumnModel().getColumn(0).setPreferredWidth(70);
         tablaGrooming.getColumnModel().getColumn(1).setPreferredWidth(55);
-        tablaGrooming.getColumnModel().getColumn(2).setPreferredWidth(120);
+        tablaGrooming.getColumnModel().getColumn(2).setPreferredWidth(160);
         tablaGrooming.getColumnModel().getColumn(3).setPreferredWidth(110);
         tablaGrooming.getColumnModel().getColumn(4).setPreferredWidth(150);
         tablaGrooming.getColumnModel().getColumn(5).setPreferredWidth(100);
@@ -573,7 +574,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
         panelHubDetalle.add(barraAcciones, BorderLayout.SOUTH);
 
-        card.add(panelHubVacio, BorderLayout.CENTER);
+        panelHubContenido = card;
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
         return card;
     }
 
@@ -729,19 +731,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
     private void mostrarDetalleEnHub(ServicioGrooming g) {
         servicioSeleccionado = g;
-        JPanel contenedorPadre = (JPanel) panelHubVacio.getParent();
-        if (contenedorPadre == null) return;
+        if (panelHubContenido == null) return;
 
+        panelHubContenido.removeAll();
         if (g == null) {
-            contenedorPadre.removeAll();
-            contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
-            contenedorPadre.revalidate();
-            contenedorPadre.repaint();
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+            panelHubContenido.revalidate();
+            panelHubContenido.repaint();
             return;
         }
 
-        contenedorPadre.removeAll();
-        contenedorPadre.add(panelHubDetalle, BorderLayout.CENTER);
+        panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
 
         // Cargar datos
         String inicial = !g.getNombreMascota().isEmpty() ? g.getNombreMascota().substring(0, 1).toUpperCase() : "M";
@@ -772,8 +772,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         lblHubCosmetica.setText(g.getProductosUtilizados().isEmpty() ? "Champú estándar veterinario" : g.getProductosUtilizados());
         txtHubObservaciones.setText(g.getObservacionesConducta().isEmpty() ? "Sin observaciones especiales." : g.getObservacionesConducta());
 
-        contenedorPadre.revalidate();
-        contenedorPadre.repaint();
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
     }
 
     private void agregarChipChecklist(JPanel p, String texto, boolean positivo) {
@@ -922,9 +922,10 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+            JPanel p = new JPanel(new BorderLayout(8, 0));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+            p.setBorder(new EmptyBorder(0, 8, 0, 8));
 
             String text = value != null ? value.toString() : "";
             String inicial = !text.isEmpty() ? text.substring(0, 1).toUpperCase() : "M";
@@ -936,10 +937,12 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     int s = Math.min(getWidth(), getHeight()) - 2;
+                    int x = (getWidth() - s) / 2;
+                    int y = (getHeight() - s) / 2;
                     g2.setColor(Ui.TURQUESA_SUAVE);
-                    g2.fillOval(1, 1, s, s);
+                    g2.fillOval(x, y, s, s);
                     g2.setColor(Ui.TURQUESA);
-                    g2.drawOval(1, 1, s, s);
+                    g2.drawOval(x, y, s, s);
                     super.paintComponent(g2);
                     g2.dispose();
                 }
@@ -952,8 +955,8 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
             lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 12));
             lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-            p.add(avatar);
-            p.add(lblNombre);
+            p.add(avatar, BorderLayout.WEST);
+            p.add(lblNombre, BorderLayout.CENTER);
             return p;
         }
     }

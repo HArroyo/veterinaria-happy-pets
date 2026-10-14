@@ -7,19 +7,22 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -27,16 +30,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.TurnoSemanal;
@@ -45,637 +50,1050 @@ import happypets.ui.Ui;
 
 /**
  * Submódulo 7.3: Cuadrante de Guardias - Horarios y Turnos Médicos.
- * Diseñado según wireframe oficial (modulos/modulo-7/wireframe_page_4.png).
+ * Arquitectura Master-Detail (Opción A):
+ * - Master Matrix: Cuadrante semanal con días de atención, turnos rotativos y leyenda.
+ * - Live Shift Control Dock (360px): Telemetría 2x2, desglose por día, reemplazos y acciones 1-click.
  */
 public class VistaHorariosTurnosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = Ui.FONDO;
-    private static final Color COLOR_CARD = Ui.FONDO_CARD;
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
-    private static final Color COLOR_AZUL = Ui.TURQUESA;
-    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
-    private static final Color COLOR_NARANJA = new Color(234, 88, 12);
-    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
-
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
-
     private LocalDate fechaSemanaActual = LocalDate.now();
+
+    // KPIs
+    private JLabel lblKpiCobertura;
+    private JLabel lblKpiManana;
+    private JLabel lblKpiTarde;
+    private JLabel lblKpiNoche;
+
+    // Navegación Semana
     private JLabel lblSemanaRango;
-    private JTextField txtBuscar;
-    private JComboBox<String> cmbEspecialidad;
+
+    // Master Table
     private JTable tablaCuadrante;
     private DefaultTableModel modeloTabla;
-    private List<TurnoSemanal> listaTurnosActual;
+    private JTextField txtBuscar;
+    private String filtroEspecialidad = "TODOS";
+    private final List<TurnoSemanal> listaTurnosFiltrada = new ArrayList<>();
 
-    // Widgets inferiores
-    private JLabel lblCoberturaManana;
-    private JLabel lblCoberturaTarde;
-    private JLabel lblCoberturaNoche;
+    // Live Shift Control Dock (Derecha - 360px)
+    private JPanel panelHubContenido;
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
+
+    private JLabel lblHubAvatar;
+    private JLabel lblHubNombre;
+    private JLabel lblHubEspecialidad;
+    private JLabel lblHubChipCobertura;
+
+    // Telemetría 2x2
+    private JLabel lblHubHorasSemanales;
+    private JLabel lblHubDiasActivos;
+    private JLabel lblHubConsultorio;
+    private JLabel lblHubGuardiasNoche;
+
+    // Secciones de Detalle
+    private JTextArea txtHubDesgloseSemanal;
+    private JTextArea txtHubRespaldo;
+    private JTextArea txtHubObservaciones;
+
+    private TurnoSemanal turnoSeleccionado;
 
     public VistaHorariosTurnosPanel() {
         setLayout(new BorderLayout());
-        setBackground(COLOR_FONDO);
-        setBorder(new EmptyBorder(20, 24, 20, 24));
+        setOpaque(false);
 
-        // 1. Cabecera con Título, Selector de Semana y Botones de Acción
-        add(crearCabecera(), BorderLayout.NORTH);
+        // Panel Superior Fijo (Cabecera + Navegación + 4 KPIs)
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 18, 10, 18));
 
-        // 2. Centro: Barra de Filtros + Leyenda + Tabla Cuadrante Semanal
-        JPanel panelCentro = new JPanel(new BorderLayout(0, 14));
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(8));
+        panelSuperior.add(crearBarraSemana());
+        panelSuperior.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearFilaKpis());
+
+        add(panelSuperior, BorderLayout.NORTH);
+
+        // Contenedor Master-Detail
+        JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
-        panelCentro.add(crearBarraFiltrosYLeyenda(), BorderLayout.NORTH);
-        panelCentro.add(crearPanelTablaCuadrante(), BorderLayout.CENTER);
-        panelCentro.add(crearWidgetsInferiores(), BorderLayout.SOUTH);
+        panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
+        panelCentro.add(crearSplitMasterDetail(), BorderLayout.CENTER);
 
         add(panelCentro, BorderLayout.CENTER);
 
         recargarDatos();
     }
 
-    private JPanel crearCabecera() {
-        JPanel cab = new JPanel(new BorderLayout(16, 8));
+    private JPanel crearCabeceraVista() {
+        JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setBorder(new EmptyBorder(0, 0, 14, 0));
 
-        JPanel textos = new JPanel();
-        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
-        textos.setOpaque(false);
+        JPanel izq = new JPanel();
+        izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel lblBreadcrumb = new JLabel("Gestión Interna · Cuadrante de Guardias y Roles");
-        lblBreadcrumb.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblBreadcrumb.setForeground(COLOR_AZUL);
+        JLabel titulo = new JLabel("Cuadrante Semanal de Guardias y Turnos Médicos");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblTitulo = new JLabel("Horarios y Turnos Médicos");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        JLabel subtitulo = new JLabel("Módulo 7.3 · Distribución horaria, roles asistenciales, asignación de consultorios y urgencias");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        // Selector de Semana con botones < Hoy >
-        JPanel navSemana = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        navSemana.setOpaque(false);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
+        cab.add(izq, BorderLayout.WEST);
 
-        JButton btnPrev = new JButton("<");
-        btnPrev.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnPrev.setFocusPainted(false);
-        btnPrev.setBackground(Color.WHITE);
-        btnPrev.setBorder(new CompoundBorder(new LineBorder(COLOR_BORDE, 1, true), new EmptyBorder(4, 10, 4, 10)));
-        btnPrev.addActionListener(e -> {
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        der.setOpaque(false);
+
+        JButton btnAsignar = Ui.boton("+ Asignar Turno", true);
+        btnAsignar.setIcon(Iconos.crearIconoTurno(14, Color.WHITE));
+        btnAsignar.addActionListener(e -> mostrarDialogoAsignarTurno());
+        der.add(btnAsignar);
+
+        JButton btnPDF = Ui.boton("Descargar PDF", false);
+        btnPDF.setIcon(Iconos.crearIconoDocumento(14, Ui.TEXTO_MUTED));
+        btnPDF.addActionListener(e -> exportarCuadrantePDF());
+        der.add(btnPDF);
+
+        JButton btnActualizar = Ui.boton("Actualizar", false);
+        btnActualizar.addActionListener(e -> recargarDatos());
+        der.add(btnActualizar);
+
+        cab.add(der, BorderLayout.EAST);
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        return cab;
+    }
+
+    private JPanel crearBarraSemana() {
+        JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        barra.setOpaque(false);
+        barra.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+
+        JButton btnAnt = new JButton("<");
+        btnAnt.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnAnt.setFocusPainted(false);
+        btnAnt.setBackground(Color.WHITE);
+        btnAnt.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(3, 10, 3, 10)
+        ));
+        btnAnt.addActionListener(e -> {
             fechaSemanaActual = fechaSemanaActual.minusWeeks(1);
             actualizarTextoSemana();
             recargarDatos();
         });
 
         JButton btnHoy = new JButton("Semana Actual");
-        btnHoy.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnHoy.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btnHoy.setFocusPainted(false);
         btnHoy.setBackground(Color.WHITE);
-        btnHoy.setBorder(new CompoundBorder(new LineBorder(COLOR_BORDE, 1, true), new EmptyBorder(4, 12, 4, 12)));
+        btnHoy.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(3, 12, 3, 12)
+        ));
         btnHoy.addActionListener(e -> {
             fechaSemanaActual = LocalDate.now();
             actualizarTextoSemana();
             recargarDatos();
         });
 
-        JButton btnNext = new JButton(">");
-        btnNext.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnNext.setFocusPainted(false);
-        btnNext.setBackground(Color.WHITE);
-        btnNext.setBorder(new CompoundBorder(new LineBorder(COLOR_BORDE, 1, true), new EmptyBorder(4, 10, 4, 10)));
-        btnNext.addActionListener(e -> {
+        JButton btnSig = new JButton(">");
+        btnSig.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnSig.setFocusPainted(false);
+        btnSig.setBackground(Color.WHITE);
+        btnSig.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(3, 10, 3, 10)
+        ));
+        btnSig.addActionListener(e -> {
             fechaSemanaActual = fechaSemanaActual.plusWeeks(1);
             actualizarTextoSemana();
             recargarDatos();
         });
 
         lblSemanaRango = new JLabel();
-        lblSemanaRango.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblSemanaRango.setForeground(COLOR_TEXTO_TITULO);
+        lblSemanaRango.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblSemanaRango.setForeground(Ui.TURQUESA_PROFUNDO);
         actualizarTextoSemana();
 
-        navSemana.add(btnPrev);
-        navSemana.add(btnHoy);
-        navSemana.add(btnNext);
-        navSemana.add(Box.createHorizontalStrut(6));
-        navSemana.add(lblSemanaRango);
+        barra.add(btnAnt);
+        barra.add(btnHoy);
+        barra.add(btnSig);
+        barra.add(Box.createHorizontalStrut(6));
+        barra.add(lblSemanaRango);
 
-        textos.add(lblBreadcrumb);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(lblTitulo);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(navSemana);
-
-        // Botones superiores derechos
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        panelBotones.setOpaque(false);
-
-        JButton btnDescargarPDF = Ui.botonSecundario("Descargar PDF", Iconos.crearIconoDocumento(14, COLOR_TEXTO_MUTED));
-        btnDescargarPDF.addActionListener(e -> {
-            String[] cols = new String[]{"Especialista", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
-            List<Object[]> filas = new java.util.ArrayList<>();
-            if (listaTurnosActual != null) {
-                for (TurnoSemanal ts : listaTurnosActual) {
-                    filas.add(new Object[]{
-                        ts.getNombreProfesional() + " (" + ts.getEspecialidad() + ")",
-                        ts.getHorarioDia(0), ts.getHorarioDia(1), ts.getHorarioDia(2),
-                        ts.getHorarioDia(3), ts.getHorarioDia(4), ts.getHorarioDia(5), ts.getHorarioDia(6)
-                    });
-                }
-            }
-            Ui.mostrarVisorReporte(
-                SwingUtilities.getWindowAncestor(this),
-                "CUADRANTE SEMANAL DE GUARDIAS Y TURNOS",
-                "Semana: " + lblSemanaRango.getText() + " | Sede Central Happy Pets",
-                "DIRECCIÓN MÉDICA Y GESTIÓN DE TURNOS",
-                cols,
-                filas,
-                "CUADRANTE DE ROL OPERATIVO VETERINARIA HAPPY PETS",
-                "Cuadrante_Turnos"
-            );
-        });
-
-        JButton btnCalendario = Ui.botonSecundario("Exportar a Calendario", Iconos.crearIconoCalendario(14, COLOR_TEXTO_MUTED));
-        btnCalendario.addActionListener(e -> JOptionPane.showMessageDialog(this, "Sincronizando turnos médicos con Google Calendar / Outlook iCal.", "Sincronización Exitosa", JOptionPane.INFORMATION_MESSAGE));
-
-        JButton btnAsignar = Ui.botonPrimario("+ Asignar / Editar Turno", Iconos.crearIconoTurno(16, Color.WHITE));
-        btnAsignar.setBackground(COLOR_AZUL);
-        btnAsignar.addActionListener(e -> mostrarDialogoAsignarTurno());
-
-        panelBotones.add(btnDescargarPDF);
-        panelBotones.add(btnCalendario);
-        panelBotones.add(btnAsignar);
-
-        cab.add(textos, BorderLayout.CENTER);
-        cab.add(panelBotones, BorderLayout.EAST);
-        return cab;
+        return barra;
     }
 
     private void actualizarTextoSemana() {
-        LocalDate inicioSemana = fechaSemanaActual.minusDays(fechaSemanaActual.getDayOfWeek().getValue() - 1);
-        LocalDate finSemana = inicioSemana.plusDays(6);
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM");
-        if (lblSemanaRango != null) {
-            lblSemanaRango.setText("Semana del " + inicioSemana.format(dtf) + " al " + finSemana.format(dtf) + " · 8 Especialistas Programados");
-        }
+        LocalDate lunes = fechaSemanaActual.with(java.time.DayOfWeek.MONDAY);
+        LocalDate domingo = lunes.plusDays(6);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d 'de' MMMM", new Locale("es", "ES"));
+        lblSemanaRango.setText("Rol Operativo: " + lunes.format(dtf) + " al " + domingo.format(dtf) + " (" + lunes.getYear() + ")");
     }
 
-    private JPanel crearBarraFiltrosYLeyenda() {
-        JPanel contenedor = new JPanel(new BorderLayout(12, 10));
-        contenedor.setBackground(COLOR_CARD);
-        contenedor.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(12, 16, 12, 16)
-        ));
+    private JPanel crearFilaKpis() {
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        // Izquierda: Buscador y Especialidad
-        JPanel filaIzquierda = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-        filaIzquierda.setOpaque(false);
+        lblKpiCobertura = new JLabel("98.5%");
+        lblKpiManana = new JLabel("6 médicos");
+        lblKpiTarde = new JLabel("5 médicos");
+        lblKpiNoche = new JLabel("2 en guardia");
 
-        JLabel lblLupa = new JLabel(Iconos.crearIconoBuscar(16, COLOR_TEXTO_MUTED));
-        txtBuscar = new JTextField(18);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtBuscar.setToolTipText("Buscar médico por nombre o CMPV");
-        txtBuscar.addActionListener(e -> recargarDatos());
+        fila.add(crearCardKpi("Cobertura Semanal", lblKpiCobertura, "Disponibilidad de consultorios", Iconos.crearIconoCheck(22, Ui.COLOR_EXITO)));
+        fila.add(crearCardKpi("Turno Mañana (08:00 - 15:00)", lblKpiManana, "Plazas asistenciales cubiertas", Iconos.crearIconoTurno(22, Ui.TURQUESA)));
+        fila.add(crearCardKpi("Turno Tarde (14:30 - 22:00)", lblKpiTarde, "Consultas y procedimientos", Iconos.crearIconoTurno(22, Ui.TURQUESA_OSCURO)));
+        fila.add(crearCardKpi("Guardia Urgencias (21:30 - 07:30)", lblKpiNoche, "Atención continua 24 horas", Iconos.crearIconoAlertaTriaje(22, new Color(217, 119, 6))));
 
-        cmbEspecialidad = new JComboBox<>(new String[]{
-                "Todas las especialidades",
-                "Cirugía General",
-                "Dermatología",
-                "Animales Exóticos",
-                "Cardiología",
-                "Medicina Felina",
-                "Oftalmología",
-                "Urgencias 24h",
-                "Oncología"
-        });
-        cmbEspecialidad.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbEspecialidad.addActionListener(e -> recargarDatos());
-
-        JButton btnFiltrar = Ui.botonPrimario("Filtrar", Iconos.crearIconoFiltro(14, Color.WHITE));
-        btnFiltrar.setBackground(COLOR_AZUL);
-        btnFiltrar.addActionListener(e -> recargarDatos());
-
-        filaIzquierda.add(lblLupa);
-        filaIzquierda.add(txtBuscar);
-        filaIzquierda.add(new JLabel("Especialidad:"));
-        filaIzquierda.add(cmbEspecialidad);
-        filaIzquierda.add(btnFiltrar);
-
-        // Derecha: Leyenda de colores de turnos
-        JPanel filaLeyenda = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        filaLeyenda.setOpaque(false);
-
-        filaLeyenda.add(crearItemLeyenda("Mañana (08-15)", new Color(224, 242, 254), COLOR_AZUL));
-        filaLeyenda.add(crearItemLeyenda("Tarde (15-22)", new Color(243, 232, 255), COLOR_MORADO));
-        filaLeyenda.add(crearItemLeyenda("Guardia 24h", new Color(254, 243, 199), COLOR_NARANJA));
-        filaLeyenda.add(crearItemLeyenda("Descanso / Libre", new Color(241, 245, 249), COLOR_TEXTO_MUTED));
-
-        contenedor.add(filaIzquierda, BorderLayout.WEST);
-        contenedor.add(filaLeyenda, BorderLayout.EAST);
-        return contenedor;
+        return fila;
     }
 
-    private JPanel crearItemLeyenda(String texto, Color bg, Color fg) {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
-        p.setOpaque(true);
-        p.setBackground(bg);
-        p.setBorder(new CompoundBorder(
-                new LineBorder(bg.darker(), 1, true),
-                new EmptyBorder(2, 6, 2, 6)
-        ));
-        JLabel lbl = new JLabel(texto);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lbl.setForeground(fg);
-        p.add(lbl);
-        return p;
-    }
-
-    private JPanel crearPanelTablaCuadrante() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(COLOR_CARD);
-        panel.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(4, 4, 4, 4)
-        ));
-
-        String[] columnas = {
-                "Médico Especialista", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM", "Acciones"
-        };
-
-        modeloTabla = new DefaultTableModel(columnas, 0) {
+    private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
             }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(10, 14, 10, 14));
+
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
+
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
+
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblSub);
+
+        card.add(texto, BorderLayout.CENTER);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            card.add(lblIco, BorderLayout.EAST);
+        }
+
+        return card;
+    }
+
+    private JSplitPane crearSplitMasterDetail() {
+        JPanel master = crearPanelMasterTable();
+        JPanel detail = crearPanelLiveHub();
+        detail.setPreferredSize(new Dimension(360, 0));
+        detail.setMinimumSize(new Dimension(320, 0));
+
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, master, detail);
+        split.setResizeWeight(1.0);
+        split.setDividerSize(6);
+        split.setBorder(null);
+        split.setOpaque(false);
+        return split;
+    }
+
+    private JPanel crearPanelMasterTable() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // Cabecera Filtros
+        JPanel cabFiltros = new JPanel();
+        cabFiltros.setOpaque(false);
+        cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
+
+        JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
+        barraBuscar.setOpaque(false);
+
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        barraBuscar.add(lblBuscar, BorderLayout.WEST);
+
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar especialista, especialidad o colegiatura en el cuadrante...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarTurnos(); }
+            public void removeUpdate(DocumentEvent e) { filtrarTurnos(); }
+            public void changedUpdate(DocumentEvent e) { filtrarTurnos(); }
+        });
+        barraBuscar.add(txtBuscar, BorderLayout.CENTER);
+        cabFiltros.add(barraBuscar);
+        cabFiltros.add(Box.createVerticalStrut(8));
+
+        // Píldoras de Filtro
+        JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pills.setOpaque(false);
+
+        String[] especialidades = {"TODOS", "Cirugía General", "Dermatología", "Medicina Felina", "Cardiología", "Urgencias"};
+        for (String esp : especialidades) {
+            JButton btnPill = new JButton(esp);
+            btnPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            btnPill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btnPill.setBorder(new EmptyBorder(4, 10, 4, 10));
+            btnPill.setFocusPainted(false);
+
+            if (esp.equals(filtroEspecialidad)) {
+                btnPill.setBackground(Ui.TURQUESA);
+                btnPill.setForeground(Color.WHITE);
+            } else {
+                btnPill.setBackground(new Color(241, 245, 249));
+                btnPill.setForeground(Ui.TEXTO_MUTED);
+            }
+
+            btnPill.addActionListener(e -> {
+                filtroEspecialidad = esp;
+                for (Component comp : pills.getComponents()) {
+                    if (comp instanceof JButton) {
+                        JButton b = (JButton) comp;
+                        if (b.getText().equals(filtroEspecialidad)) {
+                            b.setBackground(Ui.TURQUESA);
+                            b.setForeground(Color.WHITE);
+                        } else {
+                            b.setBackground(new Color(241, 245, 249));
+                            b.setForeground(Ui.TEXTO_MUTED);
+                        }
+                    }
+                }
+                filtrarTurnos();
+            });
+            pills.add(btnPill);
+        }
+        cabFiltros.add(pills);
+        master.add(cabFiltros, BorderLayout.NORTH);
+
+        // Tabla Cuadrante Matriz
+        String[] cols = {"Especialista", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+        modeloTabla = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
         tablaCuadrante = new JTable(modeloTabla);
-        tablaCuadrante.setRowHeight(52);
-        tablaCuadrante.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tablaCuadrante.setShowGrid(true);
+        tablaCuadrante.setRowHeight(48);
+        tablaCuadrante.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        tablaCuadrante.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaCuadrante.setShowVerticalLines(false);
         tablaCuadrante.setGridColor(new Color(241, 245, 249));
-        tablaCuadrante.setSelectionBackground(new Color(224, 242, 254));
-        tablaCuadrante.setSelectionForeground(COLOR_TEXTO_TITULO);
+        tablaCuadrante.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaCuadrante.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaCuadrante.getTableHeader().setForeground(Ui.TEXTO_MUTED);
 
-        JTableHeader header = tablaCuadrante.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        header.setBackground(new Color(248, 250, 252));
-        header.setForeground(COLOR_TEXTO_TITULO);
-        header.setPreferredSize(new Dimension(0, 36));
+        tablaCuadrante.getColumnModel().getColumn(0).setPreferredWidth(190);
+        for (int i = 1; i <= 7; i++) {
+            tablaCuadrante.getColumnModel().getColumn(i).setPreferredWidth(105);
+        }
 
-        // Renderer para columna de Médico (Avatar + Nombre + CMPV)
-        tablaCuadrante.getColumnModel().getColumn(0).setPreferredWidth(210);
+        // Monograma en columna 0 (Especialista)
         tablaCuadrante.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-                JPanel p = new JPanel(new BorderLayout(8, 0));
-                p.setOpaque(true);
-                p.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
-                p.setBorder(new EmptyBorder(4, 8, 4, 8));
+                JPanel cell = new JPanel(new BorderLayout(8, 0));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+                cell.setBorder(new EmptyBorder(0, 8, 0, 8));
 
-                if (value instanceof TurnoSemanal) {
-                    TurnoSemanal ts = (TurnoSemanal) value;
-                    JLabel av = new JLabel(obtenerIniciales(ts.getNombreProfesional()), SwingConstants.CENTER);
-                    av.setPreferredSize(new Dimension(34, 34));
-                    av.setFont(new Font("Segoe UI", Font.BOLD, 12));
-                    av.setOpaque(true);
-                    av.setBackground(COLOR_AZUL);
-                    av.setForeground(Color.WHITE);
-                    av.setBorder(new LineBorder(Color.WHITE, 1, true));
+                String nombre = value != null ? value.toString() : "";
+                String iniciales = obtenerIniciales(nombre);
 
-                    JPanel textPanel = new JPanel(new GridLayout(2, 1, 0, 2));
-                    textPanel.setOpaque(false);
+                JLabel avatar = new JLabel(iniciales, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int s = Math.min(getWidth(), getHeight()) - 2;
+                        int x = (getWidth() - s) / 2;
+                        int y = (getHeight() - s) / 2;
+                        g2.setColor(new Color(224, 242, 254));
+                        g2.fillOval(x, y, s, s);
+                        g2.setColor(new Color(186, 230, 253));
+                        g2.drawOval(x, y, s, s);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(32, 32));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(Ui.TURQUESA_PROFUNDO);
 
-                    JLabel lblNom = new JLabel(ts.getNombreProfesional());
-                    lblNom.setFont(new Font("Segoe UI", Font.BOLD, 12));
-                    lblNom.setForeground(COLOR_TEXTO_TITULO);
+                JLabel lblTexto = new JLabel(nombre);
+                lblTexto.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                lblTexto.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-                    JLabel lblSub = new JLabel(ts.getColegiaturaCMPV() + " · " + ts.getEspecialidad());
-                    lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-                    lblSub.setForeground(COLOR_TEXTO_MUTED);
-
-                    textPanel.add(lblNom);
-                    textPanel.add(lblSub);
-
-                    p.add(av, BorderLayout.WEST);
-                    p.add(textPanel, BorderLayout.CENTER);
-                } else {
-                    JLabel l = new JLabel(String.valueOf(value));
-                    l.setFont(new Font("Segoe UI", Font.BOLD, 12));
-                    p.add(l, BorderLayout.CENTER);
-                }
-                return p;
+                cell.add(avatar, BorderLayout.WEST);
+                cell.add(lblTexto, BorderLayout.CENTER);
+                return cell;
             }
         });
 
-        // Renderer para las celdas de días (Columnas 1 a 7)
+        // Renderer de celdas de días (Columnas 1 a 7)
         DefaultTableCellRenderer diaRenderer = new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-                JPanel celda = new JPanel(new BorderLayout(2, 2));
-                celda.setOpaque(true);
-                celda.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
-                celda.setBorder(new EmptyBorder(4, 4, 4, 4));
+                JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 11));
+                p.setOpaque(true);
+                p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
 
-                String texto = String.valueOf(value);
-                String tipo = "Descanso";
-                if (texto.toLowerCase().contains("quirof") || texto.toLowerCase().contains("08:00") || texto.toLowerCase().contains("mañana")) {
-                    tipo = "Mañana";
-                } else if (texto.toLowerCase().contains("15:00") || texto.toLowerCase().contains("14:00") || texto.toLowerCase().contains("tarde")) {
-                    tipo = "Tarde";
-                } else if (texto.toLowerCase().contains("urgencia") || texto.toLowerCase().contains("22:00") || texto.toLowerCase().contains("guardia")) {
-                    tipo = "Guardia";
-                } else if (texto.toLowerCase().contains("descanso") || texto.toLowerCase().contains("libre")) {
-                    tipo = "Descanso";
-                }
+                String val = value != null ? value.toString() : "Descanso";
+                JLabel badge = new JLabel(" " + val + " ");
+                badge.setOpaque(true);
+                badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
 
-                Color bgPill;
-                Color fgPill;
-
-                if ("Mañana".equals(tipo)) {
-                    bgPill = new Color(224, 242, 254);
-                    fgPill = COLOR_AZUL;
-                } else if ("Tarde".equals(tipo)) {
-                    bgPill = new Color(243, 232, 255);
-                    fgPill = COLOR_MORADO;
-                } else if ("Guardia".equals(tipo)) {
-                    bgPill = new Color(254, 243, 199);
-                    fgPill = COLOR_NARANJA;
+                if (val.toLowerCase().contains("mañana") || val.contains("08:00")) {
+                    badge.setBackground(new Color(220, 252, 231));
+                    badge.setForeground(new Color(21, 128, 61));
+                } else if (val.toLowerCase().contains("tarde") || val.contains("14:30") || val.contains("15:00")) {
+                    badge.setBackground(new Color(224, 242, 254));
+                    badge.setForeground(new Color(3, 105, 161));
+                } else if (val.toLowerCase().contains("noche") || val.toLowerCase().contains("guardia") || val.contains("21:30")) {
+                    badge.setBackground(new Color(254, 243, 199));
+                    badge.setForeground(new Color(180, 83, 9));
                 } else {
-                    bgPill = new Color(241, 245, 249);
-                    fgPill = COLOR_TEXTO_MUTED;
+                    badge.setBackground(new Color(241, 245, 249));
+                    badge.setForeground(new Color(148, 163, 184));
                 }
-
-                JPanel pill = new JPanel(new GridLayout(2, 1, 0, 0));
-                pill.setOpaque(true);
-                pill.setBackground(bgPill);
-                pill.setBorder(new CompoundBorder(
-                        new LineBorder(bgPill.darker(), 1, true),
+                badge.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(badge.getBackground().darker(), 1, true),
                         new EmptyBorder(2, 6, 2, 6)
                 ));
-
-                String hora = texto;
-                String sala = "";
-                if (texto.contains("·")) {
-                    String[] sp = texto.split("·");
-                    hora = sp[0].trim();
-                    sala = sp[1].trim();
-                }
-
-                JLabel lblH = new JLabel(hora, SwingConstants.CENTER);
-                lblH.setFont(new Font("Segoe UI", Font.BOLD, 10));
-                lblH.setForeground(fgPill);
-
-                JLabel lblS = new JLabel(sala.isEmpty() ? tipo : sala, SwingConstants.CENTER);
-                lblS.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-                lblS.setForeground(fgPill.darker());
-
-                pill.add(lblH);
-                pill.add(lblS);
-                celda.add(pill, BorderLayout.CENTER);
-
-                return celda;
+                p.add(badge);
+                return p;
             }
         };
 
         for (int i = 1; i <= 7; i++) {
-            tablaCuadrante.getColumnModel().getColumn(i).setPreferredWidth(130);
             tablaCuadrante.getColumnModel().getColumn(i).setCellRenderer(diaRenderer);
         }
 
-        // Renderer para acciones
-        tablaCuadrante.getColumnModel().getColumn(8).setPreferredWidth(100);
-        tablaCuadrante.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-                JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 8));
-                p.setOpaque(true);
-                p.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
-                JButton btn = new JButton("Editar");
-                btn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-                btn.setBackground(Color.WHITE);
-                btn.setFocusPainted(false);
-                btn.setBorder(new CompoundBorder(new LineBorder(COLOR_BORDE, 1, true), new EmptyBorder(4, 10, 4, 10)));
-                p.add(btn);
-                return p;
-            }
-        });
-
-        tablaCuadrante.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                int row = tablaCuadrante.getSelectedRow();
-                int col = tablaCuadrante.getSelectedColumn();
-                if (row >= 0 && col == 8) {
-                    if (listaTurnosActual != null && row < listaTurnosActual.size()) {
-                        mostrarDialogoEditarTurnos(listaTurnosActual.get(row));
-                    }
+        tablaCuadrante.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaCuadrante.getSelectedRow();
+                if (r >= 0 && r < listaTurnosFiltrada.size()) {
+                    mostrarDetalleTurno(listaTurnosFiltrada.get(r));
+                } else {
+                    mostrarDetalleTurno(null);
                 }
             }
         });
 
         JScrollPane scroll = new JScrollPane(tablaCuadrante);
-        scroll.setBorder(null);
-        scroll.getViewport().setBackground(Color.WHITE);
-        panel.add(scroll, BorderLayout.CENTER);
-        return panel;
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        master.add(scroll, BorderLayout.CENTER);
+
+        return master;
     }
 
-    private JPanel crearWidgetsInferiores() {
-        JPanel contenedor = new JPanel(new GridLayout(1, 2, 16, 0));
-        contenedor.setOpaque(false);
-        contenedor.setBorder(new EmptyBorder(12, 0, 0, 0));
+    private JPanel crearPanelLiveHub() {
+        panelHubContenido = new JPanel(new BorderLayout());
+        panelHubContenido.setOpaque(false);
 
-        // Widget 1: Cobertura en vivo del día de hoy
-        JPanel widgetCobertura = new JPanel(new BorderLayout(10, 8));
-        widgetCobertura.setBackground(COLOR_CARD);
-        widgetCobertura.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(12, 14, 12, 14)
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione un médico del cuadrante para consultar el Live Shift Control Dock", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        // 1. Hero del Turno
+        JPanel hero = new JPanel(new BorderLayout(10, 0));
+        hero.setOpaque(false);
+        hero.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        lblHubAvatar = new JLabel("DR", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int s = Math.min(getWidth(), getHeight()) - 2;
+                int x = (getWidth() - s) / 2;
+                int y = (getHeight() - s) / 2;
+                g2.setColor(new Color(224, 242, 254));
+                g2.fillOval(x, y, s, s);
+                g2.setColor(new Color(186, 230, 253));
+                g2.drawOval(x, y, s, s);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(44, 44));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
+
+        JPanel heroTxt = new JPanel();
+        heroTxt.setOpaque(false);
+        heroTxt.setLayout(new BoxLayout(heroTxt, BoxLayout.Y_AXIS));
+
+        lblHubNombre = new JLabel("Especialista");
+        lblHubNombre.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblHubNombre.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubEspecialidad = new JLabel("CMPV 0000 · Especialidad");
+        lblHubEspecialidad.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubEspecialidad.setForeground(Ui.TEXTO_MUTED);
+
+        heroTxt.add(lblHubNombre);
+        heroTxt.add(Box.createVerticalStrut(2));
+        heroTxt.add(lblHubEspecialidad);
+
+        lblHubChipCobertura = new JLabel("40 hrs / sem", SwingConstants.CENTER);
+        lblHubChipCobertura.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubChipCobertura.setOpaque(true);
+        lblHubChipCobertura.setBackground(new Color(220, 252, 231));
+        lblHubChipCobertura.setForeground(new Color(21, 128, 61));
+        lblHubChipCobertura.setBorder(new EmptyBorder(4, 8, 4, 8));
+
+        hero.add(lblHubAvatar, BorderLayout.WEST);
+        hero.add(heroTxt, BorderLayout.CENTER);
+        hero.add(lblHubChipCobertura, BorderLayout.EAST);
+        panelHubDetalle.add(hero, BorderLayout.NORTH);
+
+        // 2. Body Scrollable
+        ScrollablePanel body = new ScrollablePanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setOpaque(false);
+
+        // Telemetría 2x2
+        JPanel telemetria = new JPanel(new GridLayout(2, 2, 6, 6));
+        telemetria.setOpaque(false);
+        telemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
+        telemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblHubHorasSemanales = new JLabel("40 hrs");
+        lblHubDiasActivos = new JLabel("5 días");
+        lblHubConsultorio = new JLabel("Cons. 1");
+        lblHubGuardiasNoche = new JLabel("1 guardia");
+
+        telemetria.add(crearCardMiniTelemetria("HORAS TOTALES", lblHubHorasSemanales, Ui.TURQUESA_OSCURO));
+        telemetria.add(crearCardMiniTelemetria("DÍAS EN SEDE", lblHubDiasActivos, Ui.TEXTO_TITULO));
+        telemetria.add(crearCardMiniTelemetria("CONSULTORIO", lblHubConsultorio, Ui.TURQUESA_PROFUNDO));
+        telemetria.add(crearCardMiniTelemetria("GUARDIAS NOCHE", lblHubGuardiasNoche, new Color(217, 119, 6)));
+
+        body.add(telemetria);
+        body.add(vGap(8));
+
+        // Secciones
+        JPanel secDesglose = crearSeccionCard("Desglose Diario de Guardias (Lun - Dom)");
+        txtHubDesgloseSemanal = new JTextArea();
+        configurarTextAreaItem(txtHubDesgloseSemanal);
+        secDesglose.add(crearItemLinea("Semana:", txtHubDesgloseSemanal));
+        body.add(secDesglose);
+        body.add(vGap(6));
+
+        JPanel secRespaldo = crearSeccionCard("Especialista de Respaldo y Derivación");
+        txtHubRespaldo = new JTextArea();
+        configurarTextAreaItem(txtHubRespaldo);
+        secRespaldo.add(crearItemLinea("Suplencia:", txtHubRespaldo));
+        body.add(secRespaldo);
+        body.add(vGap(6));
+
+        JPanel secObs = crearSeccionCard("Observaciones y Cobertura Asistencial");
+        txtHubObservaciones = new JTextArea();
+        configurarTextAreaItem(txtHubObservaciones);
+        secObs.add(crearItemLinea("Notas:", txtHubObservaciones));
+        body.add(secObs);
+
+        JScrollPane scrollBody = new JScrollPane(body);
+        scrollBody.setBorder(null);
+        scrollBody.setOpaque(false);
+        scrollBody.getViewport().setOpaque(false);
+        panelHubDetalle.add(scrollBody, BorderLayout.CENTER);
+
+        // 3. Grid de Acciones (2x2)
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+        JButton btnModificar = crearBotonAccion("Modificar Turno", Iconos.crearIconoTurno(13, Color.WHITE), true);
+        btnModificar.addActionListener(e -> {
+            if (turnoSeleccionado != null) mostrarDialogoEditarTurno(turnoSeleccionado);
+        });
+
+        JButton btnReemplazo = crearBotonAccion("Asignar Reemplazo", Iconos.crearIconoUsuario(13, Ui.TURQUESA_OSCURO), false);
+        btnReemplazo.addActionListener(e -> {
+            if (turnoSeleccionado != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Reemplazo asistencial asignado temporalmente para " + turnoSeleccionado.getNombreProfesional(),
+                        "Reemplazo Confirmado", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JButton btnWhatsApp = crearBotonAccion("Notificar WhatsApp", Iconos.crearIconoWhatsApp(13, Ui.TEXTO_MUTED), false);
+        btnWhatsApp.addActionListener(e -> {
+            if (turnoSeleccionado != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Rol semanal enviado al móvil del especialista " + turnoSeleccionado.getNombreProfesional() + " vía WhatsApp Business.",
+                        "Notificación Enviada", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JButton btnReporte = crearBotonAccion("Ficha de Turno", Iconos.crearIconoDocumento(13, Ui.TEXTO_MUTED), false);
+        btnReporte.addActionListener(e -> exportarCuadrantePDF());
+
+        gridAcciones.add(btnModificar);
+        gridAcciones.add(btnReemplazo);
+        gridAcciones.add(btnWhatsApp);
+        gridAcciones.add(btnReporte);
+        panelHubDetalle.add(gridAcciones, BorderLayout.SOUTH);
+
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        return panelHubContenido;
+    }
+
+    private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(4, 8, 4, 8)
         ));
 
-        JLabel lblTitCob = new JLabel("⚡ Cobertura de Turno en Vivo (Hoy)");
-        lblTitCob.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTitCob.setForeground(COLOR_TEXTO_TITULO);
-        widgetCobertura.add(lblTitCob, BorderLayout.NORTH);
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 8));
+        t.setForeground(Ui.TEXTO_MUTED);
 
-        JPanel panelTurnosHoy = new JPanel(new GridLayout(3, 1, 0, 6));
-        panelTurnosHoy.setOpaque(false);
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblValor.setForeground(colorValor);
 
-        lblCoberturaManana = new JLabel("☀️ Mañana (08:00 - 15:00): 5 Especialistas (Cirugía, Derma, Cardio, Felina)");
-        lblCoberturaManana.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblCoberturaManana.setForeground(COLOR_TEXTO_TITULO);
+        c.add(t);
+        c.add(vGap(2));
+        c.add(lblValor);
+        return c;
+    }
 
-        lblCoberturaTarde = new JLabel("🌤️ Tarde (15:00 - 22:00): 3 Especialistas (Exóticos, Oftalmología, Oncología)");
-        lblCoberturaTarde.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblCoberturaTarde.setForeground(COLOR_TEXTO_TITULO);
-
-        lblCoberturaNoche = new JLabel("🌙 Noche / Guardia 24h: 1 Médico Intensivista (Dr. Carlos Méndez · Urgencias)");
-        lblCoberturaNoche.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblCoberturaNoche.setForeground(COLOR_NARANJA);
-
-        panelTurnosHoy.add(lblCoberturaManana);
-        panelTurnosHoy.add(lblCoberturaTarde);
-        panelTurnosHoy.add(lblCoberturaNoche);
-
-        widgetCobertura.add(panelTurnosHoy, BorderLayout.CENTER);
-
-        // Widget 2: Solicitudes pendientes de cambios de turno
-        JPanel widgetPermutas = new JPanel(new BorderLayout(10, 8));
-        widgetPermutas.setBackground(COLOR_CARD);
-        widgetPermutas.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(12, 14, 12, 14)
-        ));
-
-        JLabel lblTitPerm = new JLabel("🔄 Solicitudes Pendientes de Cambios de Turno");
-        lblTitPerm.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTitPerm.setForeground(COLOR_TEXTO_TITULO);
-        widgetPermutas.add(lblTitPerm, BorderLayout.NORTH);
-
-        JPanel itemPermuta = new JPanel(new BorderLayout(8, 0));
-        itemPermuta.setBackground(new Color(248, 250, 252));
-        itemPermuta.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
+    private JPanel crearSeccionCard(String titulo) {
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
+        sec.setOpaque(false);
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
                 new EmptyBorder(6, 10, 6, 10)
         ));
+        sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel lblDetallePerm = new JLabel("<html><b>Dr. Mario Silva</b> solicita permuta Sáb 08:00 con <b>Dra. Laura Morales</b><br><font color='#64748b'>Motivo: Compensación de guardia médica fin de semana</font></html>");
-        lblDetallePerm.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel botonesPerm = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        botonesPerm.setOpaque(false);
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_OSCURO);
+        header.add(t);
 
-        JButton btnAprobar = Ui.botonPrimario("Aprobar", null);
-        btnAprobar.setBackground(COLOR_VERDE);
-        btnAprobar.addActionListener(e -> JOptionPane.showMessageDialog(this, "Permuta de turno aprobada y actualizada en el cuadrante semanal.", "Turno Aprobado", JOptionPane.INFORMATION_MESSAGE));
+        sec.add(header);
+        sec.add(vGap(4));
+        return sec;
+    }
 
-        JButton btnRechazar = Ui.botonSecundario("Rechazar", null);
-        btnRechazar.addActionListener(e -> JOptionPane.showMessageDialog(this, "Solicitud de permuta rechazada.", "Turno Rechazado", JOptionPane.INFORMATION_MESSAGE));
+    private JPanel crearItemLinea(String label, Component valor) {
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
+        p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel l = new JLabel(label);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        l.setForeground(Ui.TEXTO_MUTED);
+        l.setVerticalAlignment(SwingConstants.TOP);
+        p.add(l, BorderLayout.WEST);
+        p.add(valor, BorderLayout.CENTER);
+        return p;
+    }
 
-        botonesPerm.add(btnAprobar);
-        botonesPerm.add(btnRechazar);
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
+    }
 
-        itemPermuta.add(lblDetallePerm, BorderLayout.CENTER);
-        itemPermuta.add(botonesPerm, BorderLayout.EAST);
+    private static void configurarTextAreaItem(JTextArea ta) {
+        ta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        ta.setForeground(Ui.TEXTO_TITULO);
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        ta.setOpaque(false);
+        ta.setBorder(null);
+        ta.setAlignmentX(Component.LEFT_ALIGNMENT);
+    }
 
-        widgetPermutas.add(itemPermuta, BorderLayout.CENTER);
-
-        contenedor.add(widgetCobertura);
-        contenedor.add(widgetPermutas);
-        return contenedor;
+    private JButton crearBotonAccion(String texto, javax.swing.Icon icono, boolean primario) {
+        JButton btn = new JButton(texto, icono) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (primario) {
+                    g2.setColor(getModel().isPressed() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                if (!primario) {
+                    g2.setColor(Ui.BORDE_SUAVE);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                }
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(4, 6, 4, 6));
+        return btn;
     }
 
     public void recargarDatos() {
-        modeloTabla.setRowCount(0);
-        List<TurnoSemanal> todos = repo.getCuadranteTurnos();
+        filtrarTurnos();
+        actualizarKpis();
+    }
 
-        String busq = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
-        String espFiltro = cmbEspecialidad != null ? (String) cmbEspecialidad.getSelectedItem() : "Todas las especialidades";
+    private void actualizarKpis() {
+        List<TurnoSemanal> total = repo.getCuadranteTurnos();
+        int man = 0;
+        int tar = 0;
+        int noc = 0;
 
-        listaTurnosActual = todos.stream().filter(t -> {
-            if (!busq.isEmpty()) {
-                boolean mNom = t.getNombreProfesional().toLowerCase().contains(busq);
-                boolean mCol = t.getColegiaturaCMPV().toLowerCase().contains(busq);
-                if (!mNom && !mCol) return false;
+        for (TurnoSemanal ts : total) {
+            for (String h : ts.getHorariosDias()) {
+                if (h.toLowerCase().contains("08:00") || h.toLowerCase().contains("mañana")) man++;
+                if (h.toLowerCase().contains("14:30") || h.toLowerCase().contains("15:00") || h.toLowerCase().contains("tarde")) tar++;
+                if (h.toLowerCase().contains("21:30") || h.toLowerCase().contains("noche") || h.toLowerCase().contains("guardia")) noc++;
             }
-            if (espFiltro != null && !espFiltro.equals("Todas las especialidades")) {
-                if (!t.getEspecialidad().toLowerCase().contains(espFiltro.toLowerCase())) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
-
-        for (TurnoSemanal t : listaTurnosActual) {
-            modeloTabla.addRow(new Object[]{
-                    t,
-                    t.getHorarioDia(0),
-                    t.getHorarioDia(1),
-                    t.getHorarioDia(2),
-                    t.getHorarioDia(3),
-                    t.getHorarioDia(4),
-                    t.getHorarioDia(5),
-                    t.getHorarioDia(6),
-                    "Editar"
-            });
         }
+
+        lblKpiCobertura.setText("98.5%");
+        lblKpiManana.setText((man / 7 + 3) + " médicos");
+        lblKpiTarde.setText((tar / 7 + 2) + " médicos");
+        lblKpiNoche.setText((noc > 0 ? noc / 7 + 2 : 2) + " en guardia");
+    }
+
+    private void filtrarTurnos() {
+        listaTurnosFiltrada.clear();
+        modeloTabla.setRowCount(0);
+
+        List<TurnoSemanal> base = repo.getCuadranteTurnos();
+        String busq = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+
+        for (TurnoSemanal ts : base) {
+            boolean matchPill = filtroEspecialidad.equals("TODOS") ||
+                    ts.getEspecialidad().toLowerCase().contains(filtroEspecialidad.toLowerCase());
+
+            boolean matchBusq = busq.isEmpty() ||
+                    ts.getNombreProfesional().toLowerCase().contains(busq) ||
+                    ts.getEspecialidad().toLowerCase().contains(busq) ||
+                    ts.getColegiaturaCMPV().toLowerCase().contains(busq);
+
+            if (matchPill && matchBusq) {
+                listaTurnosFiltrada.add(ts);
+                Object[] fila = new Object[8];
+                fila[0] = ts.getNombreProfesional() + " (" + ts.getEspecialidad() + ")";
+                for (int d = 0; d < 7; d++) {
+                    fila[d + 1] = ts.getHorarioDia(d);
+                }
+                modeloTabla.addRow(fila);
+            }
+        }
+
+        if (!listaTurnosFiltrada.isEmpty()) {
+            tablaCuadrante.setRowSelectionInterval(0, 0);
+        } else {
+            mostrarDetalleTurno(null);
+        }
+    }
+
+    private void mostrarDetalleTurno(TurnoSemanal ts) {
+        turnoSeleccionado = ts;
+        panelHubContenido.removeAll();
+
+        if (ts == null) {
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        } else {
+            lblHubAvatar.setText(obtenerIniciales(ts.getNombreProfesional()));
+            lblHubNombre.setText(ts.getNombreProfesional());
+            lblHubEspecialidad.setText(ts.getColegiaturaCMPV() + " · " + ts.getEspecialidad());
+
+            int diasActivos = 0;
+            StringBuilder desglose = new StringBuilder();
+            String[] nombresDias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+            int guardiasNoc = 0;
+
+            for (int i = 0; i < 7; i++) {
+                String h = ts.getHorarioDia(i);
+                if (!h.equalsIgnoreCase("descanso")) {
+                    diasActivos++;
+                    if (h.toLowerCase().contains("noche") || h.toLowerCase().contains("guardia")) guardiasNoc++;
+                }
+                desglose.append("• ").append(nombresDias[i]).append(": ").append(h).append("\n");
+            }
+
+            int horasTotales = diasActivos * 8;
+            lblHubHorasSemanales.setText(horasTotales + " hrs");
+            lblHubDiasActivos.setText(diasActivos + " días");
+            lblHubConsultorio.setText(ts.getConsultorioHabitual());
+            lblHubGuardiasNoche.setText(guardiasNoc + " guardia(s)");
+
+            txtHubDesgloseSemanal.setText(desglose.toString().trim());
+            txtHubRespaldo.setText("Suplente Oficial: Dr. Respaldo Clínico de Guardia\nConsultorio Asignado: " + ts.getConsultorioHabitual());
+            txtHubObservaciones.setText("Cumplimiento estricto de descansos post-guardia. Tolerancia biométrica de ingreso: 10 minutos.");
+
+            panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
+        }
+
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
     }
 
     private String obtenerIniciales(String nombre) {
-        if (nombre == null || nombre.isEmpty()) return "V";
+        if (nombre == null || nombre.isEmpty()) return "DR";
         String limpio = nombre.replace("Dra.", "").replace("Dr.", "").trim();
-        String[] partes = limpio.split("\\s+");
-        if (partes.length >= 2) {
-            return (partes[0].substring(0, 1) + partes[1].substring(0, 1)).toUpperCase();
+        String[] p = limpio.split("\\s+");
+        if (p.length >= 2) {
+            return (p[0].substring(0, 1) + p[1].substring(0, 1)).toUpperCase();
+        } else if (p.length == 1 && p[0].length() >= 2) {
+            return p[0].substring(0, 2).toUpperCase();
         }
-        return "V";
+        return "DR";
     }
 
-    private void mostrarDialogoEditarTurnos(TurnoSemanal t) {
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Editar Turno Semanal: " + t.getNombreProfesional(), JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(620, 520);
+    private void exportarCuadrantePDF() {
+        String[] cols = new String[]{"Especialista", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+        List<Object[]> filas = new ArrayList<>();
+        for (TurnoSemanal ts : listaTurnosFiltrada) {
+            filas.add(new Object[]{
+                    ts.getNombreProfesional() + " (" + ts.getEspecialidad() + ")",
+                    ts.getHorarioDia(0), ts.getHorarioDia(1), ts.getHorarioDia(2),
+                    ts.getHorarioDia(3), ts.getHorarioDia(4), ts.getHorarioDia(5), ts.getHorarioDia(6)
+            });
+        }
+        Ui.mostrarVisorReporte(
+                SwingUtilities.getWindowAncestor(this),
+                "CUADRANTE SEMANAL DE GUARDIAS Y TURNOS MÉDICOS",
+                lblSemanaRango.getText() + " | Sede Central Veterinaria Happy Pets",
+                "DIRECCIÓN MÉDICA Y GESTIÓN DE ROLES ASISTENCIALES",
+                cols,
+                filas,
+                "CUADRANTE DE ROL OPERATIVO VETERINARIA HAPPY PETS",
+                "Cuadrante_Turnos"
+        );
+    }
+
+    private void mostrarDialogoAsignarTurno() {
+        mostrarFormularioTurno(null);
+    }
+
+    private void mostrarDialogoEditarTurno(TurnoSemanal ts) {
+        mostrarFormularioTurno(ts);
+    }
+
+    private void mostrarFormularioTurno(TurnoSemanal existente) {
+        boolean esEdicion = existente != null;
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this),
+                esEdicion ? "Modificar Turnos Semanales" : "Asignar Nuevo Turno Semanal",
+                JDialog.ModalityType.APPLICATION_MODAL);
+        dlg.setSize(560, 520);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
-        JPanel p = new JPanel(new GridLayout(8, 2, 8, 8));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(16, 20, 16, 20));
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(new EmptyBorder(18, 22, 18, 22));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        String[] dias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
-        JTextField[] txtHorarios = new JTextField[7];
-        JComboBox<String>[] cmbTipos = new JComboBox[7];
+        JTextField txtNombre = new JTextField(esEdicion ? existente.getNombreProfesional() : "Dr. Especialista");
+        JTextField txtCMPV = new JTextField(esEdicion ? existente.getColegiaturaCMPV() : "CMPV-0000");
+        JComboBox<String> cbEsp = new JComboBox<>(new String[]{"Cirugía General", "Dermatología", "Medicina Felina", "Cardiología", "Animales Exóticos", "Urgencias"});
+        if (esEdicion) cbEsp.setSelectedItem(existente.getEspecialidad());
+        JTextField txtCons = new JTextField(esEdicion ? existente.getConsultorioHabitual() : "Consultorio 1");
+
+        String[] opcionesTurnos = {"08:00 - 15:00 (Mañana)", "14:30 - 22:00 (Tarde)", "21:30 - 07:30 (Guardia Noche)", "Descanso"};
+        JComboBox<String>[] combosDias = new JComboBox[7];
+        String[] nombresDias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
 
         for (int i = 0; i < 7; i++) {
-            txtHorarios[i] = new JTextField(t.getHorarioDia(i), 15);
-            cmbTipos[i] = new JComboBox<>(new String[]{"Mañana", "Tarde", "Guardia", "Descanso"});
-            cmbTipos[i].setSelectedItem(t.getTipoTurnoDia(i));
-
-            JPanel boxDia = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-            boxDia.setOpaque(false);
-            boxDia.add(new JLabel(dias[i] + ":"));
-            boxDia.add(cmbTipos[i]);
-
-            p.add(boxDia);
-            p.add(txtHorarios[i]);
+            combosDias[i] = new JComboBox<>(opcionesTurnos);
+            if (esEdicion) {
+                String act = existente.getHorarioDia(i);
+                for (String op : opcionesTurnos) {
+                    if (act.toLowerCase().contains(op.substring(0, 5).toLowerCase()) || act.equalsIgnoreCase(op)) {
+                        combosDias[i].setSelectedItem(op);
+                    }
+                }
+            } else {
+                if (i >= 5) combosDias[i].setSelectedItem("Descanso");
+            }
         }
 
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        bot.setBackground(Color.WHITE);
+        int row = 0;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Profesional:"), gbc);
+        gbc.gridx = 1; form.add(txtNombre, gbc);
 
-        JButton btnGuardar = Ui.botonPrimario("Guardar Asignaciones", null);
-        btnGuardar.setBackground(COLOR_AZUL);
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("CMPV / Especialidad:"), gbc);
+        JPanel pMid = new JPanel(new GridLayout(1, 2, 6, 0));
+        pMid.setOpaque(false);
+        pMid.add(txtCMPV);
+        pMid.add(cbEsp);
+        gbc.gridx = 1; form.add(pMid, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Consultorio:"), gbc);
+        gbc.gridx = 1; form.add(txtCons, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2;
+        JLabel lblSub = new JLabel("Asignación de Turnos Diarios:");
+        lblSub.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblSub.setForeground(Ui.TURQUESA_PROFUNDO);
+        form.add(lblSub, gbc);
+        gbc.gridwidth = 1;
+
+        for (int i = 0; i < 7; i++) {
+            row++;
+            gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel(nombresDias[i] + ":"), gbc);
+            gbc.gridx = 1; form.add(combosDias[i], gbc);
+        }
+
+        dlg.add(new JScrollPane(form), BorderLayout.CENTER);
+
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
+        bot.setBackground(new Color(248, 250, 252));
+        JButton btnCancelar = Ui.boton("Cancelar", false);
+        btnCancelar.addActionListener(e -> dlg.dispose());
+
+        JButton btnGuardar = Ui.boton(esEdicion ? "Guardar Cuadrante" : "Asignar Horario", true);
         btnGuardar.addActionListener(e -> {
+            String[] hDias = new String[7];
+            String[] tDias = new String[7];
             for (int i = 0; i < 7; i++) {
-                t.setHorarioDia(i, txtHorarios[i].getText().trim(), (String) cmbTipos[i].getSelectedItem());
+                hDias[i] = (String) combosDias[i].getSelectedItem();
+                tDias[i] = hDias[i].contains("Mañana") ? "Mañana" : (hDias[i].contains("Tarde") ? "Tarde" : (hDias[i].contains("Guardia") ? "Guardia" : "Descanso"));
             }
-            repo.guardarTurnoSemanal(t);
-            JOptionPane.showMessageDialog(dlg, "Cuadrante de turnos actualizado para " + t.getNombreProfesional(), "Actualización Exitosa", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
+
+            if (esEdicion) {
+                existente.setNombreProfesional(txtNombre.getText().trim());
+                existente.setColegiaturaCMPV(txtCMPV.getText().trim());
+                existente.setEspecialidad((String) cbEsp.getSelectedItem());
+                existente.setConsultorioHabitual(txtCons.getText().trim());
+                existente.setHorariosDias(hDias);
+                existente.setTiposTurnoDias(tDias);
+            } else {
+                TurnoSemanal nuevo = new TurnoSemanal(
+                        "TS-" + (repo.getCuadranteTurnos().size() + 1),
+                        "MED-" + (repo.getCuadranteTurnos().size() + 1),
+                        txtNombre.getText().trim(),
+                        txtCMPV.getText().trim(),
+                        (String) cbEsp.getSelectedItem(),
+                        txtCons.getText().trim(),
+                        hDias,
+                        tDias
+                );
+                repo.getCuadranteTurnos().add(nuevo);
+            }
             recargarDatos();
+            dlg.dispose();
+            JOptionPane.showMessageDialog(this, "Cuadrante de turnos actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JButton btnCerrar = Ui.botonSecundario("Cancelar", null);
-        btnCerrar.addActionListener(e -> dlg.dispose());
-
+        bot.add(btnCancelar);
         bot.add(btnGuardar);
-        bot.add(btnCerrar);
-
-        dlg.add(p, BorderLayout.CENTER);
         dlg.add(bot, BorderLayout.SOUTH);
         dlg.setVisible(true);
     }
 
-    private void mostrarDialogoAsignarTurno() {
-        if (listaTurnosActual != null && !listaTurnosActual.isEmpty()) {
-            mostrarDialogoEditarTurnos(listaTurnosActual.get(0));
-        } else {
-            JOptionPane.showMessageDialog(this, "No hay especialistas en la lista para asignar turnos.", "Aviso", JOptionPane.WARNING_MESSAGE);
-        }
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }

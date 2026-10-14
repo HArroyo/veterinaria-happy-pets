@@ -1963,6 +1963,32 @@ public final class Iconos {
         return new ImageIcon(img);
     }
 
+    /**
+     * Estrella de calificación / rating (5 puntas).
+     */
+    public static Icon crearIconoEstrella(int size, Color color) {
+        BufferedImage img = crearImagenBase(size);
+        Graphics2D g = configG2(img);
+        g.setColor(color);
+        double cx = size / 2.0;
+        double cy = size / 2.0;
+        double rOuter = size * 0.46;
+        double rInner = size * 0.19;
+        Path2D.Double p = new Path2D.Double();
+        for (int i = 0; i < 10; i++) {
+            double angle = -Math.PI / 2.0 + i * Math.PI / 5.0;
+            double r = (i % 2 == 0) ? rOuter : rInner;
+            double x = cx + r * Math.cos(angle);
+            double y = cy + r * Math.sin(angle);
+            if (i == 0) p.moveTo(x, y);
+            else p.lineTo(x, y);
+        }
+        p.closePath();
+        g.fill(p);
+        g.dispose();
+        return new ImageIcon(img);
+    }
+
     private static BufferedImage crearImagenBase(int size) {
         return new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
     }

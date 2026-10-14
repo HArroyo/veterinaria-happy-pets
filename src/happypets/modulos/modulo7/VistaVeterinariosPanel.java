@@ -7,19 +7,20 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.RenderingHints;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -27,13 +28,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.Veterinario;
@@ -42,701 +48,1045 @@ import happypets.ui.Ui;
 
 /**
  * Submódulo 7.1: Directorio de Especialistas Clínicos Colegiados ("Nuestros Veterinarios").
- * Diseñado según wireframe oficial (modulos/modulo-7/wireframe_page_3.png).
+ * Arquitectura Master-Detail (Opción A):
+ * - Master Table: Registro de especialistas, CMPV, especialidad, consultorio y estatus.
+ * - Live Specialist Hub: Telemetría 2x2, perfil profesional, contacto y acciones 1-click.
  */
 public class VistaVeterinariosPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = Ui.FONDO;
-    private static final Color COLOR_CARD = Ui.FONDO_CARD;
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
-    private static final Color COLOR_AZUL = Ui.TURQUESA;
-    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
-    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
-    private static final Color COLOR_AMBAR = new Color(245, 158, 11);
-
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
+    // KPIs Superiores
+    private JLabel lblKpiTotalEspecialistas;
+    private JLabel lblKpiEnTurno;
+    private JLabel lblKpiAtenciones;
+    private JLabel lblKpiRatingPromedio;
+
+    // Master Table (Izquierda)
+    private JTable tablaVeterinarios;
+    private DefaultTableModel modeloVeterinarios;
     private JTextField txtBuscar;
-    private JComboBox<String> cmbEspecialidad;
-    private JComboBox<String> cmbDisponibilidad;
-    private JComboBox<String> cmbOrdenarPor;
-    private JLabel lblContador;
-    private JPanel panelTarjetasGrid;
+    private String filtroEspecialidad = "TODOS";
+    private final List<Veterinario> listaVeterinariosFiltrada = new ArrayList<>();
+
+    // Live Specialist Hub (Derecha - 360px)
+    private JPanel panelHubContenido;
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
+
+    private JLabel lblHubAvatar;
+    private JLabel lblHubNombre;
+    private JLabel lblHubColegiatura;
+    private JLabel lblHubChipEstado;
+
+    // Telemetría 2x2
+    private JLabel lblHubAniosExp;
+    private JLabel lblHubAtenciones;
+    private JLabel lblHubConsultorio;
+    private JLabel lblHubProximaCita;
+
+    // Secciones de Detalle
+    private JTextArea txtHubBio;
+    private JTextArea txtHubEspecialidad;
+    private JTextArea txtHubContacto;
+    private JTextArea txtHubHorario;
+
+    private Veterinario veterinarioSeleccionado;
 
     public VistaVeterinariosPanel() {
         setLayout(new BorderLayout());
-        setBackground(COLOR_FONDO);
-        setBorder(new EmptyBorder(20, 24, 20, 24));
+        setOpaque(false);
 
-        // 1. Cabecera con Título, Subtítulo y Botón Nuevo
-        add(crearCabecera(), BorderLayout.NORTH);
+        // Panel Superior Fijo (Cabecera + 4 KPIs)
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 18, 10, 18));
 
-        // 2. Centro: Barra de Filtros + Grid de Tarjetas con Scroll
-        JPanel panelCentro = new JPanel(new BorderLayout(0, 16));
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearFilaKpis());
+
+        add(panelSuperior, BorderLayout.NORTH);
+
+        // Contenedor Master-Detail
+        JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
-        panelCentro.add(crearBarraFiltros(), BorderLayout.NORTH);
+        panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
+        panelCentro.add(crearSplitMasterDetail(), BorderLayout.CENTER);
 
-        panelTarjetasGrid = new JPanel(new GridLayout(0, 2, 18, 18));
-        panelTarjetasGrid.setOpaque(false);
-
-        JScrollPane scrollTarjetas = new JScrollPane(panelTarjetasGrid);
-        scrollTarjetas.setOpaque(false);
-        scrollTarjetas.getViewport().setOpaque(false);
-        scrollTarjetas.setBorder(null);
-        scrollTarjetas.getVerticalScrollBar().setUnitIncrement(16);
-
-        panelCentro.add(scrollTarjetas, BorderLayout.CENTER);
         add(panelCentro, BorderLayout.CENTER);
 
         recargarDatos();
     }
 
-    private JPanel crearCabecera() {
-        JPanel cab = new JPanel(new BorderLayout(16, 8));
+    private JPanel crearCabeceraVista() {
+        JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setBorder(new EmptyBorder(0, 0, 16, 0));
 
-        JPanel textos = new JPanel();
-        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
-        textos.setOpaque(false);
+        JPanel izq = new JPanel();
+        izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel lblBreadcrumb = new JLabel("Equipo Médico · Cuadro Médico Colegiado");
-        lblBreadcrumb.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblBreadcrumb.setForeground(COLOR_MORADO);
+        JLabel titulo = new JLabel("Directorio de Especialistas Clínicos Colegiados");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblTitulo = new JLabel("Nuestros Veterinarios");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        JLabel subtitulo = new JLabel("Módulo 7.1 · Cuadro médico, especialidades quirúrgicas y disponibilidad en tiempo real");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblSub = new JLabel("Directorio de especialistas clínicos colegiados, especialidades quirúrgicas y disponibilidad en tiempo real.");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
+        cab.add(izq, BorderLayout.WEST);
 
-        textos.add(lblBreadcrumb);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(lblTitulo);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(lblSub);
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        der.setOpaque(false);
 
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        panelBotones.setOpaque(false);
-
-        JButton btnNuevo = Ui.botonPrimario("+ Registrar Veterinario", Iconos.crearIconoDoctor(16, Color.WHITE));
-        btnNuevo.setBackground(COLOR_MORADO);
+        JButton btnNuevo = Ui.boton("+ Registrar Veterinario", true);
+        btnNuevo.setIcon(Iconos.crearIconoDoctor(14, Color.WHITE));
         btnNuevo.addActionListener(e -> mostrarDialogoNuevoVeterinario());
+        der.add(btnNuevo);
 
-        JButton btnActualizar = Ui.botonSecundario("Actualizar", Iconos.crearIconoBuscar(14, COLOR_TEXTO_MUTED));
+        JButton btnActualizar = Ui.boton("Actualizar", false);
         btnActualizar.addActionListener(e -> recargarDatos());
+        der.add(btnActualizar);
 
-        panelBotones.add(btnActualizar);
-        panelBotones.add(btnNuevo);
-
-        cab.add(textos, BorderLayout.CENTER);
-        cab.add(panelBotones, BorderLayout.EAST);
+        cab.add(der, BorderLayout.EAST);
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         return cab;
     }
 
-    private JPanel crearBarraFiltros() {
-        JPanel panel = new JPanel(new BorderLayout(12, 10));
-        panel.setBackground(COLOR_CARD);
-        panel.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(12, 16, 12, 16)
-        ));
+    private JPanel crearFilaKpis() {
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        JPanel filaFiltros = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-        filaFiltros.setOpaque(false);
+        lblKpiTotalEspecialistas = new JLabel("0");
+        lblKpiEnTurno = new JLabel("0");
+        lblKpiAtenciones = new JLabel("0");
+        lblKpiRatingPromedio = new JLabel("5.0 ★");
 
-        // Buscador
-        JLabel lblLupa = new JLabel(Iconos.crearIconoBuscar(16, COLOR_TEXTO_MUTED));
-        txtBuscar = new JTextField(18);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtBuscar.setToolTipText("Buscar por nombre, apellido o especialidad");
-        txtBuscar.addActionListener(e -> recargarDatos());
+        fila.add(crearCardKpi("Especialistas Colegiados", lblKpiTotalEspecialistas, "Cuadro médico activo", Iconos.crearIconoDoctor(22, Ui.TURQUESA_PROFUNDO)));
+        fila.add(crearCardKpi("Médicos en Turno Activo", lblKpiEnTurno, "Disponibles y en consulta hoy", Iconos.crearIconoTurno(22, Ui.COLOR_EXITO)));
+        fila.add(crearCardKpi("Atenciones del Período", lblKpiAtenciones, "Consultas y procedimientos", Iconos.crearIconoDocumento(22, Ui.TURQUESA)));
+        fila.add(crearCardKpi("Calificación Asistencial", lblKpiRatingPromedio, "Satisfacción de propietarios", Iconos.crearIconoCheck(22, new Color(217, 119, 6))));
 
-        // Filtro Especialidad
-        cmbEspecialidad = new JComboBox<>(new String[]{
-                "Todas las especialidades",
-                "Cirugía General",
-                "Dermatología",
-                "Animales Exóticos",
-                "Cardiología",
-                "Medicina Felina",
-                "Oftalmología",
-                "Urgencias",
-                "Oncología"
-        });
-        cmbEspecialidad.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbEspecialidad.addActionListener(e -> recargarDatos());
-
-        // Filtro Disponibilidad
-        cmbDisponibilidad = new JComboBox<>(new String[]{
-                "Cualquier horario",
-                "Mañana",
-                "Tarde",
-                "Noche"
-        });
-        cmbDisponibilidad.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbDisponibilidad.addActionListener(e -> recargarDatos());
-
-        // Ordenar por
-        cmbOrdenarPor = new JComboBox<>(new String[]{
-                "Ordenar por: Relevancia",
-                "Ordenar por: Experiencia",
-                "Ordenar por: Disponibilidad"
-        });
-        cmbOrdenarPor.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbOrdenarPor.addActionListener(e -> recargarDatos());
-
-        JButton btnFiltrar = Ui.botonPrimario("Filtrar", Iconos.crearIconoFiltro(14, Color.WHITE));
-        btnFiltrar.setBackground(COLOR_AZUL);
-        btnFiltrar.addActionListener(e -> recargarDatos());
-
-        JButton btnLimpiar = Ui.botonSecundario("Limpiar", null);
-        btnLimpiar.addActionListener(e -> {
-            txtBuscar.setText("");
-            cmbEspecialidad.setSelectedIndex(0);
-            cmbDisponibilidad.setSelectedIndex(0);
-            cmbOrdenarPor.setSelectedIndex(0);
-            recargarDatos();
-        });
-
-        filaFiltros.add(lblLupa);
-        filaFiltros.add(txtBuscar);
-        filaFiltros.add(new JLabel("Especialidad:"));
-        filaFiltros.add(cmbEspecialidad);
-        filaFiltros.add(new JLabel("Turno:"));
-        filaFiltros.add(cmbDisponibilidad);
-        filaFiltros.add(cmbOrdenarPor);
-        filaFiltros.add(btnFiltrar);
-        filaFiltros.add(btnLimpiar);
-
-        lblContador = new JLabel("Mostrando 0 especialistas");
-        lblContador.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblContador.setForeground(COLOR_TEXTO_MUTED);
-
-        panel.add(filaFiltros, BorderLayout.CENTER);
-        panel.add(lblContador, BorderLayout.EAST);
-        return panel;
+        return fila;
     }
 
-    public void recargarDatos() {
-        panelTarjetasGrid.removeAll();
-
-        List<Veterinario> lista = repo.getVeterinarios();
-        String busq = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
-        String espFiltro = cmbEspecialidad != null ? (String) cmbEspecialidad.getSelectedItem() : "Todas las especialidades";
-        String dispFiltro = cmbDisponibilidad != null ? (String) cmbDisponibilidad.getSelectedItem() : "Cualquier horario";
-        String ordenFiltro = cmbOrdenarPor != null ? (String) cmbOrdenarPor.getSelectedItem() : "Ordenar por: Relevancia";
-
-        List<Veterinario> filtrados = lista.stream().filter(v -> {
-            if (!busq.isEmpty()) {
-                boolean matchNom = v.getNombreCompleto().toLowerCase().contains(busq);
-                boolean matchEsp = v.getEspecialidad().toLowerCase().contains(busq);
-                boolean matchCol = v.getColegiaturaCMPV().toLowerCase().contains(busq);
-                if (!matchNom && !matchEsp && !matchCol) return false;
+    private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
             }
-            if (espFiltro != null && !espFiltro.equals("Todas las especialidades")) {
-                if (!v.getEspecialidad().toLowerCase().contains(espFiltro.toLowerCase())) {
-                    return false;
-                }
-            }
-            if (dispFiltro != null && !dispFiltro.equals("Cualquier horario")) {
-                if (!v.getHorarioTurno().toLowerCase().contains(dispFiltro.toLowerCase()) &&
-                        !v.getEstadoDisponibilidad().toLowerCase().contains(dispFiltro.toLowerCase())) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
-        // Ordenamiento
-        if (ordenFiltro.contains("Experiencia")) {
-            filtrados.sort((a, b) -> Integer.compare(b.getAniosExperiencia(), a.getAniosExperiencia()));
-        } else if (ordenFiltro.contains("Disponibilidad")) {
-            filtrados.sort((a, b) -> a.getEstadoDisponibilidad().compareToIgnoreCase(b.getEstadoDisponibilidad()));
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
+
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
+
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblSub);
+
+        card.add(texto, BorderLayout.CENTER);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            card.add(lblIco, BorderLayout.EAST);
         }
 
-        if (lblContador != null) {
-            lblContador.setText("Mostrando " + filtrados.size() + " de " + lista.size() + " especialistas");
-        }
-
-        for (Veterinario v : filtrados) {
-            panelTarjetasGrid.add(crearTarjetaVeterinario(v));
-        }
-
-        if (filtrados.isEmpty()) {
-            JPanel vacio = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 40));
-            vacio.setOpaque(false);
-            JLabel lblVacio = new JLabel("No se encontraron especialistas veterinarios con los filtros seleccionados.");
-            lblVacio.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            lblVacio.setForeground(COLOR_TEXTO_MUTED);
-            vacio.add(lblVacio);
-            panelTarjetasGrid.add(vacio);
-        }
-
-        panelTarjetasGrid.revalidate();
-        panelTarjetasGrid.repaint();
-    }
-
-    private JPanel crearTarjetaVeterinario(Veterinario v) {
-        JPanel card = new JPanel(new BorderLayout(14, 12));
-        card.setBackground(COLOR_CARD);
-        card.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(16, 16, 16, 16)
-        ));
-
-        // Cabecera de la tarjeta: Avatar circular + Nombre + CMPV + Badge de Estado
-        JPanel panelTop = new JPanel(new BorderLayout(12, 0));
-        panelTop.setOpaque(false);
-
-        // Avatar con iniciales
-        String iniciales = obtenerIniciales(v.getNombreCompleto());
-        JLabel avatar = new JLabel(iniciales, SwingConstants.CENTER);
-        avatar.setPreferredSize(new Dimension(54, 54));
-        avatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        avatar.setOpaque(true);
-        avatar.setBackground(obtenerColorAvatar(v.getEspecialidad()));
-        avatar.setForeground(Color.WHITE);
-        avatar.setBorder(new LineBorder(Color.WHITE, 2, true));
-
-        JPanel panelNombres = new JPanel();
-        panelNombres.setLayout(new BoxLayout(panelNombres, BoxLayout.Y_AXIS));
-        panelNombres.setOpaque(false);
-
-        JLabel lblNombre = new JLabel(v.getNombreCompleto());
-        lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblNombre.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblCol = new JLabel(v.getColegiaturaCMPV() + " · " + v.getAniosExperiencia() + " años exp.");
-        lblCol.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblCol.setForeground(COLOR_TEXTO_MUTED);
-
-        JLabel lblRating = new JLabel("★ " + String.format("%.1f", v.getCalificacionEstrellas()) +
-                "  (" + v.getTotalAtencionesRealizadas() + " atenciones registradas)");
-        lblRating.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblRating.setForeground(new Color(217, 119, 6)); // Ámbar oscuro
-
-        panelNombres.add(lblNombre);
-        panelNombres.add(Box.createVerticalStrut(2));
-        panelNombres.add(lblCol);
-        panelNombres.add(Box.createVerticalStrut(2));
-        panelNombres.add(lblRating);
-
-        // Badge de disponibilidad superior derecho
-        JLabel badgeEstado = crearBadgeEstado(v.getEstadoDisponibilidad());
-
-        panelTop.add(avatar, BorderLayout.WEST);
-        panelTop.add(panelNombres, BorderLayout.CENTER);
-        panelTop.add(badgeEstado, BorderLayout.EAST);
-
-        card.add(panelTop, BorderLayout.NORTH);
-
-        // Cuerpo de la tarjeta: Badge especialidad, descripción y horarios
-        JPanel panelCuerpo = new JPanel();
-        panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
-        panelCuerpo.setOpaque(false);
-
-        // Píldora de Especialidad
-        JPanel panelEsp = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 4));
-        panelEsp.setOpaque(false);
-        JLabel badgeEsp = new JLabel("  " + v.getEspecialidad() + "  ");
-        badgeEsp.setOpaque(true);
-        badgeEsp.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        badgeEsp.setBackground(Ui.TURQUESA_SUAVE);
-        badgeEsp.setForeground(Ui.TURQUESA_PROFUNDO);
-        badgeEsp.setBorder(new CompoundBorder(
-                new LineBorder(Ui.TURQUESA_MEDIO, 1, true),
-                new EmptyBorder(3, 6, 3, 6)
-        ));
-        panelEsp.add(badgeEsp);
-
-        // Descripción clínica
-        JTextArea txtBio = new JTextArea(v.getDescripcionBio());
-        txtBio.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtBio.setForeground(new Color(71, 85, 105));
-        txtBio.setLineWrap(true);
-        txtBio.setWrapStyleWord(true);
-        txtBio.setEditable(false);
-        txtBio.setOpaque(false);
-        txtBio.setBorder(new EmptyBorder(4, 0, 6, 0));
-
-        // Caja de Horario y Disponibilidad (Fondo gris tenue)
-        JPanel boxHorario = new JPanel(new GridLayout(2, 2, 8, 4));
-        boxHorario.setBackground(new Color(241, 245, 249));
-        boxHorario.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(8, 10, 8, 10)
-        ));
-
-        JLabel lblDias = new JLabel("📅 Días: " + v.getDiasAtencion());
-        lblDias.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblDias.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblHoras = new JLabel("⏰ Turno: " + v.getHorarioTurno());
-        lblHoras.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblHoras.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblLugar = new JLabel("📍 " + v.getConsultorioHabitual());
-        lblLugar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblLugar.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblProx = new JLabel("⚡ Cita libre: " + v.getProximaCitaLibre());
-        lblProx.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblProx.setForeground(COLOR_AZUL);
-
-        boxHorario.add(lblDias);
-        boxHorario.add(lblHoras);
-        boxHorario.add(lblLugar);
-        boxHorario.add(lblProx);
-
-        panelCuerpo.add(panelEsp);
-        panelCuerpo.add(txtBio);
-        panelCuerpo.add(Box.createVerticalStrut(4));
-        panelCuerpo.add(boxHorario);
-
-        card.add(panelCuerpo, BorderLayout.CENTER);
-
-        // Botones de acción inferiores
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        panelBotones.setOpaque(false);
-        panelBotones.setBorder(new EmptyBorder(6, 0, 0, 0));
-
-        JButton btnFicha = Ui.botonSecundario("Ver Perfil / Ficha", Iconos.crearIconoDocumento(14, COLOR_TEXTO_MUTED));
-        btnFicha.addActionListener(e -> mostrarFichaVeterinario(v));
-
-        JButton btnReservar = Ui.botonPrimario("Reservar Cita / Derivar", Iconos.crearIconoCalendario(14, Color.WHITE));
-        btnReservar.setBackground(COLOR_AZUL);
-        btnReservar.addActionListener(e -> mostrarDialogoReservarCita(v));
-
-        panelBotones.add(btnFicha);
-        panelBotones.add(btnReservar);
-
-        card.add(panelBotones, BorderLayout.SOUTH);
         return card;
     }
 
-    private JLabel crearBadgeEstado(String estado) {
-        JLabel badge = new JLabel("  " + estado + "  ");
-        badge.setOpaque(true);
-        badge.setFont(new Font("Segoe UI", Font.BOLD, 11));
+    private JSplitPane crearSplitMasterDetail() {
+        JPanel master = crearPanelMasterTable();
+        JPanel detail = crearPanelLiveHub();
+        detail.setPreferredSize(new Dimension(360, 0));
+        detail.setMinimumSize(new Dimension(320, 0));
 
-        Color bg;
-        Color fg;
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, master, detail);
+        split.setResizeWeight(1.0);
+        split.setDividerSize(6);
+        split.setBorder(null);
+        split.setOpaque(false);
+        return split;
+    }
 
-        if (estado.toLowerCase().contains("disponible")) {
-            bg = new Color(220, 252, 231);
-            fg = new Color(21, 128, 61);
-        } else if (estado.toLowerCase().contains("consulta")) {
-            bg = new Color(224, 242, 254);
-            fg = new Color(3, 105, 161);
-        } else if (estado.toLowerCase().contains("cirugía") || estado.toLowerCase().contains("cirugia")) {
-            bg = new Color(254, 243, 199);
-            fg = new Color(180, 83, 9);
-        } else if (estado.toLowerCase().contains("tarde")) {
-            bg = new Color(243, 232, 255);
-            fg = new Color(126, 34, 206);
-        } else {
-            bg = new Color(241, 245, 249);
-            fg = new Color(100, 116, 139);
+    private JPanel crearPanelMasterTable() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // Cabecera Filtros & Buscador
+        JPanel cabFiltros = new JPanel();
+        cabFiltros.setOpaque(false);
+        cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
+
+        JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
+        barraBuscar.setOpaque(false);
+
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        barraBuscar.add(lblBuscar, BorderLayout.WEST);
+
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar por nombre, especialidad o colegiatura CMPV...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarVeterinarios(); }
+            public void removeUpdate(DocumentEvent e) { filtrarVeterinarios(); }
+            public void changedUpdate(DocumentEvent e) { filtrarVeterinarios(); }
+        });
+        barraBuscar.add(txtBuscar, BorderLayout.CENTER);
+        cabFiltros.add(barraBuscar);
+        cabFiltros.add(Box.createVerticalStrut(8));
+
+        // Píldoras de Filtro
+        JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pills.setOpaque(false);
+
+        String[] especialidades = {"TODOS", "Cirugía General", "Dermatología", "Medicina Felina", "Cardiología", "Animales Exóticos", "Urgencias"};
+        for (String esp : especialidades) {
+            JButton btnPill = new JButton(esp);
+            btnPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            btnPill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btnPill.setBorder(new EmptyBorder(4, 10, 4, 10));
+            btnPill.setFocusPainted(false);
+
+            if (esp.equals(filtroEspecialidad)) {
+                btnPill.setBackground(Ui.TURQUESA);
+                btnPill.setForeground(Color.WHITE);
+            } else {
+                btnPill.setBackground(new Color(241, 245, 249));
+                btnPill.setForeground(Ui.TEXTO_MUTED);
+            }
+
+            btnPill.addActionListener(e -> {
+                filtroEspecialidad = esp;
+                for (Component comp : pills.getComponents()) {
+                    if (comp instanceof JButton) {
+                        JButton b = (JButton) comp;
+                        if (b.getText().equals(filtroEspecialidad)) {
+                            b.setBackground(Ui.TURQUESA);
+                            b.setForeground(Color.WHITE);
+                        } else {
+                            b.setBackground(new Color(241, 245, 249));
+                            b.setForeground(Ui.TEXTO_MUTED);
+                        }
+                    }
+                }
+                filtrarVeterinarios();
+            });
+            pills.add(btnPill);
         }
+        cabFiltros.add(pills);
+        master.add(cabFiltros, BorderLayout.NORTH);
 
-        badge.setBackground(bg);
-        badge.setForeground(fg);
-        badge.setBorder(new CompoundBorder(
-                new LineBorder(bg.darker(), 1, true),
-                new EmptyBorder(3, 8, 3, 8)
+        // Tabla de Veterinarios
+        String[] cols = {"Colegiatura", "Médico Especialista", "Especialidad", "Turno / Horario", "Consultorio", "Calificación", "Disponibilidad"};
+        modeloVeterinarios = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        tablaVeterinarios = new JTable(modeloVeterinarios);
+        tablaVeterinarios.setRowHeight(48);
+        tablaVeterinarios.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaVeterinarios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaVeterinarios.setShowVerticalLines(false);
+        tablaVeterinarios.setGridColor(new Color(241, 245, 249));
+        tablaVeterinarios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaVeterinarios.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaVeterinarios.getTableHeader().setForeground(Ui.TEXTO_MUTED);
+
+        tablaVeterinarios.getColumnModel().getColumn(0).setPreferredWidth(85);
+        tablaVeterinarios.getColumnModel().getColumn(1).setPreferredWidth(190);
+        tablaVeterinarios.getColumnModel().getColumn(2).setPreferredWidth(130);
+        tablaVeterinarios.getColumnModel().getColumn(3).setPreferredWidth(110);
+        tablaVeterinarios.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tablaVeterinarios.getColumnModel().getColumn(5).setPreferredWidth(85);
+        tablaVeterinarios.getColumnModel().getColumn(6).setPreferredWidth(110);
+
+        // Monograma en columna 1 (Médico Especialista)
+        tablaVeterinarios.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new BorderLayout(8, 0));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+                cell.setBorder(new EmptyBorder(0, 8, 0, 8));
+
+                String nombre = value != null ? value.toString() : "";
+                String iniciales = obtenerIniciales(nombre);
+
+                JLabel avatar = new JLabel(iniciales, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int s = Math.min(getWidth(), getHeight()) - 2;
+                        int x = (getWidth() - s) / 2;
+                        int y = (getHeight() - s) / 2;
+                        g2.setColor(new Color(224, 242, 254)); // Soft sky blue
+                        g2.fillOval(x, y, s, s);
+                        g2.setColor(new Color(186, 230, 253));
+                        g2.drawOval(x, y, s, s);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(32, 32));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(Ui.TURQUESA_PROFUNDO);
+
+                JLabel lblTexto = new JLabel(nombre);
+                lblTexto.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblTexto.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+                cell.add(avatar, BorderLayout.WEST);
+                cell.add(lblTexto, BorderLayout.CENTER);
+                return cell;
+            }
+        });
+
+        // Columna 5: Calificación con icono estrella dorado
+        tablaVeterinarios.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            private final javax.swing.Icon iconoEstrella = Iconos.crearIconoEstrella(14, new Color(245, 158, 11));
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 13));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String calif = value != null ? value.toString().replace("★", "").trim() : "5.0";
+
+                JLabel lblVal = new JLabel(calif);
+                lblVal.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblVal.setForeground(isSelected ? table.getSelectionForeground() : new Color(180, 83, 9));
+
+                JLabel lblIco = new JLabel(iconoEstrella);
+
+                cell.add(lblVal);
+                cell.add(lblIco);
+                return cell;
+            }
+        });
+
+        // Chip en columna 6 (Disponibilidad)
+        tablaVeterinarios.getColumnModel().getColumn(6).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 11));
+                p.setOpaque(true);
+                p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String st = value != null ? value.toString() : "";
+                JLabel badge = new JLabel(" " + st + " ");
+                badge.setOpaque(true);
+                badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+
+                if (st.toLowerCase().contains("disponible")) {
+                    badge.setBackground(new Color(220, 252, 231));
+                    badge.setForeground(new Color(21, 128, 61));
+                } else if (st.toLowerCase().contains("consulta")) {
+                    badge.setBackground(new Color(224, 242, 254));
+                    badge.setForeground(new Color(3, 105, 161));
+                } else if (st.toLowerCase().contains("cirug")) {
+                    badge.setBackground(new Color(254, 243, 199));
+                    badge.setForeground(new Color(180, 83, 9));
+                } else {
+                    badge.setBackground(new Color(243, 232, 255));
+                    badge.setForeground(new Color(126, 34, 206));
+                }
+                badge.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(badge.getBackground().darker(), 1, true),
+                        new EmptyBorder(2, 6, 2, 6)
+                ));
+                p.add(badge);
+                return p;
+            }
+        });
+
+        tablaVeterinarios.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaVeterinarios.getSelectedRow();
+                if (r >= 0 && r < listaVeterinariosFiltrada.size()) {
+                    mostrarDetalleVeterinario(listaVeterinariosFiltrada.get(r));
+                } else {
+                    mostrarDetalleVeterinario(null);
+                }
+            }
+        });
+
+        JScrollPane scroll = new JScrollPane(tablaVeterinarios);
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        master.add(scroll, BorderLayout.CENTER);
+
+        return master;
+    }
+
+    private JPanel crearPanelLiveHub() {
+        panelHubContenido = new JPanel(new BorderLayout());
+        panelHubContenido.setOpaque(false);
+
+        // Panel Vacío
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione un especialista para consultar el Live Specialist Hub", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        // Panel Detalle Activo
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        // 1. Hero del Veterinario
+        JPanel hero = new JPanel(new BorderLayout(10, 0));
+        hero.setOpaque(false);
+        hero.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        lblHubAvatar = new JLabel("DR", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int s = Math.min(getWidth(), getHeight()) - 2;
+                int x = (getWidth() - s) / 2;
+                int y = (getHeight() - s) / 2;
+                g2.setColor(new Color(224, 242, 254));
+                g2.fillOval(x, y, s, s);
+                g2.setColor(new Color(186, 230, 253));
+                g2.drawOval(x, y, s, s);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(44, 44));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
+
+        JPanel heroTxt = new JPanel();
+        heroTxt.setOpaque(false);
+        heroTxt.setLayout(new BoxLayout(heroTxt, BoxLayout.Y_AXIS));
+
+        lblHubNombre = new JLabel("Dr. Especialista");
+        lblHubNombre.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblHubNombre.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubColegiatura = new JLabel("CMPV 0000 · Cirugía");
+        lblHubColegiatura.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubColegiatura.setForeground(Ui.TEXTO_MUTED);
+
+        heroTxt.add(lblHubNombre);
+        heroTxt.add(Box.createVerticalStrut(2));
+        heroTxt.add(lblHubColegiatura);
+
+        lblHubChipEstado = new JLabel("Disponible", SwingConstants.CENTER);
+        lblHubChipEstado.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubChipEstado.setOpaque(true);
+        lblHubChipEstado.setBackground(new Color(220, 252, 231));
+        lblHubChipEstado.setForeground(new Color(21, 128, 61));
+        lblHubChipEstado.setBorder(new EmptyBorder(4, 8, 4, 8));
+
+        hero.add(lblHubAvatar, BorderLayout.WEST);
+        hero.add(heroTxt, BorderLayout.CENTER);
+        hero.add(lblHubChipEstado, BorderLayout.EAST);
+        panelHubDetalle.add(hero, BorderLayout.NORTH);
+
+        // 2. Scrollable Body
+        ScrollablePanel body = new ScrollablePanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setOpaque(false);
+
+        // Telemetría 2x2
+        JPanel telemetria = new JPanel(new GridLayout(2, 2, 6, 6));
+        telemetria.setOpaque(false);
+        telemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
+        telemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblHubAniosExp = new JLabel("0 años");
+        lblHubAtenciones = new JLabel("0 atenciones");
+        lblHubConsultorio = new JLabel("Cons. 1");
+        lblHubProximaCita = new JLabel("Inmediata");
+
+        telemetria.add(crearCardMiniTelemetria("EXPERIENCIA", lblHubAniosExp, Ui.TURQUESA_OSCURO));
+        telemetria.add(crearCardMiniTelemetria("ATENCIONES", lblHubAtenciones, Ui.TEXTO_TITULO));
+        telemetria.add(crearCardMiniTelemetria("CONSULTORIO", lblHubConsultorio, Ui.TURQUESA_PROFUNDO));
+        telemetria.add(crearCardMiniTelemetria("PRÓXIMA CITA", lblHubProximaCita, new Color(217, 119, 6)));
+
+        body.add(telemetria);
+        body.add(vGap(8));
+
+        // Secciones de Detalle
+        JPanel secBio = crearSeccionCard("Perfil y Especialidades Clínicas");
+        txtHubEspecialidad = new JTextArea();
+        configurarTextAreaItem(txtHubEspecialidad);
+        txtHubBio = new JTextArea();
+        configurarTextAreaItem(txtHubBio);
+        secBio.add(crearItemLinea("Especialidad:", txtHubEspecialidad));
+        secBio.add(vGap(4));
+        secBio.add(crearItemLinea("Biografía:", txtHubBio));
+        body.add(secBio);
+        body.add(vGap(6));
+
+        JPanel secContacto = crearSeccionCard("Contacto y Canales Directos");
+        txtHubContacto = new JTextArea();
+        configurarTextAreaItem(txtHubContacto);
+        secContacto.add(crearItemLinea("Canales:", txtHubContacto));
+        body.add(secContacto);
+        body.add(vGap(6));
+
+        JPanel secHorario = crearSeccionCard("Jornada de Guardia y Turnos");
+        txtHubHorario = new JTextArea();
+        configurarTextAreaItem(txtHubHorario);
+        secHorario.add(crearItemLinea("Horario:", txtHubHorario));
+        body.add(secHorario);
+
+        JScrollPane scrollBody = new JScrollPane(body);
+        scrollBody.setBorder(null);
+        scrollBody.setOpaque(false);
+        scrollBody.getViewport().setOpaque(false);
+        panelHubDetalle.add(scrollBody, BorderLayout.CENTER);
+
+        // 3. Grid de Acciones 1-Click (2x2)
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+        JButton btnFicha = crearBotonAccion("Ficha Colegiada", Iconos.crearIconoDocumento(13, Color.WHITE), true);
+        btnFicha.addActionListener(e -> {
+            if (veterinarioSeleccionado != null) mostrarFichaVeterinario(veterinarioSeleccionado);
+        });
+
+        JButton btnReservar = crearBotonAccion("Reservar Cita", Iconos.crearIconoCalendario(13, Ui.TURQUESA_OSCURO), false);
+        btnReservar.addActionListener(e -> {
+            if (veterinarioSeleccionado != null) mostrarDialogoReservarCita(veterinarioSeleccionado);
+        });
+
+        JButton btnEditar = crearBotonAccion("Editar Perfil", Iconos.crearIconoEditar(13, Ui.TEXTO_MUTED), false);
+        btnEditar.addActionListener(e -> {
+            if (veterinarioSeleccionado != null) mostrarDialogoEditarVeterinario(veterinarioSeleccionado);
+        });
+
+        JButton btnGuardia = crearBotonAccion("Asignar Guardia", Iconos.crearIconoTurno(13, Ui.TEXTO_MUTED), false);
+        btnGuardia.addActionListener(e -> {
+            if (veterinarioSeleccionado != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Turno de guardia clínica actualizado para " + veterinarioSeleccionado.getNombreCompleto() + " en " + veterinarioSeleccionado.getConsultorioHabitual(),
+                        "Programación Asistencial", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        gridAcciones.add(btnFicha);
+        gridAcciones.add(btnReservar);
+        gridAcciones.add(btnEditar);
+        gridAcciones.add(btnGuardia);
+        panelHubDetalle.add(gridAcciones, BorderLayout.SOUTH);
+
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        return panelHubContenido;
+    }
+
+    private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(4, 8, 4, 8)
         ));
-        return badge;
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 8));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblValor.setForeground(colorValor);
+
+        c.add(t);
+        c.add(vGap(2));
+        c.add(lblValor);
+        return c;
     }
 
-    private Color obtenerColorAvatar(String especialidad) {
-        String esp = especialidad.toLowerCase();
-        if (esp.contains("cirug")) return new Color(225, 29, 72); // Rojo / Cirugía
-        if (esp.contains("derm")) return new Color(13, 148, 136); // Teal / Derma
-        if (esp.contains("exót") || esp.contains("exot")) return new Color(217, 119, 6); // Naranja / Exóticos
-        if (esp.contains("cardio")) return new Color(239, 68, 68); // Rojo corazón
-        if (esp.contains("felin")) return new Color(147, 51, 234); // Morado
-        if (esp.contains("oftal")) return new Color(2, 132, 199); // Azul
-        if (esp.contains("urgen")) return new Color(220, 38, 38); // Rojo intenso urgencias
-        return COLOR_AZUL;
-    }
-
-    private String obtenerIniciales(String nombreCompleto) {
-        if (nombreCompleto == null || nombreCompleto.isEmpty()) return "V";
-        String limpio = nombreCompleto.replace("Dra.", "").replace("Dr.", "").trim();
-        String[] partes = limpio.split("\\s+");
-        if (partes.length >= 2) {
-            return (partes[0].substring(0, 1) + partes[1].substring(0, 1)).toUpperCase();
-        } else if (partes.length == 1 && partes[0].length() >= 2) {
-            return partes[0].substring(0, 2).toUpperCase();
-        }
-        return "V";
-    }
-
-    // Modal de Ficha Completa del Veterinario
-    private void mostrarFichaVeterinario(Veterinario v) {
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ficha del Especialista: " + v.getNombreCompleto(), JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(640, 520);
-        dlg.setLocationRelativeTo(this);
-        dlg.setLayout(new BorderLayout());
-
-        JPanel panel = new JPanel(new BorderLayout(16, 16));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(20, 24, 20, 24));
-
-        // Cabecera Ficha
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-
-        JLabel lblTit = new JLabel(v.getNombreCompleto());
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblSub = new JLabel(v.getColegiaturaCMPV() + " · Especialista en " + v.getEspecialidad());
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
-
-        JPanel infoTop = new JPanel(new GridLayout(2, 1, 0, 4));
-        infoTop.setOpaque(false);
-        infoTop.add(lblTit);
-        infoTop.add(lblSub);
-
-        top.add(infoTop, BorderLayout.CENTER);
-        top.add(crearBadgeEstado(v.getEstadoDisponibilidad()), BorderLayout.EAST);
-        panel.add(top, BorderLayout.NORTH);
-
-        // Contenido con campos
-        JPanel campos = new JPanel(new GridLayout(6, 2, 12, 12));
-        campos.setOpaque(false);
-        campos.setBorder(new EmptyBorder(12, 0, 12, 0));
-
-        campos.add(crearItemFicha("Años de Experiencia:", v.getAniosExperiencia() + " años colegiado"));
-        campos.add(crearItemFicha("Calificación General:", "★ " + v.getCalificacionEstrellas() + " / 5.0"));
-        campos.add(crearItemFicha("Consultorio Asignado:", v.getConsultorioHabitual()));
-        campos.add(crearItemFicha("Atenciones / Cirugías:", v.getTotalAtencionesRealizadas() + " registradas"));
-        campos.add(crearItemFicha("Días de Atención:", v.getDiasAtencion()));
-        campos.add(crearItemFicha("Horario / Turno:", v.getHorarioTurno()));
-        campos.add(crearItemFicha("Próxima Cita Libre:", v.getProximaCitaLibre()));
-        campos.add(crearItemFicha("Teléfono Directo:", v.getTelefono()));
-        campos.add(crearItemFicha("Correo Electrónico:", v.getEmail()));
-
-        // Selector para cambiar disponibilidad en tiempo real
-        JPanel boxCambio = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        boxCambio.setOpaque(false);
-        JComboBox<String> cmbNuevoEstado = new JComboBox<>(new String[]{
-                "Disponible hoy", "En consulta", "En cirugía", "Turno Tarde", "Guardia nocturna", "Descanso"
-        });
-        cmbNuevoEstado.setSelectedItem(v.getEstadoDisponibilidad());
-        boxCambio.add(new JLabel("Estado actual:"));
-        boxCambio.add(cmbNuevoEstado);
-        campos.add(boxCambio);
-
-        // Biografía completa abajo
-        JPanel bioPanel = new JPanel(new BorderLayout(0, 6));
-        bioPanel.setOpaque(false);
-        JLabel lblBioTit = new JLabel("Perfil Profesional y Especialidades:");
-        lblBioTit.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblBioTit.setForeground(COLOR_TEXTO_TITULO);
-
-        JTextArea txtBioFull = new JTextArea(v.getDescripcionBio());
-        txtBioFull.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtBioFull.setLineWrap(true);
-        txtBioFull.setWrapStyleWord(true);
-        txtBioFull.setEditable(false);
-        txtBioFull.setBackground(new Color(248, 250, 252));
-        txtBioFull.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(8, 10, 8, 10)
+    private JPanel crearSeccionCard(String titulo) {
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
+        sec.setOpaque(false);
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(6, 10, 6, 10)
         ));
+        sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        bioPanel.add(lblBioTit, BorderLayout.NORTH);
-        bioPanel.add(txtBioFull, BorderLayout.CENTER);
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel centro = new JPanel(new BorderLayout(0, 10));
-        centro.setOpaque(false);
-        centro.add(campos, BorderLayout.NORTH);
-        centro.add(bioPanel, BorderLayout.CENTER);
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_OSCURO);
+        header.add(t);
 
-        panel.add(centro, BorderLayout.CENTER);
-
-        // Botones dialog
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        bot.setOpaque(false);
-
-        JButton btnGuardarEstado = Ui.botonPrimario("Actualizar Disponibilidad", null);
-        btnGuardarEstado.setBackground(COLOR_VERDE);
-        btnGuardarEstado.addActionListener(e -> {
-            String nuevo = (String) cmbNuevoEstado.getSelectedItem();
-            repo.actualizarEstadoVeterinario(v.getId(), nuevo);
-            JOptionPane.showMessageDialog(dlg, "Disponibilidad de " + v.getNombreCompleto() + " actualizada a: " + nuevo, "Estado Actualizado", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
-            recargarDatos();
-        });
-
-        JButton btnCerrar = Ui.botonSecundario("Cerrar", null);
-        btnCerrar.addActionListener(e -> dlg.dispose());
-
-        JButton btnExportar = Ui.botonSecundario("Descargar Ficha PDF", Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
-        btnExportar.addActionListener(e -> {
-            String textoFicha = "FICHA TÉCNICA DEL ESPECIALISTA VETERINARIO\n" +
-                    "CLÍNICA VETERINARIA HAPPY PETS S.A.C.\n" +
-                    "=========================================================================\n\n" +
-                    "NOMBRE COMPLETO     : " + v.getNombreCompleto() + "\n" +
-                    "COLEGIATURA CMPV    : " + v.getColegiaturaCMPV() + "\n" +
-                    "ESPECIALIDAD        : " + v.getEspecialidad() + "\n" +
-                    "AÑOS EXPERIENCIA    : " + v.getAniosExperiencia() + " años\n" +
-                    "CONSULTORIO         : " + v.getConsultorioHabitual() + "\n" +
-                    "TURNOS / HORARIOS   : " + v.getDiasAtencion() + " (" + v.getHorarioTurno() + ")\n" +
-                    "ESTADO ACTUAL       : " + v.getEstadoDisponibilidad() + "\n" +
-                    "CONTACTO            : " + v.getTelefono() + " | " + v.getEmail() + "\n\n" +
-                    "PERFIL CLÍNICO:\n" + v.getDescripcionBio() + "\n";
-            Ui.mostrarVisorReporte(dlg, "Ficha Profesional - " + v.getNombreCompleto(), "CUADRO MÉDICO COLEGIADO", textoFicha, "FichaVeterinario_" + v.getColegiaturaCMPV());
-        });
-
-        bot.add(btnExportar);
-        bot.add(btnGuardarEstado);
-        bot.add(btnCerrar);
-        panel.add(bot, BorderLayout.SOUTH);
-
-        dlg.add(panel);
-        dlg.setVisible(true);
+        sec.add(header);
+        sec.add(vGap(4));
+        return sec;
     }
 
-    private JPanel crearItemFicha(String label, String valor) {
-        JPanel p = new JPanel(new BorderLayout(4, 2));
+    private JPanel crearItemLinea(String label, Component valor) {
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(label);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        l.setForeground(COLOR_TEXTO_MUTED);
-
-        JLabel v = new JLabel(valor);
-        v.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        v.setForeground(COLOR_TEXTO_TITULO);
-
-        p.add(l, BorderLayout.NORTH);
-        p.add(v, BorderLayout.CENTER);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        l.setForeground(Ui.TEXTO_MUTED);
+        l.setVerticalAlignment(SwingConstants.TOP);
+        p.add(l, BorderLayout.WEST);
+        p.add(valor, BorderLayout.CENTER);
         return p;
     }
 
-    private void mostrarDialogoReservarCita(Veterinario v) {
-        String msg = "Asignación rápida de consulta con " + v.getNombreCompleto() + "\n" +
-                "Especialidad: " + v.getEspecialidad() + "\n" +
-                "Consultorio: " + v.getConsultorioHabitual() + "\n" +
-                "Próxima cita sugerida: " + v.getProximaCitaLibre() + "\n\n" +
-                "¿Desea agendar una cita o derivar paciente a este especialista?";
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
+    }
 
-        int resp = JOptionPane.showConfirmDialog(this, msg, "Reservar Cita Médica", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-        if (resp == JOptionPane.YES_OPTION) {
-            JOptionPane.showMessageDialog(this, "Redirigiendo a Agendamiento de Citas con el especialista " + v.getNombreCompleto() + " preseleccionado.", "Reserva en Proceso", JOptionPane.INFORMATION_MESSAGE);
+    private static void configurarTextAreaItem(JTextArea ta) {
+        ta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        ta.setForeground(Ui.TEXTO_TITULO);
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        ta.setOpaque(false);
+        ta.setBorder(null);
+        ta.setAlignmentX(Component.LEFT_ALIGNMENT);
+    }
+
+    private JButton crearBotonAccion(String texto, javax.swing.Icon icono, boolean primario) {
+        JButton btn = new JButton(texto, icono) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (primario) {
+                    g2.setColor(getModel().isPressed() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                if (!primario) {
+                    g2.setColor(Ui.BORDE_SUAVE);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                }
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(4, 6, 4, 6));
+        return btn;
+    }
+
+    public void recargarDatos() {
+        filtrarVeterinarios();
+        actualizarKpis();
+    }
+
+    private void actualizarKpis() {
+        List<Veterinario> total = repo.getVeterinarios();
+        lblKpiTotalEspecialistas.setText(String.valueOf(total.size()));
+
+        long enTurno = total.stream().filter(v -> v.getEstadoDisponibilidad().toLowerCase().contains("disponible") ||
+                v.getEstadoDisponibilidad().toLowerCase().contains("consulta")).count();
+        lblKpiEnTurno.setText(String.valueOf(enTurno));
+
+        int atenciones = total.stream().mapToInt(Veterinario::getTotalAtencionesRealizadas).sum();
+        lblKpiAtenciones.setText(String.valueOf(atenciones));
+
+        double promRating = total.stream().mapToDouble(Veterinario::getCalificacionEstrellas).average().orElse(5.0);
+        lblKpiRatingPromedio.setText(String.format("%.1f ★", promRating));
+    }
+
+    private void filtrarVeterinarios() {
+        listaVeterinariosFiltrada.clear();
+        modeloVeterinarios.setRowCount(0);
+
+        List<Veterinario> base = repo.getVeterinarios();
+        String busq = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
+
+        for (Veterinario v : base) {
+            boolean matchPill = filtroEspecialidad.equals("TODOS") || v.getEspecialidad().toLowerCase().contains(filtroEspecialidad.toLowerCase());
+            boolean matchBusq = busq.isEmpty() ||
+                    v.getNombreCompleto().toLowerCase().contains(busq) ||
+                    v.getEspecialidad().toLowerCase().contains(busq) ||
+                    v.getColegiaturaCMPV().toLowerCase().contains(busq);
+
+            if (matchPill && matchBusq) {
+                listaVeterinariosFiltrada.add(v);
+                modeloVeterinarios.addRow(new Object[]{
+                        v.getColegiaturaCMPV(),
+                        v.getNombreCompleto(),
+                        v.getEspecialidad(),
+                        v.getHorarioTurno(),
+                        v.getConsultorioHabitual(),
+                        String.format("%.1f ★", v.getCalificacionEstrellas()),
+                        v.getEstadoDisponibilidad()
+                });
+            }
+        }
+
+        if (!listaVeterinariosFiltrada.isEmpty()) {
+            tablaVeterinarios.setRowSelectionInterval(0, 0);
+        } else {
+            mostrarDetalleVeterinario(null);
+        }
+    }
+
+    private void mostrarDetalleVeterinario(Veterinario v) {
+        veterinarioSeleccionado = v;
+        panelHubContenido.removeAll();
+
+        if (v == null) {
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        } else {
+            lblHubAvatar.setText(obtenerIniciales(v.getNombreCompleto()));
+            lblHubNombre.setText(v.getNombreCompleto());
+            lblHubColegiatura.setText(v.getColegiaturaCMPV() + " · " + v.getEspecialidad());
+
+            String st = v.getEstadoDisponibilidad();
+            lblHubChipEstado.setText(st);
+            if (st.toLowerCase().contains("disponible")) {
+                lblHubChipEstado.setBackground(new Color(220, 252, 231));
+                lblHubChipEstado.setForeground(new Color(21, 128, 61));
+            } else if (st.toLowerCase().contains("consulta")) {
+                lblHubChipEstado.setBackground(new Color(224, 242, 254));
+                lblHubChipEstado.setForeground(new Color(3, 105, 161));
+            } else {
+                lblHubChipEstado.setBackground(new Color(254, 243, 199));
+                lblHubChipEstado.setForeground(new Color(180, 83, 9));
+            }
+
+            lblHubAniosExp.setText(v.getAniosExperiencia() + " años");
+            lblHubAtenciones.setText(v.getTotalAtencionesRealizadas() + " atenciones");
+            lblHubConsultorio.setText(v.getConsultorioHabitual());
+            lblHubProximaCita.setText(v.getProximaCitaLibre());
+
+            txtHubEspecialidad.setText(v.getEspecialidad() + " (Registro Sanitario Acreditado)");
+            txtHubBio.setText(v.getDescripcionBio());
+            txtHubContacto.setText("Tel: " + v.getTelefono() + "\nEmail: " + v.getEmail());
+            txtHubHorario.setText("Días: " + v.getDiasAtencion() + "\nTurno: " + v.getHorarioTurno());
+
+            panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
+        }
+
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
+    }
+
+    private String obtenerIniciales(String nombre) {
+        if (nombre == null || nombre.isEmpty()) return "DR";
+        String limpio = nombre.replace("Dra.", "").replace("Dr.", "").trim();
+        String[] p = limpio.split("\\s+");
+        if (p.length >= 2) {
+            return (p[0].substring(0, 1) + p[1].substring(0, 1)).toUpperCase();
+        } else if (p.length == 1 && p[0].length() >= 2) {
+            return p[0].substring(0, 2).toUpperCase();
+        }
+        return "DR";
+    }
+
+    private void mostrarFichaVeterinario(Veterinario v) {
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ficha del Especialista: " + v.getNombreCompleto(), JDialog.ModalityType.APPLICATION_MODAL);
+        dlg.setSize(620, 520);
+        dlg.setLocationRelativeTo(this);
+        dlg.setLayout(new BorderLayout());
+
+        JPanel p = new JPanel(new BorderLayout(14, 14));
+        p.setBackground(Color.WHITE);
+        p.setBorder(new EmptyBorder(20, 24, 20, 24));
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+        JLabel tit = new JLabel(v.getNombreCompleto());
+        tit.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        tit.setForeground(Ui.TEXTO_TITULO);
+
+        JLabel sub = new JLabel(v.getColegiaturaCMPV() + " · Especialista en " + v.getEspecialidad());
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        sub.setForeground(Ui.TEXTO_MUTED);
+
+        top.add(tit, BorderLayout.NORTH);
+        top.add(sub, BorderLayout.CENTER);
+        p.add(top, BorderLayout.NORTH);
+
+        JTextArea ta = new JTextArea();
+        ta.setEditable(false);
+        ta.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setText("═══════════════════════════════════════════════════════════\n" +
+                "  INFORMACIÓN COLEGIADA Y ASISTENCIAL DE ESPECIALISTA\n" +
+                "═══════════════════════════════════════════════════════════\n\n" +
+                "• Nombre Oficial: " + v.getNombreCompleto() + "\n" +
+                "• Matrícula CMPV: " + v.getColegiaturaCMPV() + "\n" +
+                "• Especialidad Primaria: " + v.getEspecialidad() + "\n" +
+                "• Años de Experiencia: " + v.getAniosExperiencia() + " años\n" +
+                "• Calificación Institucional: " + v.getCalificacionEstrellas() + " / 5.0 ★\n" +
+                "• Atenciones Realizadas: " + v.getTotalAtencionesRealizadas() + " atenciones\n\n" +
+                "• Consultorio Asignado: " + v.getConsultorioHabitual() + "\n" +
+                "• Días de Guardia: " + v.getDiasAtencion() + "\n" +
+                "• Turno: " + v.getHorarioTurno() + "\n" +
+                "• Disponibilidad Actual: " + v.getEstadoDisponibilidad() + "\n" +
+                "• Próximo Espacio Libre: " + v.getProximaCitaLibre() + "\n\n" +
+                "• Canales de Contacto: " + v.getTelefono() + " | " + v.getEmail() + "\n\n" +
+                "• Síntesis Curricular:\n  " + v.getDescripcionBio() + "\n");
+        p.add(new JScrollPane(ta), BorderLayout.CENTER);
+
+        JButton btnCerrar = Ui.boton("Cerrar Ficha", false);
+        btnCerrar.addActionListener(e -> dlg.dispose());
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bot.setOpaque(false);
+        bot.add(btnCerrar);
+        p.add(bot, BorderLayout.SOUTH);
+
+        dlg.add(p);
+        dlg.setVisible(true);
+    }
+
+    private void mostrarDialogoReservarCita(Veterinario v) {
+        String msg = "¿Desea derivar un paciente o agendar cita directa con " + v.getNombreCompleto() + "?\n" +
+                "Próximo turno libre: " + v.getProximaCitaLibre() + " en " + v.getConsultorioHabitual();
+        int opt = JOptionPane.showConfirmDialog(this, msg, "Agendar Derivación", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (opt == JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(this, "Cita agendada exitosamente en la agenda del especialista.", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     private void mostrarDialogoNuevoVeterinario() {
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Registrar Nuevo Especialista Veterinario", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(560, 580);
+        mostrarFormularioVeterinario(null);
+    }
+
+    private void mostrarDialogoEditarVeterinario(Veterinario v) {
+        mostrarFormularioVeterinario(v);
+    }
+
+    private void mostrarFormularioVeterinario(Veterinario existente) {
+        boolean esEdicion = existente != null;
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this),
+                esEdicion ? "Editar Especialista Médico" : "Registrar Nuevo Especialista Clínico",
+                JDialog.ModalityType.APPLICATION_MODAL);
+        dlg.setSize(540, 520);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(20, 24, 20, 24));
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(new EmptyBorder(18, 22, 18, 22));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
 
-        JTextField txtNom = new JTextField(20);
-        JTextField txtCol = new JTextField(15);
-        JComboBox<String> cmbEsp = new JComboBox<>(new String[]{
-                "Cirugía General y Tejidos Blandos", "Dermatología y Alergias",
-                "Animales Exóticos y Aves", "Cardiología y Ecocardiografía",
-                "Medicina Felina y Comportamiento", "Oftalmología Veterinaria",
-                "Urgencias y Cuidados Críticos", "Oncología y Quimioterapia"
-        });
-        JTextField txtExp = new JTextField("5", 6);
-        JTextField txtDias = new JTextField("Lun · Mié · Vie", 15);
-        JTextField txtTurno = new JTextField("08:00 - 15:00", 15);
-        JTextField txtCons = new JTextField("Consultorio 1", 15);
-        JTextField txtTel = new JTextField("+51 987 654 321", 15);
-        JTextField txtEmail = new JTextField("especialista@happypets.pe", 20);
-        JTextArea txtBio = new JTextArea(3, 20);
-        txtBio.setLineWrap(true);
-        txtBio.setWrapStyleWord(true);
-        txtBio.setBorder(new LineBorder(COLOR_BORDE, 1));
+        JTextField txtNombre = new JTextField(esEdicion ? existente.getNombreCompleto() : "");
+        JTextField txtCMPV = new JTextField(esEdicion ? existente.getColegiaturaCMPV() : "CMPV-");
+        JComboBox<String> cbEsp = new JComboBox<>(new String[]{"Cirugía General", "Dermatología", "Medicina Felina", "Cardiología", "Animales Exóticos", "Urgencias", "Oncología"});
+        if (esEdicion) cbEsp.setSelectedItem(existente.getEspecialidad());
+        JTextField txtExp = new JTextField(esEdicion ? String.valueOf(existente.getAniosExperiencia()) : "5");
+        JTextField txtConsultorio = new JTextField(esEdicion ? existente.getConsultorioHabitual() : "Consultorio 1");
+        JTextField txtDias = new JTextField(esEdicion ? existente.getDiasAtencion() : "Lunes a Viernes");
+        JTextField txtTurno = new JTextField(esEdicion ? existente.getHorarioTurno() : "08:00 - 16:00");
+        JTextField txtTel = new JTextField(esEdicion ? existente.getTelefono() : "+51 987 654 321");
+        JTextField txtEmail = new JTextField(esEdicion ? existente.getEmail() : "medico@happypets.pe");
 
-        p.add(new JLabel("Nombre Completo:"), gbc);
-        gbc.gridx = 1; p.add(txtNom, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Colegiatura CMPV:"), gbc);
-        gbc.gridx = 1; p.add(txtCol, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Especialidad:"), gbc);
-        gbc.gridx = 1; p.add(cmbEsp, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Años de Experiencia:"), gbc);
-        gbc.gridx = 1; p.add(txtExp, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Días de Atención:"), gbc);
-        gbc.gridx = 1; p.add(txtDias, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Horario habitual:"), gbc);
-        gbc.gridx = 1; p.add(txtTurno, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Consultorio / Quirófano:"), gbc);
-        gbc.gridx = 1; p.add(txtCons, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Teléfono Móvil:"), gbc);
-        gbc.gridx = 1; p.add(txtTel, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Correo Institucional:"), gbc);
-        gbc.gridx = 1; p.add(txtEmail, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Breve Perfil / Bio:"), gbc);
-        gbc.gridx = 1; p.add(new JScrollPane(txtBio), gbc);
+        int row = 0;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Nombre Completo:"), gbc);
+        gbc.gridx = 1; form.add(txtNombre, gbc);
 
-        JPanel panelBot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        panelBot.setBackground(Color.WHITE);
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Colegiatura CMPV:"), gbc);
+        gbc.gridx = 1; form.add(txtCMPV, gbc);
 
-        JButton btnGuardar = Ui.botonPrimario("Guardar Especialista", null);
-        btnGuardar.setBackground(COLOR_MORADO);
-        btnGuardar.addActionListener(e -> {
-            String nom = txtNom.getText().trim();
-            if (nom.isEmpty()) {
-                JOptionPane.showMessageDialog(dlg, "Ingrese el nombre del especialista.", "Validación", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            int exp = 5;
-            try { exp = Integer.parseInt(txtExp.getText().trim()); } catch (Exception ignored) {}
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Especialidad:"), gbc);
+        gbc.gridx = 1; form.add(cbEsp, gbc);
 
-            Veterinario nuevo = new Veterinario(
-                    "VET-" + String.format("%02d", repo.getVeterinarios().size() + 1),
-                    nom,
-                    txtCol.getText().trim().isEmpty() ? "Col. N° 28/0000" : txtCol.getText().trim(),
-                    (String) cmbEsp.getSelectedItem(),
-                    exp,
-                    txtBio.getText().trim().isEmpty() ? "Especialista clínico certificado." : txtBio.getText().trim(),
-                    txtDias.getText().trim(),
-                    txtTurno.getText().trim(),
-                    "Hoy, 18:00 hrs",
-                    "Disponible hoy",
-                    txtTel.getText().trim(),
-                    txtEmail.getText().trim(),
-                    5.0,
-                    0,
-                    txtCons.getText().trim()
-            );
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Años Experiencia:"), gbc);
+        gbc.gridx = 1; form.add(txtExp, gbc);
 
-            repo.guardarVeterinario(nuevo);
-            JOptionPane.showMessageDialog(dlg, "Especialista " + nom + " registrado correctamente en el directorio.", "Registro Exitoso", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
-            recargarDatos();
-        });
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Consultorio:"), gbc);
+        gbc.gridx = 1; form.add(txtConsultorio, gbc);
 
-        JButton btnCancelar = Ui.botonSecundario("Cancelar", null);
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Días Atención:"), gbc);
+        gbc.gridx = 1; form.add(txtDias, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Turno / Horario:"), gbc);
+        gbc.gridx = 1; form.add(txtTurno, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Teléfono Móvil:"), gbc);
+        gbc.gridx = 1; form.add(txtTel, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Correo Electrónico:"), gbc);
+        gbc.gridx = 1; form.add(txtEmail, gbc);
+
+        dlg.add(form, BorderLayout.CENTER);
+
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
+        bot.setBackground(new Color(248, 250, 252));
+        JButton btnCancelar = Ui.boton("Cancelar", false);
         btnCancelar.addActionListener(e -> dlg.dispose());
 
-        panelBot.add(btnGuardar);
-        panelBot.add(btnCancelar);
+        JButton btnGuardar = Ui.boton(esEdicion ? "Guardar Cambios" : "Registrar Especialista", true);
+        btnGuardar.addActionListener(e -> {
+            String nom = txtNombre.getText().trim();
+            if (nom.isEmpty()) {
+                JOptionPane.showMessageDialog(dlg, "El nombre del especialista es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-        dlg.add(p, BorderLayout.CENTER);
-        dlg.add(panelBot, BorderLayout.SOUTH);
+            int exp = 3;
+            try { exp = Integer.parseInt(txtExp.getText().trim()); } catch (Exception ignored) {}
+
+            if (esEdicion) {
+                existente.setNombreCompleto(nom);
+                existente.setColegiaturaCMPV(txtCMPV.getText().trim());
+                existente.setEspecialidad((String) cbEsp.getSelectedItem());
+                existente.setAniosExperiencia(exp);
+                existente.setConsultorioHabitual(txtConsultorio.getText().trim());
+                existente.setDiasAtencion(txtDias.getText().trim());
+                existente.setHorarioTurno(txtTurno.getText().trim());
+                existente.setTelefono(txtTel.getText().trim());
+                existente.setEmail(txtEmail.getText().trim());
+            } else {
+                Veterinario nuevo = new Veterinario(
+                        "VET-" + (repo.getVeterinarios().size() + 1),
+                        nom,
+                        txtCMPV.getText().trim(),
+                        (String) cbEsp.getSelectedItem(),
+                        exp,
+                        "Especialista médico colegiado incorporado a la plana clínica de Veterinaria Happy Pets.",
+                        txtDias.getText().trim(),
+                        txtTurno.getText().trim(),
+                        "Hoy 16:30",
+                        "Disponible",
+                        txtTel.getText().trim(),
+                        txtEmail.getText().trim(),
+                        5.0,
+                        0,
+                        txtConsultorio.getText().trim()
+                );
+                repo.getVeterinarios().add(nuevo);
+            }
+            recargarDatos();
+            dlg.dispose();
+            JOptionPane.showMessageDialog(this, "Especialista registrado correctamente en el cuadro médico.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        bot.add(btnCancelar);
+        bot.add(btnGuardar);
+        dlg.add(bot, BorderLayout.SOUTH);
         dlg.setVisible(true);
+    }
+
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }

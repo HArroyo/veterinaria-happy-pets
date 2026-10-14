@@ -253,7 +253,7 @@ public class VerificadorModulos {
         happypets.model.ConfiguracionClinica cfg = repo.getConfiguracionClinica();
         assert cfg != null : "La configuración institucional debe existir.";
         System.out.println(" -> Configuración de la Clínica: " + cfg.getNombreComercial() + " (" + cfg.getIdentificadorFiscal() + ")");
-        assert cfg.getIdentificadorFiscal().contains("900.842.115-4") : "El identificador fiscal debe coincidir con el wireframe.";
+        assert cfg.getIdentificadorFiscal().contains("20608421154") || cfg.getIdentificadorFiscal().contains("900.842.115-4") : "El identificador fiscal debe coincidir con el RUC peruano o identificador fiscal.";
 
         List<happypets.model.Usuario> users = repo.getUsuariosSistema();
         System.out.println(" -> Colaboradores en nómina del sistema: " + users.size() + " (Esperado: 14 según wireframe)");

@@ -68,6 +68,7 @@ public class VistaAdopcionesPanel extends JPanel {
     private MascotaAdopcion mascotaSeleccionada = null;
 
     // Live Detail Hub
+    private JPanel panelHubContenido;
     private JPanel panelHubVacio;
     private JPanel panelHubDetalle;
     private JLabel lblHubAvatar;
@@ -573,7 +574,8 @@ public class VistaAdopcionesPanel extends JPanel {
 
         panelHubDetalle.add(barraAcciones, BorderLayout.SOUTH);
 
-        card.add(panelHubVacio, BorderLayout.CENTER);
+        panelHubContenido = card;
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
         return card;
     }
 
@@ -724,19 +726,17 @@ public class VistaAdopcionesPanel extends JPanel {
 
     private void mostrarDetalleEnHub(MascotaAdopcion m) {
         mascotaSeleccionada = m;
-        JPanel contenedorPadre = (JPanel) panelHubVacio.getParent();
-        if (contenedorPadre == null) return;
+        if (panelHubContenido == null) return;
 
+        panelHubContenido.removeAll();
         if (m == null) {
-            contenedorPadre.removeAll();
-            contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
-            contenedorPadre.revalidate();
-            contenedorPadre.repaint();
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+            panelHubContenido.revalidate();
+            panelHubContenido.repaint();
             return;
         }
 
-        contenedorPadre.removeAll();
-        contenedorPadre.add(panelHubDetalle, BorderLayout.CENTER);
+        panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
 
         String inicial = !m.getNombre().isEmpty() ? m.getNombre().substring(0, 1).toUpperCase() : "R";
         lblHubAvatar.setText(inicial);
@@ -772,8 +772,8 @@ public class VistaAdopcionesPanel extends JPanel {
             lblHubAdoptanteDir.setText("-");
         }
 
-        contenedorPadre.revalidate();
-        contenedorPadre.repaint();
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
     }
 
     private void agregarChipSanitario(JPanel p, String texto, boolean activo) {
@@ -1008,9 +1008,10 @@ public class VistaAdopcionesPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+            JPanel p = new JPanel(new BorderLayout(8, 0));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+            p.setBorder(new EmptyBorder(0, 8, 0, 8));
 
             String text = value != null ? value.toString() : "";
             String inicial = !text.isEmpty() ? text.substring(0, 1).toUpperCase() : "R";
@@ -1022,10 +1023,12 @@ public class VistaAdopcionesPanel extends JPanel {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     int s = Math.min(getWidth(), getHeight()) - 2;
+                    int x = (getWidth() - s) / 2;
+                    int y = (getHeight() - s) / 2;
                     g2.setColor(Ui.TURQUESA_SUAVE);
-                    g2.fillOval(1, 1, s, s);
+                    g2.fillOval(x, y, s, s);
                     g2.setColor(Ui.TURQUESA_PROFUNDO);
-                    g2.drawOval(1, 1, s, s);
+                    g2.drawOval(x, y, s, s);
                     super.paintComponent(g);
                     g2.dispose();
                 }
@@ -1038,8 +1041,8 @@ public class VistaAdopcionesPanel extends JPanel {
             lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 12));
             lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-            p.add(avatar);
-            p.add(lblNombre);
+            p.add(avatar, BorderLayout.WEST);
+            p.add(lblNombre, BorderLayout.CENTER);
             return p;
         }
     }

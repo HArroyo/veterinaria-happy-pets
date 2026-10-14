@@ -73,6 +73,11 @@ public final class Ui {
     public static final Color COLOR_PELIGRO = new Color(239, 68, 68);       // #EF4444 Rojo (Crítico/Vencido/Urgente)
     public static final Color ESTADO_ACTIVO = COLOR_EXITO;
 
+    public static final Color ROJO_ERROR = COLOR_PELIGRO;
+    public static final Color VERDE_EXITO = COLOR_EXITO;
+    public static final Color NARANJA_AVISO = COLOR_ADVERTENCIA;
+    public static final Color AZUL_INFO = new Color(2, 132, 199);
+
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private Ui() { }

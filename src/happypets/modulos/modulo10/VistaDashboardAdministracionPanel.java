@@ -323,26 +323,28 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         txtRazonSocial = Ui.campoTexto(15);
         txtNombreComercial = Ui.campoTexto(15);
+        txtIdentificadorFiscal = Ui.campoTexto(15);
         txtCorreo = Ui.campoTexto(15);
         txtTelefono = Ui.campoTexto(15);
         txtDireccion = Ui.campoTexto(25);
 
-        cbMoneda = Ui.combo(new String[]{"COP ($) - Peso Colombiano", "PEN (S/) - Sol Peruano", "USD ($) - Dólar"});
-        cbZonaHoraria = Ui.combo(new String[]{"America/Bogota (UTC -05:00)", "America/Lima (UTC -05:00)"});
+        cbMoneda = Ui.combo(new String[]{"PEN (S/) - Sol Peruano", "USD ($) - Dólar", "COP ($) - Peso Colombiano"});
+        cbZonaHoraria = Ui.combo(new String[]{"America/Lima (UTC -05:00)", "America/Bogota (UTC -05:00)"});
 
         g.gridx = 0; g.gridy = 0; g.weightx = 0.5;
         form.add(crearCampo("Razón Social / Nombre Legal", txtRazonSocial), g);
         g.gridx = 1; g.gridy = 0; g.weightx = 0.5;
-        form.add(crearCampo("Nombre Comercial", txtNombreComercial), g);
+        form.add(crearCampo("RUC / Identificador Fiscal", txtIdentificadorFiscal), g);
 
         g.gridx = 0; g.gridy = 1;
-        form.add(crearCampo("Correo Electrónico Institucional", txtCorreo), g);
+        form.add(crearCampo("Nombre Comercial", txtNombreComercial), g);
         g.gridx = 1; g.gridy = 1;
-        form.add(crearCampo("Línea Telefónica de Urgencias", txtTelefono), g);
+        form.add(crearCampo("Correo Electrónico Institucional", txtCorreo), g);
 
-        g.gridx = 0; g.gridy = 2; g.gridwidth = 2;
+        g.gridx = 0; g.gridy = 2;
+        form.add(crearCampo("Línea Telefónica de Urgencias", txtTelefono), g);
+        g.gridx = 1; g.gridy = 2;
         form.add(crearCampo("Dirección Sede Principal", txtDireccion), g);
-        g.gridwidth = 1;
 
         g.gridx = 0; g.gridy = 3;
         form.add(crearCampo("Moneda Principal", cbMoneda), g);

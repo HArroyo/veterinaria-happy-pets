@@ -2958,6 +2958,12 @@ public class RepositorioVeterinaria {
         notificaciones.removeIf(NotificacionSistema::isLeida);
     }
 
+    public void agregarNotificacion(NotificacionSistema notif) {
+        if (notif != null) {
+            notificaciones.add(0, notif);
+        }
+    }
+
     public int contarNotificacionesPorCategoria(String cat) {
         int c = 0;
         for (NotificacionSistema n : notificaciones) {
@@ -3066,16 +3072,16 @@ public class RepositorioVeterinaria {
     private void inicializarModulo10ConfiguracionSoporte() {
         // 1. Configuración Institucional de la Clínica
         configuracionClinica = new ConfiguracionClinica(
-                "HappyPets Servicios Veterinarios S.A.S.",
-                "HappyPets Clínica y Hospital 24H",
-                "NIT 900.842.115-4",
-                "contacto@happypets-vet.com",
-                "+57 (601) 745-9988 / +57 312 000 1122",
-                "Avenida Las Mascotas # 45 - 28, Sector San Martín",
-                "COP ($) - Peso Colombiano",
-                "America/Bogota (UTC -05:00)",
+                "HappyPets Servicios Veterinarios S.A.C.",
+                "HappyPets Clínica y Hospital Veterinario 24H",
+                "RUC 20608421154",
+                "contacto@happypets.pe",
+                "+51 (01) 432-9980 / +51 984 552 110",
+                "Av. Angamos Oeste 840, Miraflores, Lima - Perú",
+                "PEN (S/) - Sol Peruano",
+                "America/Lima (UTC -05:00)",
                 "assets/logo_happypets.png",
-                "Sede Norte - Principal"
+                "Sede Principal - Miraflores"
         );
 
         // 2. Usuarios Activos y Asignación de Roles (14 colaboradores según wireframe USUARIO.pdf)
@@ -3136,20 +3142,20 @@ public class RepositorioVeterinaria {
         rCont.asignarPermiso("Notificaciones y Auditoría", true);
         rolesPermisos.add(rCont);
 
-        // 4. Integraciones Externas (según wireframe Integraciones externas.pdf)
+        // 4. Integraciones Externas (según requerimientos Perú)
         integracionesExternas.add(new IntegracionExterna(
-                "INT-01", "DIAN Factura Electrónica", "API REST v2 • Sincronización diaria",
-                "Facturación", true, "https://api.dian.gov.co/v2/cpe/sync", "sk_live_9f83a2184c2",
+                "INT-01", "SUNAT Facturación Electrónica (CPE)", "API REST v2 • Sincronización diaria con SUNAT",
+                "Facturación", true, "https://api.sunat.gob.pe/v2/cpe/sync", "sk_live_9f83a2184c2",
                 "Producción", "Hoy, 14:15"
         ));
         integracionesExternas.add(new IntegracionExterna(
-                "INT-02", "WhatsApp Business Cloud", "Envío automático de citas y fórmulas",
+                "INT-02", "WhatsApp Business Cloud", "Envío automático de citas y recetas",
                 "Comunicaciones", true, "https://graph.facebook.com/v19.0/waba/messages", "waba_meta_88203b",
                 "Producción", "Hoy, 13:50"
         ));
         integracionesExternas.add(new IntegracionExterna(
-                "INT-03", "Pasarela de Pagos (Wompi)", "Cobros en línea y datáfono integrado",
-                "Pagos", true, "https://api.wompi.co/v1/transactions", "pub_prod_77192a",
+                "INT-03", "Pasarela de Pagos (Niubiz / Izipay / Yape)", "Cobros POS y pagos digitales QR (Yape/Plin)",
+                "Pagos", true, "https://api.niubiz.com.pe/v1/transactions", "pub_prod_77192a",
                 "Producción", "Hoy, 12:30"
         ));
         integracionesExternas.add(new IntegracionExterna(

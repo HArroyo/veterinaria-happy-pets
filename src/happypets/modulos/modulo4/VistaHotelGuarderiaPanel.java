@@ -67,6 +67,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
     private ReservaHospedaje reservaSeleccionada = null;
 
     // Live Detail Hub
+    private JPanel panelHubContenido;
     private JPanel panelHubVacio;
     private JPanel panelHubDetalle;
     private JLabel lblHubAvatar;
@@ -307,7 +308,7 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         tablaHospedaje.getColumnModel().getColumn(0).setPreferredWidth(65);
         tablaHospedaje.getColumnModel().getColumn(1).setPreferredWidth(125);
-        tablaHospedaje.getColumnModel().getColumn(2).setPreferredWidth(110);
+        tablaHospedaje.getColumnModel().getColumn(2).setPreferredWidth(150);
         tablaHospedaje.getColumnModel().getColumn(3).setPreferredWidth(95);
         tablaHospedaje.getColumnModel().getColumn(4).setPreferredWidth(70);
         tablaHospedaje.getColumnModel().getColumn(5).setPreferredWidth(70);
@@ -569,7 +570,8 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
         panelHubDetalle.add(barraAcciones, BorderLayout.SOUTH);
 
-        card.add(panelHubVacio, BorderLayout.CENTER);
+        panelHubContenido = card;
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
         return card;
     }
 
@@ -718,19 +720,17 @@ public class VistaHotelGuarderiaPanel extends JPanel {
 
     private void mostrarDetalleEnHub(ReservaHospedaje r) {
         reservaSeleccionada = r;
-        JPanel contenedorPadre = (JPanel) panelHubVacio.getParent();
-        if (contenedorPadre == null) return;
+        if (panelHubContenido == null) return;
 
+        panelHubContenido.removeAll();
         if (r == null) {
-            contenedorPadre.removeAll();
-            contenedorPadre.add(panelHubVacio, BorderLayout.CENTER);
-            contenedorPadre.revalidate();
-            contenedorPadre.repaint();
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+            panelHubContenido.revalidate();
+            panelHubContenido.repaint();
             return;
         }
 
-        contenedorPadre.removeAll();
-        contenedorPadre.add(panelHubDetalle, BorderLayout.CENTER);
+        panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
 
         String inicial = !r.getNombreMascota().isEmpty() ? r.getNombreMascota().substring(0, 1).toUpperCase() : "M";
         lblHubAvatar.setText(inicial);
@@ -753,8 +753,8 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         lblHubPaseos.setText(r.getPlanPaseos().isEmpty() ? "Recreación supervisada" : r.getPlanPaseos());
         txtHubMedicacion.setText(r.getMedicacionEspecial().isEmpty() ? "Ninguna medicación requerida." : r.getMedicacionEspecial());
 
-        contenedorPadre.revalidate();
-        contenedorPadre.repaint();
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
     }
 
     private void configurarBadgeSuite(JLabel lbl, String estado) {
@@ -954,9 +954,10 @@ public class VistaHotelGuarderiaPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+            JPanel p = new JPanel(new BorderLayout(8, 0));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+            p.setBorder(new EmptyBorder(0, 8, 0, 8));
 
             String text = value != null ? value.toString() : "";
             String inicial = !text.isEmpty() ? text.substring(0, 1).toUpperCase() : "M";
@@ -968,11 +969,13 @@ public class VistaHotelGuarderiaPanel extends JPanel {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     int s = Math.min(getWidth(), getHeight()) - 2;
+                    int x = (getWidth() - s) / 2;
+                    int y = (getHeight() - s) / 2;
                     g2.setColor(Ui.TURQUESA_SUAVE);
-                    g2.fillOval(1, 1, s, s);
+                    g2.fillOval(x, y, s, s);
                     g2.setColor(Ui.TURQUESA);
-                    g2.drawOval(1, 1, s, s);
-                    super.paintComponent(g);
+                    g2.drawOval(x, y, s, s);
+                    super.paintComponent(g2);
                     g2.dispose();
                 }
             };
@@ -984,8 +987,8 @@ public class VistaHotelGuarderiaPanel extends JPanel {
             lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 12));
             lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-            p.add(avatar);
-            p.add(lblNombre);
+            p.add(avatar, BorderLayout.WEST);
+            p.add(lblNombre, BorderLayout.CENTER);
             return p;
         }
     }

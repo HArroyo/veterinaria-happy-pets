@@ -359,9 +359,10 @@ public class VistaEgresosOperativosPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                JPanel cell = new JPanel(new BorderLayout(8, 0));
                 cell.setOpaque(true);
                 cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+                cell.setBorder(new EmptyBorder(0, 8, 0, 8));
 
                 String desc = value != null ? value.toString() : "";
                 String letra = !desc.isEmpty() ? desc.substring(0, 1).toUpperCase() : "E";
@@ -372,10 +373,13 @@ public class VistaEgresosOperativosPanel extends JPanel {
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int s = Math.min(getWidth(), getHeight()) - 2;
+                        int x = (getWidth() - s) / 2;
+                        int y = (getHeight() - s) / 2;
                         g2.setColor(new Color(254, 242, 242));
-                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.fillOval(x, y, s, s);
                         g2.setColor(new Color(254, 202, 202));
-                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.drawOval(x, y, s, s);
                         super.paintComponent(g);
                         g2.dispose();
                     }
@@ -388,8 +392,8 @@ public class VistaEgresosOperativosPanel extends JPanel {
                 lblTexto.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 lblTexto.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-                cell.add(avatar);
-                cell.add(lblTexto);
+                cell.add(avatar, BorderLayout.WEST);
+                cell.add(lblTexto, BorderLayout.CENTER);
                 return cell;
             }
         });

@@ -353,8 +353,8 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
 
         tablaCartera.getColumnModel().getColumn(0).setPreferredWidth(70);
         tablaCartera.getColumnModel().getColumn(1).setPreferredWidth(75);
-        tablaCartera.getColumnModel().getColumn(2).setPreferredWidth(140);
-        tablaCartera.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tablaCartera.getColumnModel().getColumn(2).setPreferredWidth(180);
+        tablaCartera.getColumnModel().getColumn(3).setPreferredWidth(140);
         tablaCartera.getColumnModel().getColumn(4).setPreferredWidth(75);
         tablaCartera.getColumnModel().getColumn(5).setPreferredWidth(75);
         tablaCartera.getColumnModel().getColumn(6).setPreferredWidth(80);
@@ -365,9 +365,10 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                JPanel cell = new JPanel(new BorderLayout(8, 0));
                 cell.setOpaque(true);
                 cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+                cell.setBorder(new EmptyBorder(0, 8, 0, 8));
 
                 String nombre = value != null ? value.toString() : "";
                 String letra = !nombre.isEmpty() ? nombre.substring(0, 1).toUpperCase() : "C";
@@ -378,10 +379,13 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int s = Math.min(getWidth(), getHeight()) - 2;
+                        int x = (getWidth() - s) / 2;
+                        int y = (getHeight() - s) / 2;
                         g2.setColor(new Color(240, 253, 250));
-                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.fillOval(x, y, s, s);
                         g2.setColor(new Color(153, 246, 228));
-                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.drawOval(x, y, s, s);
                         super.paintComponent(g);
                         g2.dispose();
                     }
@@ -394,8 +398,8 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
                 lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 11));
                 lblNombre.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
 
-                cell.add(avatar);
-                cell.add(lblNombre);
+                cell.add(avatar, BorderLayout.WEST);
+                cell.add(lblNombre, BorderLayout.CENTER);
                 return cell;
             }
         });

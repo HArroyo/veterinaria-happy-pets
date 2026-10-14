@@ -7,25 +7,37 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.io.File;
+import java.time.LocalDate;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import java.time.LocalDate;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.ConfiguracionClinica;
@@ -33,14 +45,23 @@ import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 10.1: Parámetros Generales de la Clínica Veterinaria.
- * Basado fielmente en el wireframe institucional 'PÁGINA COMPLETA.pdf'.
+ * Submódulo 10.1: Parámetros Generales de la Clínica Veterinaria
+ * Responsable: Minaya Bravo, Almendra Lili
+ * Configuración centralizada de datos fiscales, razón social, sedes, comprobantes y membrete oficial
+ * con arquitectura Master-Detail, 4 KPIs corporativos y hub de previsualización en vivo de comprobantes.
  */
 public class VistaParametrosGeneralesPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
+    // KPIs Superiores
+    private JLabel lblKpiSedes;
+    private JLabel lblKpiFiscal;
+    private JLabel lblKpiMoneda;
+    private JLabel lblKpiMembrete;
+
+    // Formulario (Master)
     private JTextField txtRazonSocial;
     private JTextField txtNombreComercial;
     private JTextField txtIdentificadorFiscal;
@@ -52,286 +73,603 @@ public class VistaParametrosGeneralesPanel extends JPanel {
     private JComboBox<String> cbSede;
     private JLabel lblLogoPreview;
 
+    // Live Detail Hub (360px)
+    private JLabel lblHubLogoMonograma;
+    private JLabel lblHubNombreComercial;
+    private JLabel lblHubRazonSocial;
+    private JLabel lblHubSedeChip;
+
+    private JLabel lblHubNitValor;
+    private JLabel lblHubMonedaValor;
+    private JLabel lblHubTelefonoValor;
+    private JLabel lblHubZonaValor;
+
+    private JTextArea txtHubMembretePreview;
+
     public VistaParametrosGeneralesPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(248, 250, 252)); // Slate-50 suave
-        inicializarUI();
+        setOpaque(false);
+
+        // Panel Superior Fijo (Cabecera + 4 KPIs)
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 18, 10, 18));
+
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearFilaKpis());
+
+        add(panelSuperior, BorderLayout.NORTH);
+
+        // Contenedor Master-Detail
+        JPanel panelCentro = new JPanel(new BorderLayout());
+        panelCentro.setOpaque(false);
+        panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
+        panelCentro.add(crearSplitMasterDetail(), BorderLayout.CENTER);
+
+        add(panelCentro, BorderLayout.CENTER);
+
         cargarDatos();
+        actualizarHubEnVivo();
     }
 
-    private void inicializarUI() {
-        JPanel contenedor = new JPanel();
-        contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setBackground(new Color(248, 250, 252));
-        contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
+    private JPanel crearCabeceraVista() {
+        JPanel cab = new JPanel(new BorderLayout());
+        cab.setOpaque(false);
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
-        // 1. Barra de Encabezado Institucional (Breadcrumb + Título + Acciones)
-        contenedor.add(crearBarraEncabezado());
-        contenedor.add(Box.createVerticalStrut(20));
-
-        // 2. Tarjeta Principal: "Datos Generales de la Clínica Veterinaria"
-        contenedor.add(crearTarjetaDatosGenerales());
-        contenedor.add(Box.createVerticalStrut(20));
-
-        // 3. Tarjeta de Logo Institucional y Configuración de Comprobantes
-        contenedor.add(crearTarjetaLogoYRecetas());
-        contenedor.add(Box.createVerticalGlue());
-
-        JScrollPane scroll = new JScrollPane(contenedor);
-        scroll.setBorder(null);
-        scroll.getVerticalScrollBar().setUnitIncrement(14);
-        scroll.getViewport().setBackground(new Color(248, 250, 252));
-        add(scroll, BorderLayout.CENTER);
-    }
-
-    private JPanel crearBarraEncabezado() {
-        JPanel header = new JPanel(new BorderLayout(15, 8));
-        header.setBackground(new Color(248, 250, 252));
-
-        // Lado Izquierdo: Breadcrumb y Títulos
         JPanel izq = new JPanel();
+        izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
-        izq.setBackground(new Color(248, 250, 252));
 
-        JLabel lblBreadcrumb = new JLabel("Ajustes > Configuración Empresarial > Parámetros Generales");
-        lblBreadcrumb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblBreadcrumb.setForeground(Ui.TURQUESA_OSCURO);
-        izq.add(lblBreadcrumb);
-        izq.add(Box.createVerticalStrut(4));
+        JLabel titulo = new JLabel("Parámetros Generales de la Clínica");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblTitulo = new JLabel("Administración de HappyPets");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitulo.setForeground(new Color(15, 23, 42));
-        izq.add(lblTitulo);
-        izq.add(Box.createVerticalStrut(4));
+        JLabel subtitulo = new JLabel("Módulo 10.1 · Configuración legal, fiscal, sedes y personalización de comprobantes oficiales");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblSub = new JLabel("Configuración centralizada de parámetros, control de acceso, IA y servicios conectados de la clínica.");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSub.setForeground(new Color(100, 116, 139));
-        izq.add(lblSub);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
+        cab.add(izq, BorderLayout.WEST);
 
-        header.add(izq, BorderLayout.CENTER);
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        der.setOpaque(false);
 
-        // Lado Derecho: Botones [Exportar], [Restablecer Valores] y [Guardar Todos los Cambios]
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        der.setBackground(new Color(248, 250, 252));
-
-        JButton btnExportar = Ui.botonSecundario("📄 Exportar Parámetros", Iconos.crearIconoExportar(13, Ui.TURQUESA_PROFUNDO));
-        btnExportar.setPreferredSize(new Dimension(190, 34));
+        JButton btnExportar = Ui.boton("Exportar Ficha", false);
         btnExportar.addActionListener(e -> exportarParametrosReporte());
         der.add(btnExportar);
 
-        JButton btnRestablecer = Ui.botonSecundario("Restablecer Valores", null);
-        btnRestablecer.setPreferredSize(new Dimension(160, 34));
-        btnRestablecer.addActionListener(e -> cargarDatos());
-        der.add(btnRestablecer);
-
-        JButton btnGuardar = Ui.botonPrimario("Guardar Cambios", Iconos.crearIconoGuardar(13, Color.WHITE));
-        btnGuardar.setPreferredSize(new Dimension(160, 34));
+        JButton btnGuardar = Ui.boton("Guardar Cambios", true);
         btnGuardar.addActionListener(e -> guardarCambios());
         der.add(btnGuardar);
 
-        header.add(der, BorderLayout.EAST);
-        return header;
+        cab.add(der, BorderLayout.EAST);
+        return cab;
     }
 
-    private JPanel crearTarjetaDatosGenerales() {
-        JPanel card = new JPanel(new BorderLayout(10, 16));
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
-                BorderFactory.createEmptyBorder(20, 24, 24, 24)
-        ));
+    private JPanel crearFilaKpis() {
+        JPanel kpis = new JPanel(new GridLayout(1, 4, 12, 0));
+        kpis.setOpaque(false);
+        kpis.setPreferredSize(new Dimension(0, 74));
+        kpis.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        // Cabecera de la tarjeta
-        JPanel headCard = new JPanel(new BorderLayout());
-        headCard.setBackground(Color.WHITE);
+        lblKpiSedes = new JLabel("3 Sedes en Lima");
+        lblKpiFiscal = new JLabel("RUC 20608421154");
+        lblKpiMoneda = new JLabel("PEN (S/.) • UTC-5");
+        lblKpiMembrete = new JLabel("SUNAT / CPE OK");
 
-        JLabel lblTitCard = new JLabel("Datos Generales de la Clínica Veterinaria");
-        lblTitCard.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTitCard.setForeground(new Color(30, 41, 59));
-        headCard.add(lblTitCard, BorderLayout.WEST);
+        kpis.add(crearTarjetaKpi("Sedes Operativas", lblKpiSedes, "Miraflores (Principal)", Iconos.crearIconoHuella(22, Ui.TURQUESA)));
+        kpis.add(crearTarjetaKpi("Identificador Fiscal", lblKpiFiscal, "SUNAT RUC Vigente", Iconos.crearIconoFactura(22, Ui.AZUL_INFO)));
+        kpis.add(crearTarjetaKpi("Régimen & Divisa", lblKpiMoneda, "Lima / Sol Peruano (S/.)", Iconos.crearIconoMonedas(22, Ui.VERDE_EXITO)));
+        kpis.add(crearTarjetaKpi("Comprobantes CPE", lblKpiMembrete, "Boletas y Facturas", Iconos.crearIconoCheck(22, Ui.NARANJA_AVISO)));
 
-        txtIdentificadorFiscal = Ui.campoTexto(16);
+        return kpis;
+    }
 
-        JPanel pnlIdFiscal = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pnlIdFiscal.setBackground(Color.WHITE);
-        JLabel lblRucNit = new JLabel("Identificador Fiscal:");
-        lblRucNit.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblRucNit.setForeground(new Color(100, 116, 139));
-        pnlIdFiscal.add(lblRucNit);
-        pnlIdFiscal.add(txtIdentificadorFiscal);
-        headCard.add(pnlIdFiscal, BorderLayout.EAST);
+    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(8, 12, 8, 12));
 
-        card.add(headCard, BorderLayout.NORTH);
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
 
-        // Formulario en GridBagLayout
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
+
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
+
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(1));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(1));
+        texto.add(lblSub);
+
+        card.add(texto, BorderLayout.CENTER);
+
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            lblIco.setBorder(new EmptyBorder(2, 0, 0, 0));
+            card.add(lblIco, BorderLayout.EAST);
+        }
+
+        return card;
+    }
+
+    private JSplitPane crearSplitMasterDetail() {
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        split.setOpaque(false);
+        split.setBorder(null);
+        split.setDividerSize(8);
+        split.setContinuousLayout(true);
+        split.setResizeWeight(1.0);
+
+        split.setLeftComponent(crearPanelMasterConfiguracion());
+        split.setRightComponent(crearPanelLiveDetailHub());
+
+        return split;
+    }
+
+    private JPanel crearPanelMasterConfiguracion() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        ScrollablePanel scrollContent = new ScrollablePanel();
+        scrollContent.setOpaque(false);
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+
+        // Título del formulario
+        JLabel lblSubtit = new JLabel("Identidad Legal y Fiscal de la Empresa:");
+        lblSubtit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblSubtit.setForeground(Ui.TEXTO_TITULO);
+        lblSubtit.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollContent.add(lblSubtit);
+        scrollContent.add(Box.createVerticalStrut(10));
+
+        // Formulario GridBagLayout
         JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(Color.WHITE);
+        form.setOpaque(false);
+        form.setAlignmentX(Component.LEFT_ALIGNMENT);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Fila 1: Razón Social y Nombre Comercial
-        txtRazonSocial = Ui.campoTexto(15);
-        txtNombreComercial = Ui.campoTexto(15);
+        txtRazonSocial = new JTextField(15);
+        txtNombreComercial = new JTextField(15);
+        txtIdentificadorFiscal = new JTextField(15);
+        txtCorreo = new JTextField(15);
+        txtTelefono = new JTextField(15);
+        txtDireccion = new JTextField(25);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.5;
-        form.add(crearGrupoCampo("Razón Social / Nombre Legal", txtRazonSocial), gbc);
-
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.5;
-        form.add(crearGrupoCampo("Nombre Comercial", txtNombreComercial), gbc);
-
-        // Fila 2: Correo Institucional y Teléfono de Urgencias
-        txtCorreo = Ui.campoTexto(15);
-        txtTelefono = Ui.campoTexto(15);
-
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.5;
-        form.add(crearGrupoCampo("Correo Electrónico Institucional", txtCorreo), gbc);
-
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 0.5;
-        form.add(crearGrupoCampo("Línea Telefónica de Urgencias", txtTelefono), gbc);
-
-        // Fila 3: Dirección Sede Principal (Full Width)
-        txtDireccion = Ui.campoTexto(25);
-
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2; gbc.weightx = 1.0;
-        form.add(crearGrupoCampo("Dirección Sede Principal", txtDireccion), gbc);
-        gbc.gridwidth = 1;
-
-        // Fila 4: Moneda Principal, Zona Horaria y Sede Activa
         cbMoneda = Ui.combo(new String[]{
-                "COP ($) - Peso Colombiano",
                 "PEN (S/) - Sol Peruano",
                 "USD ($) - Dólar Estadounidense"
         });
 
         cbZonaHoraria = Ui.combo(new String[]{
-                "America/Bogota (UTC -05:00)",
-                "America/Lima (UTC -05:00)",
-                "America/Santiago (UTC -04:00)",
-                "America/Mexico_City (UTC -06:00)"
+                "America/Lima (UTC -05:00)"
         });
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0.5;
-        form.add(crearGrupoCampo("Moneda Principal", cbMoneda), gbc);
+        cbSede = Ui.combo(new String[]{
+                "Sede Principal - Miraflores",
+                "Sede Surco - El Polo",
+                "Sede San Isidro"
+        });
 
-        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 0.5;
-        form.add(crearGrupoCampo("Zona Horaria", cbZonaHoraria), gbc);
+        DocumentListener docListener = new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { actualizarHubEnVivo(); }
+            public void removeUpdate(DocumentEvent e) { actualizarHubEnVivo(); }
+            public void changedUpdate(DocumentEvent e) { actualizarHubEnVivo(); }
+        };
+        txtRazonSocial.getDocument().addDocumentListener(docListener);
+        txtNombreComercial.getDocument().addDocumentListener(docListener);
+        txtIdentificadorFiscal.getDocument().addDocumentListener(docListener);
+        txtCorreo.getDocument().addDocumentListener(docListener);
+        txtTelefono.getDocument().addDocumentListener(docListener);
+        txtDireccion.getDocument().addDocumentListener(docListener);
+        cbMoneda.addActionListener(e -> actualizarHubEnVivo());
+        cbZonaHoraria.addActionListener(e -> actualizarHubEnVivo());
+        cbSede.addActionListener(e -> actualizarHubEnVivo());
 
-        card.add(form, BorderLayout.CENTER);
-        return card;
-    }
+        // Fila 0: Razón Social y Nombre Comercial
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Razón Social Legal:", txtRazonSocial), gbc);
 
-    private JPanel crearTarjetaLogoYRecetas() {
-        JPanel card = new JPanel(new BorderLayout(16, 12));
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
-                BorderFactory.createEmptyBorder(18, 24, 18, 24)
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Nombre Comercial:", txtNombreComercial), gbc);
+
+        // Fila 1: Identificador Fiscal y Sede en Edición
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Identificador Fiscal (RUC - SUNAT):", txtIdentificadorFiscal), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Sede en Edición:", cbSede), gbc);
+
+        // Fila 2: Correo Institucional y Teléfono de Urgencias
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Correo Institucional:", txtCorreo), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Teléfono Central / Urgencias:", txtTelefono), gbc);
+
+        // Fila 3: Dirección Sede Principal (Full width)
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.weightx = 1.0;
+        form.add(crearGrupoCampo("Dirección Sede Principal:", txtDireccion), gbc);
+        gbc.gridwidth = 1;
+
+        // Fila 4: Moneda y Zona Horaria
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Moneda Principal de Facturación:", cbMoneda), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 0.5;
+        form.add(crearGrupoCampo("Huso Horario Oficial:", cbZonaHoraria), gbc);
+
+        scrollContent.add(form);
+        scrollContent.add(Box.createVerticalStrut(14));
+
+        // Card Logotipo Oficial
+        JPanel cardLogo = new JPanel(new BorderLayout(14, 0));
+        cardLogo.setOpaque(false);
+        cardLogo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(12, 14, 12, 14)
         ));
+        cardLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Vista previa del Logo
         JPanel pnlLogoBox = new JPanel(new BorderLayout());
         pnlLogoBox.setBackground(new Color(241, 245, 249));
-        pnlLogoBox.setPreferredSize(new Dimension(80, 80));
+        pnlLogoBox.setPreferredSize(new Dimension(72, 72));
         pnlLogoBox.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
 
         lblLogoPreview = new JLabel(Iconos.crearIconoHuella(36, Ui.TURQUESA_OSCURO), SwingConstants.CENTER);
         pnlLogoBox.add(lblLogoPreview, BorderLayout.CENTER);
+        cardLogo.add(pnlLogoBox, BorderLayout.WEST);
 
-        // Texto informativo del logotipo
-        JPanel info = new JPanel();
-        info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
-        info.setBackground(Color.WHITE);
+        JPanel infoLogo = new JPanel();
+        infoLogo.setOpaque(false);
+        infoLogo.setLayout(new BoxLayout(infoLogo, BoxLayout.Y_AXIS));
 
-        JLabel lblTitLogo = new JLabel("Logotipo Oficial para Recetas y Facturas");
-        lblTitLogo.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblTitLogo.setForeground(new Color(30, 41, 59));
-        info.add(lblTitLogo);
-        info.add(Box.createVerticalStrut(4));
+        JLabel lblTitLogo = new JLabel("Logotipo Oficial para Recetas y Comprobantes");
+        lblTitLogo.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTitLogo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblFmt = new JLabel("Formatos aceptados: PNG, JPG, SVG. Máx 2MB (Resolución recomendada 400x400 px con fondo transparente).");
-        lblFmt.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblFmt.setForeground(new Color(100, 116, 139));
-        info.add(lblFmt);
-        info.add(Box.createVerticalStrut(6));
+        JLabel lblDescLogo = new JLabel("<html>Formatos admitidos: PNG, JPG o SVG transparente. Resolución recomendada 400x400 px.<br/>Aparecerá en el encabezado de recetas médicas, historias clínicas y boletas electrónicas.</html>");
+        lblDescLogo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblDescLogo.setForeground(Ui.TEXTO_MUTED);
 
-        cbSede = Ui.combo(new String[]{
-                "Sede Norte - Principal",
-                "Sede Sur - Miraflores",
-                "Sede Este - La Molina"
-        });
-        cbSede.setPreferredSize(new Dimension(220, 32));
+        infoLogo.add(lblTitLogo);
+        infoLogo.add(Box.createVerticalStrut(4));
+        infoLogo.add(lblDescLogo);
+        cardLogo.add(infoLogo, BorderLayout.CENTER);
 
-        JPanel pnlSedeSel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        pnlSedeSel.setBackground(Color.WHITE);
-        JLabel lblSedeT = new JLabel("Sede en Edición:  ");
-        lblSedeT.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSedeT.setForeground(new Color(71, 85, 105));
-        pnlSedeSel.add(lblSedeT);
-        pnlSedeSel.add(cbSede);
-        info.add(pnlSedeSel);
+        JButton btnActualizarLogo = Ui.botonSecundario("Cambiar Logo", null);
+        btnActualizarLogo.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnActualizarLogo.addActionListener(e -> cambiarLogotipo());
+        cardLogo.add(btnActualizarLogo, BorderLayout.EAST);
 
-        // Botón Actualizar Imagen
-        JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 20));
-        pnlDer.setBackground(Color.WHITE);
+        scrollContent.add(cardLogo);
 
-        JButton btnActualizarLogo = Ui.botonSecundario("Actualizar Imagen", null);
-        btnActualizarLogo.addActionListener(e -> seleccionarLogo());
-        pnlDer.add(btnActualizarLogo);
+        JScrollPane scroll = new JScrollPane(scrollContent);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.getVerticalScrollBar().setUnitIncrement(14);
 
-        JPanel centro = new JPanel(new BorderLayout(16, 0));
-        centro.setBackground(Color.WHITE);
-        centro.add(pnlLogoBox, BorderLayout.WEST);
-        centro.add(info, BorderLayout.CENTER);
-
-        card.add(centro, BorderLayout.CENTER);
-        card.add(pnlDer, BorderLayout.EAST);
-        return card;
+        master.add(scroll, BorderLayout.CENTER);
+        return master;
     }
 
-    private JPanel crearGrupoCampo(String etiqueta, Component campo) {
+    private JPanel crearPanelLiveDetailHub() {
+        JPanel detail = new JPanel(new BorderLayout()) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        detail.setOpaque(false);
+        detail.setPreferredSize(new Dimension(360, 0));
+        detail.setMinimumSize(new Dimension(320, 0));
+
+        ScrollablePanel scrollContent = new ScrollablePanel();
+        scrollContent.setOpaque(false);
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+        scrollContent.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        // 1. Hero Block
+        JPanel hero = new JPanel(new BorderLayout(8, 0));
+        hero.setOpaque(false);
+        hero.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblHubLogoMonograma = new JLabel("HP", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int s = Math.min(getWidth(), getHeight()) - 2;
+                int x = (getWidth() - s) / 2;
+                int y = (getHeight() - s) / 2;
+                g2.setColor(Ui.TURQUESA_SUAVE);
+                g2.fillOval(x, y, s, s);
+                g2.setColor(Ui.TURQUESA);
+                g2.drawOval(x, y, s, s);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubLogoMonograma.setPreferredSize(new Dimension(46, 46));
+        lblHubLogoMonograma.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblHubLogoMonograma.setForeground(Ui.TURQUESA_PROFUNDO);
+
+        JPanel avatarBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        avatarBox.setOpaque(false);
+        avatarBox.setPreferredSize(new Dimension(46, 46));
+        avatarBox.add(lblHubLogoMonograma);
+        hero.add(avatarBox, BorderLayout.WEST);
+
+        JPanel heroText = new JPanel();
+        heroText.setOpaque(false);
+        heroText.setLayout(new BoxLayout(heroText, BoxLayout.Y_AXIS));
+
+        lblHubNombreComercial = new JLabel("HappyPets Clínica");
+        lblHubNombreComercial.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblHubNombreComercial.setForeground(Ui.TEXTO_TITULO);
+        lblHubNombreComercial.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblHubRazonSocial = new JLabel("HappyPets S.A.C.");
+        lblHubRazonSocial.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubRazonSocial.setForeground(Ui.TEXTO_MUTED);
+        lblHubRazonSocial.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel rowChips = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        rowChips.setOpaque(false);
+        rowChips.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblHubSedeChip = new JLabel(" Sede Principal Activa ");
+        lblHubSedeChip.setOpaque(true);
+        lblHubSedeChip.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubSedeChip.setBackground(new Color(220, 252, 231));
+        lblHubSedeChip.setForeground(new Color(21, 128, 61));
+        lblHubSedeChip.setBorder(BorderFactory.createLineBorder(new Color(134, 239, 172), 1, true));
+        rowChips.add(lblHubSedeChip);
+
+        heroText.add(lblHubNombreComercial);
+        heroText.add(Box.createVerticalStrut(2));
+        heroText.add(lblHubRazonSocial);
+        heroText.add(Box.createVerticalStrut(4));
+        heroText.add(rowChips);
+
+        hero.add(heroText, BorderLayout.CENTER);
+        scrollContent.add(hero);
+        scrollContent.add(Box.createVerticalStrut(14));
+
+        // 2. Telemetría 2x2
+        JPanel telemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        telemetria.setOpaque(false);
+        telemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
+        telemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+
+        lblHubNitValor = new JLabel("900.842.115-4");
+        lblHubMonedaValor = new JLabel("COP ($)");
+        lblHubTelefonoValor = new JLabel("+57 312 000 1122");
+        lblHubZonaValor = new JLabel("UTC -05:00");
+
+        telemetria.add(crearMicroCard("Identificador Fiscal", lblHubNitValor));
+        telemetria.add(crearMicroCard("Moneda Facturación", lblHubMonedaValor));
+        telemetria.add(crearMicroCard("Teléfono Central", lblHubTelefonoValor));
+        telemetria.add(crearMicroCard("Huso Horario", lblHubZonaValor));
+
+        scrollContent.add(telemetria);
+        scrollContent.add(Box.createVerticalStrut(12));
+
+        // 3. Card Vista Previa de Membrete Impreso
+        txtHubMembretePreview = new JTextArea();
+        txtHubMembretePreview.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtHubMembretePreview.setForeground(Ui.TEXTO_TITULO);
+        txtHubMembretePreview.setLineWrap(true);
+        txtHubMembretePreview.setWrapStyleWord(true);
+        txtHubMembretePreview.setEditable(false);
+        txtHubMembretePreview.setOpaque(false);
+
+        JPanel pnlMembrete = crearSeccionCard("Encabezado Oficial de Comprobantes", txtHubMembretePreview);
+        pnlMembrete.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollContent.add(pnlMembrete);
+        scrollContent.add(Box.createVerticalStrut(14));
+
+        // 4. Botones 2x2
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
+
+        JButton btnExportarFicha = Ui.botonSecundario("Descargar PDF", Iconos.crearIconoDescargar(12, Ui.TEXTO_TITULO));
+        btnExportarFicha.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnExportarFicha.addActionListener(e -> exportarParametrosReporte());
+
+        JButton btnGuardarDock = Ui.botonPrimario("Guardar", null);
+        btnGuardarDock.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnGuardarDock.addActionListener(e -> guardarCambios());
+
+        JButton btnProbarReceta = Ui.botonSecundario("Test Receta", Iconos.crearIconoFactura(12, Ui.TEXTO_TITULO));
+        btnProbarReceta.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnProbarReceta.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this,
+                    "Simulación de membrete oficial validada con éxito.\n" +
+                    "Los campos de encabezado se ajustan a las normativas de impresión A4 y formato térmico 80mm.",
+                    "Validación de Membrete", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        JButton btnRestablecer = Ui.botonSecundario("Restablecer", null);
+        btnRestablecer.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnRestablecer.addActionListener(e -> {
+            cargarDatos();
+            JOptionPane.showMessageDialog(this, "Parámetros restablecidos desde la base de datos.", "Restablecer", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        gridAcciones.add(btnExportarFicha);
+        gridAcciones.add(btnGuardarDock);
+        gridAcciones.add(btnProbarReceta);
+        gridAcciones.add(btnRestablecer);
+
+        scrollContent.add(gridAcciones);
+
+        JScrollPane scroll = new JScrollPane(scrollContent);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.getVerticalScrollBar().setUnitIncrement(14);
+
+        detail.add(scroll, BorderLayout.CENTER);
+        return detail;
+    }
+
+    private JPanel crearMicroCard(String etiqueta, JLabel lblValor) {
+        JPanel mc = new JPanel();
+        mc.setOpaque(false);
+        mc.setLayout(new BoxLayout(mc, BoxLayout.Y_AXIS));
+        mc.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
+
+        JLabel lblEtiq = new JLabel(etiqueta);
+        lblEtiq.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblEtiq.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
+
+        mc.add(lblEtiq);
+        mc.add(Box.createVerticalStrut(2));
+        mc.add(lblValor);
+
+        return mc;
+    }
+
+    private JPanel crearSeccionCard(String titulo, JComponent contenido) {
+        JPanel sec = new JPanel(new BorderLayout(0, 6));
+        sec.setOpaque(false);
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(8, 10, 8, 10)
+        ));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
+        sec.add(lblTit, BorderLayout.NORTH);
+
+        sec.add(contenido, BorderLayout.CENTER);
+        return sec;
+    }
+
+    private JPanel crearGrupoCampo(String titulo, JComponent campo) {
         JPanel p = new JPanel(new BorderLayout(0, 4));
-        p.setBackground(Color.WHITE);
-        JLabel l = new JLabel(etiqueta);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        l.setForeground(new Color(71, 85, 105));
-        p.add(l, BorderLayout.NORTH);
+        p.setOpaque(false);
+
+        JLabel lbl = new JLabel(titulo);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lbl.setForeground(Ui.TEXTO_MUTED);
+
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        campo.setPreferredSize(new Dimension(campo.getPreferredSize().width, 32));
+
+        p.add(lbl, BorderLayout.NORTH);
         p.add(campo, BorderLayout.CENTER);
         return p;
     }
 
-    private void estilizarCampoTexto(JTextField tf) {
-        tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        tf.setForeground(new Color(15, 23, 42));
-        tf.setPreferredSize(new Dimension(tf.getPreferredSize().width, 36));
-        tf.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
-                BorderFactory.createEmptyBorder(6, 10, 6, 10)
-        ));
-    }
+    private void actualizarHubEnVivo() {
+        String com = txtNombreComercial != null ? txtNombreComercial.getText().trim() : "HappyPets";
+        String raz = txtRazonSocial != null ? txtRazonSocial.getText().trim() : "Servicios Veterinarios";
+        String nit = txtIdentificadorFiscal != null ? txtIdentificadorFiscal.getText().trim() : "";
+        String tel = txtTelefono != null ? txtTelefono.getText().trim() : "";
+        String dir = txtDireccion != null ? txtDireccion.getText().trim() : "";
+        String mon = cbMoneda != null ? (String) cbMoneda.getSelectedItem() : "";
+        String zon = cbZonaHoraria != null ? (String) cbZonaHoraria.getSelectedItem() : "";
+        String sed = cbSede != null ? (String) cbSede.getSelectedItem() : "Sede Principal";
 
-    private void estilizarCombo(JComboBox<?> cb) {
-        cb.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cb.setBackground(Color.WHITE);
-        cb.setForeground(new Color(15, 23, 42));
-        cb.setPreferredSize(new Dimension(cb.getPreferredSize().width, 36));
+        if (lblHubNombreComercial != null) lblHubNombreComercial.setText(com.isEmpty() ? "HappyPets" : com);
+        if (lblHubRazonSocial != null) lblHubRazonSocial.setText(raz.isEmpty() ? "Servicios S.A.S." : raz);
+        if (lblHubSedeChip != null) lblHubSedeChip.setText(" " + sed + " ");
+        if (lblHubNitValor != null) lblHubNitValor.setText(nit.isEmpty() ? "-" : nit);
+        if (lblHubMonedaValor != null) lblHubMonedaValor.setText(mon.split("-")[0].trim());
+        if (lblHubTelefonoValor != null) lblHubTelefonoValor.setText(tel.isEmpty() ? "-" : tel);
+        if (lblHubZonaValor != null) lblHubZonaValor.setText(zon.split(" ")[0]);
+
+        if (txtHubMembretePreview != null) {
+            txtHubMembretePreview.setText(
+                    "=========================================\n" +
+                    com.toUpperCase() + "\n" +
+                    raz + " • " + nit + "\n" +
+                    dir + "\n" +
+                    "Central: " + tel + "\n" +
+                    "Emisión: " + sed + "\n" +
+                    "========================================="
+            );
+        }
     }
 
     private void cargarDatos() {
         ConfiguracionClinica cfg = repo.getConfiguracionClinica();
-        if (cfg != null) {
-            txtRazonSocial.setText(cfg.getRazonSocial());
-            txtNombreComercial.setText(cfg.getNombreComercial());
-            txtIdentificadorFiscal.setText(cfg.getIdentificadorFiscal());
-            txtCorreo.setText(cfg.getCorreoInstitucional());
-            txtTelefono.setText(cfg.getTelefonoUrgencias());
-            txtDireccion.setText(cfg.getDireccionSedePrincipal());
-            cbMoneda.setSelectedItem(cfg.getMonedaPrincipal());
-            cbZonaHoraria.setSelectedItem(cfg.getZonaHoraria());
-            cbSede.setSelectedItem(cfg.getSedeActiva());
-        }
+        if (cfg == null) return;
+
+        txtRazonSocial.setText(cfg.getRazonSocial());
+        txtNombreComercial.setText(cfg.getNombreComercial());
+        txtIdentificadorFiscal.setText(cfg.getIdentificadorFiscal());
+        txtCorreo.setText(cfg.getCorreoInstitucional());
+        txtTelefono.setText(cfg.getTelefonoUrgencias());
+        txtDireccion.setText(cfg.getDireccionSedePrincipal());
+
+        cbMoneda.setSelectedItem(cfg.getMonedaPrincipal());
+        cbZonaHoraria.setSelectedItem(cfg.getZonaHoraria());
+        cbSede.setSelectedItem(cfg.getSedeActiva());
+
+        actualizarHubEnVivo();
     }
 
     private void guardarCambios() {
@@ -349,68 +687,80 @@ public class VistaParametrosGeneralesPanel extends JPanel {
         );
 
         repo.guardarConfiguracionClinica(cfg);
+        actualizarHubEnVivo();
 
-        JOptionPane.showMessageDialog(
-                this,
-                "✓ Los parámetros generales de HappyPets se han guardado exitosamente.\n"
-                        + "Todos los documentos, recetas y facturas aplicarán esta configuración.",
-                "Configuración Actualizada",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        JOptionPane.showMessageDialog(this,
+                "Los parámetros de la clínica veterinaria fueron actualizados satisfactoriamente.",
+                "Configuración Guardada", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void seleccionarLogo() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Seleccionar Logotipo Institucional (PNG, JPG, SVG)");
-        int res = chooser.showOpenDialog(this);
+    private void cambiarLogotipo() {
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Seleccionar Logotipo Institucional");
+        int res = fc.showOpenDialog(this);
         if (res == JFileChooser.APPROVE_OPTION) {
-            File f = chooser.getSelectedFile();
-            JOptionPane.showMessageDialog(
-                    this,
-                    "✓ Logotipo institucional actualizado correctamente:\n" + f.getName() + " (" + (f.length() / 1024) + " KB)",
-                    "Logotipo Actualizado",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            File f = fc.getSelectedFile();
+            JOptionPane.showMessageDialog(this,
+                    "Logotipo actualizado correctamente:\n" + f.getName() + " (" + (f.length() / 1024) + " KB)",
+                    "Imagen Actualizada", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     private void exportarParametrosReporte() {
-        StringBuilder html = new StringBuilder();
-        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
-        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>FICHA TÉCNICA DE PARÁMETROS EMPRESARIALES</h2>");
-        html.append("<p><strong>Fecha de Emisión:</strong> ").append(LocalDate.now()).append(" | <strong>Sistema:</strong> Veterinaria Happy Pets ERP</p>");
-        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:12px;'>");
-        html.append("<tr style='background-color:#006064; color:white;'><th align='left'>Parámetro Institucional</th><th align='left'>Valor Asignado</th></tr>");
-        html.append("<tr><td><b>Razón Social / Nombre Legal:</b></td><td>").append(txtRazonSocial.getText()).append("</td></tr>");
-        html.append("<tr><td><b>Nombre Comercial:</b></td><td>").append(txtNombreComercial.getText()).append("</td></tr>");
-        html.append("<tr><td><b>Identificador Fiscal (RUC/NIT):</b></td><td>").append(txtIdentificadorFiscal.getText()).append("</td></tr>");
-        html.append("<tr><td><b>Correo Electrónico Oficial:</b></td><td>").append(txtCorreo.getText()).append("</td></tr>");
-        html.append("<tr><td><b>Teléfono Urgencias 24/7:</b></td><td>").append(txtTelefono.getText()).append("</td></tr>");
-        html.append("<tr><td><b>Dirección Sede Principal:</b></td><td>").append(txtDireccion.getText()).append("</td></tr>");
-        html.append("<tr><td><b>Moneda Base ERP:</b></td><td>").append(cbMoneda.getSelectedItem()).append("</td></tr>");
-        html.append("<tr><td><b>Zona Horaria Servidor:</b></td><td>").append(cbZonaHoraria.getSelectedItem()).append("</td></tr>");
-        html.append("<tr><td><b>Sede Activa en Edición:</b></td><td>").append(cbSede.getSelectedItem()).append("</td></tr>");
-        html.append("</table>");
-        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento oficial de configuración del ERP emitido para auditoría técnica y fiscal.</p>");
-        html.append("</body></html>");
-
-        StringBuilder csv = new StringBuilder("PARAMETRO,VALOR\n");
-        csv.append("\"Razon Social\",\"").append(txtRazonSocial.getText()).append("\"\n");
-        csv.append("\"Nombre Comercial\",\"").append(txtNombreComercial.getText()).append("\"\n");
-        csv.append("\"Identificador Fiscal\",\"").append(txtIdentificadorFiscal.getText()).append("\"\n");
-        csv.append("\"Correo\",\"").append(txtCorreo.getText()).append("\"\n");
-        csv.append("\"Telefono\",\"").append(txtTelefono.getText()).append("\"\n");
-        csv.append("\"Direccion\",\"").append(txtDireccion.getText()).append("\"\n");
-        csv.append("\"Moneda\",\"").append(cbMoneda.getSelectedItem()).append("\"\n");
-        csv.append("\"Zona Horaria\",\"").append(cbZonaHoraria.getSelectedItem()).append("\"\n");
-        csv.append("\"Sede\",\"").append(cbSede.getSelectedItem()).append("\"\n");
-
+        ConfiguracionClinica cfg = repo.getConfiguracionClinica();
+        String[][] meta = new String[][]{
+            {"Razón Social", cfg.getRazonSocial()},
+            {"Nombre Comercial", cfg.getNombreComercial()},
+            {"Identificador Fiscal", cfg.getIdentificadorFiscal()},
+            {"Sede Principal", cfg.getSedeActiva()},
+            {"Moneda Oficial", cfg.getMonedaPrincipal()},
+            {"Zona Horaria", cfg.getZonaHoraria()}
+        };
+        String[][] datos = new String[][]{
+            {"1", "Nombre Legal / Razón Social", cfg.getRazonSocial(), "Oficial"},
+            {"2", "Nombre Comercial", cfg.getNombreComercial(), "Marca Registrada"},
+            {"3", "Identificador Tributario", cfg.getIdentificadorFiscal(), "DIAN / SUNAT"},
+            {"4", "Canal de Contacto", cfg.getCorreoInstitucional() + " | " + cfg.getTelefonoUrgencias(), "Atención al Cliente"},
+            {"5", "Dirección Central", cfg.getDireccionSedePrincipal(), "Sede Matriz"}
+        };
         Ui.mostrarVisorReporte(
-            SwingUtilities.getWindowAncestor(this),
-            "Parámetros Generales ERP",
-            "Ficha Técnica de Parámetros Generales",
-            html.toString(),
-            csv.toString()
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "FICHA TÉCNICA INSTITUCIONAL DE LA CLÍNICA",
+            "Parámetros y Configuración Empresarial Happy Pets",
+            meta,
+            new String[]{"N°", "Parámetro Institucional", "Valor Configurado", "Estado / Entidad"},
+            datos,
+            "Directorio oficial de configuración corporativa Happy Pets.",
+            "Ficha_Institucional_Clinica"
         );
+    }
+
+    private static class ScrollablePanel extends JPanel implements Scrollable {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) {
+            return 32;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }

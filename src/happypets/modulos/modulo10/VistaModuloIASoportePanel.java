@@ -7,29 +7,40 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.ConfiguracionModuloIA;
@@ -39,596 +50,855 @@ import happypets.ui.Iconos;
 import happypets.ui.Ui;
 
 /**
- * Submódulo 10.4: Módulo de IA y Soporte Técnico.
- * Estandarizado con la paleta institucional Turquesa Clínico Original y visor de reportes A4.
+ * Submódulo 10.4: Módulo de IA y Soporte Técnico
+ * Responsable: Minaya Bravo, Almendra Lili
+ * Asistentes inteligentes para pre-triaje clínico, sugerencias de diagnóstico, recordatorios predictivos
+ * y monitoreo de salud del sistema con arquitectura Master-Detail, 4 KPIs y hub de telemetría de IA.
  */
 public class VistaModuloIASoportePanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
+    // KPIs Superiores
+    private JLabel lblKpiMotorIA;
+    private JLabel lblKpiTriajesMes;
+    private JLabel lblKpiSaludBD;
+    private JLabel lblKpiTickets;
+
+    // Consola IA (Master)
+    private JComboBox<String> cbEspecie;
+    private JTextField txtRaza;
+    private JTextField txtEdad;
+    private JTextField txtSintomas;
+    private JTextArea txtResultadoIA;
+
+    // Switches IA
     private JCheckBox chkPreTriaje;
     private JCheckBox chkDiagnostico;
     private JCheckBox chkVacunas;
-    private JLabel lblModeloActual;
 
-    private JLabel lblEstadoBD;
-    private JLabel lblUltimoRespaldo;
-    private JLabel lblTicketsPendientes;
+    // Tabla de Tickets
+    private JTable tablaTickets;
+    private DefaultTableModel modeloTickets;
+
+    // Live Detail Hub (Derecha - 360px)
+    private JTextArea txtHubPromptPreview;
+    private JLabel lblHubLatencia;
+    private JLabel lblHubModelo;
 
     public VistaModuloIASoportePanel() {
         setLayout(new BorderLayout());
-        setBackground(Ui.FONDO);
-        inicializarUI();
+        setOpaque(false);
+
+        // Panel Superior Fijo (Cabecera + 4 KPIs)
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 18, 10, 18));
+
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearFilaKpis());
+
+        add(panelSuperior, BorderLayout.NORTH);
+
+        // Contenedor Master-Detail
+        JPanel panelCentro = new JPanel(new BorderLayout());
+        panelCentro.setOpaque(false);
+        panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
+        panelCentro.add(crearSplitMasterDetail(), BorderLayout.CENTER);
+
+        add(panelCentro, BorderLayout.CENTER);
+
         cargarDatos();
     }
 
-    private void inicializarUI() {
-        JPanel contenedor = new JPanel();
-        contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setBackground(Ui.FONDO);
-        contenedor.setBorder(BorderFactory.createEmptyBorder(20, 28, 28, 28));
+    private JPanel crearCabeceraVista() {
+        JPanel cab = new JPanel(new BorderLayout());
+        cab.setOpaque(false);
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
-        // 1. Tarjeta: "Módulo de IA HappyPets"
-        contenedor.add(crearTarjetaModuloIA());
-        contenedor.add(Box.createVerticalStrut(20));
+        JPanel izq = new JPanel();
+        izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        // 2. Tarjeta: "Consola Interactiva de Triaje y Diagnóstico IA"
-        contenedor.add(crearTarjetaConsolaIA());
-        contenedor.add(Box.createVerticalStrut(20));
+        JLabel titulo = new JLabel("Módulo de IA y Soporte Técnico");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        // 3. Tarjeta: "Soporte Técnico y Diagnóstico"
-        contenedor.add(crearTarjetaSoporteTecnico());
-        contenedor.add(Box.createVerticalGlue());
+        JLabel subtitulo = new JLabel("Módulo 10.4 · Asistentes predictivos, triaje inteligente HappyPet-Core-v1.8 y monitoreo de salud del sistema");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JScrollPane scroll = new JScrollPane(contenedor);
-        scroll.setBorder(null);
-        scroll.getVerticalScrollBar().setUnitIncrement(14);
-        scroll.getViewport().setBackground(Ui.FONDO);
-        add(scroll, BorderLayout.CENTER);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
+        cab.add(izq, BorderLayout.WEST);
+
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        der.setOpaque(false);
+
+        JButton btnPrompts = Ui.boton("Ajustes de Prompts", false);
+        btnPrompts.addActionListener(e -> abrirAjustesPrompts());
+        der.add(btnPrompts);
+
+        JButton btnNuevoTicket = Ui.boton("+ Nuevo Ticket", true);
+        btnNuevoTicket.addActionListener(e -> abrirDialogoNuevoTicket());
+        der.add(btnNuevoTicket);
+
+        cab.add(der, BorderLayout.EAST);
+        return cab;
     }
 
-    private JPanel crearTarjetaModuloIA() {
-        JPanel card = new JPanel(new BorderLayout(0, 16));
-        card.setBackground(Ui.FONDO_CARD);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
-                BorderFactory.createEmptyBorder(20, 24, 20, 24)
-        ));
+    private JPanel crearFilaKpis() {
+        JPanel kpis = new JPanel(new GridLayout(1, 4, 12, 0));
+        kpis.setOpaque(false);
+        kpis.setPreferredSize(new Dimension(0, 74));
+        kpis.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        // Cabecera: Título "Módulo de IA HappyPets" y Badge "Habilitado"
-        JPanel head = new JPanel(new BorderLayout());
-        head.setBackground(Ui.FONDO_CARD);
+        lblKpiMotorIA = new JLabel("HappyPet-Core-v1.8");
+        lblKpiTriajesMes = new JLabel("312 Casos");
+        lblKpiSaludBD = new JLabel("100% Saludable");
+        lblKpiTickets = new JLabel("0 Pendientes");
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        izq.setBackground(Ui.FONDO_CARD);
-        izq.add(new JLabel(Iconos.crearIconoRobot(24, Ui.TURQUESA_PROFUNDO)));
-        JLabel lblTit = new JLabel("Módulo de IA HappyPets");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lblTit.setForeground(Ui.TEXTO_TITULO);
-        izq.add(lblTit);
+        kpis.add(crearTarjetaKpi("Motor IA Activo", lblKpiMotorIA, "Inferencia clínica de triaje", Iconos.crearIconoRobot(22, Ui.TURQUESA)));
+        kpis.add(crearTarjetaKpi("Triajes Procesados", lblKpiTriajesMes, "Tiempo respuesta < 1.2s", Iconos.crearIconoEstetoscopio(22, Ui.AZUL_INFO)));
+        kpis.add(crearTarjetaKpi("Estado de Base Datos", lblKpiSaludBD, "Integridad transaccional OK", Iconos.crearIconoCheck(22, Ui.VERDE_EXITO)));
+        kpis.add(crearTarjetaKpi("Tickets de Soporte", lblKpiTickets, "2 resueltos con éxito", Iconos.crearIconoAlertaTriaje(22, Ui.NARANJA_AVISO)));
 
-        JLabel badgeHabilitado = new JLabel("Habilitado");
-        badgeHabilitado.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        badgeHabilitado.setForeground(Ui.TURQUESA_PROFUNDO);
-        badgeHabilitado.setBackground(Ui.TURQUESA_SUAVE);
-        badgeHabilitado.setOpaque(true);
-        badgeHabilitado.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1),
-                BorderFactory.createEmptyBorder(4, 12, 4, 12)
-        ));
+        return kpis;
+    }
 
-        head.add(izq, BorderLayout.WEST);
-        head.add(badgeHabilitado, BorderLayout.EAST);
+    private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(8, 12, 8, 12));
 
-        // Subtítulo
-        JPanel cuerpo = new JPanel();
-        cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
-        cuerpo.setBackground(Ui.FONDO_CARD);
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
 
-        JLabel lblSub = new JLabel("Configura los asistentes inteligentes para triaje clínico, diagnóstico sugerido y respuesta rápida al cliente.");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
+
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblSub.setForeground(Ui.TEXTO_MUTED);
-        cuerpo.add(lblSub);
-        cuerpo.add(Box.createVerticalStrut(14));
 
-        // Switches interactivos
-        chkPreTriaje = new JCheckBox();
-        chkDiagnostico = new JCheckBox();
-        chkVacunas = new JCheckBox();
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(1));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(1));
+        texto.add(lblSub);
 
-        cuerpo.add(crearFilaSwitch("Pre-Triaje de Mascotas con IA", "Categoriza urgencias al registrar ingreso del paciente.", chkPreTriaje));
-        cuerpo.add(Box.createVerticalStrut(10));
-        cuerpo.add(crearFilaSwitch("Asistente Diagnóstico Preliminar", "Sugiere posibles patologías por síntomas clínicos reportados.", chkDiagnostico));
-        cuerpo.add(Box.createVerticalStrut(10));
-        cuerpo.add(crearFilaSwitch("Recordatorios Predictivos de Vacunas", "Calcula fechas óptimas por raza/edad y factores de riesgo.", chkVacunas));
-        cuerpo.add(Box.createVerticalStrut(16));
+        card.add(texto, BorderLayout.CENTER);
 
-        // Pie de la tarjeta: Modelo actual + Botón Ajustes de Prompts
-        JPanel pie = new JPanel(new BorderLayout());
-        pie.setBackground(Ui.FONDO_CARD);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            lblIco.setBorder(new EmptyBorder(2, 0, 0, 0));
+            card.add(lblIco, BorderLayout.EAST);
+        }
 
-        lblModeloActual = new JLabel("Modelo actual:  HappyPet-Core-v1.8");
-        lblModeloActual.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblModeloActual.setForeground(Ui.TURQUESA_OSCURO);
-
-        JButton btnPrompts = Ui.botonSecundario("Ajustes de Prompts", null);
-        btnPrompts.addActionListener(e -> abrirAjustesPrompts());
-
-        pie.add(lblModeloActual, BorderLayout.WEST);
-        pie.add(btnPrompts, BorderLayout.EAST);
-        cuerpo.add(pie);
-
-        card.add(head, BorderLayout.NORTH);
-        card.add(cuerpo, BorderLayout.CENTER);
         return card;
     }
 
-    private JPanel crearFilaSwitch(String titulo, String subtitulo, JCheckBox chk) {
-        JPanel fila = new JPanel(new BorderLayout(14, 0));
-        fila.setBackground(Ui.FONDO);
-        fila.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
-                BorderFactory.createEmptyBorder(10, 16, 10, 16)
-        ));
+    private JSplitPane crearSplitMasterDetail() {
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        split.setOpaque(false);
+        split.setBorder(null);
+        split.setDividerSize(8);
+        split.setContinuousLayout(true);
+        split.setResizeWeight(1.0);
 
-        JPanel textos = new JPanel();
-        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
-        textos.setBackground(Ui.FONDO);
+        split.setLeftComponent(crearPanelMasterIA());
+        split.setRightComponent(crearPanelLiveDetailHub());
 
-        JLabel lTit = new JLabel(titulo);
-        lTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lTit.setForeground(Ui.TEXTO_TITULO);
-
-        JLabel lSub = new JLabel(subtitulo);
-        lSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lSub.setForeground(Ui.TEXTO_MUTED);
-
-        textos.add(lTit);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(lSub);
-
-        chk.setBackground(Ui.FONDO);
-        chk.setFocusPainted(false);
-        chk.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        chk.addActionListener(e -> guardarConfiguracionIA());
-
-        fila.add(textos, BorderLayout.CENTER);
-        fila.add(chk, BorderLayout.EAST);
-        return fila;
+        return split;
     }
 
-    private JPanel crearTarjetaConsolaIA() {
-        JPanel card = new JPanel(new BorderLayout(0, 14));
-        card.setBackground(Ui.FONDO_CARD);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
-                BorderFactory.createEmptyBorder(18, 24, 18, 24)
-        ));
+    private JPanel crearPanelMasterIA() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(14, 16, 14, 16));
 
-        JPanel head = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        head.setBackground(Ui.FONDO_CARD);
-        head.add(new JLabel(Iconos.crearIconoRobot(22, Ui.TURQUESA_OSCURO)));
-        JLabel lblTit = new JLabel("Consola Interactiva de Triaje Clínico con IA");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTit.setForeground(Ui.TEXTO_TITULO);
-        head.add(lblTit);
-        card.add(head, BorderLayout.NORTH);
+        ScrollablePanel scrollContent = new ScrollablePanel();
+        scrollContent.setOpaque(false);
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+
+        // 1. Consola Interactiva de Triaje Clínico
+        JPanel cardConsola = new JPanel(new BorderLayout(0, 10));
+        cardConsola.setOpaque(false);
+        cardConsola.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(12, 14, 12, 14)
+        ));
+        cardConsola.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblTitConsola = new JLabel("Consola Interactiva de Triaje Clínico con IA:");
+        lblTitConsola.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTitConsola.setForeground(Ui.TEXTO_TITULO);
+        cardConsola.add(lblTitConsola, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(Ui.FONDO_CARD);
+        form.setOpaque(false);
         GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(6, 6, 6, 6);
+        g.insets = new Insets(4, 4, 4, 4);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JComboBox<String> cbEspecie = Ui.combo(new String[]{"Canino", "Felino", "Conejo", "Ave Exótica"});
-        JTextField txtRaza = Ui.campoTexto("Golden Retriever", 14);
-        JTextField txtEdad = Ui.campoTexto("48", 6); // 48 meses
-        JTextField txtSintomas = Ui.campoTexto("Tos seca nocturna recurrente, arcadas post ejercicio, letargo moderado.", 30);
+        cbEspecie = Ui.combo(new String[]{"Canino", "Felino", "Conejo", "Ave Exótica"});
+        txtRaza = new JTextField("Golden Retriever", 14);
+        txtRaza.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtEdad = new JTextField("48", 6);
+        txtEdad.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtSintomas = new JTextField("Tos seca nocturna recurrente, arcadas post ejercicio, letargo moderado.", 30);
+        txtSintomas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 
         g.gridx = 0; g.gridy = 0; g.weightx = 0.15;
-        form.add(Ui.crearLabelFormulario("Especie:"), g);
+        form.add(crearLabelForm("Especie:"), g);
         g.gridx = 1; g.gridy = 0; g.weightx = 0.35;
         form.add(cbEspecie, g);
 
         g.gridx = 2; g.gridy = 0; g.weightx = 0.15;
-        form.add(Ui.crearLabelFormulario("Raza:"), g);
+        form.add(crearLabelForm("Raza:"), g);
         g.gridx = 3; g.gridy = 0; g.weightx = 0.35;
         form.add(txtRaza, g);
 
         g.gridx = 0; g.gridy = 1; g.weightx = 0.15;
-        form.add(Ui.crearLabelFormulario("Edad (meses):"), g);
+        form.add(crearLabelForm("Edad (meses):"), g);
         g.gridx = 1; g.gridy = 1; g.weightx = 0.35;
         form.add(txtEdad, g);
 
         g.gridx = 2; g.gridy = 1; g.weightx = 0.15;
-        form.add(Ui.crearLabelFormulario("Signos / Síntomas:"), g);
+        form.add(crearLabelForm("Signos Clínicos:"), g);
         g.gridx = 3; g.gridy = 1; g.weightx = 0.35;
         form.add(txtSintomas, g);
 
-        JTextArea txtResultado = new JTextArea(7, 40);
-        txtResultado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtResultado.setBackground(Ui.FONDO);
-        txtResultado.setForeground(Ui.TEXTO_REGULAR);
-        txtResultado.setEditable(false);
-        txtResultado.setBorder(BorderFactory.createCompoundBorder(
+        txtResultadoIA = new JTextArea(5, 40);
+        txtResultadoIA.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtResultadoIA.setBackground(new Color(248, 250, 252));
+        txtResultadoIA.setForeground(Ui.TEXTO_TITULO);
+        txtResultadoIA.setEditable(false);
+        txtResultadoIA.setLineWrap(true);
+        txtResultadoIA.setWrapStyleWord(true);
+        txtResultadoIA.setText("Haga clic en 'Ejecutar Diagnóstico IA' para procesar el cuadro clínico con HappyPet-Core-v1.8.");
+        txtResultadoIA.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+                new EmptyBorder(8, 10, 8, 10)
         ));
-        txtResultado.setText("Presione 'Ejecutar Diagnóstico IA' para procesar el caso clínico.");
+
+        JPanel pnlBotonesConsola = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        pnlBotonesConsola.setOpaque(false);
+
+        JButton btnExportarFicha = Ui.botonSecundario("Exportar Ficha IA", null);
+        btnExportarFicha.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnExportarFicha.addActionListener(e -> exportarFichaDiagnostica());
 
         JButton btnEjecutar = Ui.botonPrimario("⚡ Ejecutar Diagnóstico IA", null);
-        btnEjecutar.addActionListener(e -> {
-            int edadM = 24;
-            try {
-                edadM = Integer.parseInt(txtEdad.getText().trim());
-            } catch (Exception ex) {}
+        btnEjecutar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnEjecutar.addActionListener(e -> ejecutarDiagnosticoIA());
 
-            String res = repo.simularDiagnosticoTriajeIA(
-                    (String) cbEspecie.getSelectedItem(),
-                    txtRaza.getText().trim(),
-                    edadM,
-                    "Consulta por síntomas clínicos",
-                    txtSintomas.getText().trim()
-            );
-            txtResultado.setText(res);
-            txtResultado.setCaretPosition(0);
+        pnlBotonesConsola.add(btnExportarFicha);
+        pnlBotonesConsola.add(btnEjecutar);
+
+        JPanel pnlCentroConsola = new JPanel(new BorderLayout(0, 8));
+        pnlCentroConsola.setOpaque(false);
+        pnlCentroConsola.add(form, BorderLayout.NORTH);
+        pnlCentroConsola.add(new JScrollPane(txtResultadoIA), BorderLayout.CENTER);
+        pnlCentroConsola.add(pnlBotonesConsola, BorderLayout.SOUTH);
+
+        cardConsola.add(pnlCentroConsola, BorderLayout.CENTER);
+        scrollContent.add(cardConsola);
+        scrollContent.add(Box.createVerticalStrut(12));
+
+        // 2. Switches de Configuración de Asistentes IA
+        JPanel cardSwitches = new JPanel(new BorderLayout(0, 8));
+        cardSwitches.setOpaque(false);
+        cardSwitches.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(10, 14, 10, 14)
+        ));
+        cardSwitches.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblTitSwitches = new JLabel("Asistentes Inteligentes Configurados:");
+        lblTitSwitches.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblTitSwitches.setForeground(Ui.TEXTO_TITULO);
+        cardSwitches.add(lblTitSwitches, BorderLayout.NORTH);
+
+        JPanel pnlListSwitches = new JPanel(new GridLayout(3, 1, 0, 6));
+        pnlListSwitches.setOpaque(false);
+
+        chkPreTriaje = new JCheckBox("Pre-Triaje de Pacientes con IA — Categoriza el nivel de urgencia al registrar ingreso", true);
+        chkPreTriaje.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        chkPreTriaje.setOpaque(false);
+        chkPreTriaje.addActionListener(e -> guardarConfiguracionIA());
+
+        chkDiagnostico = new JCheckBox("Asistente Diagnóstico Preliminar — Sugiere correlación patológica por síntomas clínicos", true);
+        chkDiagnostico.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        chkDiagnostico.setOpaque(false);
+        chkDiagnostico.addActionListener(e -> guardarConfiguracionIA());
+
+        chkVacunas = new JCheckBox("Recordatorios Predictivos de Vacunas — Calcula fechas óptimas según raza, edad y perfil", true);
+        chkVacunas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        chkVacunas.setOpaque(false);
+        chkVacunas.addActionListener(e -> guardarConfiguracionIA());
+
+        pnlListSwitches.add(chkPreTriaje);
+        pnlListSwitches.add(chkDiagnostico);
+        pnlListSwitches.add(chkVacunas);
+
+        cardSwitches.add(pnlListSwitches, BorderLayout.CENTER);
+        scrollContent.add(cardSwitches);
+        scrollContent.add(Box.createVerticalStrut(12));
+
+        // 3. Tabla de Tickets de Soporte
+        JPanel cardTickets = new JPanel(new BorderLayout(0, 8));
+        cardTickets.setOpaque(false);
+        cardTickets.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(10, 14, 10, 14)
+        ));
+        cardTickets.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblTitTickets = new JLabel("Tickets de Soporte Técnico y Diagnóstico del Sistema:");
+        lblTitTickets.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblTitTickets.setForeground(Ui.TEXTO_TITULO);
+        cardTickets.add(lblTitTickets, BorderLayout.NORTH);
+
+        String[] cols = {"Cód. Ticket", "Asunto del Incidente", "Categoría", "Prioridad", "Fecha", "Estado"};
+        modeloTickets = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        tablaTickets = new JTable(modeloTickets);
+        tablaTickets.setRowHeight(36);
+        tablaTickets.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaTickets.setShowVerticalLines(false);
+        tablaTickets.setGridColor(new Color(241, 245, 249));
+        tablaTickets.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaTickets.getTableHeader().setBackground(new Color(248, 250, 252));
+
+        tablaTickets.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 7));
+                p.setOpaque(true);
+                p.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+
+                String st = value != null ? value.toString() : "Cerrado";
+                JLabel badge = new JLabel(" " + st + " ");
+                badge.setOpaque(true);
+                badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+
+                if (st.equalsIgnoreCase("Cerrado") || st.equalsIgnoreCase("Resuelto")) {
+                    badge.setBackground(new Color(220, 252, 231));
+                    badge.setForeground(new Color(21, 128, 61));
+                } else {
+                    badge.setBackground(new Color(254, 243, 199));
+                    badge.setForeground(new Color(180, 83, 9));
+                }
+                badge.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(badge.getBackground().darker(), 1, true),
+                        new EmptyBorder(2, 6, 2, 6)
+                ));
+                p.add(badge);
+                return p;
+            }
         });
 
-        JButton btnExportar = Ui.botonSecundario("📄 Exportar Ficha IA", null);
-        btnExportar.addActionListener(e -> {
-            exportarFichaDiagnostica(
-                    (String) cbEspecie.getSelectedItem(),
-                    txtRaza.getText().trim(),
-                    txtEdad.getText().trim(),
-                    txtSintomas.getText().trim(),
-                    txtResultado.getText().trim()
-            );
-        });
+        JScrollPane scTickets = new JScrollPane(tablaTickets);
+        scTickets.setPreferredSize(new Dimension(0, 110));
+        scTickets.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        cardTickets.add(scTickets, BorderLayout.CENTER);
 
-        JPanel pnlAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        pnlAcciones.setBackground(Ui.FONDO_CARD);
-        pnlAcciones.add(btnExportar);
-        pnlAcciones.add(btnEjecutar);
+        scrollContent.add(cardTickets);
 
-        JPanel pnlCentro = new JPanel(new BorderLayout(0, 10));
-        pnlCentro.setBackground(Ui.FONDO_CARD);
-        pnlCentro.add(form, BorderLayout.NORTH);
-        pnlCentro.add(new JScrollPane(txtResultado), BorderLayout.CENTER);
-        pnlCentro.add(pnlAcciones, BorderLayout.SOUTH);
+        JScrollPane scroll = new JScrollPane(scrollContent);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.getVerticalScrollBar().setUnitIncrement(14);
 
-        card.add(pnlCentro, BorderLayout.CENTER);
-        return card;
+        master.add(scroll, BorderLayout.CENTER);
+        return master;
     }
 
-    private void exportarFichaDiagnostica(String especie, String raza, String edad, String sintomas, String resultado) {
-        StringBuilder html = new StringBuilder();
-        html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
-        html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>FICHA CLÍNICA DE TRIAJE Y DIAGNÓSTICO PREDICTIVO IA</h2>");
-        html.append("<p><strong>Fecha de Evaluación:</strong> ").append(LocalDate.now()).append(" | <strong>Modelo IA:</strong> HappyPet-Core-v1.8</p>");
-        html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:12px;'>");
-        html.append("<tr style='background-color:#006064; color:white;'><th align='left'>Parámetro Clínico</th><th align='left'>Dato Evaluado</th><th align='left'>Sugerencia Asistente IA</th></tr>");
-        html.append("<tr><td><b>Especie Animal:</b></td><td>").append(especie).append("</td><td>Protocolo biológico validado</td></tr>");
-        html.append("<tr><td><b>Raza Declarada:</b></td><td>").append(raza.isEmpty() ? "No especificada" : raza).append("</td><td>Ponderación biométrica de factores de riesgo</td></tr>");
-        html.append("<tr><td><b>Edad Cronológica:</b></td><td>").append(edad).append(" meses</td><td>Segmentación etaria pediátrica/adulta calculada</td></tr>");
-        html.append("<tr><td><b>Sintomatología Reportada:</b></td><td>").append(sintomas.isEmpty() ? "Sin síntomas" : sintomas).append("</td><td>Indexación y correlación de patologías clínicas</td></tr>");
-        html.append("<tr><td><b>Dictamen Predictivo IA:</b></td><td colspan='2' style='background-color:#E0F7FA; color:#006064;'><b>").append(resultado.isEmpty() ? "Pendiente" : resultado.replace("\n", "<br/>")).append("</b></td></tr>");
-        html.append("</table>");
-        html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Documento de pre-triaje asistido por IA para soporte clínico del médico veterinario oficial.</p>");
-        html.append("</body></html>");
+    private JPanel crearPanelLiveDetailHub() {
+        JPanel detail = new JPanel(new BorderLayout()) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        detail.setOpaque(false);
+        detail.setPreferredSize(new Dimension(360, 0));
+        detail.setMinimumSize(new Dimension(320, 0));
 
-        StringBuilder csv = new StringBuilder("PARAMETRO,VALOR,EVALUACION_IA\n");
-        csv.append("\"Especie Animal\",\"").append(especie).append("\",\"Protocolo validado\"\n");
-        csv.append("\"Raza\",\"").append(raza).append("\",\"Ponderacion biometrica\"\n");
-        csv.append("\"Edad Cronologica\",\"").append(edad).append(" meses\",\"Segmentacion etaria\"\n");
-        csv.append("\"Sintomatologia\",\"").append(sintomas.replace("\"", "'")).append("\",\"Correlacion clinica\"\n");
-        csv.append("\"Dictamen Preliminar\",\"").append(resultado.replace("\"", "'").replace("\n", " | ")).append("\",\"Dictamen asistido\"\n");
+        ScrollablePanel scrollContent = new ScrollablePanel();
+        scrollContent.setOpaque(false);
+        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
+        scrollContent.setBorder(new EmptyBorder(14, 16, 14, 16));
 
-        Ui.mostrarVisorReporte(
-                SwingUtilities.getWindowAncestor(this),
-                "Ficha Diagnóstica y Triaje IA",
-                "Ficha Clínica de Triaje y Diagnóstico Predictivo IA",
-                html.toString(),
-                csv.toString()
-        );
+        // 1. Hero Block
+        JPanel hero = new JPanel(new BorderLayout(8, 0));
+        hero.setOpaque(false);
+        hero.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel avatar = new JLabel(Iconos.crearIconoRobot(26, Ui.TURQUESA_PROFUNDO), SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int s = Math.min(getWidth(), getHeight()) - 2;
+                int x = (getWidth() - s) / 2;
+                int y = (getHeight() - s) / 2;
+                g2.setColor(Ui.TURQUESA_SUAVE);
+                g2.fillOval(x, y, s, s);
+                g2.setColor(Ui.TURQUESA);
+                g2.drawOval(x, y, s, s);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        avatar.setPreferredSize(new Dimension(46, 46));
+
+        JPanel avatarBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        avatarBox.setOpaque(false);
+        avatarBox.setPreferredSize(new Dimension(46, 46));
+        avatarBox.add(avatar);
+        hero.add(avatarBox, BorderLayout.WEST);
+
+        JPanel heroText = new JPanel();
+        heroText.setOpaque(false);
+        heroText.setLayout(new BoxLayout(heroText, BoxLayout.Y_AXIS));
+
+        lblHubModelo = new JLabel("HappyPet-Core-v1.8");
+        lblHubModelo.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblHubModelo.setForeground(Ui.TEXTO_TITULO);
+        lblHubModelo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblSub = new JLabel("Motor de Inferencia Clínica");
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel rowChips = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        rowChips.setOpaque(false);
+        rowChips.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel chipEstado = new JLabel(" Asistente Operativo ");
+        chipEstado.setOpaque(true);
+        chipEstado.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        chipEstado.setBackground(new Color(220, 252, 231));
+        chipEstado.setForeground(new Color(21, 128, 61));
+        chipEstado.setBorder(BorderFactory.createLineBorder(new Color(134, 239, 172), 1, true));
+        rowChips.add(chipEstado);
+
+        heroText.add(lblHubModelo);
+        heroText.add(Box.createVerticalStrut(2));
+        heroText.add(lblSub);
+        heroText.add(Box.createVerticalStrut(4));
+        heroText.add(rowChips);
+
+        hero.add(heroText, BorderLayout.CENTER);
+        scrollContent.add(hero);
+        scrollContent.add(Box.createVerticalStrut(14));
+
+        // 2. Telemetría 2x2
+        JPanel telemetria = new JPanel(new GridLayout(2, 2, 8, 8));
+        telemetria.setOpaque(false);
+        telemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
+        telemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
+
+        lblHubLatencia = new JLabel("34 ms (Óptimo)");
+        telemetria.add(crearMicroCard("Latencia Inferencia", lblHubLatencia));
+        telemetria.add(crearMicroCard("Precisión Diagnóstica", new JLabel("98.5% Validación")));
+        telemetria.add(crearMicroCard("Copia de Seguridad", new JLabel("Hoy, 03:00 AM")));
+        telemetria.add(crearMicroCard("Motor de Base Datos", new JLabel("PostgreSQL ACID")));
+
+        scrollContent.add(telemetria);
+        scrollContent.add(Box.createVerticalStrut(12));
+
+        // 3. Card Prompt Base y Directivas
+        txtHubPromptPreview = new JTextArea();
+        txtHubPromptPreview.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        txtHubPromptPreview.setForeground(Ui.TEXTO_TITULO);
+        txtHubPromptPreview.setLineWrap(true);
+        txtHubPromptPreview.setWrapStyleWord(true);
+        txtHubPromptPreview.setEditable(false);
+        txtHubPromptPreview.setOpaque(false);
+
+        JPanel pnlPrompt = crearSeccionCard("Directivas del Asistente (System Prompt)", txtHubPromptPreview);
+        pnlPrompt.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollContent.add(pnlPrompt);
+        scrollContent.add(Box.createVerticalStrut(14));
+
+        // 4. Botones 2x2
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gridAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
+
+        JButton btnTestIA = Ui.botonSecundario("Test Inferencia", Iconos.crearIconoRobot(12, Ui.TEXTO_TITULO));
+        btnTestIA.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnTestIA.addActionListener(e -> ejecutarDiagnosticoIA());
+
+        JButton btnExportar = Ui.botonSecundario("Ficha A4 PDF", Iconos.crearIconoDescargar(12, Ui.TEXTO_TITULO));
+        btnExportar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnExportar.addActionListener(e -> exportarFichaDiagnostica());
+
+        JButton btnAjustarPrompt = Ui.botonSecundario("Ajustar Prompts", null);
+        btnAjustarPrompt.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnAjustarPrompt.addActionListener(e -> abrirAjustesPrompts());
+
+        JButton btnCrearTicket = Ui.botonPrimario("+ Ticket", null);
+        btnCrearTicket.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        btnCrearTicket.addActionListener(e -> abrirDialogoNuevoTicket());
+
+        gridAcciones.add(btnTestIA);
+        gridAcciones.add(btnExportar);
+        gridAcciones.add(btnAjustarPrompt);
+        gridAcciones.add(btnCrearTicket);
+
+        scrollContent.add(gridAcciones);
+
+        JScrollPane scroll = new JScrollPane(scrollContent);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.getVerticalScrollBar().setUnitIncrement(14);
+
+        detail.add(scroll, BorderLayout.CENTER);
+        return detail;
     }
 
-    private JPanel crearTarjetaSoporteTecnico() {
-        JPanel card = new JPanel(new BorderLayout(0, 16));
-        card.setBackground(Ui.FONDO_CARD);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1),
-                BorderFactory.createEmptyBorder(20, 24, 20, 24)
+    private JPanel crearMicroCard(String etiqueta, JLabel lblValor) {
+        JPanel mc = new JPanel();
+        mc.setOpaque(false);
+        mc.setLayout(new BoxLayout(mc, BoxLayout.Y_AXIS));
+        mc.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(6, 8, 6, 8)
         ));
 
-        // Cabecera: Título con Auriculares y Estado: Normal
-        JPanel head = new JPanel(new BorderLayout());
-        head.setBackground(Ui.FONDO_CARD);
+        JLabel lblEtiq = new JLabel(etiqueta);
+        lblEtiq.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblEtiq.setForeground(Ui.TEXTO_MUTED);
 
-        JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        izq.setBackground(Ui.FONDO_CARD);
-        izq.add(new JLabel(Iconos.crearIconoAuriculares(24, Ui.TURQUESA_PROFUNDO)));
-        JLabel lblTit = new JLabel("Soporte Técnico y Diagnóstico");
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lblTit.setForeground(Ui.TEXTO_TITULO);
-        izq.add(lblTit);
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblEstadoNormal = new JLabel("Estado: Normal");
-        lblEstadoNormal.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblEstadoNormal.setForeground(Ui.TURQUESA_PROFUNDO);
-        lblEstadoNormal.setBackground(Ui.TURQUESA_SUAVE);
-        lblEstadoNormal.setOpaque(true);
-        lblEstadoNormal.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.TURQUESA_MEDIO, 1),
-                BorderFactory.createEmptyBorder(4, 12, 4, 12)
-        ));
+        mc.add(lblEtiq);
+        mc.add(Box.createVerticalStrut(2));
+        mc.add(lblValor);
 
-        head.add(izq, BorderLayout.WEST);
-        head.add(lblEstadoNormal, BorderLayout.EAST);
-        card.add(head, BorderLayout.NORTH);
-
-        // Grid con métricas de salud
-        JPanel metricas = new JPanel(new GridLayout(3, 2, 10, 8));
-        metricas.setBackground(Ui.FONDO_CARD);
-        metricas.setBorder(BorderFactory.createEmptyBorder(4, 4, 12, 4));
-
-        lblEstadoBD = new JLabel("En línea (0.12 ms)");
-        lblEstadoBD.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblEstadoBD.setForeground(Ui.TURQUESA_OSCURO);
-
-        lblUltimoRespaldo = new JLabel("Hoy, 03:00 AM");
-        lblUltimoRespaldo.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblUltimoRespaldo.setForeground(Ui.TEXTO_TITULO);
-
-        lblTicketsPendientes = new JLabel("0 pendientes");
-        lblTicketsPendientes.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTicketsPendientes.setForeground(Ui.TEXTO_TITULO);
-
-        metricas.add(crearLabelMetrica("Estado de Base de Datos:"));
-        metricas.add(lblEstadoBD);
-        metricas.add(crearLabelMetrica("Último Respaldo Cloud:"));
-        metricas.add(lblUltimoRespaldo);
-        metricas.add(crearLabelMetrica("Tickets de Soporte Abiertos:"));
-        metricas.add(lblTicketsPendientes);
-
-        card.add(metricas, BorderLayout.CENTER);
-
-        // Botones inferiores: [Ver Logs Sistema] y [🎫 Crear Ticket]
-        JPanel botones = new JPanel(new GridLayout(1, 2, 12, 0));
-        botones.setBackground(Ui.FONDO_CARD);
-
-        JButton btnLogs = Ui.botonSecundario("Ver Logs Sistema", null);
-        btnLogs.addActionListener(e -> abrirLogsSistema());
-
-        JButton btnTicket = Ui.botonPrimario("🎫 Crear Ticket", null);
-        btnTicket.addActionListener(e -> abrirCrearTicket());
-
-        botones.add(btnLogs);
-        botones.add(btnTicket);
-        card.add(botones, BorderLayout.SOUTH);
-
-        return card;
+        return mc;
     }
 
-    private JLabel crearLabelMetrica(String text) {
-        JLabel l = new JLabel(text);
-        l.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+    private JPanel crearSeccionCard(String titulo, JComponent contenido) {
+        JPanel sec = new JPanel(new BorderLayout(0, 6));
+        sec.setOpaque(false);
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(241, 245, 249), 1, true),
+                new EmptyBorder(8, 10, 8, 10)
+        ));
+
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
+        sec.add(lblTit, BorderLayout.NORTH);
+
+        sec.add(contenido, BorderLayout.CENTER);
+        return sec;
+    }
+
+    private JLabel crearLabelForm(String txt) {
+        JLabel l = new JLabel(txt);
+        l.setFont(new Font("Segoe UI", Font.BOLD, 11));
         l.setForeground(Ui.TEXTO_MUTED);
         return l;
     }
 
     private void cargarDatos() {
-        ConfiguracionModuloIA ia = repo.getConfiguracionModuloIA();
-        if (ia != null) {
-            chkPreTriaje.setSelected(ia.isPreTriajeMascotas());
-            chkDiagnostico.setSelected(ia.isAsistenteDiagnosticoPreliminar());
-            chkVacunas.setSelected(ia.isRecordatoriosPredictivosVacunas());
-            lblModeloActual.setText("Modelo actual:  " + ia.getModeloActual());
+        ConfiguracionModuloIA cfg = repo.getConfiguracionModuloIA();
+        if (cfg != null) {
+            chkPreTriaje.setSelected(cfg.isPreTriajeMascotas());
+            chkDiagnostico.setSelected(cfg.isAsistenteDiagnosticoPreliminar());
+            chkVacunas.setSelected(cfg.isRecordatoriosPredictivosVacunas());
+            lblHubModelo.setText(cfg.getModeloActual());
+            lblKpiMotorIA.setText(cfg.getModeloActual());
+            txtHubPromptPreview.setText(cfg.getPromptSistema());
         }
 
-        DiagnosticoSistema diag = repo.getDiagnosticoSistema();
-        if (diag != null) {
-            lblEstadoBD.setText(diag.getEstadoBaseDatos());
-            lblUltimoRespaldo.setText(diag.getUltimoRespaldoCloud());
-            lblTicketsPendientes.setText(diag.getTicketsPendientes() + " pendientes");
+        // Cargar Tickets
+        modeloTickets.setRowCount(0);
+        List<TicketSoporte> tickets = repo.getTicketsSoporte();
+        for (TicketSoporte t : tickets) {
+            modeloTickets.addRow(new Object[]{
+                    t.getIdTicket(),
+                    t.getAsunto(),
+                    t.getCategoria(),
+                    t.getPrioridad(),
+                    t.getFechaCreacionFormateada(),
+                    t.getEstado()
+            });
         }
+        lblKpiTickets.setText("0 Pendientes");
     }
 
     private void guardarConfiguracionIA() {
-        ConfiguracionModuloIA ia = repo.getConfiguracionModuloIA();
-        if (ia != null) {
-            ia.setPreTriajeMascotas(chkPreTriaje.isSelected());
-            ia.setAsistenteDiagnosticoPreliminar(chkDiagnostico.isSelected());
-            ia.setRecordatoriosPredictivosVacunas(chkVacunas.isSelected());
-            repo.guardarConfiguracionModuloIA(ia);
+        ConfiguracionModuloIA cfg = repo.getConfiguracionModuloIA();
+        if (cfg != null) {
+            cfg.setPreTriajeMascotas(chkPreTriaje.isSelected());
+            cfg.setAsistenteDiagnosticoPreliminar(chkDiagnostico.isSelected());
+            cfg.setRecordatoriosPredictivosVacunas(chkVacunas.isSelected());
         }
+    }
+
+    private void ejecutarDiagnosticoIA() {
+        int edadM = 24;
+        try {
+            edadM = Integer.parseInt(txtEdad.getText().trim());
+        } catch (Exception ignored) { }
+
+        String res = repo.simularDiagnosticoTriajeIA(
+                (String) cbEspecie.getSelectedItem(),
+                txtRaza.getText().trim(),
+                edadM,
+                "Consulta por síntomas clínicos",
+                txtSintomas.getText().trim()
+        );
+        txtResultadoIA.setText(res);
+        txtResultadoIA.setCaretPosition(0);
     }
 
     private void abrirAjustesPrompts() {
-        ConfiguracionModuloIA ia = repo.getConfiguracionModuloIA();
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ajustes de Prompts de IA", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(620, 440);
+        ConfiguracionModuloIA cfg = repo.getConfiguracionModuloIA();
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ajustes de Prompts y Directivas IA", JDialog.ModalityType.APPLICATION_MODAL);
+        dlg.setSize(520, 380);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
-        JPanel pnl = new JPanel(new BorderLayout(0, 10));
-        pnl.setBackground(Ui.FONDO_CARD);
-        pnl.setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
+        JPanel pnl = new JPanel(new BorderLayout(8, 8));
+        pnl.setBackground(Color.WHITE);
+        pnl.setBorder(new EmptyBorder(16, 20, 16, 20));
 
-        JLabel lblTit = Ui.crearLabelFormulario("Prompt del Sistema para Triaje y Diagnóstico Clínico:");
+        JLabel lblTit = new JLabel("Directiva Maestra (System Prompt):");
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTit.setForeground(Ui.TEXTO_TITULO);
         pnl.add(lblTit, BorderLayout.NORTH);
 
-        JTextArea txtPrompt = new JTextArea(ia.getPromptSistema(), 10, 40);
-        txtPrompt.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtPrompt.setLineWrap(true);
-        txtPrompt.setWrapStyleWord(true);
-        txtPrompt.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_INPUT, 1),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)
-        ));
-        pnl.add(new JScrollPane(txtPrompt), BorderLayout.CENTER);
+        JTextArea txtP = new JTextArea(cfg != null ? cfg.getPromptSistema() : "");
+        txtP.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtP.setLineWrap(true);
+        txtP.setWrapStyleWord(true);
+        pnl.add(new JScrollPane(txtP), BorderLayout.CENTER);
+
+        dlg.add(pnl, BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        bot.setBackground(Ui.FONDO_CARD);
-        JButton btnCerrar = Ui.botonSecundario("Cancelar", null);
-        btnCerrar.addActionListener(e -> dlg.dispose());
+        bot.setBackground(new Color(248, 250, 252));
+        bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
+
+        JButton btnCancelar = Ui.botonSecundario("Cancelar", null);
+        btnCancelar.addActionListener(e -> dlg.dispose());
+
         JButton btnGuardar = Ui.botonPrimario("Guardar Prompt", null);
         btnGuardar.addActionListener(e -> {
-            ia.setPromptSistema(txtPrompt.getText().trim());
-            repo.guardarConfiguracionModuloIA(ia);
+            if (cfg != null) {
+                cfg.setPromptSistema(txtP.getText().trim());
+                txtHubPromptPreview.setText(cfg.getPromptSistema());
+            }
             dlg.dispose();
-            JOptionPane.showMessageDialog(this, "✓ Prompt del sistema actualizado para HappyPet-Core-v1.8.", "Prompt Guardado", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Directivas de IA actualizadas satisfactoriamente.", "Configuración Guardada", JOptionPane.INFORMATION_MESSAGE);
         });
-        bot.add(btnCerrar);
+
+        bot.add(btnCancelar);
         bot.add(btnGuardar);
-
-        dlg.add(pnl, BorderLayout.CENTER);
         dlg.add(bot, BorderLayout.SOUTH);
+
         dlg.setVisible(true);
     }
 
-    private void abrirLogsSistema() {
-        DiagnosticoSistema diag = repo.getDiagnosticoSistema();
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Logs del Servidor y Diagnóstico", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(720, 480);
-        dlg.setLocationRelativeTo(this);
-        dlg.setLayout(new BorderLayout());
-
-        JPanel pnl = new JPanel(new BorderLayout(0, 10));
-        pnl.setBackground(new Color(15, 23, 42));
-        pnl.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-
-        JTextArea txtLogs = new JTextArea();
-        txtLogs.setFont(new Font("Consolas", Font.PLAIN, 12));
-        txtLogs.setBackground(new Color(15, 23, 42));
-        txtLogs.setForeground(new Color(148, 163, 184));
-        txtLogs.setEditable(false);
-
-        StringBuilder sb = new StringBuilder();
-        for (String log : diag.getLogsServidor()) {
-            sb.append(log).append("\n");
-        }
-        sb.append("[INFO] ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .append(" - Telemetría de salud de hardware: CPU: 12%, RAM: ").append(diag.getMemoriaUsadaMB()).append(" MB, Disco Libre: ").append(diag.getEspacioDiscoLibreGB()).append(" GB\n");
-        txtLogs.setText(sb.toString());
-
-        pnl.add(new JScrollPane(txtLogs), BorderLayout.CENTER);
-
-        JButton btnExportar = Ui.botonSecundario("📄 Exportar Telemetría", null);
-        btnExportar.addActionListener(e -> {
-            StringBuilder html = new StringBuilder();
-            html.append("<html><body style='font-family:sans-serif; padding:15px; color:#1e293b;'>");
-            html.append("<h2 style='color:#006064; border-bottom:2px solid #00BCD4; padding-bottom:6px;'>REPORTE TÉCNICO DE TELEMETRÍA Y ESTADO DEL SISTEMA</h2>");
-            html.append("<p><strong>Fecha de Emisión:</strong> ").append(LocalDate.now()).append(" | <strong>Entorno:</strong> Servidor Local / Cloud Híbrido</p>");
-            html.append("<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; width:100%; border-color:#cbd5e1; font-size:12px;'>");
-            html.append("<tr style='background-color:#006064; color:white;'><th align='left'>Métrica de Infraestructura</th><th align='left'>Valor Actual</th><th align='left'>Diagnóstico Operativo</th></tr>");
-            html.append("<tr><td><b>Base de Datos Local:</b></td><td>").append(diag.getEstadoBaseDatos()).append("</td><td>Conexión estable e íntegra</td></tr>");
-            html.append("<tr><td><b>Último Respaldo Cloud:</b></td><td>").append(diag.getUltimoRespaldoCloud()).append("</td><td>Snapshot sincronizado</td></tr>");
-            html.append("<tr><td><b>Memoria JVM en Uso:</b></td><td>").append(diag.getMemoriaUsadaMB()).append(" MB</td><td>Consumo eficiente dentro del umbral</td></tr>");
-            html.append("<tr><td><b>Espacio en Disco Libre:</b></td><td>").append(diag.getEspacioDiscoLibreGB()).append(" GB</td><td>Capacidad adecuada</td></tr>");
-            html.append("<tr><td><b>Tickets de Soporte Abiertos:</b></td><td>").append(diag.getTicketsPendientes()).append(" pendientes</td><td>Mesa de ayuda activa</td></tr>");
-            html.append("</table>");
-            html.append("<p style='margin-top:15px; font-size:10px; color:#64748b;'>Reporte técnico generado por el subsistema de diagnóstico y telemetría de Happy Pets ERP.</p>");
-            html.append("</body></html>");
-
-            StringBuilder csv = new StringBuilder("METRICA,VALOR,DIAGNOSTICO\n");
-            csv.append("\"Base de Datos\",\"").append(diag.getEstadoBaseDatos()).append("\",\"Conexion estable\"\n");
-            csv.append("\"Ultimo Respaldo\",\"").append(diag.getUltimoRespaldoCloud()).append("\",\"Snapshot sincronizado\"\n");
-            csv.append("\"Memoria JVM\",\"").append(diag.getMemoriaUsadaMB()).append(" MB\",\"Consumo normal\"\n");
-            csv.append("\"Espacio en Disco\",\"").append(diag.getEspacioDiscoLibreGB()).append(" GB\",\"Capacidad adecuada\"\n");
-            csv.append("\"Tickets Pendientes\",").append(diag.getTicketsPendientes()).append(",\"Mesa de ayuda\"\n");
-
-            Ui.mostrarVisorReporte(
-                    dlg,
-                    "Telemetría y Diagnóstico del Servidor",
-                    "Reporte Técnico de Telemetría y Salud del Sistema",
-                    html.toString(),
-                    csv.toString()
-            );
-        });
-
-        JButton btnCerrar = Ui.botonSecundario("Cerrar Consola", null);
-        btnCerrar.addActionListener(e -> dlg.dispose());
-
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        bot.setBackground(new Color(15, 23, 42));
-        bot.add(btnExportar);
-        bot.add(btnCerrar);
-
-        dlg.add(pnl, BorderLayout.CENTER);
-        dlg.add(bot, BorderLayout.SOUTH);
-        dlg.setVisible(true);
-    }
-
-    private void abrirCrearTicket() {
+    private void abrirDialogoNuevoTicket() {
         JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Crear Ticket de Soporte Técnico", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(520, 440);
+        dlg.setSize(480, 400);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
-        JPanel pnl = new JPanel(new GridBagLayout());
-        pnl.setBackground(Ui.FONDO_CARD);
-        pnl.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
-        GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(6, 6, 6, 6);
-        g.fill = GridBagConstraints.HORIZONTAL;
+        JPanel pnl = new JPanel();
+        pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+        pnl.setBackground(Color.WHITE);
+        pnl.setBorder(new EmptyBorder(16, 20, 16, 20));
 
-        JTextField txtAsunto = Ui.campoTexto("", 20);
-        JComboBox<String> cbCat = Ui.combo(new String[]{"Integraciones y APIs", "Base de Datos", "Facturación Electrónica", "Hardware e Impresoras POS", "Otro"});
-        JComboBox<String> cbPrio = Ui.combo(new String[]{"Alta", "Media", "Baja"});
+        JTextField txtAsunto = new JTextField();
+        JComboBox<String> cmbCat = Ui.combo(new String[]{"Integración", "Facturación", "Base de Datos", "Hardware / Red", "Módulo IA"});
+        JComboBox<String> cmbPrioridad = Ui.combo(new String[]{"Alta", "Media", "Baja"});
         JTextArea txtDesc = new JTextArea(4, 20);
         txtDesc.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtDesc.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Ui.BORDE_INPUT, 1),
-                BorderFactory.createEmptyBorder(6, 6, 6, 6)
-        ));
+        txtDesc.setLineWrap(true);
+        txtDesc.setWrapStyleWord(true);
 
-        g.gridx = 0; g.gridy = 0; g.weightx = 0.35;
-        pnl.add(Ui.crearLabelFormulario("Asunto del Ticket:"), g);
-        g.gridx = 1; g.gridy = 0; g.weightx = 0.65;
-        pnl.add(txtAsunto, g);
+        pnl.add(crearFilaCampo("Asunto del Ticket:", txtAsunto));
+        pnl.add(Box.createVerticalStrut(6));
+        pnl.add(crearFilaCampo("Categoría:", cmbCat));
+        pnl.add(Box.createVerticalStrut(6));
+        pnl.add(crearFilaCampo("Prioridad:", cmbPrioridad));
+        pnl.add(Box.createVerticalStrut(6));
 
-        g.gridx = 0; g.gridy = 1;
-        pnl.add(Ui.crearLabelFormulario("Categoría:"), g);
-        g.gridx = 1; g.gridy = 1;
-        pnl.add(cbCat, g);
-
-        g.gridx = 0; g.gridy = 2;
-        pnl.add(Ui.crearLabelFormulario("Prioridad:"), g);
-        g.gridx = 1; g.gridy = 2;
-        pnl.add(cbPrio, g);
-
-        g.gridx = 0; g.gridy = 3;
-        pnl.add(Ui.crearLabelFormulario("Descripción:"), g);
-        g.gridx = 1; g.gridy = 3;
-        pnl.add(new JScrollPane(txtDesc), g);
-
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        bot.setBackground(Ui.FONDO_CARD);
-        JButton btnCan = Ui.botonSecundario("Cancelar", null);
-        btnCan.addActionListener(e -> dlg.dispose());
-        JButton btnCrear = Ui.botonPrimario("Enviar Ticket", null);
-        btnCrear.addActionListener(e -> {
-            String asunto = txtAsunto.getText().trim();
-            if (asunto.isEmpty()) {
-                JOptionPane.showMessageDialog(dlg, "Ingrese el asunto del ticket.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            TicketSoporte t = new TicketSoporte(
-                    null, asunto, (String) cbCat.getSelectedItem(), (String) cbPrio.getSelectedItem(),
-                    "Abierto", "admin_user", LocalDateTime.now(), txtDesc.getText().trim(),
-                    "Ticket encolado en cola técnica de HappyPets L1."
-            );
-            repo.crearTicketSoporte(t);
-            cargarDatos();
-            dlg.dispose();
-            JOptionPane.showMessageDialog(this, "✓ Ticket " + t.getIdTicket() + " creado con éxito. El equipo de soporte lo atenderá a la brevedad.", "Ticket Enviado", JOptionPane.INFORMATION_MESSAGE);
-        });
-        bot.add(btnCan);
-        bot.add(btnCrear);
+        JLabel lDesc = new JLabel("Descripción Detallada del Incidente:");
+        lDesc.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lDesc.setForeground(Ui.TEXTO_MUTED);
+        pnl.add(lDesc);
+        pnl.add(Box.createVerticalStrut(4));
+        pnl.add(new JScrollPane(txtDesc));
 
         dlg.add(pnl, BorderLayout.CENTER);
+
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        bot.setBackground(new Color(248, 250, 252));
+        bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
+
+        JButton btnCancelar = Ui.botonSecundario("Cancelar", null);
+        btnCancelar.addActionListener(e -> dlg.dispose());
+
+        JButton btnGuardar = Ui.botonPrimario("Registrar Ticket", null);
+        btnGuardar.addActionListener(e -> {
+            String as = txtAsunto.getText().trim();
+            if (as.isEmpty()) {
+                JOptionPane.showMessageDialog(dlg, "El asunto es requerido.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String id = "#TCK-" + (500 + repo.getTicketsSoporte().size() + 1);
+            TicketSoporte nuevo = new TicketSoporte(
+                    id, as, (String) cmbCat.getSelectedItem(), (String) cmbPrioridad.getSelectedItem(),
+                    "Abierto", "admin@happypets.com", LocalDateTime.now(), txtDesc.getText().trim(), "En proceso de revisión técnica"
+            );
+            repo.getTicketsSoporte().add(0, nuevo);
+            dlg.dispose();
+            cargarDatos();
+            JOptionPane.showMessageDialog(this, "Ticket de soporte técnico registrado (" + id + ").", "Ticket Creado", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        bot.add(btnCancelar);
+        bot.add(btnGuardar);
         dlg.add(bot, BorderLayout.SOUTH);
+
         dlg.setVisible(true);
+    }
+
+    private void exportarFichaDiagnostica() {
+        String esp = (String) cbEspecie.getSelectedItem();
+        String raz = txtRaza.getText().trim();
+        String edad = txtEdad.getText().trim();
+        String sint = txtSintomas.getText().trim();
+        String res = txtResultadoIA.getText().trim();
+
+        String[][] meta = new String[][]{
+            {"Paciente Evaluado", esp + " - " + raz},
+            {"Edad Cronológica", edad + " meses"},
+            {"Modelo de Inferencia", "HappyPet-Core-v1.8"},
+            {"Fecha de Evaluación", LocalDate.now().toString()},
+            {"Tipo de Documento", "Pre-Triaje y Orientación Diagnóstica Asistida por IA"}
+        };
+        String[][] datos = new String[][]{
+            {"1", "Especie Animal", esp, "Protocolo biológico validado"},
+            {"2", "Raza Declarada", raz, "Ponderación de factores de riesgo"},
+            {"3", "Edad en Meses", edad + " meses", "Segmentación etaria calculada"},
+            {"4", "Sintomatología", sint, "Indexación de patologías clínicas"},
+            {"5", "Dictamen Predictivo IA", res.replace("\n", " "), "Sugerencia orientativa para médico"}
+        };
+
+        Ui.mostrarVisorReporte(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+            "FICHA CLÍNICA DE TRIAJE Y DIAGNÓSTICO PREDICTIVO IA",
+            "Evaluación de Asistencia Clínica HappyPet-Core-v1.8",
+            meta,
+            new String[]{"N°", "Parámetro Evaluado", "Valor Reportado", "Criterio de Inferencia IA"},
+            datos,
+            "Documento confidencial de apoyo diagnóstico veterinario Happy Pets.",
+            "Ficha_Triaje_IA_" + esp
+        );
+    }
+
+    private JPanel crearFilaCampo(String etiqueta, JComponent comp) {
+        JPanel f = new JPanel(new BorderLayout(8, 0));
+        f.setOpaque(false);
+        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
+        JLabel lbl = new JLabel(etiqueta);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lbl.setForeground(Ui.TEXTO_MUTED);
+        lbl.setPreferredSize(new Dimension(140, 26));
+
+        f.add(lbl, BorderLayout.WEST);
+        f.add(comp, BorderLayout.CENTER);
+        return f;
+    }
+
+    private static class ScrollablePanel extends JPanel implements Scrollable {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) {
+            return 32;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }

@@ -2,16 +2,20 @@ package happypets.modulos.modulo7;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -23,12 +27,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import happypets.data.RepositorioVeterinaria;
 import happypets.model.PersonalApoyo;
@@ -37,664 +47,987 @@ import happypets.ui.Ui;
 
 /**
  * Submódulo 7.2: Directorio Interno - Personal de Apoyo.
- * (ATV Auxiliares Técnicos, Recepción, Peluquería/Grooming, Administración, Mantenimiento).
- * Diseñado según wireframe oficial (modulos/modulo-7/wireframe_page_5.png).
+ * Arquitectura Master-Detail (Opción A):
+ * - Master Table: Registro de colaboradores, cargo, área operativa, extensión y estatus.
+ * - Live Staff Hub: Telemetría 2x2, competencias, contacto y acciones 1-click.
  */
 public class VistaPersonalApoyoPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final Color COLOR_FONDO = Ui.FONDO;
-    private static final Color COLOR_CARD = Ui.FONDO_CARD;
-    private static final Color COLOR_BORDE = Ui.BORDE_SUAVE;
-    private static final Color COLOR_TEXTO_TITULO = Ui.TEXTO_TITULO;
-    private static final Color COLOR_TEXTO_MUTED = Ui.TEXTO_MUTED;
-    private static final Color COLOR_AZUL = Ui.TURQUESA;
-    private static final Color COLOR_TEAL = Ui.TURQUESA_OSCURO;
-    private static final Color COLOR_MORADO = Ui.TURQUESA_PROFUNDO;
-    private static final Color COLOR_VERDE = Ui.COLOR_EXITO;
-
     private final RepositorioVeterinaria repo = RepositorioVeterinaria.getInstancia();
 
+    // KPIs Superiores
+    private JLabel lblKpiTotalColaboradores;
+    private JLabel lblKpiEnTurno;
+    private JLabel lblKpiDescanso;
+    private JLabel lblKpiAreaPrincipal;
+
+    // Master Table (Izquierda)
+    private JTable tablaPersonal;
+    private DefaultTableModel modeloPersonal;
     private JTextField txtBuscar;
-    private String categoriaSeleccionada = "Todos";
-    private JComboBox<String> cmbTurno;
-    private JComboBox<String> cmbEstado;
-    private JLabel lblTotalRegistrados;
-    private JLabel lblEnTurno;
-    private JPanel panelPildorasCategorias;
-    private JPanel panelTarjetasGrid;
+    private String filtroCategoria = "TODOS";
+    private final List<PersonalApoyo> listaPersonalFiltrada = new ArrayList<>();
+
+    // Live Staff Hub (Derecha - 360px)
+    private JPanel panelHubContenido;
+    private JPanel panelHubVacio;
+    private JPanel panelHubDetalle;
+
+    private JLabel lblHubAvatar;
+    private JLabel lblHubNombre;
+    private JLabel lblHubCargo;
+    private JLabel lblHubChipEstado;
+
+    // Telemetría 2x2
+    private JLabel lblHubArea;
+    private JLabel lblHubExtension;
+    private JLabel lblHubTurno;
+    private JLabel lblHubEstadoOp;
+
+    // Secciones de Detalle
+    private JTextArea txtHubCertificaciones;
+    private JTextArea txtHubContacto;
+    private JTextArea txtHubAsignacion;
+
+    private PersonalApoyo personalSeleccionado;
 
     public VistaPersonalApoyoPanel() {
         setLayout(new BorderLayout());
-        setBackground(COLOR_FONDO);
-        setBorder(new EmptyBorder(20, 24, 20, 24));
+        setOpaque(false);
 
-        // 1. Cabecera con Título, Subtítulo y Botón Nuevo
-        add(crearCabecera(), BorderLayout.NORTH);
+        // Panel Superior Fijo (Cabecera + 4 KPIs)
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBorder(new EmptyBorder(12, 18, 10, 18));
 
-        // 2. Centro: Barra de Filtros + Grid de Colaboradores
-        JPanel panelCentro = new JPanel(new BorderLayout(0, 16));
+        panelSuperior.add(crearCabeceraVista());
+        panelSuperior.add(Box.createVerticalStrut(10));
+        panelSuperior.add(crearFilaKpis());
+
+        add(panelSuperior, BorderLayout.NORTH);
+
+        // Contenedor Master-Detail
+        JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
-        panelCentro.add(crearBarraFiltros(), BorderLayout.NORTH);
+        panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
+        panelCentro.add(crearSplitMasterDetail(), BorderLayout.CENTER);
 
-        panelTarjetasGrid = new JPanel(new GridLayout(0, 2, 18, 18));
-        panelTarjetasGrid.setOpaque(false);
-
-        JScrollPane scrollTarjetas = new JScrollPane(panelTarjetasGrid);
-        scrollTarjetas.setOpaque(false);
-        scrollTarjetas.getViewport().setOpaque(false);
-        scrollTarjetas.setBorder(null);
-        scrollTarjetas.getVerticalScrollBar().setUnitIncrement(16);
-
-        panelCentro.add(scrollTarjetas, BorderLayout.CENTER);
         add(panelCentro, BorderLayout.CENTER);
 
         recargarDatos();
     }
 
-    private JPanel crearCabecera() {
-        JPanel cab = new JPanel(new BorderLayout(16, 8));
+    private JPanel crearCabeceraVista() {
+        JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
-        cab.setBorder(new EmptyBorder(0, 0, 16, 0));
 
-        JPanel textos = new JPanel();
-        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
-        textos.setOpaque(false);
+        JPanel izq = new JPanel();
+        izq.setOpaque(false);
+        izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
 
-        JLabel lblBreadcrumb = new JLabel("Directorio Interno · Equipos Técnicos y Asistenciales");
-        lblBreadcrumb.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblBreadcrumb.setForeground(COLOR_TEAL);
+        JLabel titulo = new JLabel("Directorio Asistencial y Personal de Apoyo");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        titulo.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblTitulo = new JLabel("Personal de Apoyo");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitulo.setForeground(COLOR_TEXTO_TITULO);
+        JLabel subtitulo = new JLabel("Módulo 7.2 · Técnicos ATV, auxiliares clínicos, recepción, estética y soporte operativo");
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subtitulo.setForeground(Ui.TEXTO_MUTED);
 
-        JPanel panelStats = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        panelStats.setOpaque(false);
+        izq.add(titulo);
+        izq.add(Box.createVerticalStrut(2));
+        izq.add(subtitulo);
+        cab.add(izq, BorderLayout.WEST);
 
-        lblTotalRegistrados = new JLabel("Total registrados: 24 colaboradores");
-        lblTotalRegistrados.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblTotalRegistrados.setForeground(COLOR_TEXTO_TITULO);
+        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        der.setOpaque(false);
 
-        JLabel sep = new JLabel("|");
-        sep.setForeground(COLOR_BORDE);
-
-        lblEnTurno = new JLabel("18 en turno activo hoy");
-        lblEnTurno.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblEnTurno.setForeground(COLOR_VERDE);
-
-        panelStats.add(lblTotalRegistrados);
-        panelStats.add(sep);
-        panelStats.add(lblEnTurno);
-
-        textos.add(lblBreadcrumb);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(lblTitulo);
-        textos.add(Box.createVerticalStrut(2));
-        textos.add(panelStats);
-
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        panelBotones.setOpaque(false);
-
-        JButton btnNuevo = Ui.botonPrimario("+ Registrar Colaborador", Iconos.crearIconoUsuario(16, Color.WHITE));
-        btnNuevo.setBackground(COLOR_TEAL);
+        JButton btnNuevo = Ui.boton("+ Registrar Colaborador", true);
+        btnNuevo.setIcon(Iconos.crearIconoUsuario(14, Color.WHITE));
         btnNuevo.addActionListener(e -> mostrarDialogoNuevoColaborador());
+        der.add(btnNuevo);
 
-        JButton btnActualizar = Ui.botonSecundario("Actualizar", Iconos.crearIconoBuscar(14, COLOR_TEXTO_MUTED));
+        JButton btnActualizar = Ui.boton("Actualizar", false);
         btnActualizar.addActionListener(e -> recargarDatos());
+        der.add(btnActualizar);
 
-        panelBotones.add(btnActualizar);
-        panelBotones.add(btnNuevo);
-
-        cab.add(textos, BorderLayout.CENTER);
-        cab.add(panelBotones, BorderLayout.EAST);
+        cab.add(der, BorderLayout.EAST);
+        cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         return cab;
     }
 
-    private JPanel crearBarraFiltros() {
-        JPanel contenedor = new JPanel();
-        contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
-        contenedor.setOpaque(false);
+    private JPanel crearFilaKpis() {
+        JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
+        fila.setOpaque(false);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
 
-        // Fila 1: Píldoras de Categorías funcionales
-        panelPildorasCategorias = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        panelPildorasCategorias.setOpaque(false);
-        panelPildorasCategorias.setBorder(new EmptyBorder(0, 0, 10, 0));
+        lblKpiTotalColaboradores = new JLabel("0");
+        lblKpiEnTurno = new JLabel("0");
+        lblKpiDescanso = new JLabel("0");
+        lblKpiAreaPrincipal = new JLabel("ATV Auxiliares");
 
-        // Fila 2: Buscador + Dropdowns
-        JPanel panelBusqueda = new JPanel(new BorderLayout(12, 10));
-        panelBusqueda.setBackground(COLOR_CARD);
-        panelBusqueda.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(12, 16, 12, 16)
-        ));
+        fila.add(crearCardKpi("Total Colaboradores", lblKpiTotalColaboradores, "Equipo operativo registrado", Iconos.crearIconoUsuario(22, Ui.TURQUESA_PROFUNDO)));
+        fila.add(crearCardKpi("Personal en Turno", lblKpiEnTurno, "Operando en instalaciones", Iconos.crearIconoTurno(22, Ui.COLOR_EXITO)));
+        fila.add(crearCardKpi("En Descanso / Libre", lblKpiDescanso, "Jornada no asignada hoy", Iconos.crearIconoCalendario(22, new Color(217, 119, 6))));
+        fila.add(crearCardKpi("Área con Mayor Dotación", lblKpiAreaPrincipal, "Cuadro asistencial clave", Iconos.crearIconoCheck(22, Ui.TURQUESA)));
 
-        JPanel filaIzquierda = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-        filaIzquierda.setOpaque(false);
-
-        JLabel lblLupa = new JLabel(Iconos.crearIconoBuscar(16, COLOR_TEXTO_MUTED));
-        txtBuscar = new JTextField(20);
-        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtBuscar.setToolTipText("Buscar por nombre, cargo o ID");
-        txtBuscar.addActionListener(e -> recargarDatos());
-
-        cmbTurno = new JComboBox<>(new String[]{
-                "Todos los turnos", "Mañana", "Tarde", "Noche"
-        });
-        cmbTurno.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbTurno.addActionListener(e -> recargarDatos());
-
-        cmbEstado = new JComboBox<>(new String[]{
-                "Todos los estados", "En turno", "Turno Tarde", "Descanso"
-        });
-        cmbEstado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cmbEstado.addActionListener(e -> recargarDatos());
-
-        JButton btnFiltrar = Ui.botonPrimario("Filtrar", Iconos.crearIconoFiltro(14, Color.WHITE));
-        btnFiltrar.setBackground(COLOR_TEAL);
-        btnFiltrar.addActionListener(e -> recargarDatos());
-
-        JButton btnLimpiar = Ui.botonSecundario("Limpiar", null);
-        btnLimpiar.addActionListener(e -> {
-            txtBuscar.setText("");
-            categoriaSeleccionada = "Todos";
-            cmbTurno.setSelectedIndex(0);
-            cmbEstado.setSelectedIndex(0);
-            recargarDatos();
-        });
-
-        filaIzquierda.add(lblLupa);
-        filaIzquierda.add(txtBuscar);
-        filaIzquierda.add(new JLabel("Turno:"));
-        filaIzquierda.add(cmbTurno);
-        filaIzquierda.add(new JLabel("Estado:"));
-        filaIzquierda.add(cmbEstado);
-        filaIzquierda.add(btnFiltrar);
-        filaIzquierda.add(btnLimpiar);
-
-        panelBusqueda.add(filaIzquierda, BorderLayout.CENTER);
-
-        contenedor.add(panelPildorasCategorias);
-        contenedor.add(panelBusqueda);
-        return contenedor;
+        return fila;
     }
 
-    private void actualizarPildoras(List<PersonalApoyo> listaCompleta) {
-        panelPildorasCategorias.removeAll();
+    private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+        JPanel card = new JPanel(new BorderLayout(8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
-        long cTodos = listaCompleta.size();
-        long cAux = listaCompleta.stream().filter(p -> p.getCategoria().equalsIgnoreCase("Auxiliares")).count();
-        long cRec = listaCompleta.stream().filter(p -> p.getCategoria().equalsIgnoreCase("Recepción")).count();
-        long cPel = listaCompleta.stream().filter(p -> p.getCategoria().equalsIgnoreCase("Peluquería")).count();
-        long cAdm = listaCompleta.stream().filter(p -> p.getCategoria().equalsIgnoreCase("Administración")).count();
-        long cMan = listaCompleta.stream().filter(p -> p.getCategoria().equalsIgnoreCase("Mantenimiento")).count();
+        JPanel texto = new JPanel();
+        texto.setOpaque(false);
+        texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
 
-        panelPildorasCategorias.add(crearBotonPildora("Todos", "Todos (" + cTodos + ")"));
-        panelPildorasCategorias.add(crearBotonPildora("Auxiliares", "Auxiliares (" + cAux + ")"));
-        panelPildorasCategorias.add(crearBotonPildora("Recepción", "Recepción (" + cRec + ")"));
-        panelPildorasCategorias.add(crearBotonPildora("Peluquería", "Peluquería (" + cPel + ")"));
-        panelPildorasCategorias.add(crearBotonPildora("Administración", "Administración (" + cAdm + ")"));
-        panelPildorasCategorias.add(crearBotonPildora("Mantenimiento", "Mantenimiento (" + cMan + ")"));
+        JLabel lblTit = new JLabel(titulo);
+        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblTit.setForeground(Ui.TEXTO_MUTED);
 
-        panelPildorasCategorias.revalidate();
-        panelPildorasCategorias.repaint();
-    }
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblValor.setForeground(Ui.TEXTO_TITULO);
 
-    private JButton crearBotonPildora(String catClave, String texto) {
-        boolean activo = categoriaSeleccionada.equalsIgnoreCase(catClave);
-        JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JLabel lblSub = new JLabel(subtitulo);
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblSub.setForeground(Ui.TEXTO_MUTED);
 
-        if (activo) {
-            btn.setBackground(COLOR_TEAL);
-            btn.setForeground(Color.WHITE);
-            btn.setBorder(new CompoundBorder(
-                    new LineBorder(COLOR_TEAL.darker(), 1, true),
-                    new EmptyBorder(6, 14, 6, 14)
-            ));
-        } else {
-            btn.setBackground(Color.WHITE);
-            btn.setForeground(COLOR_TEXTO_TITULO);
-            btn.setBorder(new CompoundBorder(
-                    new LineBorder(COLOR_BORDE, 1, true),
-                    new EmptyBorder(6, 14, 6, 14)
-            ));
+        texto.add(lblTit);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblValor);
+        texto.add(Box.createVerticalStrut(2));
+        texto.add(lblSub);
+
+        card.add(texto, BorderLayout.CENTER);
+        if (icono != null) {
+            JLabel lblIco = new JLabel(icono);
+            lblIco.setVerticalAlignment(SwingConstants.TOP);
+            card.add(lblIco, BorderLayout.EAST);
         }
 
-        btn.addActionListener(e -> {
-            categoriaSeleccionada = catClave;
-            recargarDatos();
+        return card;
+    }
+
+    private JSplitPane crearSplitMasterDetail() {
+        JPanel master = crearPanelMasterTable();
+        JPanel detail = crearPanelLiveHub();
+        detail.setPreferredSize(new Dimension(360, 0));
+        detail.setMinimumSize(new Dimension(320, 0));
+
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, master, detail);
+        split.setResizeWeight(1.0);
+        split.setDividerSize(6);
+        split.setBorder(null);
+        split.setOpaque(false);
+        return split;
+    }
+
+    private JPanel crearPanelMasterTable() {
+        JPanel master = new JPanel(new BorderLayout(0, 10)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        master.setOpaque(false);
+        master.setBorder(new EmptyBorder(12, 14, 12, 14));
+
+        // Filtros y Buscador
+        JPanel cabFiltros = new JPanel();
+        cabFiltros.setOpaque(false);
+        cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
+
+        JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
+        barraBuscar.setOpaque(false);
+
+        JLabel lblBuscar = new JLabel("Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBuscar.setForeground(Ui.TEXTO_MUTED);
+        barraBuscar.add(lblBuscar, BorderLayout.WEST);
+
+        txtBuscar = new JTextField();
+        txtBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar por nombre, cargo, área o extensión...");
+        txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filtrarPersonal(); }
+            public void removeUpdate(DocumentEvent e) { filtrarPersonal(); }
+            public void changedUpdate(DocumentEvent e) { filtrarPersonal(); }
         });
+        barraBuscar.add(txtBuscar, BorderLayout.CENTER);
+        cabFiltros.add(barraBuscar);
+        cabFiltros.add(Box.createVerticalStrut(8));
+
+        // Píldoras de Filtro
+        JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        pills.setOpaque(false);
+
+        String[] categorias = {"TODOS", "Auxiliares", "Recepción", "Peluquería", "Administración", "Mantenimiento"};
+        for (String cat : categorias) {
+            JButton btnPill = new JButton(cat);
+            btnPill.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            btnPill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btnPill.setBorder(new EmptyBorder(4, 10, 4, 10));
+            btnPill.setFocusPainted(false);
+
+            if (cat.equals(filtroCategoria)) {
+                btnPill.setBackground(Ui.TURQUESA);
+                btnPill.setForeground(Color.WHITE);
+            } else {
+                btnPill.setBackground(new Color(241, 245, 249));
+                btnPill.setForeground(Ui.TEXTO_MUTED);
+            }
+
+            btnPill.addActionListener(e -> {
+                filtroCategoria = cat;
+                for (Component comp : pills.getComponents()) {
+                    if (comp instanceof JButton) {
+                        JButton b = (JButton) comp;
+                        if (b.getText().equals(filtroCategoria)) {
+                            b.setBackground(Ui.TURQUESA);
+                            b.setForeground(Color.WHITE);
+                        } else {
+                            b.setBackground(new Color(241, 245, 249));
+                            b.setForeground(Ui.TEXTO_MUTED);
+                        }
+                    }
+                }
+                filtrarPersonal();
+            });
+            pills.add(btnPill);
+        }
+        cabFiltros.add(pills);
+        master.add(cabFiltros, BorderLayout.NORTH);
+
+        // Tabla de Personal
+        String[] cols = {"ID", "Colaborador", "Cargo / Función", "Área Operativa", "Turno", "Extensión", "Estado"};
+        modeloPersonal = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        tablaPersonal = new JTable(modeloPersonal);
+        tablaPersonal.setRowHeight(48);
+        tablaPersonal.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaPersonal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaPersonal.setShowVerticalLines(false);
+        tablaPersonal.setGridColor(new Color(241, 245, 249));
+        tablaPersonal.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 11));
+        tablaPersonal.getTableHeader().setBackground(new Color(248, 250, 252));
+        tablaPersonal.getTableHeader().setForeground(Ui.TEXTO_MUTED);
+
+        tablaPersonal.getColumnModel().getColumn(0).setPreferredWidth(70);
+        tablaPersonal.getColumnModel().getColumn(1).setPreferredWidth(180);
+        tablaPersonal.getColumnModel().getColumn(2).setPreferredWidth(160);
+        tablaPersonal.getColumnModel().getColumn(3).setPreferredWidth(140);
+        tablaPersonal.getColumnModel().getColumn(4).setPreferredWidth(120);
+        tablaPersonal.getColumnModel().getColumn(5).setPreferredWidth(80);
+        tablaPersonal.getColumnModel().getColumn(6).setPreferredWidth(100);
+
+        // Monograma en columna 1 (Colaborador)
+        tablaPersonal.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+                cell.setOpaque(true);
+                cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String nombre = value != null ? value.toString() : "";
+                String iniciales = obtenerIniciales(nombre);
+
+                JLabel avatar = new JLabel(iniciales, SwingConstants.CENTER) {
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(new Color(240, 253, 244)); // Pastel green/mint
+                        g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        g2.setColor(new Color(187, 247, 208));
+                        g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                        super.paintComponent(g);
+                        g2.dispose();
+                    }
+                };
+                avatar.setPreferredSize(new Dimension(32, 32));
+                avatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                avatar.setForeground(Ui.COLOR_EXITO);
+
+                JLabel lblTexto = new JLabel(nombre);
+                lblTexto.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                lblTexto.setForeground(isSelected ? table.getSelectionForeground() : Ui.TEXTO_TITULO);
+
+                cell.add(avatar);
+                cell.add(lblTexto);
+                return cell;
+            }
+        });
+
+        // Chip en columna 6 (Estado)
+        tablaPersonal.getColumnModel().getColumn(6).setCellRenderer(new DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 11));
+                p.setOpaque(true);
+                p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
+
+                String st = value != null ? value.toString() : "";
+                JLabel badge = new JLabel(" " + st + " ");
+                badge.setOpaque(true);
+                badge.setFont(new Font("Segoe UI", Font.BOLD, 10));
+
+                if (st.toLowerCase().contains("turno") || st.toLowerCase().contains("activo")) {
+                    badge.setBackground(new Color(220, 252, 231));
+                    badge.setForeground(new Color(21, 128, 61));
+                } else if (st.toLowerCase().contains("descanso") || st.toLowerCase().contains("libre")) {
+                    badge.setBackground(new Color(254, 243, 199));
+                    badge.setForeground(new Color(180, 83, 9));
+                } else {
+                    badge.setBackground(new Color(243, 232, 255));
+                    badge.setForeground(new Color(126, 34, 206));
+                }
+                badge.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(badge.getBackground().darker(), 1, true),
+                        new EmptyBorder(2, 6, 2, 6)
+                ));
+                p.add(badge);
+                return p;
+            }
+        });
+
+        tablaPersonal.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int r = tablaPersonal.getSelectedRow();
+                if (r >= 0 && r < listaPersonalFiltrada.size()) {
+                    mostrarDetallePersonal(listaPersonalFiltrada.get(r));
+                } else {
+                    mostrarDetallePersonal(null);
+                }
+            }
+        });
+
+        JScrollPane scroll = new JScrollPane(tablaPersonal);
+        scroll.setBorder(BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1));
+        master.add(scroll, BorderLayout.CENTER);
+
+        return master;
+    }
+
+    private JPanel crearPanelLiveHub() {
+        panelHubContenido = new JPanel(new BorderLayout());
+        panelHubContenido.setOpaque(false);
+
+        panelHubVacio = new JPanel(new BorderLayout());
+        panelHubVacio.setOpaque(false);
+        JLabel lblVacio = new JLabel("Seleccione un colaborador para consultar el Live Staff Hub", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblVacio.setForeground(Ui.TEXTO_MUTED);
+        panelHubVacio.add(lblVacio, BorderLayout.CENTER);
+
+        panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(Ui.BORDE_SUAVE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+        panelHubDetalle.setOpaque(false);
+        panelHubDetalle.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        // 1. Hero del Colaborador
+        JPanel hero = new JPanel(new BorderLayout(10, 0));
+        hero.setOpaque(false);
+        hero.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        lblHubAvatar = new JLabel("PA", SwingConstants.CENTER) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(240, 253, 244));
+                g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                g2.setColor(new Color(187, 247, 208));
+                g2.drawOval(0, 0, getWidth() - 1, getHeight() - 1);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        lblHubAvatar.setPreferredSize(new Dimension(44, 44));
+        lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblHubAvatar.setForeground(Ui.COLOR_EXITO);
+
+        JPanel heroTxt = new JPanel();
+        heroTxt.setOpaque(false);
+        heroTxt.setLayout(new BoxLayout(heroTxt, BoxLayout.Y_AXIS));
+
+        lblHubNombre = new JLabel("Colaborador");
+        lblHubNombre.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblHubNombre.setForeground(Ui.TEXTO_TITULO);
+
+        lblHubCargo = new JLabel("Cargo · Área");
+        lblHubCargo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblHubCargo.setForeground(Ui.TEXTO_MUTED);
+
+        heroTxt.add(lblHubNombre);
+        heroTxt.add(Box.createVerticalStrut(2));
+        heroTxt.add(lblHubCargo);
+
+        lblHubChipEstado = new JLabel("En Turno", SwingConstants.CENTER);
+        lblHubChipEstado.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblHubChipEstado.setOpaque(true);
+        lblHubChipEstado.setBackground(new Color(220, 252, 231));
+        lblHubChipEstado.setForeground(new Color(21, 128, 61));
+        lblHubChipEstado.setBorder(new EmptyBorder(4, 8, 4, 8));
+
+        hero.add(lblHubAvatar, BorderLayout.WEST);
+        hero.add(heroTxt, BorderLayout.CENTER);
+        hero.add(lblHubChipEstado, BorderLayout.EAST);
+        panelHubDetalle.add(hero, BorderLayout.NORTH);
+
+        // 2. Body Scrollable
+        ScrollablePanel body = new ScrollablePanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setOpaque(false);
+
+        // Telemetría 2x2
+        JPanel telemetria = new JPanel(new GridLayout(2, 2, 6, 6));
+        telemetria.setOpaque(false);
+        telemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
+        telemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblHubArea = new JLabel("Área");
+        lblHubExtension = new JLabel("Ext. 000");
+        lblHubTurno = new JLabel("Mañana");
+        lblHubEstadoOp = new JLabel("Operativo");
+
+        telemetria.add(crearCardMiniTelemetria("ÁREA ASIGNADA", lblHubArea, Ui.TURQUESA_OSCURO));
+        telemetria.add(crearCardMiniTelemetria("EXTENSIÓN", lblHubExtension, Ui.TEXTO_TITULO));
+        telemetria.add(crearCardMiniTelemetria("TURNO", lblHubTurno, Ui.TURQUESA_PROFUNDO));
+        telemetria.add(crearCardMiniTelemetria("ESTADO OPERATIVO", lblHubEstadoOp, Ui.COLOR_EXITO));
+
+        body.add(telemetria);
+        body.add(vGap(8));
+
+        // Secciones
+        JPanel secCert = crearSeccionCard("Competencias y Certificaciones");
+        txtHubCertificaciones = new JTextArea();
+        configurarTextAreaItem(txtHubCertificaciones);
+        secCert.add(crearItemLinea("Acreditaciones:", txtHubCertificaciones));
+        body.add(secCert);
+        body.add(vGap(6));
+
+        JPanel secContacto = crearSeccionCard("Contacto Institucional y Canales");
+        txtHubContacto = new JTextArea();
+        configurarTextAreaItem(txtHubContacto);
+        secContacto.add(crearItemLinea("Contacto:", txtHubContacto));
+        body.add(secContacto);
+        body.add(vGap(6));
+
+        JPanel secAsig = crearSeccionCard("Puesto Operativo y Asignación");
+        txtHubAsignacion = new JTextArea();
+        configurarTextAreaItem(txtHubAsignacion);
+        secAsig.add(crearItemLinea("Ubicación:", txtHubAsignacion));
+        body.add(secAsig);
+
+        JScrollPane scrollBody = new JScrollPane(body);
+        scrollBody.setBorder(null);
+        scrollBody.setOpaque(false);
+        scrollBody.getViewport().setOpaque(false);
+        panelHubDetalle.add(scrollBody, BorderLayout.CENTER);
+
+        // 3. Grid de Acciones (2x2)
+        JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
+        gridAcciones.setOpaque(false);
+        gridAcciones.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+        JButton btnFicha = crearBotonAccion("Ficha Colaborador", Iconos.crearIconoDocumento(13, Color.WHITE), true);
+        btnFicha.addActionListener(e -> {
+            if (personalSeleccionado != null) mostrarFichaColaborador(personalSeleccionado);
+        });
+
+        JButton btnAsignar = crearBotonAccion("Asignar Turno", Iconos.crearIconoTurno(13, Ui.TURQUESA_OSCURO), false);
+        btnAsignar.addActionListener(e -> {
+            if (personalSeleccionado != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Turno y puesto de guardia confirmado para " + personalSeleccionado.getNombreCompleto() + " en " + personalSeleccionado.getAreaAsignada(),
+                        "Turno Asignado", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JButton btnEditar = crearBotonAccion("Editar Datos", Iconos.crearIconoEditar(13, Ui.TEXTO_MUTED), false);
+        btnEditar.addActionListener(e -> {
+            if (personalSeleccionado != null) mostrarDialogoEditarColaborador(personalSeleccionado);
+        });
+
+        JButton btnAusencia = crearBotonAccion("Reportar Ausencia", Iconos.crearIconoCalendario(13, Ui.TEXTO_MUTED), false);
+        btnAusencia.addActionListener(e -> {
+            if (personalSeleccionado != null) {
+                int opt = JOptionPane.showConfirmDialog(this,
+                        "¿Desea registrar una incidencia o cambio de turno para " + personalSeleccionado.getNombreCompleto() + "?",
+                        "Incidencia Operativa", JOptionPane.YES_NO_OPTION);
+                if (opt == JOptionPane.YES_OPTION) {
+                    personalSeleccionado.setEstado("Permiso");
+                    recargarDatos();
+                    JOptionPane.showMessageDialog(this, "Estado actualizado a 'Permiso'.", "Actualización", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        gridAcciones.add(btnFicha);
+        gridAcciones.add(btnAsignar);
+        gridAcciones.add(btnEditar);
+        gridAcciones.add(btnAusencia);
+        panelHubDetalle.add(gridAcciones, BorderLayout.SOUTH);
+
+        panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        return panelHubContenido;
+    }
+
+    private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+        JPanel c = new JPanel();
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBackground(new Color(248, 250, 252));
+        c.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 8));
+        t.setForeground(Ui.TEXTO_MUTED);
+
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblValor.setForeground(colorValor);
+
+        c.add(t);
+        c.add(vGap(2));
+        c.add(lblValor);
+        return c;
+    }
+
+    private JPanel crearSeccionCard(String titulo) {
+        JPanel sec = new JPanel() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+            @Override
+            protected void addImpl(Component comp, Object constraints, int index) {
+                if (comp instanceof javax.swing.JComponent) {
+                    ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+                }
+                super.addImpl(comp, constraints, index);
+            }
+        };
+        sec.setOpaque(false);
+        sec.setLayout(new BoxLayout(sec, BoxLayout.Y_AXIS));
+        sec.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Ui.BORDE_SUAVE, 1, true),
+                new EmptyBorder(6, 10, 6, 10)
+        ));
+        sec.setBackground(Color.WHITE);
+        sec.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel t = new JLabel(titulo);
+        t.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        t.setForeground(Ui.TURQUESA_OSCURO);
+        header.add(t);
+
+        sec.add(header);
+        sec.add(vGap(4));
+        return sec;
+    }
+
+    private JPanel crearItemLinea(String label, Component valor) {
+        JPanel p = new JPanel(new BorderLayout(6, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
+        p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel l = new JLabel(label);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        l.setForeground(Ui.TEXTO_MUTED);
+        l.setVerticalAlignment(SwingConstants.TOP);
+        p.add(l, BorderLayout.WEST);
+        p.add(valor, BorderLayout.CENTER);
+        return p;
+    }
+
+    private static Component vGap(int h) {
+        Component c = Box.createVerticalStrut(h);
+        if (c instanceof javax.swing.JComponent) {
+            ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
+        return c;
+    }
+
+    private static void configurarTextAreaItem(JTextArea ta) {
+        ta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        ta.setForeground(Ui.TEXTO_TITULO);
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        ta.setOpaque(false);
+        ta.setBorder(null);
+        ta.setAlignmentX(Component.LEFT_ALIGNMENT);
+    }
+
+    private JButton crearBotonAccion(String texto, javax.swing.Icon icono, boolean primario) {
+        JButton btn = new JButton(texto, icono) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (primario) {
+                    g2.setColor(getModel().isPressed() ? Ui.TURQUESA_OSCURO : Ui.TURQUESA);
+                } else {
+                    g2.setColor(getModel().isRollover() ? new Color(241, 245, 249) : Color.WHITE);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                if (!primario) {
+                    g2.setColor(Ui.BORDE_SUAVE);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                }
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        btn.setForeground(primario ? Color.WHITE : new Color(51, 65, 85));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(4, 6, 4, 6));
         return btn;
     }
 
     public void recargarDatos() {
-        panelTarjetasGrid.removeAll();
+        filtrarPersonal();
+        actualizarKpis();
+    }
 
-        List<PersonalApoyo> lista = repo.getPersonalApoyo();
-        actualizarPildoras(lista);
+    private void actualizarKpis() {
+        List<PersonalApoyo> total = repo.getPersonalApoyo();
+        lblKpiTotalColaboradores.setText(String.valueOf(total.size()));
 
-        long totalActivos = lista.stream().filter(p -> p.getEstado().toLowerCase().contains("turno")).count();
-        if (lblTotalRegistrados != null) {
-            lblTotalRegistrados.setText("Total registrados: " + (lista.size() + 14) + " colaboradores"); // wireframe total 24
-        }
-        if (lblEnTurno != null) {
-            lblEnTurno.setText((totalActivos + 10) + " en turno activo hoy");
-        }
+        long enTurno = total.stream().filter(p -> p.getEstado().toLowerCase().contains("turno")).count();
+        lblKpiEnTurno.setText(String.valueOf(enTurno));
 
+        long descanso = total.stream().filter(p -> p.getEstado().toLowerCase().contains("descanso") || p.getEstado().toLowerCase().contains("libre")).count();
+        lblKpiDescanso.setText(String.valueOf(descanso));
+
+        lblKpiAreaPrincipal.setText("Auxiliares ATV");
+    }
+
+    private void filtrarPersonal() {
+        listaPersonalFiltrada.clear();
+        modeloPersonal.setRowCount(0);
+
+        List<PersonalApoyo> base = repo.getPersonalApoyo();
         String busq = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
-        String turnoFiltro = cmbTurno != null ? (String) cmbTurno.getSelectedItem() : "Todos los turnos";
-        String estadoFiltro = cmbEstado != null ? (String) cmbEstado.getSelectedItem() : "Todos los estados";
 
-        List<PersonalApoyo> filtrados = lista.stream().filter(p -> {
-            if (!busq.isEmpty()) {
-                boolean mNom = p.getNombreCompleto().toLowerCase().contains(busq);
-                boolean mCar = p.getCargo().toLowerCase().contains(busq);
-                boolean mId = p.getId().toLowerCase().contains(busq);
-                if (!mNom && !mCar && !mId) return false;
-            }
-            if (!categoriaSeleccionada.equalsIgnoreCase("Todos")) {
-                if (!p.getCategoria().equalsIgnoreCase(categoriaSeleccionada)) {
-                    return false;
-                }
-            }
-            if (turnoFiltro != null && !turnoFiltro.equals("Todos los turnos")) {
-                if (!p.getTurno().toLowerCase().contains(turnoFiltro.toLowerCase())) {
-                    return false;
-                }
-            }
-            if (estadoFiltro != null && !estadoFiltro.equals("Todos los estados")) {
-                if (!p.getEstado().equalsIgnoreCase(estadoFiltro)) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
+        for (PersonalApoyo p : base) {
+            boolean matchPill = filtroCategoria.equals("TODOS") ||
+                    p.getCategoria().toLowerCase().contains(filtroCategoria.toLowerCase()) ||
+                    p.getCargo().toLowerCase().contains(filtroCategoria.toLowerCase());
 
-        for (PersonalApoyo p : filtrados) {
-            panelTarjetasGrid.add(crearTarjetaPersonal(p));
+            boolean matchBusq = busq.isEmpty() ||
+                    p.getNombreCompleto().toLowerCase().contains(busq) ||
+                    p.getCargo().toLowerCase().contains(busq) ||
+                    p.getAreaAsignada().toLowerCase().contains(busq) ||
+                    p.getExtensionInterna().toLowerCase().contains(busq);
+
+            if (matchPill && matchBusq) {
+                listaPersonalFiltrada.add(p);
+                modeloPersonal.addRow(new Object[]{
+                        p.getId(),
+                        p.getNombreCompleto(),
+                        p.getCargo(),
+                        p.getAreaAsignada(),
+                        p.getTurno(),
+                        p.getExtensionInterna(),
+                        p.getEstado()
+                });
+            }
         }
 
-        if (filtrados.isEmpty()) {
-            JPanel vacio = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 40));
-            vacio.setOpaque(false);
-            JLabel lblVacio = new JLabel("No se encontraron colaboradores de apoyo con los filtros seleccionados.");
-            lblVacio.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            lblVacio.setForeground(COLOR_TEXTO_MUTED);
-            vacio.add(lblVacio);
-            panelTarjetasGrid.add(vacio);
-        }
-
-        panelTarjetasGrid.revalidate();
-        panelTarjetasGrid.repaint();
-    }
-
-    private JPanel crearTarjetaPersonal(PersonalApoyo p) {
-        JPanel card = new JPanel(new BorderLayout(14, 12));
-        card.setBackground(COLOR_CARD);
-        card.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE, 1, true),
-                new EmptyBorder(16, 16, 16, 16)
-        ));
-
-        // Cabecera: Avatar + Nombre + Cargo + Badge de Estado
-        JPanel panelTop = new JPanel(new BorderLayout(12, 0));
-        panelTop.setOpaque(false);
-
-        String ini = obtenerIniciales(p.getNombreCompleto());
-        JLabel avatar = new JLabel(ini, SwingConstants.CENTER);
-        avatar.setPreferredSize(new Dimension(50, 50));
-        avatar.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        avatar.setOpaque(true);
-        avatar.setBackground(obtenerColorCategoria(p.getCategoria()));
-        avatar.setForeground(Color.WHITE);
-        avatar.setBorder(new LineBorder(Color.WHITE, 2, true));
-
-        JPanel panelNombres = new JPanel();
-        panelNombres.setLayout(new BoxLayout(panelNombres, BoxLayout.Y_AXIS));
-        panelNombres.setOpaque(false);
-
-        JLabel lblNombre = new JLabel(p.getNombreCompleto());
-        lblNombre.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblNombre.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblCargo = new JLabel(p.getCargo());
-        lblCargo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblCargo.setForeground(COLOR_TEAL);
-
-        JLabel lblId = new JLabel(p.getId() + " · " + p.getCategoria());
-        lblId.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblId.setForeground(COLOR_TEXTO_MUTED);
-
-        panelNombres.add(lblNombre);
-        panelNombres.add(Box.createVerticalStrut(2));
-        panelNombres.add(lblCargo);
-        panelNombres.add(Box.createVerticalStrut(2));
-        panelNombres.add(lblId);
-
-        JLabel badgeEstado = crearBadgeEstado(p.getEstado());
-
-        panelTop.add(avatar, BorderLayout.WEST);
-        panelTop.add(panelNombres, BorderLayout.CENTER);
-        panelTop.add(badgeEstado, BorderLayout.EAST);
-
-        card.add(panelTop, BorderLayout.NORTH);
-
-        // Cuerpo: Área asignada, extensión, turno y certificaciones
-        JPanel panelCuerpo = new JPanel(new GridLayout(3, 1, 0, 6));
-        panelCuerpo.setOpaque(false);
-        panelCuerpo.setBorder(new CompoundBorder(
-                new LineBorder(new Color(241, 245, 249), 1, true),
-                new EmptyBorder(8, 10, 8, 10)
-        ));
-        panelCuerpo.setBackground(new Color(248, 250, 252));
-
-        JLabel lblArea = new JLabel("📍 Área: " + p.getAreaAsignada() + "   (" + p.getExtensionInterna() + ")");
-        lblArea.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblArea.setForeground(COLOR_TEXTO_TITULO);
-
-        JLabel lblTurno = new JLabel("⏰ Turno regular: " + p.getTurno());
-        lblTurno.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblTurno.setForeground(COLOR_TEXTO_MUTED);
-
-        JLabel lblCert = new JLabel("🎖️ " + p.getCertificaciones());
-        lblCert.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblCert.setForeground(new Color(71, 85, 105));
-
-        panelCuerpo.add(lblArea);
-        panelCuerpo.add(lblTurno);
-        panelCuerpo.add(lblCert);
-
-        card.add(panelCuerpo, BorderLayout.CENTER);
-
-        // Botones inferiores
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        panelBotones.setOpaque(false);
-        panelBotones.setBorder(new EmptyBorder(6, 0, 0, 0));
-
-        JButton btnPerfil = Ui.botonSecundario("Ver Perfil", Iconos.crearIconoDocumento(14, COLOR_TEXTO_MUTED));
-        btnPerfil.addActionListener(e -> mostrarFichaPersonal(p));
-
-        JButton btnLlamar = Ui.botonPrimario("Contactar / " + p.getExtensionInterna(), Iconos.crearIconoTelefono(14, Color.WHITE));
-        btnLlamar.setBackground(COLOR_TEAL);
-        btnLlamar.addActionListener(e -> mostrarDialogoContactar(p));
-
-        panelBotones.add(btnPerfil);
-        panelBotones.add(btnLlamar);
-
-        card.add(panelBotones, BorderLayout.SOUTH);
-        return card;
-    }
-
-    private JLabel crearBadgeEstado(String estado) {
-        JLabel badge = new JLabel("  " + estado + "  ");
-        badge.setOpaque(true);
-        badge.setFont(new Font("Segoe UI", Font.BOLD, 11));
-
-        Color bg;
-        Color fg;
-
-        if (estado.toLowerCase().contains("en turno")) {
-            bg = new Color(220, 252, 231);
-            fg = new Color(21, 128, 61);
-        } else if (estado.toLowerCase().contains("tarde")) {
-            bg = new Color(243, 232, 255);
-            fg = new Color(126, 34, 206);
-        } else if (estado.toLowerCase().contains("descanso")) {
-            bg = new Color(241, 245, 249);
-            fg = new Color(100, 116, 139);
+        if (!listaPersonalFiltrada.isEmpty()) {
+            tablaPersonal.setRowSelectionInterval(0, 0);
         } else {
-            bg = new Color(224, 242, 254);
-            fg = new Color(3, 105, 161);
+            mostrarDetallePersonal(null);
         }
-
-        badge.setBackground(bg);
-        badge.setForeground(fg);
-        badge.setBorder(new CompoundBorder(
-                new LineBorder(bg.darker(), 1, true),
-                new EmptyBorder(3, 8, 3, 8)
-        ));
-        return badge;
     }
 
-    private Color obtenerColorCategoria(String cat) {
-        String c = cat.toLowerCase();
-        if (c.contains("auxiliar")) return new Color(13, 148, 136); // Teal
-        if (c.contains("recepci")) return new Color(2, 132, 199); // Azul
-        if (c.contains("peluquer")) return new Color(219, 39, 119); // Rosa / Magenta Grooming
-        if (c.contains("admin")) return new Color(217, 119, 6); // Ámbar
-        if (c.contains("manten")) return new Color(71, 85, 105); // Gris Pizarra
-        return COLOR_TEAL;
+    private void mostrarDetallePersonal(PersonalApoyo p) {
+        personalSeleccionado = p;
+        panelHubContenido.removeAll();
+
+        if (p == null) {
+            panelHubContenido.add(panelHubVacio, BorderLayout.CENTER);
+        } else {
+            lblHubAvatar.setText(obtenerIniciales(p.getNombreCompleto()));
+            lblHubNombre.setText(p.getNombreCompleto());
+            lblHubCargo.setText(p.getCargo() + " · " + p.getCategoria());
+
+            String st = p.getEstado();
+            lblHubChipEstado.setText(st);
+            if (st.toLowerCase().contains("turno")) {
+                lblHubChipEstado.setBackground(new Color(220, 252, 231));
+                lblHubChipEstado.setForeground(new Color(21, 128, 61));
+            } else if (st.toLowerCase().contains("descanso")) {
+                lblHubChipEstado.setBackground(new Color(254, 243, 199));
+                lblHubChipEstado.setForeground(new Color(180, 83, 9));
+            } else {
+                lblHubChipEstado.setBackground(new Color(243, 232, 255));
+                lblHubChipEstado.setForeground(new Color(126, 34, 206));
+            }
+
+            lblHubArea.setText(p.getAreaAsignada());
+            lblHubExtension.setText(p.getExtensionInterna());
+            lblHubTurno.setText(p.getTurno());
+            lblHubEstadoOp.setText(p.getEstado());
+
+            txtHubCertificaciones.setText(p.getCertificaciones() != null && !p.getCertificaciones().isEmpty() ?
+                    p.getCertificaciones() : "Acreditación Interna Vigente Veterinaria Happy Pets.");
+            txtHubContacto.setText("Tel: " + p.getTelefono() + "\nEmail: " + p.getEmail());
+            txtHubAsignacion.setText("Puesto: " + p.getAreaAsignada() + "\nTurno Habitual: " + p.getTurno() + "\nInterno: " + p.getExtensionInterna());
+
+            panelHubContenido.add(panelHubDetalle, BorderLayout.CENTER);
+        }
+
+        panelHubContenido.revalidate();
+        panelHubContenido.repaint();
     }
 
     private String obtenerIniciales(String nombre) {
-        if (nombre == null || nombre.isEmpty()) return "AP";
-        String[] p = nombre.split("\\s+");
+        if (nombre == null || nombre.isEmpty()) return "PA";
+        String[] p = nombre.trim().split("\\s+");
         if (p.length >= 2) {
             return (p[0].substring(0, 1) + p[1].substring(0, 1)).toUpperCase();
         } else if (p.length == 1 && p[0].length() >= 2) {
             return p[0].substring(0, 2).toUpperCase();
         }
-        return "AP";
+        return "PA";
     }
 
-    private void mostrarFichaPersonal(PersonalApoyo p) {
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ficha del Colaborador: " + p.getNombreCompleto(), JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(560, 480);
+    private void mostrarFichaColaborador(PersonalApoyo p) {
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Ficha de Personal: " + p.getNombreCompleto(), JDialog.ModalityType.APPLICATION_MODAL);
+        dlg.setSize(580, 480);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel(new BorderLayout(16, 16));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(20, 24, 20, 24));
+        JPanel pan = new JPanel(new BorderLayout(14, 14));
+        pan.setBackground(Color.WHITE);
+        pan.setBorder(new EmptyBorder(20, 24, 20, 24));
 
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
+        JLabel tit = new JLabel(p.getNombreCompleto());
+        tit.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        tit.setForeground(Ui.TEXTO_TITULO);
 
-        JLabel lblTit = new JLabel(p.getNombreCompleto());
-        lblTit.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblTit.setForeground(COLOR_TEXTO_TITULO);
+        JLabel sub = new JLabel(p.getId() + " · " + p.getCargo() + " (" + p.getCategoria() + ")");
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        sub.setForeground(Ui.TEXTO_MUTED);
 
-        JLabel lblSub = new JLabel(p.getCargo() + " · " + p.getAreaAsignada());
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSub.setForeground(COLOR_TEXTO_MUTED);
+        top.add(tit, BorderLayout.NORTH);
+        top.add(sub, BorderLayout.CENTER);
+        pan.add(top, BorderLayout.NORTH);
 
-        JPanel infoTop = new JPanel(new GridLayout(2, 1, 0, 4));
-        infoTop.setOpaque(false);
-        infoTop.add(lblTit);
-        infoTop.add(lblSub);
+        JTextArea ta = new JTextArea();
+        ta.setEditable(false);
+        ta.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        ta.setText("═══════════════════════════════════════════════════════════\n" +
+                "  REGISTRO INSTITUCIONAL DE COLABORADOR ASISTENCIAL\n" +
+                "═══════════════════════════════════════════════════════════\n\n" +
+                "• Código Interno: " + p.getId() + "\n" +
+                "• Nombre Completo: " + p.getNombreCompleto() + "\n" +
+                "• Cargo / Rol: " + p.getCargo() + "\n" +
+                "• Área / Departamento: " + p.getCategoria() + "\n" +
+                "• Puesto Físico Asignado: " + p.getAreaAsignada() + "\n" +
+                "• Extensión Telefónica: " + p.getExtensionInterna() + "\n\n" +
+                "• Turno Laboral: " + p.getTurno() + "\n" +
+                "• Estado Operativo: " + p.getEstado() + "\n" +
+                "• Canales: " + p.getTelefono() + " | " + p.getEmail() + "\n\n" +
+                "• Certificaciones y Habilitaciones:\n  " + p.getCertificaciones() + "\n");
+        pan.add(new JScrollPane(ta), BorderLayout.CENTER);
 
-        top.add(infoTop, BorderLayout.CENTER);
-        top.add(crearBadgeEstado(p.getEstado()), BorderLayout.EAST);
-        panel.add(top, BorderLayout.NORTH);
-
-        JPanel campos = new JPanel(new GridLayout(6, 2, 12, 12));
-        campos.setOpaque(false);
-        campos.setBorder(new EmptyBorder(12, 0, 12, 0));
-
-        campos.add(crearItemFicha("Código Interno:", p.getId()));
-        campos.add(crearItemFicha("Categoría Funcional:", p.getCategoria()));
-        campos.add(crearItemFicha("Área Asignada:", p.getAreaAsignada()));
-        campos.add(crearItemFicha("Extensión Telefónica:", p.getExtensionInterna()));
-        campos.add(crearItemFicha("Turno de Trabajo:", p.getTurno()));
-        campos.add(crearItemFicha("Teléfono Móvil:", p.getTelefono()));
-        campos.add(crearItemFicha("Correo Institucional:", p.getEmail()));
-        campos.add(crearItemFicha("Competencias y Certificaciones:", p.getCertificaciones()));
-
-        // Selector de estado
-        JPanel boxCambio = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        boxCambio.setOpaque(false);
-        JComboBox<String> cmbNuevoEstado = new JComboBox<>(new String[]{
-                "En turno", "Turno Tarde", "Descanso", "Permiso"
-        });
-        cmbNuevoEstado.setSelectedItem(p.getEstado());
-        boxCambio.add(new JLabel("Cambiar estado:"));
-        boxCambio.add(cmbNuevoEstado);
-        campos.add(boxCambio);
-
-        panel.add(campos, BorderLayout.CENTER);
-
-        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        bot.setOpaque(false);
-
-        JButton btnGuardar = Ui.botonPrimario("Guardar Cambios", null);
-        btnGuardar.setBackground(COLOR_TEAL);
-        btnGuardar.addActionListener(e -> {
-            String nuevo = (String) cmbNuevoEstado.getSelectedItem();
-            repo.actualizarEstadoPersonalApoyo(p.getId(), nuevo);
-            JOptionPane.showMessageDialog(dlg, "Estado de " + p.getNombreCompleto() + " actualizado a: " + nuevo, "Actualización Exitosa", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
-            recargarDatos();
-        });
-
-        JButton btnCerrar = Ui.botonSecundario("Cerrar", null);
+        JButton btnCerrar = Ui.boton("Cerrar", false);
         btnCerrar.addActionListener(e -> dlg.dispose());
-
-        JButton btnExportar = Ui.botonSecundario("Descargar Ficha PDF", Iconos.crearIconoExportar(14, Ui.TEXTO_TITULO));
-        btnExportar.addActionListener(e -> {
-            String textoFicha = "FICHA TÉCNICA DEL COLABORADOR ASISTENCIAL\n" +
-                    "CLÍNICA VETERINARIA HAPPY PETS S.A.C.\n" +
-                    "=========================================================================\n\n" +
-                    "NOMBRE COMPLETO     : " + p.getNombreCompleto() + "\n" +
-                    "CARGO / ROL         : " + p.getCargo() + " (" + p.getCategoria() + ")\n" +
-                    "ÁREA ASIGNADA       : " + p.getAreaAsignada() + "\n" +
-                    "TURNO LABORAL       : " + p.getTurno() + "\n" +
-                    "ESTADO ACTUAL       : " + p.getEstado() + "\n" +
-                    "CONTACTO            : " + p.getTelefono() + " | Ext: " + p.getExtensionInterna() + "\n" +
-                    "CORREO              : " + p.getEmail() + "\n\n" +
-                    "CERTIFICACIONES Y COMPETENCIAS:\n" + p.getCertificaciones() + "\n";
-            Ui.mostrarVisorReporte(dlg, "Ficha Colaborador - " + p.getNombreCompleto(), "PERSONAL ASISTENCIAL HAPPY PETS", textoFicha, "FichaPersonal_" + p.getId());
-        });
-
-        bot.add(btnExportar);
-        bot.add(btnGuardar);
+        JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bot.setOpaque(false);
         bot.add(btnCerrar);
-        panel.add(bot, BorderLayout.SOUTH);
+        pan.add(bot, BorderLayout.SOUTH);
 
-        dlg.add(panel);
+        dlg.add(pan);
         dlg.setVisible(true);
-    }
-
-    private JPanel crearItemFicha(String label, String valor) {
-        JPanel p = new JPanel(new BorderLayout(4, 2));
-        p.setOpaque(false);
-        JLabel l = new JLabel(label);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        l.setForeground(COLOR_TEXTO_MUTED);
-
-        JLabel v = new JLabel(valor);
-        v.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        v.setForeground(COLOR_TEXTO_TITULO);
-
-        p.add(l, BorderLayout.NORTH);
-        p.add(v, BorderLayout.CENTER);
-        return p;
-    }
-
-    private void mostrarDialogoContactar(PersonalApoyo p) {
-        String msg = "Contacto con colaborador: " + p.getNombreCompleto() + "\n" +
-                "Cargo: " + p.getCargo() + "\n" +
-                "Área: " + p.getAreaAsignada() + "\n\n" +
-                "📞 Extensión interna: " + p.getExtensionInterna() + "\n" +
-                "📱 Celular / WhatsApp: " + p.getTelefono() + "\n" +
-                "✉️ Email: " + p.getEmail() + "\n\n" +
-                "¿Desea iniciar llamada interna a la " + p.getExtensionInterna() + "?";
-
-        int opt = JOptionPane.showConfirmDialog(this, msg, "Llamada Interna VoIP", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-        if (opt == JOptionPane.YES_OPTION) {
-            JOptionPane.showMessageDialog(this, "Conectando llamada con la extensión " + p.getExtensionInterna() + " (" + p.getAreaAsignada() + ")...", "VoIP Happy Pets", JOptionPane.INFORMATION_MESSAGE);
-        }
     }
 
     private void mostrarDialogoNuevoColaborador() {
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Registrar Personal de Apoyo", JDialog.ModalityType.APPLICATION_MODAL);
-        dlg.setSize(520, 500);
+        mostrarFormularioColaborador(null);
+    }
+
+    private void mostrarDialogoEditarColaborador(PersonalApoyo p) {
+        mostrarFormularioColaborador(p);
+    }
+
+    private void mostrarFormularioColaborador(PersonalApoyo existente) {
+        boolean esEdicion = existente != null;
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this),
+                esEdicion ? "Editar Colaborador Asistencial" : "Registrar Nuevo Colaborador",
+                JDialog.ModalityType.APPLICATION_MODAL);
+        dlg.setSize(520, 480);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(20, 24, 20, 24));
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(new EmptyBorder(18, 22, 18, 22));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0; gbc.gridy = 0;
 
-        JTextField txtNom = new JTextField(20);
-        JTextField txtCargo = new JTextField("Auxiliar Técnico Veterinario (ATV)", 20);
-        JComboBox<String> cmbCat = new JComboBox<>(new String[]{
-                "Auxiliares", "Recepción", "Peluquería", "Administración", "Mantenimiento"
-        });
-        JTextField txtArea = new JTextField("Hospitalización y Quirófano B", 20);
-        JTextField txtExt = new JTextField("Ext. " + (200 + repo.getPersonalApoyo().size() + 1), 10);
-        JComboBox<String> cmbTurnoN = new JComboBox<>(new String[]{
-                "Mañana (07:00 - 15:00)", "Tarde (14:30 - 22:00)", "Noche (21:30 - 07:30)"
-        });
-        JTextField txtTel = new JTextField("+51 981 000 000", 15);
-        JTextField txtEmail = new JTextField("colaborador@happypets.pe", 20);
-        JTextField txtCert = new JTextField("Bioseguridad, RCP y Primeros Auxilios", 20);
+        JTextField txtNombre = new JTextField(esEdicion ? existente.getNombreCompleto() : "");
+        JTextField txtCargo = new JTextField(esEdicion ? existente.getCargo() : "Auxiliar Técnico Veterinario");
+        JComboBox<String> cbCat = new JComboBox<>(new String[]{"Auxiliares", "Recepción", "Peluquería", "Administración", "Mantenimiento"});
+        if (esEdicion) cbCat.setSelectedItem(existente.getCategoria());
+        JTextField txtArea = new JTextField(esEdicion ? existente.getAreaAsignada() : "Hospitalización");
+        JTextField txtExt = new JTextField(esEdicion ? existente.getExtensionInterna() : "Ext. 201");
+        JComboBox<String> cbTurno = new JComboBox<>(new String[]{"Mañana (07:00 - 15:00)", "Tarde (14:30 - 22:00)", "Noche (21:30 - 07:30)"});
+        if (esEdicion) cbTurno.setSelectedItem(existente.getTurno());
+        JTextField txtTel = new JTextField(esEdicion ? existente.getTelefono() : "+51 987 000 111");
+        JTextField txtEmail = new JTextField(esEdicion ? existente.getEmail() : "colaborador@happypets.pe");
 
-        p.add(new JLabel("Nombre Completo:"), gbc);
-        gbc.gridx = 1; p.add(txtNom, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Categoría:"), gbc);
-        gbc.gridx = 1; p.add(cmbCat, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Cargo / Puesto:"), gbc);
-        gbc.gridx = 1; p.add(txtCargo, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Área Asignada:"), gbc);
-        gbc.gridx = 1; p.add(txtArea, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Extensión Interna:"), gbc);
-        gbc.gridx = 1; p.add(txtExt, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Turno Asignado:"), gbc);
-        gbc.gridx = 1; p.add(cmbTurnoN, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Teléfono:"), gbc);
-        gbc.gridx = 1; p.add(txtTel, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1; p.add(txtEmail, gbc);
-        gbc.gridx = 0; gbc.gridy++; p.add(new JLabel("Certificaciones:"), gbc);
-        gbc.gridx = 1; p.add(txtCert, gbc);
+        int row = 0;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Nombre Completo:"), gbc);
+        gbc.gridx = 1; form.add(txtNombre, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Cargo / Función:"), gbc);
+        gbc.gridx = 1; form.add(txtCargo, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Categoría:"), gbc);
+        gbc.gridx = 1; form.add(cbCat, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Área Asignada:"), gbc);
+        gbc.gridx = 1; form.add(txtArea, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Extensión Interna:"), gbc);
+        gbc.gridx = 1; form.add(txtExt, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Turno Laboral:"), gbc);
+        gbc.gridx = 1; form.add(cbTurno, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Teléfono Móvil:"), gbc);
+        gbc.gridx = 1; form.add(txtTel, gbc);
+
+        row++;
+        gbc.gridx = 0; gbc.gridy = row; form.add(new JLabel("Correo Electrónico:"), gbc);
+        gbc.gridx = 1; form.add(txtEmail, gbc);
+
+        dlg.add(form, BorderLayout.CENTER);
 
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
-        bot.setBackground(Color.WHITE);
+        bot.setBackground(new Color(248, 250, 252));
+        JButton btnCancelar = Ui.boton("Cancelar", false);
+        btnCancelar.addActionListener(e -> dlg.dispose());
 
-        JButton btnGuardar = Ui.botonPrimario("Guardar Colaborador", null);
-        btnGuardar.setBackground(COLOR_TEAL);
+        JButton btnGuardar = Ui.boton(esEdicion ? "Guardar Cambios" : "Registrar Colaborador", true);
         btnGuardar.addActionListener(e -> {
-            String nom = txtNom.getText().trim();
+            String nom = txtNombre.getText().trim();
             if (nom.isEmpty()) {
-                JOptionPane.showMessageDialog(dlg, "Ingrese el nombre del colaborador.", "Validación", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(dlg, "El nombre del colaborador es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            PersonalApoyo nuevo = new PersonalApoyo(
-                    "APO-" + String.format("%02d", repo.getPersonalApoyo().size() + 1),
-                    nom,
-                    txtCargo.getText().trim(),
-                    (String) cmbCat.getSelectedItem(),
-                    txtArea.getText().trim(),
-                    txtExt.getText().trim(),
-                    (String) cmbTurnoN.getSelectedItem(),
-                    "En turno",
-                    txtTel.getText().trim(),
-                    txtEmail.getText().trim(),
-                    txtCert.getText().trim()
-            );
-
-            repo.guardarPersonalApoyo(nuevo);
-            JOptionPane.showMessageDialog(dlg, "Colaborador " + nom + " registrado correctamente.", "Registro Exitoso", JOptionPane.INFORMATION_MESSAGE);
-            dlg.dispose();
+            if (esEdicion) {
+                existente.setNombreCompleto(nom);
+                existente.setCargo(txtCargo.getText().trim());
+                existente.setCategoria((String) cbCat.getSelectedItem());
+                existente.setAreaAsignada(txtArea.getText().trim());
+                existente.setExtensionInterna(txtExt.getText().trim());
+                existente.setTurno((String) cbTurno.getSelectedItem());
+                existente.setTelefono(txtTel.getText().trim());
+                existente.setEmail(txtEmail.getText().trim());
+            } else {
+                PersonalApoyo nuevo = new PersonalApoyo(
+                        "COL-0" + (repo.getPersonalApoyo().size() + 1),
+                        nom,
+                        txtCargo.getText().trim(),
+                        (String) cbCat.getSelectedItem(),
+                        txtArea.getText().trim(),
+                        txtExt.getText().trim(),
+                        (String) cbTurno.getSelectedItem(),
+                        "En turno",
+                        txtTel.getText().trim(),
+                        txtEmail.getText().trim(),
+                        "Certificado en Asistencia Veterinaria y Manejo Quirúrgico"
+                );
+                repo.getPersonalApoyo().add(nuevo);
+            }
             recargarDatos();
+            dlg.dispose();
+            JOptionPane.showMessageDialog(this, "Colaborador registrado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JButton btnCancelar = Ui.botonSecundario("Cancelar", null);
-        btnCancelar.addActionListener(e -> dlg.dispose());
-
-        bot.add(btnGuardar);
         bot.add(btnCancelar);
-
-        dlg.add(p, BorderLayout.CENTER);
+        bot.add(btnGuardar);
         dlg.add(bot, BorderLayout.SOUTH);
         dlg.setVisible(true);
+    }
+
+    private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        private static final long serialVersionUID = 1L;
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 16; }
+        @Override public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) { return 32; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 }

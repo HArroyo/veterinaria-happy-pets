@@ -20,16 +20,16 @@ public class ConfiguracionClinica implements Serializable {
     private String sedeActiva;
 
     public ConfiguracionClinica() {
-        this.razonSocial = "HappyPets Servicios Veterinarios S.A.S.";
-        this.nombreComercial = "HappyPets Clínica y Hospital 24H";
-        this.identificadorFiscal = "NIT 900.842.115-4";
-        this.correoInstitucional = "contacto@happypets-vet.com";
-        this.telefonoUrgencias = "+57 (601) 745-9988 / +57 312 000 1122";
-        this.direccionSedePrincipal = "Avenida Las Mascotas # 45 - 28, Sector San Martín";
-        this.monedaPrincipal = "COP ($) - Peso Colombiano";
-        this.zonaHoraria = "America/Bogota (UTC -05:00)";
+        this.razonSocial = "HappyPets Servicios Veterinarios S.A.C.";
+        this.nombreComercial = "HappyPets Clínica y Hospital Veterinario 24H";
+        this.identificadorFiscal = "RUC 20608421154";
+        this.correoInstitucional = "contacto@happypets.pe";
+        this.telefonoUrgencias = "+51 (01) 432-9980 / +51 984 552 110";
+        this.direccionSedePrincipal = "Av. Angamos Oeste 840, Miraflores, Lima - Perú";
+        this.monedaPrincipal = "PEN (S/) - Sol Peruano";
+        this.zonaHoraria = "America/Lima (UTC -05:00)";
         this.rutaLogotipo = "assets/logo_happypets.png";
-        this.sedeActiva = "Sede Norte - Principal";
+        this.sedeActiva = "Sede Principal - Miraflores";
     }
 
     public ConfiguracionClinica(String razonSocial, String nombreComercial, String identificadorFiscal,
