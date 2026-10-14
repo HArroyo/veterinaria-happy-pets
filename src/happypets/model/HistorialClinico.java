@@ -12,6 +12,11 @@ public class HistorialClinico {
     private final String codigoMascota;
     private final List<ConsultaClinica> consultas = new ArrayList<>();
 
+    /**
+     * Constructor de HistorialClinico.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public HistorialClinico(String codigoMascota) {
         this.codigoMascota = codigoMascota;
     }

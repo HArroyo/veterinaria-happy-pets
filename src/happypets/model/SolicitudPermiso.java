@@ -21,9 +21,19 @@ public class SolicitudPermiso implements Serializable {
     private String motivoDetalle;
     private String estado; // "Pendiente", "Aprobado", "Rechazado"
 
+    /**
+     * Constructor de SolicitudPermiso.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public SolicitudPermiso() {
     }
 
+    /**
+     * Constructor de SolicitudPermiso.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public SolicitudPermiso(String id, String personalId, String nombreSolicitante, String rol,
                             String tipoPermiso, LocalDate fecha, String turnoAfectado,
                             String reemplazoPropuesto, String motivoDetalle, String estado) {

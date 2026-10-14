@@ -26,6 +26,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -88,6 +93,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioConsultaMedicaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioConsultaMedicaDialog(Window parent, AtencionMedica atencionExistente, Mascota mascotaInicial, Consumer<AtencionMedica> onGuardado) {
         super(parent, atencionExistente == null ? "Nueva Consulta Médica" : "Editar Consulta " + atencionExistente.getIdConsulta(), ModalityType.APPLICATION_MODAL);
         this.atencionExistente = atencionExistente;
@@ -99,10 +109,20 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera superior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(13, 148, 136)); // Teal
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -136,6 +156,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Barra inferior de botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(new Color(248, 250, 252));
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
@@ -174,7 +199,17 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabAnamnesis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -248,11 +283,21 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         panel.add(crearEtiquetaCampo("Triada Clínica y Constantes Fisiológicas *"), gbc);
         y++;
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSignos = new JPanel(new GridLayout(1, 3, 10, 0));
         panelSignos.setOpaque(false);
 
         txtPeso = crearCampoTexto(true);
         txtPeso.setText("15.0");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pPeso = new JPanel(new BorderLayout(0, 2));
         pPeso.setOpaque(false);
         JLabel lp = new JLabel("Peso (kg)");
@@ -263,6 +308,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
 
         txtTemperatura = crearCampoTexto(true);
         txtTemperatura.setText("38.5");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pTemp = new JPanel(new BorderLayout(0, 2));
         pTemp.setOpaque(false);
         JLabel lt = new JLabel("Temperatura (°C)");
@@ -273,6 +323,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
 
         txtFC = crearCampoTexto(true);
         txtFC.setText("95");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pFc = new JPanel(new BorderLayout(0, 2));
         pFc.setOpaque(false);
         JLabel lfc = new JLabel("Frec. Cardíaca (lpm)");
@@ -323,12 +378,27 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabDiagnostico() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -414,11 +484,21 @@ public class FormularioConsultaMedicaDialog extends JDialog {
 
         // Próximo control, Costo y Estado
         gbc.gridx = 0; gbc.gridy = y; gbc.gridwidth = 2; gbc.weightx = 1.0;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fFinal = new JPanel(new GridLayout(1, 3, 10, 0));
         fFinal.setOpaque(false);
 
         txtSeguimiento = crearCampoTexto(true);
         txtSeguimiento.setText("Control en 3 meses");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pSeg = new JPanel(new BorderLayout(0, 2));
         pSeg.setOpaque(false);
         JLabel ls = new JLabel("Próximo Control");
@@ -429,6 +509,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
 
         txtCosto = crearCampoTexto(true);
         txtCosto.setText("85.00");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pCos = new JPanel(new BorderLayout(0, 2));
         pCos.setOpaque(false);
         JLabel lc = new JLabel("Costo Total (S/.)");
@@ -441,6 +526,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         cbEstado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cbEstado.setBackground(Color.WHITE);
         cbEstado.setPreferredSize(new Dimension(0, 30));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pEst = new JPanel(new BorderLayout(0, 2));
         pEst.setOpaque(false);
         JLabel le = new JLabel("Estado Final");
@@ -459,6 +549,11 @@ public class FormularioConsultaMedicaDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;

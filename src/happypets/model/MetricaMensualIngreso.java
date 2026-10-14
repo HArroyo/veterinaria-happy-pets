@@ -16,9 +16,19 @@ public class MetricaMensualIngreso implements Serializable {
     private double farmaciaAlimentos;
     private double costesOperativos;
 
+    /**
+     * Constructor de MetricaMensualIngreso.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public MetricaMensualIngreso() {
     }
 
+    /**
+     * Constructor de MetricaMensualIngreso.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public MetricaMensualIngreso(String mesEtiqueta, int anio, int mesNumero,
                                  double serviciosClinicos, double farmaciaAlimentos, double costesOperativos) {
         this.mesEtiqueta = mesEtiqueta;

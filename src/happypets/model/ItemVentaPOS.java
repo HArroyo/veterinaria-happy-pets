@@ -10,6 +10,11 @@ public class ItemVentaPOS {
     private int cantidad;
     private double precioUnitario;
 
+    /**
+     * Constructor de ItemVentaPOS.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ItemVentaPOS(String codigo, String descripcion, String categoria, int cantidad, double precioUnitario) {
         this.codigo = codigo;
         this.descripcion = descripcion;

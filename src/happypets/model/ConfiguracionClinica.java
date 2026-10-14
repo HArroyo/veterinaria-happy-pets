@@ -19,6 +19,11 @@ public class ConfiguracionClinica implements Serializable {
     private String rutaLogotipo;
     private String sedeActiva;
 
+    /**
+     * Constructor de ConfiguracionClinica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConfiguracionClinica() {
         this.razonSocial = "HappyPets Servicios Veterinarios S.A.C.";
         this.nombreComercial = "HappyPets Clínica y Hospital Veterinario 24H";
@@ -32,6 +37,11 @@ public class ConfiguracionClinica implements Serializable {
         this.sedeActiva = "Sede Principal - Miraflores";
     }
 
+    /**
+     * Constructor de ConfiguracionClinica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConfiguracionClinica(String razonSocial, String nombreComercial, String identificadorFiscal,
                                 String correoInstitucional, String telefonoUrgencias, String direccionSedePrincipal,
                                 String monedaPrincipal, String zonaHoraria, String rutaLogotipo, String sedeActiva) {

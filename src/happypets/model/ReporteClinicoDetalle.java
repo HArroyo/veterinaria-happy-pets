@@ -24,9 +24,19 @@ public class ReporteClinicoDetalle implements Serializable {
     private String tratamiento;
     private String observaciones;
 
+    /**
+     * Constructor de ReporteClinicoDetalle.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ReporteClinicoDetalle() {
     }
 
+    /**
+     * Constructor de ReporteClinicoDetalle.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ReporteClinicoDetalle(String codigoReporte, LocalDate fecha, String nombrePaciente,
                                  String especieRaza, String nombrePropietario, String telefonoPropietario,
                                  String veterinarioTratante, String diagnosticoConfirmado, String severidad,

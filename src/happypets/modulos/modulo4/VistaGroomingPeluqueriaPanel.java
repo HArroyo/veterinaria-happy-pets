@@ -23,6 +23,11 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -69,8 +74,23 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
     private ServicioGrooming servicioSeleccionado = null;
 
     // Live Detail Hub
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubContenido;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubVacio;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubDetalle;
     private JLabel lblHubAvatar;
     private JLabel lblHubNombreMascota;
@@ -83,14 +103,29 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
     private JLabel lblHubServicio;
     private JLabel lblHubTutor;
     private JLabel lblHubTelefono;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubChecklistBadges;
     private JLabel lblHubCosmetica;
     private JTextArea txtHubObservaciones;
 
+    /**
+     * Constructor de VistaGroomingPeluqueriaPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaGroomingPeluqueriaPanel() {
         setLayout(new BorderLayout());
         setBackground(new Color(248, 250, 252));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSuperior = new JPanel();
         panelSuperior.setOpaque(false);
         panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
@@ -114,10 +149,25 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         recargarDatos();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -135,6 +185,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         izq.add(subtitulo);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
@@ -163,7 +218,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
         fila.setOpaque(false);
 
@@ -180,10 +245,24 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardKpi(JLabel lblValor, String etiqueta, Color colorFondoIco, Color colorIco, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -201,6 +280,10 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         JLabel iconBox = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -213,6 +296,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         iconBox.setPreferredSize(new Dimension(36, 36));
         card.add(iconBox, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel();
         centro.setOpaque(false);
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
@@ -231,10 +319,24 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelMaster() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -250,11 +352,21 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         panel.setBorder(new EmptyBorder(12, 14, 12, 14));
 
         // Barra de búsqueda y filtros
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topFiltros = new JPanel();
         topFiltros.setOpaque(false);
         topFiltros.setLayout(new BoxLayout(topFiltros, BoxLayout.Y_AXIS));
 
         // Fila 1: Buscador rápido
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaBuscar = new JPanel(new BorderLayout(8, 0));
         filaBuscar.setOpaque(false);
 
@@ -280,6 +392,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         topFiltros.add(Box.createVerticalStrut(8));
 
         // Fila 2: Filtros en Pills/Pestañas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaPills = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         filaPills.setOpaque(false);
 
@@ -377,10 +494,24 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDetail() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout()) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -398,6 +529,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         card.setMinimumSize(new Dimension(320, 0));
 
         // Panel Vacío (cuando no hay selección)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
         JLabel lblVacio = new JLabel("<html><center>Seleccione un turno de la lista para ver la ficha completa de Spa,<br>el checklist de admisión sanitaria y las opciones de seguimiento.</center></html>", SwingConstants.CENTER);
@@ -406,16 +542,30 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
         // Panel con Detalle Activo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubDetalle = new JPanel(new BorderLayout(0, 8));
         panelHubDetalle.setOpaque(false);
 
         // 1. Cabecera del Hub
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topHub = new JPanel(new BorderLayout(8, 0));
         topHub.setOpaque(false);
 
         lblHubAvatar = new JLabel() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -434,6 +584,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         lblHubAvatar.setForeground(Ui.TURQUESA);
         topHub.add(lblHubAvatar, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centroTit = new JPanel();
         centroTit.setOpaque(false);
         centroTit.setLayout(new BoxLayout(centroTit, BoxLayout.Y_AXIS));
@@ -466,7 +621,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -476,6 +641,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         hubBody.setOpaque(false);
 
         // 2x2 Telemetría / Métricas clave
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridMetricas = new JPanel(new GridLayout(2, 2, 6, 6));
         gridMetricas.setOpaque(false);
         gridMetricas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
@@ -506,6 +676,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         lblHubTelefono.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lblHubTelefono.setForeground(new Color(2, 132, 199));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel secServicio = crearSeccionCard("SERVICIO & DATOS DEL TUTOR");
         secServicio.add(crearItemLinea("Tratamiento de Spa:", lblHubServicio));
         secServicio.add(crearItemLinea("Tutor Titular:", lblHubTutor));
@@ -514,8 +689,18 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         hubBody.add(vGap(6));
 
         // Checklist Sanitario
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubChecklistBadges = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
         panelHubChecklistBadges.setOpaque(false);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel secChecklist = crearSeccionCard("CHECKLIST SANITARIO DE ADMISIÓN");
         secChecklist.add(panelHubChecklistBadges);
         hubBody.add(secChecklist);
@@ -525,6 +710,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         lblHubCosmetica = new JLabel("-");
         lblHubCosmetica.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblHubCosmetica.setForeground(Ui.TEXTO_TITULO);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel secCosmetica = crearSeccionCard("COSMÉTICA & CHAMPÚS ESPECIALES");
         secCosmetica.add(lblHubCosmetica);
         hubBody.add(secCosmetica);
@@ -537,6 +727,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         txtHubObservaciones.setWrapStyleWord(true);
         txtHubObservaciones.setEditable(false);
         txtHubObservaciones.setOpaque(false);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel secObs = crearSeccionCard("OBSERVACIONES DEL GROOMER / CONDUCTA");
         secObs.add(txtHubObservaciones);
         hubBody.add(secObs);
@@ -550,6 +745,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         panelHubDetalle.add(spHub, BorderLayout.CENTER);
 
         // 3. Barra Inferior de Acciones Rápidas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
         barraAcciones.setPreferredSize(new Dimension(0, 62));
@@ -579,7 +779,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCajaMetrica(String etiqueta, JLabel lblValor, Color colorValor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel c = new JPanel();
         c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(new Color(248, 250, 252));
@@ -600,7 +810,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return c;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSeccionCard(String titulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel sec = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -609,7 +829,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
             }
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -624,6 +854,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         sec.setBackground(Color.WHITE);
         sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         header.setOpaque(false);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -638,7 +873,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return sec;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemLinea(String label, Component valor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(6, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -658,7 +903,17 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
 
     private static Component vGap(int h) {
         Component c = Box.createVerticalStrut(h);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         if (c instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
         }
         return c;
@@ -687,6 +942,10 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         lblKpiFacturacion.setText("S/. " + String.format("%.0f", totalFact));
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarYActualizarTabla() {
         List<ServicioGrooming> todos = repo.getServiciosGrooming();
         String txt = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
@@ -729,6 +988,10 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         }
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleEnHub(ServicioGrooming g) {
         servicioSeleccionado = g;
         if (panelHubContenido == null) return;
@@ -776,6 +1039,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         panelHubContenido.repaint();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void agregarChipChecklist(JPanel p, String texto, boolean positivo) {
         JLabel chip = new JLabel(texto);
         chip.setFont(new Font("Segoe UI", Font.BOLD, 10));
@@ -922,6 +1190,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel p = new JPanel(new BorderLayout(8, 0));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -933,6 +1206,10 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
             JLabel avatar = new JLabel(inicial, SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -994,6 +1271,10 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1033,6 +1314,11 @@ public class VistaGroomingPeluqueriaPanel extends JPanel {
         return btn;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
         private static final long serialVersionUID = 1L;
         @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }

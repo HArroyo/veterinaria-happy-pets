@@ -16,9 +16,19 @@ public class DesgloseFinancieroPrestacion implements Serializable {
     private double porcentajeRentabilidad;
     private String estadoFinanciero; // "Óptimo", "Excelente", "Margen Normal", "Estable", "A Revisar"
 
+    /**
+     * Constructor de DesgloseFinancieroPrestacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DesgloseFinancieroPrestacion() {
     }
 
+    /**
+     * Constructor de DesgloseFinancieroPrestacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DesgloseFinancieroPrestacion(String lineaServicio, String centroOperativo, int transacciones,
                                         double ingresosBrutos, double costeDirecto,
                                         double porcentajeRentabilidad, String estadoFinanciero) {

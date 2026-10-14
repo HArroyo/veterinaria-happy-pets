@@ -23,6 +23,11 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -45,6 +50,11 @@ public class LoginFrame extends JFrame {
     private JLabel lblError;
     private final ServicioAutenticacion auth = ServicioAutenticacion.getInstancia();
 
+    /**
+     * Constructor de LoginFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public LoginFrame() {
         setTitle("Happy Pets - Iniciar Sesión");
         setIconImage(Ui.icono());
@@ -55,6 +65,11 @@ public class LoginFrame extends JFrame {
         setResizable(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelPrincipal = new JPanel(new GridLayout(1, 2));
         panelPrincipal.add(crearPanelBannerVeterinario());
         panelPrincipal.add(crearPanelFormularioLogin());
@@ -66,9 +81,18 @@ public class LoginFrame extends JFrame {
      * Panel izquierdo: Banner visual veterinario con degradado e identidad Happy Pets.
      */
     private JPanel crearPanelBannerVeterinario() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel banner = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -106,9 +130,19 @@ public class LoginFrame extends JFrame {
         banner.setLayout(new BorderLayout());
         banner.setBorder(new EmptyBorder(40, 40, 40, 40));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenido = new JPanel();
         contenido.setOpaque(false);
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
@@ -117,6 +151,10 @@ public class LoginFrame extends JFrame {
         JLabel badgeHp = new JLabel("HP", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -171,7 +209,17 @@ public class LoginFrame extends JFrame {
         return banner;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemCaracteristica(String texto, javax.swing.Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         p.setOpaque(false);
         p.setAlignmentX(LEFT_ALIGNMENT);
@@ -192,10 +240,20 @@ public class LoginFrame extends JFrame {
      * Panel derecho: Formulario de inicio de sesión con inputs estilizados y ayuda por defecto.
      */
     private JPanel crearPanelFormularioLogin() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel form = new JPanel(new BorderLayout());
         form.setBackground(Color.WHITE);
         form.setBorder(new EmptyBorder(40, 48, 40, 48));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setOpaque(false);
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
@@ -218,6 +276,11 @@ public class LoginFrame extends JFrame {
         cuerpo.add(Box.createVerticalStrut(24));
 
         // Caja de credenciales por defecto (usuario y clave admin)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel boxCredenciales = new JPanel(new BorderLayout(8, 0));
         boxCredenciales.setBackground(new Color(236, 250, 252));
         boxCredenciales.setBorder(BorderFactory.createCompoundBorder(
@@ -294,6 +357,10 @@ public class LoginFrame extends JFrame {
         JButton btnIngresar = new JButton("INGRESAR AL SISTEMA") {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -321,6 +388,11 @@ public class LoginFrame extends JFrame {
 
         cuerpo.add(btnIngresar);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setOpaque(false);
         wrapper.add(cuerpo);

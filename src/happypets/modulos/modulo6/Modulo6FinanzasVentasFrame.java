@@ -28,10 +28,20 @@ public class Modulo6FinanzasVentasFrame extends JFrame {
     private final VistaEgresosOperativosPanel vistaEgresos;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo6FinanzasVentasFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo6FinanzasVentasFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo6FinanzasVentasFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo6FinanzasVentasFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 6: Finanzas y Ventas");
         setIconImage(Ui.icono());

@@ -35,6 +35,11 @@ public class RegistroCirugia {
     private LocalDate fechaRetiroPuntos;
     private String estado; // "Programada", "En Proceso", "En Recuperación", "Alta Quirúrgica"
 
+    /**
+     * Constructor de RegistroCirugia.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RegistroCirugia(String idCirugia, String codigoMascota, String nombreMascota, String especieRaza,
                            String nombreTutor, String telefonoTutor, String procedimiento, String quirofano,
                            String cirujanoPrincipal, String personalApoyo, LocalDate fecha,

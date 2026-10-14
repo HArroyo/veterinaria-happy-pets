@@ -17,6 +17,11 @@ public class ConfiguracionModuloIA implements Serializable {
     private double temperatura;
     private int maxTokens;
 
+    /**
+     * Constructor de ConfiguracionModuloIA.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConfiguracionModuloIA() {
         this.habilitado = true;
         this.preTriajeMascotas = true;
@@ -30,6 +35,11 @@ public class ConfiguracionModuloIA implements Serializable {
         this.maxTokens = 1024;
     }
 
+    /**
+     * Constructor de ConfiguracionModuloIA.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConfiguracionModuloIA(boolean habilitado, boolean preTriajeMascotas,
                                  boolean asistenteDiagnosticoPreliminar, boolean recordatoriosPredictivosVacunas,
                                  String modeloActual, String promptSistema) {

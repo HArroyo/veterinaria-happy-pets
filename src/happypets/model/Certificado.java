@@ -11,10 +11,20 @@ public class Certificado extends DocumentoMascota {
     private String motivoDestino;
     private String estado;
 
+    /**
+     * Constructor de Certificado.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Certificado() {
         super();
     }
 
+    /**
+     * Constructor de Certificado.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Certificado(String codigo, String codigoMascota, String tipo, String descripcion,
                        LocalDate fechaActualizacion, boolean disponible, String numeroCertificado,
                        LocalDate fechaEmision, String motivoDestino, String estado) {

@@ -29,6 +29,11 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -94,6 +99,11 @@ public final class Ui {
      * "Happy Pets" y perfil de usuario a la derecha.
      */
     public static JPanel crearCabeceraSistema() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barra = new JPanel(new BorderLayout());
         barra.setBackground(TURQUESA);
         barra.setPreferredSize(new Dimension(1400, 54));
@@ -104,6 +114,11 @@ public final class Ui {
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
         barra.add(titulo, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel derecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 28, 0));
         derecha.setOpaque(false);
 
@@ -125,6 +140,11 @@ public final class Ui {
      * Cabecera del módulo con insignia 'HP', título, subtítulo y badge 'Happy Pets'.
      */
     public static JPanel crearCabeceraModulo(String tituloModulo, String subtituloModulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new BorderLayout(16, 0));
         panel.setBackground(TURQUESA);
         panel.setBorder(BorderFactory.createCompoundBorder(
@@ -136,6 +156,10 @@ public final class Ui {
         JLabel badge = new JLabel("HP", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -151,6 +175,11 @@ public final class Ui {
         panel.add(badge, BorderLayout.WEST);
 
         // Textos del Módulo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel();
         centro.setOpaque(false);
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
@@ -172,6 +201,10 @@ public final class Ui {
         JLabel pill = new JLabel("Happy Pets", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -200,6 +233,10 @@ public final class Ui {
         JButton boton = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -268,6 +305,10 @@ public final class Ui {
         JButton b = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -314,6 +355,10 @@ public final class Ui {
         JButton b = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -405,6 +450,11 @@ public final class Ui {
      * Panel tarjeta blanca contenedor con borde suave.
      */
     public static JPanel crearTarjeta() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel();
         p.setBackground(Color.WHITE);
         p.setBorder(BorderFactory.createCompoundBorder(
@@ -418,9 +468,18 @@ public final class Ui {
      * Tarjeta KPI estandarizada para todos los módulos.
      */
     public static JPanel crearTarjetaKPI(String titulo, String valor, String subtitulo, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(12, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -437,6 +496,11 @@ public final class Ui {
         ));
 
         if (icono != null) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel badgeIcon = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
             badgeIcon.setOpaque(false);
             badgeIcon.setPreferredSize(new Dimension(44, 44));
@@ -444,6 +508,11 @@ public final class Ui {
             card.add(badgeIcon, BorderLayout.WEST);
         }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel();
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
         centro.setOpaque(false);
@@ -477,6 +546,10 @@ public final class Ui {
         JLabel badge = new JLabel("  " + texto + "  ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -496,6 +569,11 @@ public final class Ui {
      * Barra de título para tarjetas internas (turquesa con texto blanco).
      */
     public static JPanel crearTituloTarjeta(String titulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(TURQUESA);
         p.setBorder(new EmptyBorder(8, 14, 8, 14));
@@ -510,6 +588,11 @@ public final class Ui {
      * Pie de página del módulo exactamente como el wireframe.
      */
     public static JPanel crearPieModulo(String modulo, Component... botonesDerecha) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new BorderLayout());
         footer.setBackground(Color.WHITE);
         footer.setBorder(BorderFactory.createCompoundBorder(
@@ -523,6 +606,11 @@ public final class Ui {
         footer.add(lbl, BorderLayout.WEST);
 
         if (botonesDerecha != null && botonesDerecha.length > 0) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel derecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
             derecha.setOpaque(false);
             for (Component c : botonesDerecha) {
@@ -710,7 +798,17 @@ public final class Ui {
     private static final class BotonColumnaRendererEditor extends AbstractCellEditor
             implements TableCellRenderer, TableCellEditor {
         private static final long serialVersionUID = 1L;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         private final JPanel panelVisual = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         private final JPanel panelEditor = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
         private final JButton visual;
         private final JButton editor;
@@ -766,7 +864,17 @@ public final class Ui {
     private static final class DobleBotonRendererEditor extends AbstractCellEditor
             implements TableCellRenderer, TableCellEditor {
         private static final long serialVersionUID = 1L;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         private final JPanel panelVisual = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 2));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         private final JPanel panelEditor = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 2));
         private final JButton btnVerVisual = boton("Ver", false);
         private final JButton btnDescargarVisual = boton("Descargar PDF", false);

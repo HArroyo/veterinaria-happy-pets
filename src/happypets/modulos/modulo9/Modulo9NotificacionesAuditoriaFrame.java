@@ -28,10 +28,20 @@ public class Modulo9NotificacionesAuditoriaFrame extends JFrame {
     private final VistaLogsTrazabilidadPanel vistaLogsTrazabilidad;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo9NotificacionesAuditoriaFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo9NotificacionesAuditoriaFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo9NotificacionesAuditoriaFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo9NotificacionesAuditoriaFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 9: Notificaciones, Documentos y Auditoría");
         setIconImage(Ui.icono());

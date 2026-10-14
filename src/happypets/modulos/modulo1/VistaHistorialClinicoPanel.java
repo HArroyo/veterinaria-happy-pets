@@ -25,10 +25,20 @@ import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -88,6 +98,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
     private JList<ConsultaClinica> listaConsultas;
 
     // Componentes del Panel Derecho (Detail - Ficha Ejecutiva)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelAvatarMascota;
     private JLabel lblPetNombre;
     private JLabel lblPetCodigoBadge;
@@ -102,6 +117,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
     private JLabel lblKpiAlergiasVal;
 
     // Componentes del Expediente Clínico de la Consulta
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel cardExpediente;
     private JLabel lblExpedienteCodigo;
     private JLabel lblExpedienteFecha;
@@ -118,8 +138,18 @@ public class VistaHistorialClinicoPanel extends JPanel {
     private JLabel lblExpTratamiento;
     private JLabel lblExpObservaciones;
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelSinConsulta;
 
+    /**
+     * Constructor de VistaHistorialClinicoPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaHistorialClinicoPanel() {
         setLayout(new BorderLayout(0, 10));
         setOpaque(false);
@@ -129,6 +159,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         add(crearCabeceraVista(), BorderLayout.NORTH);
 
         // 2. Panel central dividido (Master-Detail 350px / resto)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centralSplit = new JPanel(new BorderLayout(14, 0));
         centralSplit.setOpaque(false);
 
@@ -153,11 +188,26 @@ public class VistaHistorialClinicoPanel extends JPanel {
     // =========================================================================
     // 1. CABECERA DE LA VISTA
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
         cab.setPreferredSize(new Dimension(0, 42));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -175,6 +225,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         izq.add(lblSub);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
@@ -204,10 +259,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
     // =========================================================================
     // 2. PANEL IZQUIERDO (MASTER): DIRECTORIO + TIMELINE
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelIzquierdoMaster() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel master = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -224,10 +293,20 @@ public class VistaHistorialClinicoPanel extends JPanel {
         master.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         // Sub-panel superior: Directorio de Pacientes
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelPacientes = new JPanel(new BorderLayout(0, 6));
         panelPacientes.setOpaque(false);
 
         // Cabecera del directorio
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topDirectorio = new JPanel(new BorderLayout());
         topDirectorio.setOpaque(false);
 
@@ -243,6 +322,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         panelPacientes.add(topDirectorio, BorderLayout.NORTH);
 
         // Barra de búsqueda y filtro por especie
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelFiltros = new JPanel(new BorderLayout(6, 0));
         panelFiltros.setOpaque(false);
 
@@ -292,11 +376,21 @@ public class VistaHistorialClinicoPanel extends JPanel {
         master.add(panelPacientes, BorderLayout.NORTH);
 
         // Sub-panel central: Timeline de Consultas del paciente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelTimeline = new JPanel(new BorderLayout(0, 6));
         panelTimeline.setOpaque(false);
         panelTimeline.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
 
         // Cabecera del timeline
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topTimeline = new JPanel(new BorderLayout());
         topTimeline.setOpaque(false);
         topTimeline.setBorder(new EmptyBorder(8, 0, 2, 0));
@@ -324,6 +418,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         cbPeriodo.setBackground(Color.WHITE);
         cbPeriodo.addActionListener(e -> filtrarConsultasTimeline());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTimeline = new JPanel();
         headerTimeline.setOpaque(false);
         headerTimeline.setLayout(new BoxLayout(headerTimeline, BoxLayout.Y_AXIS));
@@ -359,7 +458,17 @@ public class VistaHistorialClinicoPanel extends JPanel {
     // =========================================================================
     // 3. PANEL DERECHO (DETAIL): DOSSIER CLÍNICO INTEGRAL EN VIVO
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDerechoDossier() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel dossier = new JPanel(new BorderLayout(0, 10));
         dossier.setOpaque(false);
 
@@ -372,10 +481,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
         return dossier;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFichaEjecutivaPaciente() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -391,21 +514,41 @@ public class VistaHistorialClinicoPanel extends JPanel {
         card.setBorder(new EmptyBorder(12, 16, 12, 16));
 
         // Parte Superior de la Ficha: Avatar circular + Datos Identificatorios
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerInfo = new JPanel(new BorderLayout(14, 0));
         headerInfo.setOpaque(false);
 
         // Avatar circular grande (50px)
         panelAvatarMascota = crearAvatarCircular(50, "P", COLOR_TURQUESA_SUAVE, COLOR_TURQUESA_OSCURO);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel avatarWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         avatarWrapper.setOpaque(false);
         avatarWrapper.add(panelAvatarMascota);
         headerInfo.add(avatarWrapper, BorderLayout.WEST);
 
         // Textos del paciente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel datosTxt = new JPanel();
         datosTxt.setOpaque(false);
         datosTxt.setLayout(new BoxLayout(datosTxt, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         filaTitulo.setOpaque(false);
         filaTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -439,6 +582,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         card.add(headerInfo, BorderLayout.NORTH);
 
         // Parte Inferior de la Ficha: 4 Micro-KPIs Biológicos
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaKpis = new JPanel(new GridLayout(1, 4, 10, 0));
         filaKpis.setOpaque(false);
         filaKpis.setBorder(new EmptyBorder(8, 0, 0, 0));
@@ -458,10 +606,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemKpi(String etiqueta, JLabel lblValor, String sub, Color fondo, Color acento) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel kpi = new JPanel(new BorderLayout(4, 2)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -476,6 +638,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         kpi.setOpaque(false);
         kpi.setBorder(new EmptyBorder(6, 10, 6, 10));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel txt = new JPanel();
         txt.setOpaque(false);
         txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
@@ -501,10 +668,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
         return kpi;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardExpedienteConsulta() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         cardExpediente = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -520,11 +701,21 @@ public class VistaHistorialClinicoPanel extends JPanel {
         cardExpediente.setBorder(new EmptyBorder(14, 16, 14, 16));
 
         // Cabecera del expediente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerExp = new JPanel(new BorderLayout());
         headerExp.setOpaque(false);
         headerExp.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
         headerExp.setPreferredSize(new Dimension(0, 44));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         izq.setOpaque(false);
 
@@ -551,6 +742,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
 
         headerExp.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         der.setOpaque(false);
 
@@ -570,12 +766,22 @@ public class VistaHistorialClinicoPanel extends JPanel {
         cardExpediente.add(headerExp, BorderLayout.NORTH);
 
         // Cuerpo del expediente con scroll
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setOpaque(false);
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
         cuerpo.setBorder(new EmptyBorder(10, 4, 10, 4));
 
         // Bloque 1: Triaje y Signos Vitales en la cita
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaTriaje = new JPanel(new GridLayout(1, 2, 12, 0));
         filaTriaje.setOpaque(false);
         filaTriaje.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -630,9 +836,19 @@ public class VistaHistorialClinicoPanel extends JPanel {
         cardExpediente.add(scrollCuerpo, BorderLayout.CENTER);
 
         // Panel alternativo: Estado vacío sin consulta
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelSinConsulta = new JPanel(new BorderLayout());
         panelSinConsulta.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centroVacio = new JPanel();
         centroVacio.setOpaque(false);
         centroVacio.setLayout(new BoxLayout(centroVacio, BoxLayout.Y_AXIS));
@@ -669,10 +885,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
         return cardExpediente;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCajaDatoSimple(String titulo, JLabel valor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel caja = new JPanel(new BorderLayout(4, 2)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -699,10 +929,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
         return caja;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBloqueClinico(String titulo, JLabel principal, JLabel secundario, Color fondo, Color borde) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bloque = new JPanel(new BorderLayout(0, 4)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -723,6 +967,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         lblT.setForeground(COLOR_MUTED);
         bloque.add(lblT, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setOpaque(false);
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
@@ -761,6 +1010,10 @@ public class VistaHistorialClinicoPanel extends JPanel {
         filtrarMascotas();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarMascotas() {
         String query = txtBuscarMascota != null ? txtBuscarMascota.getText().trim().toLowerCase() : "";
         String especie = cbFiltroEspecie != null ? (String) cbFiltroEspecie.getSelectedItem() : "Todas";
@@ -826,6 +1079,10 @@ public class VistaHistorialClinicoPanel extends JPanel {
         filtrarConsultasTimeline();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarConsultasTimeline() {
         modeloListaConsultas.clear();
         if (mascotaSeleccionada == null || listaConsultasMascota == null) {
@@ -860,6 +1117,10 @@ public class VistaHistorialClinicoPanel extends JPanel {
         }
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleConsultaEnVivo(ConsultaClinica c) {
         this.consultaSeleccionada = c;
         if (c == null) {
@@ -897,11 +1158,21 @@ public class VistaHistorialClinicoPanel extends JPanel {
         cardExpediente.setLayout(new BorderLayout(0, 10));
 
         // Reconstruir
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerExp = new JPanel(new BorderLayout());
         headerExp.setOpaque(false);
         headerExp.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
         headerExp.setPreferredSize(new Dimension(0, 44));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         izq.setOpaque(false);
         izq.add(new JLabel(Iconos.crearIconoHistorial(18, COLOR_TURQUESA)));
@@ -911,6 +1182,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         izq.add(lblExpedienteEstadoBadge);
         headerExp.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         der.setOpaque(false);
         der.add(btnEditarConsulta);
@@ -924,11 +1200,21 @@ public class VistaHistorialClinicoPanel extends JPanel {
         cardExpediente.add(headerExp, BorderLayout.NORTH);
 
         // Cuerpo con los bloques
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setOpaque(false);
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
         cuerpo.setBorder(new EmptyBorder(10, 4, 10, 4));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaTriaje = new JPanel(new GridLayout(1, 2, 12, 0));
         filaTriaje.setOpaque(false);
         filaTriaje.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -1073,10 +1359,24 @@ public class VistaHistorialClinicoPanel extends JPanel {
     // 6. COMPONENTES GRÁFICOS PERSONALIZADOS (AVATARES Y RENDERERS)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearAvatarCircular(int diametro, String texto, Color fondo, Color textoColor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel avatar = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -1114,6 +1414,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         return avatar;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void actualizarAvatarCircular(JPanel avatar, String texto, Color fondo, Color textoColor) {
         avatar.putClientProperty("texto", texto);
         avatar.putClientProperty("fondo", fondo);
@@ -1125,6 +1430,10 @@ public class VistaHistorialClinicoPanel extends JPanel {
         JLabel badge = new JLabel(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1146,6 +1455,10 @@ public class VistaHistorialClinicoPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1178,6 +1491,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
     // 7. RENDERERS DE LISTA (MASCOTA & TIMELINE)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private class MascotaCellRenderer extends JPanel implements ListCellRenderer<Mascota> {
         private static final long serialVersionUID = 1L;
         private final JLabel lblAvatar;
@@ -1193,6 +1511,10 @@ public class VistaHistorialClinicoPanel extends JPanel {
             lblAvatar = new JLabel("", SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1216,11 +1538,21 @@ public class VistaHistorialClinicoPanel extends JPanel {
             lblAvatar.setMaximumSize(new Dimension(32, 32));
             lblAvatar.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel avatarWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
             avatarWrap.setOpaque(false);
             avatarWrap.add(lblAvatar);
             add(avatarWrap, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel txt = new JPanel();
             txt.setOpaque(false);
             txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
@@ -1269,6 +1601,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private class ConsultaTimelineCellRenderer extends JPanel implements ListCellRenderer<ConsultaClinica> {
         private static final long serialVersionUID = 1L;
         private final JLabel lblFecha;
@@ -1282,12 +1619,21 @@ public class VistaHistorialClinicoPanel extends JPanel {
             setOpaque(true);
 
             // Icono nodo circular de fecha
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel izq = new JPanel(new BorderLayout());
             izq.setOpaque(false);
 
             lblFecha = new JLabel("", SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1306,6 +1652,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
             izq.add(lblFecha, BorderLayout.NORTH);
             add(izq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel center = new JPanel();
             center.setOpaque(false);
             center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
@@ -1324,6 +1675,11 @@ public class VistaHistorialClinicoPanel extends JPanel {
             add(center, BorderLayout.CENTER);
 
             lblBadgeEstado = crearBadge("Cerrada", new Color(220, 252, 231), new Color(22, 163, 74));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 4));
             der.setOpaque(false);
             der.add(lblBadgeEstado);

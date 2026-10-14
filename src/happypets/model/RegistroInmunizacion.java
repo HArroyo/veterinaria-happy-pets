@@ -28,6 +28,11 @@ public class RegistroInmunizacion {
     private String observaciones;
     private String estado; // "Aplicada", "Próxima", "Pendiente"
 
+    /**
+     * Constructor de RegistroInmunizacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RegistroInmunizacion(String idRegistro, String tipoControl, String codigoMascota, String nombreMascota,
                                  String especieRaza, String nombreTutor, String telefonoTutor, String producto,
                                  String laboratorioLote, String dosis, LocalDate fechaAplicacion,

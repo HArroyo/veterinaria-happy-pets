@@ -22,6 +22,11 @@ public class OrdenCompra {
     private String estado; // "Borrador", "Enviada a Proveedor", "Recibida en Almacén", "Cancelada"
     private String solicitante;
 
+    /**
+     * Constructor de OrdenCompra.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public OrdenCompra(String idOrden, String rucProveedor, String nombreProveedor,
                        LocalDate fechaEmision, LocalDate fechaEntregaEstimada,
                        String itemsResumen, double subtotal, double igv, double total,

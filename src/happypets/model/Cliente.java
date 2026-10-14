@@ -21,9 +21,19 @@ public class Cliente {
     private String notasContacto;
     private final List<Mascota> mascotas = new ArrayList<>();
 
+    /**
+     * Constructor de Cliente.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Cliente() {
     }
 
+    /**
+     * Constructor de Cliente.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Cliente(String codigo, String nombres, String apellidos, String tipoDocumento,
                    String numeroDocumento, String telefonoPrincipal, String telefonoSecundario,
                    String correo, String direccion, String distritoCiudad, String notasContacto) {

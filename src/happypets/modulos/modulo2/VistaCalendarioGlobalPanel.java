@@ -30,9 +30,19 @@ import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -81,9 +91,19 @@ public class VistaCalendarioGlobalPanel extends JPanel {
 
     // Componentes del mini-calendario y panel lateral
     private JLabel lblMesAnio;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel gridDiasMes;
     private JLabel lblInfoDiaSeleccionado;
     private JLabel lblTotalCitasDia;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelMedidoresOcupacion;
     private JButton btnFiltroTodo;
     private JButton btnFiltroManana;
@@ -93,7 +113,17 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     private JLabel lblTituloFechaMatriz;
     private JComboBox<String> cbRecurso;
     private JTextField txtBuscarMatriz;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelAgendaHorarios;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel cardControlTurno;
 
     private final String[] HORAS_TODAS = {
@@ -114,6 +144,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             "Área de Grooming"
     };
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ScrollablePanel extends JPanel implements Scrollable {
         private static final long serialVersionUID = 1L;
         @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
@@ -123,10 +158,20 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 
+    /**
+     * Constructor de VistaCalendarioGlobalPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaCalendarioGlobalPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenido = new JPanel();
         contenido.setOpaque(false);
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
@@ -143,6 +188,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         // 3. Contenedor principal: Panel lateral inteligente (290px) + Matriz y Dock de turno (Centro)
         contenido.add(crearContenedorPrincipal());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
         wrapper.add(contenido, BorderLayout.NORTH);
@@ -162,12 +212,27 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     // 1. CABECERA Y KPIS SUPERIORES
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
         cab.setPreferredSize(new Dimension(0, 42));
         cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -185,6 +250,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         izq.add(lblSub);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
@@ -215,7 +285,17 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpisCalendario() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 4, 10, 0));
         fila.setOpaque(false);
         fila.setPreferredSize(new Dimension(0, 56));
@@ -235,10 +315,24 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardKpi(JLabel lblVal, String etiqueta, JLabel lblSub, Color bgIco, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -256,6 +350,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         JLabel badge = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -268,6 +366,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         badge.setPreferredSize(new Dimension(36, 36));
         card.add(badge, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pText = new JPanel();
         pText.setOpaque(false);
         pText.setLayout(new BoxLayout(pText, BoxLayout.Y_AXIS));
@@ -296,11 +399,26 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     // 2. CONTENEDOR PRINCIPAL (SPLIT IZQUIERDO Y DERECHO)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearContenedorPrincipal() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel split = new JPanel(new BorderLayout(14, 0));
         split.setOpaque(false);
 
         // Panel Lateral Izquierdo (290px)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel colIzq = new JPanel();
         colIzq.setOpaque(false);
         colIzq.setLayout(new BoxLayout(colIzq, BoxLayout.Y_AXIS));
@@ -315,6 +433,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         split.add(colIzq, BorderLayout.WEST);
 
         // Panel Central / Derecho: Matriz fluida + Dock de Control de Turno
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel colDer = new JPanel(new BorderLayout(0, 10));
         colDer.setOpaque(false);
 
@@ -330,10 +453,24 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     // 3. PANEL LATERAL: MINI CALENDARIO, MEDIDORES Y LEYENDA
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaMiniCalendario() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -349,6 +486,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // Cabecera del mes con botones < >
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel navMes = new JPanel(new BorderLayout(4, 0));
         navMes.setOpaque(false);
 
@@ -374,9 +516,19 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         card.add(navMes, BorderLayout.NORTH);
 
         // Cuadrícula del mes
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlCal = new JPanel(new BorderLayout(0, 4));
         pnlCal.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlSemana = new JPanel(new GridLayout(1, 7, 2, 2));
         pnlSemana.setOpaque(false);
         String[] diasCortos = {"Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"};
@@ -388,6 +540,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         }
         pnlCal.add(pnlSemana, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         gridDiasMes = new JPanel(new GridLayout(6, 7, 2, 2));
         gridDiasMes.setOpaque(false);
         pnlCal.add(gridDiasMes, BorderLayout.CENTER);
@@ -395,6 +552,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         card.add(pnlCal, BorderLayout.CENTER);
 
         // Resumen inferior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bot = new JPanel(new BorderLayout());
         bot.setOpaque(false);
         bot.setBorder(BorderFactory.createCompoundBorder(
@@ -417,10 +579,24 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaMedidoresOcupacion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 6)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -442,6 +618,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         lblTit.setForeground(COLOR_TEXTO_TITULO);
         card.add(lblTit, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelMedidoresOcupacion = new JPanel();
         panelMedidoresOcupacion.setOpaque(false);
         panelMedidoresOcupacion.setLayout(new BoxLayout(panelMedidoresOcupacion, BoxLayout.Y_AXIS));
@@ -450,10 +631,24 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaFiltrosYLeyenda() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -469,6 +664,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // Segmented Control de Jornada
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pFiltro = new JPanel(new BorderLayout(0, 4));
         pFiltro.setOpaque(false);
 
@@ -477,6 +677,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         lblJor.setForeground(COLOR_TEXTO_MUTED);
         pFiltro.add(lblJor, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pPills = new JPanel(new GridLayout(1, 3, 4, 0));
         pPills.setOpaque(false);
 
@@ -496,6 +701,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         card.add(pFiltro, BorderLayout.NORTH);
 
         // Leyenda de Espacios
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlItems = new JPanel();
         pnlItems.setOpaque(false);
         pnlItems.setLayout(new BoxLayout(pnlItems, BoxLayout.Y_AXIS));
@@ -513,13 +723,27 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaLeyenda(Color bg, Color text, String etiqueta) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         p.setOpaque(false);
 
         JLabel dot = new JLabel() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -545,10 +769,24 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     // 4. MATRIZ DE ESPACIOS FLUIDA Y HERRAMIENTAS (SIN SCROLL HORIZONTAL)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaMatrizAgenda() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -564,6 +802,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // Barra de Herramientas superior de la matriz
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout(10, 0));
         top.setOpaque(false);
         top.setPreferredSize(new Dimension(0, 36));
@@ -575,6 +818,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         lblTituloFechaMatriz.setForeground(COLOR_TEXTO_TITULO);
         top.add(lblTituloFechaMatriz, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
@@ -588,6 +836,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             @Override public void changedUpdate(DocumentEvent e) { filtrarPorTexto(); }
         });
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlBusqueda = new JPanel(new BorderLayout(4, 0));
         pnlBusqueda.setOpaque(false);
         JLabel lblLupa = new JLabel(Iconos.crearIconoBuscar(14, COLOR_TEXTO_MUTED));
@@ -627,6 +880,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarPorTexto() {
         filtroTexto = txtBuscarMatriz.getText();
         actualizarMatrizHorarios();
@@ -636,10 +893,24 @@ public class VistaCalendarioGlobalPanel extends JPanel {
     // 5. DOCK DE CONTROL DE TURNO EN VIVO (PANEL INFERIOR)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaDockControlTurno() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         cardControlTurno = new JPanel(new BorderLayout(0, 6)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -663,6 +934,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         cardControlTurno.removeAll();
 
         if (citaSeleccionada == null) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel vacio = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 36));
             vacio.setOpaque(false);
 
@@ -679,6 +955,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             String rec = resolverRecursoCita(c);
 
             // Fila Superior: Avatar circular + Datos Paciente + Badges Micro-KPI
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel top = new JPanel(new BorderLayout(10, 0));
             top.setOpaque(false);
 
@@ -687,12 +968,22 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             Color fgAv = getColorAvatarTextoRecurso(rec);
             JLabel avatar = crearAvatarCircular(extraerIniciales(c.getNombreMascota()), 42, bgAv, fgAv);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel avWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
             avWrapper.setOpaque(false);
             avWrapper.add(avatar);
             top.add(avWrapper, BorderLayout.WEST);
 
             // Textos paciente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel infoPac = new JPanel();
             infoPac.setOpaque(false);
             infoPac.setLayout(new BoxLayout(infoPac, BoxLayout.Y_AXIS));
@@ -711,6 +1002,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             top.add(infoPac, BorderLayout.CENTER);
 
             // Badges a la derecha
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel pBadges = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
             pBadges.setOpaque(false);
 
@@ -726,6 +1022,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             cardControlTurno.add(top, BorderLayout.NORTH);
 
             // Fila Media: Motivo y prioridad
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel mid = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
             mid.setOpaque(false);
 
@@ -736,6 +1037,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             cardControlTurno.add(mid, BorderLayout.CENTER);
 
             // Fila Inferior: Acciones Operativas Inmediatas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
             bot.setOpaque(false);
 
@@ -930,6 +1236,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             JLabel lblDia = new JLabel(String.valueOf(d), SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1010,10 +1320,25 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         panelMedidoresOcupacion.repaint();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBarraProgresoEspacio(String nombre, int ocupados, int total, int porcentaje, Color colorBarra) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pLabels = new JPanel(new BorderLayout());
         pLabels.setOpaque(false);
 
@@ -1030,9 +1355,18 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         pLabels.add(lblVal, BorderLayout.EAST);
         p.add(pLabels, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JComponent progressBar = new JComponent() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1074,6 +1408,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
                                  "TARDE".equals(filtroJornada) ? HORAS_TARDE : HORAS_TODAS;
 
         // 1. Fila Cabecera con nombres de salas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaCab = new JPanel(new BorderLayout(8, 0));
         filaCab.setBackground(new Color(241, 245, 249));
         filaCab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
@@ -1085,6 +1424,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         lblH.setPreferredSize(new Dimension(65, 24));
         filaCab.add(lblH, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pCols = new JPanel(new GridLayout(1, columnasAMostrar.size(), 6, 0));
         pCols.setOpaque(false);
         for (String col : columnasAMostrar) {
@@ -1099,6 +1443,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
 
         // 2. Filas de horarios
         for (String slotHora : slotsHorarios) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel filaSlot = new JPanel(new BorderLayout(8, 0));
             filaSlot.setOpaque(false);
             filaSlot.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
@@ -1110,6 +1459,11 @@ public class VistaCalendarioGlobalPanel extends JPanel {
             lblHora.setPreferredSize(new Dimension(65, 38));
             filaSlot.add(lblHora, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel pCeldas = new JPanel(new GridLayout(1, columnasAMostrar.size(), 6, 0));
             pCeldas.setOpaque(false);
             for (String rec : columnasAMostrar) {
@@ -1148,12 +1502,26 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         return null;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCeldaSlot(String hora, String recurso, Cita cita) {
         if (cita == null) {
             // Slot Disponible
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel libre = new JPanel(new BorderLayout()) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1190,9 +1558,18 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         Color bgAvatar = getColorAvatarBgRecurso(recurso);
         Color fgAvatar = getColorAvatarTextoRecurso(recurso);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel ocupado = new JPanel(new BorderLayout(6, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1218,12 +1595,22 @@ public class VistaCalendarioGlobalPanel extends JPanel {
 
         // Avatar perfectamente circular con panel contenedor para evitar estiramiento
         JLabel av = crearAvatarCircular(extraerIniciales(cita.getNombreMascota()), 26, bgAvatar, fgAvatar);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel avWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
         avWrapper.setOpaque(false);
         avWrapper.add(av);
         ocupado.add(avWrapper, BorderLayout.WEST);
 
         // Textos del turno
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pInfo = new JPanel();
         pInfo.setOpaque(false);
         pInfo.setLayout(new BoxLayout(pInfo, BoxLayout.Y_AXIS));
@@ -1318,6 +1705,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         JLabel lbl = new JLabel(texto, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1349,6 +1740,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         JLabel l = new JLabel(texto, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1408,6 +1803,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1435,6 +1834,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1468,6 +1871,10 @@ public class VistaCalendarioGlobalPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

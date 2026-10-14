@@ -25,6 +25,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -48,6 +53,11 @@ public class VisorReporteDialog extends JDialog {
     private final String resumen;
     private final String prefijoArchivo;
 
+    /**
+     * Constructor de VisorReporteDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VisorReporteDialog(Window parent, String titulo, String subtitulo,
                               String[][] metadatos, String[] columnas,
                               List<Object[]> filas, String resumen, String prefijoArchivo) {
@@ -71,10 +81,20 @@ public class VisorReporteDialog extends JDialog {
 
     private void inicializarInterfaz() {
         // Fondo general
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fondo = new JPanel(new BorderLayout());
         fondo.setBackground(new Color(241, 245, 249));
 
         // Barra de herramientas superior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraHerramientas = new JPanel(new BorderLayout(12, 0));
         barraHerramientas.setBackground(Color.WHITE);
         barraHerramientas.setBorder(BorderFactory.createCompoundBorder(
@@ -82,6 +102,11 @@ public class VisorReporteDialog extends JDialog {
                 new EmptyBorder(10, 20, 10, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         titIzq.setOpaque(false);
         JLabel lblIco = new JLabel(Iconos.crearIconoDocumento(20, Ui.TURQUESA));
@@ -92,6 +117,11 @@ public class VisorReporteDialog extends JDialog {
         titIzq.add(lblTitHerramientas);
         barraHerramientas.add(titIzq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel btnsDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         btnsDer.setOpaque(false);
 
@@ -116,9 +146,19 @@ public class VisorReporteDialog extends JDialog {
         fondo.add(barraHerramientas, BorderLayout.NORTH);
 
         // Contenedor del documento "Hoja A4"
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenedorHoja = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 20));
         contenedorHoja.setBackground(new Color(241, 245, 249));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel hojaA4 = crearHojaDocumento();
         contenedorHoja.add(hojaA4);
 
@@ -131,10 +171,24 @@ public class VisorReporteDialog extends JDialog {
         add(fondo, BorderLayout.CENTER);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearHojaDocumento() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel hoja = new JPanel(new BorderLayout(0, 16)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -152,10 +206,20 @@ public class VisorReporteDialog extends JDialog {
         ));
 
         // 1. Encabezado institucional de la hoja
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
         // Barra Turquesa superior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bannerTurquesa = new JPanel(new BorderLayout(14, 0));
         bannerTurquesa.setBackground(Ui.TURQUESA);
         bannerTurquesa.setBorder(new EmptyBorder(12, 18, 12, 18));
@@ -163,6 +227,10 @@ public class VisorReporteDialog extends JDialog {
         JLabel logoHP = new JLabel("HP", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -177,6 +245,11 @@ public class VisorReporteDialog extends JDialog {
         logoHP.setForeground(Ui.TURQUESA);
         bannerTurquesa.add(logoHP, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel infoClinica = new JPanel();
         infoClinica.setLayout(new BoxLayout(infoClinica, BoxLayout.Y_AXIS));
         infoClinica.setOpaque(false);
@@ -197,6 +270,11 @@ public class VisorReporteDialog extends JDialog {
         header.add(bannerTurquesa, BorderLayout.NORTH);
 
         // Bloque del Título y Subtítulo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bloqueTit = new JPanel();
         bloqueTit.setLayout(new BoxLayout(bloqueTit, BoxLayout.Y_AXIS));
         bloqueTit.setOpaque(false);
@@ -219,12 +297,22 @@ public class VisorReporteDialog extends JDialog {
         hoja.add(header, BorderLayout.NORTH);
 
         // 2. Contenido Central (Metadatos + Tabla)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel();
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
         centro.setOpaque(false);
 
         // Metadatos
         if (metadatos != null && metadatos.length > 0) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel cardMeta = new JPanel(new GridLayout((metadatos.length + 1) / 2, 2, 14, 6));
             cardMeta.setBackground(Ui.TURQUESA_SUAVE);
             cardMeta.setBorder(BorderFactory.createCompoundBorder(
@@ -268,6 +356,11 @@ public class VisorReporteDialog extends JDialog {
         // Bloque de Resumen / Totales
         if (resumen != null && !resumen.trim().isEmpty()) {
             centro.add(Box.createVerticalStrut(12));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel panelResumen = new JPanel(new BorderLayout());
             panelResumen.setBackground(Ui.TURQUESA_SUAVE);
             panelResumen.setBorder(BorderFactory.createCompoundBorder(
@@ -285,10 +378,20 @@ public class VisorReporteDialog extends JDialog {
         hoja.add(centro, BorderLayout.CENTER);
 
         // 3. Pie de página formal con firma y certificación
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new BorderLayout());
         footer.setOpaque(false);
         footer.setBorder(new EmptyBorder(14, 0, 0, 0));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel firmaIzq = new JPanel();
         firmaIzq.setLayout(new BoxLayout(firmaIzq, BoxLayout.Y_AXIS));
         firmaIzq.setOpaque(false);
@@ -307,6 +410,11 @@ public class VisorReporteDialog extends JDialog {
         firmaIzq.add(lblCol);
         footer.add(firmaIzq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel selloDer = new JPanel();
         selloDer.setLayout(new BoxLayout(selloDer, BoxLayout.Y_AXIS));
         selloDer.setOpaque(false);

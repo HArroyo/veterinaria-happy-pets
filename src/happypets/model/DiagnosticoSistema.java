@@ -20,6 +20,11 @@ public class DiagnosticoSistema implements Serializable {
     private double espacioDiscoLibreGB;
     private List<String> logsServidor;
 
+    /**
+     * Constructor de DiagnosticoSistema.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DiagnosticoSistema() {
         this.estadoBaseDatos = "En línea (0.12 ms)";
         this.ultimoRespaldoCloud = "Hoy, 03:00 AM";

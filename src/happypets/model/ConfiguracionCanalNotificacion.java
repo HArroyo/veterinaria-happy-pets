@@ -13,9 +13,19 @@ public class ConfiguracionCanalNotificacion implements Serializable {
     private String destino;     // "usuario@empresa.com", "+51 987 654 321", "Dispositivo Móvil / Navegador Web"
     private String frecuencia;  // "Inmediata", "Cada hora", "Resumen Diario", "Semanal"
 
+    /**
+     * Constructor de ConfiguracionCanalNotificacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConfiguracionCanalNotificacion() {
     }
 
+    /**
+     * Constructor de ConfiguracionCanalNotificacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConfiguracionCanalNotificacion(String canal, boolean activo, String destino, String frecuencia) {
         this.canal = canal;
         this.activo = activo;

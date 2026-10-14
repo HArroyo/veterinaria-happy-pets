@@ -25,6 +25,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -89,6 +94,11 @@ public class FormularioCirugiaDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioCirugiaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioCirugiaDialog(Window parent, RegistroCirugia cirugiaExistente, Mascota mascotaInicial, Consumer<RegistroCirugia> onGuardado) {
         super(parent, cirugiaExistente == null ? "Programar Intervención Quirúrgica" : "Editar Cirugía " + cirugiaExistente.getIdCirugia(), ModalityType.APPLICATION_MODAL);
         this.cirugiaExistente = cirugiaExistente;
@@ -100,10 +110,20 @@ public class FormularioCirugiaDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera Quirúrgica
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(15, 118, 110)); // Turquesa profundo quirúrgico
         header.setBorder(new EmptyBorder(16, 20, 16, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -138,6 +158,11 @@ public class FormularioCirugiaDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Footer
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(new Color(248, 250, 252));
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
@@ -175,7 +200,17 @@ public class FormularioCirugiaDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabProgramacion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -300,12 +335,27 @@ public class FormularioCirugiaDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabIntraoperatorio() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -397,12 +447,27 @@ public class FormularioCirugiaDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabPostoperatorio() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -491,6 +556,11 @@ public class FormularioCirugiaDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;

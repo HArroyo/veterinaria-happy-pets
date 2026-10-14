@@ -25,9 +25,19 @@ public class Veterinario implements Serializable {
     private int totalAtencionesRealizadas;
     private String consultorioHabitual;
 
+    /**
+     * Constructor de Veterinario.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Veterinario() {
     }
 
+    /**
+     * Constructor de Veterinario.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Veterinario(String id, String nombreCompleto, String colegiaturaCMPV, String especialidad,
                        int aniosExperiencia, String descripcionBio, String diasAtencion,
                        String horarioTurno, String proximaCitaLibre, String estadoDisponibilidad,

@@ -24,6 +24,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -81,6 +86,11 @@ public class FormularioInmunizacionDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioInmunizacionDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioInmunizacionDialog(Window parent, RegistroInmunizacion registroExistente, Mascota mascotaInicial, Consumer<RegistroInmunizacion> onGuardado) {
         super(parent, registroExistente == null ? "Nuevo Registro de Inmunización" : "Editar Inmunización " + registroExistente.getIdRegistro(), ModalityType.APPLICATION_MODAL);
         this.registroExistente = registroExistente;
@@ -92,10 +102,20 @@ public class FormularioInmunizacionDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera Médica
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(COLOR_AZUL_PRIMARIO);
         header.setBorder(new EmptyBorder(16, 20, 16, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -129,6 +149,11 @@ public class FormularioInmunizacionDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Footer
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(new Color(248, 250, 252));
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
@@ -166,7 +191,17 @@ public class FormularioInmunizacionDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabAplicacion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -269,12 +304,27 @@ public class FormularioInmunizacionDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabTrazabilidad() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -368,6 +418,11 @@ public class FormularioInmunizacionDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;

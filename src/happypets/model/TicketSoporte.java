@@ -20,9 +20,19 @@ public class TicketSoporte implements Serializable {
     private String descripcion;
     private String respuestaTecnica;
 
+    /**
+     * Constructor de TicketSoporte.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public TicketSoporte() {
     }
 
+    /**
+     * Constructor de TicketSoporte.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public TicketSoporte(String idTicket, String asunto, String categoria, String prioridad,
                          String estado, String usuarioReporta, LocalDateTime fechaCreacion,
                          String descripcion, String respuestaTecnica) {

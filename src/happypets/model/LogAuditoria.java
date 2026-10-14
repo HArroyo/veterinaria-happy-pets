@@ -18,9 +18,19 @@ public class LogAuditoria implements Serializable {
     private String estado;       // "ÉXITO", "FALLIDO"
     private String detalles;
 
+    /**
+     * Constructor de LogAuditoria.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public LogAuditoria() {
     }
 
+    /**
+     * Constructor de LogAuditoria.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public LogAuditoria(String idEvento, String tipoEvento, String usuario,
                         LocalDateTime fechaHora, String ipOrigen, String estado, String detalles) {
         this.idEvento = idEvento;

@@ -27,6 +27,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -72,6 +77,11 @@ public class FormularioMovimientoStockDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioMovimientoStockDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioMovimientoStockDialog(Frame parent) {
         super(parent, "Registrar Movimiento de Kardex / Trazabilidad de Lotes", true);
         setSize(640, 520);
@@ -94,11 +104,26 @@ public class FormularioMovimientoStockDialog extends JDialog {
         inicializarDatos();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabecera() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setBackground(Color.WHITE);
         cab.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel textos = new JPanel();
         textos.setOpaque(false);
         textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
@@ -122,7 +147,17 @@ public class FormularioMovimientoStockDialog extends JDialog {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaOperacion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -174,6 +209,11 @@ public class FormularioMovimientoStockDialog extends JDialog {
 
         // Fila 4: Resumen de Stock
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelResumenStock = new JPanel(new GridLayout(1, 2, 10, 0));
         panelResumenStock.setOpaque(false);
         panelResumenStock.setBorder(new EmptyBorder(8, 0, 4, 0));
@@ -205,7 +245,17 @@ public class FormularioMovimientoStockDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaTrazabilidad() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -297,7 +347,17 @@ public class FormularioMovimientoStockDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBotoneraInferior() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         barra.setBackground(Color.WHITE);
         barra.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -418,6 +478,10 @@ public class FormularioMovimientoStockDialog extends JDialog {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

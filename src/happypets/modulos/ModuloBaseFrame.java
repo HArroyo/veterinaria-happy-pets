@@ -19,6 +19,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
@@ -41,6 +46,11 @@ public class ModuloBaseFrame extends JFrame {
     protected final Color colorAcento;
     protected final Icon iconoModulo;
 
+    /**
+     * Constructor de ModuloBaseFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ModuloBaseFrame(int numeroModulo, String nombreModulo, String responsable, String[] submodulos, Color colorAcento, Icon iconoModulo) {
         this.numeroModulo = numeroModulo;
         this.nombreModulo = nombreModulo;
@@ -61,6 +71,11 @@ public class ModuloBaseFrame extends JFrame {
         add(Ui.crearCabeceraSistema(), BorderLayout.NORTH);
 
         // Contenedor principal con fondo gris suave
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenedor = new JPanel(new BorderLayout(0, 16));
         contenedor.setBackground(Ui.FONDO);
         contenedor.setBorder(new EmptyBorder(18, 24, 18, 24));
@@ -69,6 +84,11 @@ public class ModuloBaseFrame extends JFrame {
         contenedor.add(crearCabeceraModuloConResponsable(), BorderLayout.NORTH);
 
         // Grid con los 4 submódulos
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridSubmodulos = new JPanel(new GridLayout(2, 2, 16, 16));
         gridSubmodulos.setOpaque(false);
 
@@ -92,10 +112,24 @@ public class ModuloBaseFrame extends JFrame {
         add(contenedor, BorderLayout.CENTER);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraModuloConResponsable() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout(14, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -113,6 +147,11 @@ public class ModuloBaseFrame extends JFrame {
                 new EmptyBorder(14, 18, 14, 18)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -142,6 +181,11 @@ public class ModuloBaseFrame extends JFrame {
         cab.add(izq, BorderLayout.CENTER);
 
         // Estado a la derecha
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 8));
         der.setOpaque(false);
         JLabel badgeEstado = new JLabel("● Estructura Lista para Wireframe");
@@ -153,10 +197,24 @@ public class ModuloBaseFrame extends JFrame {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaSubmodulo(String codigo, String nombreSubmodulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -173,6 +231,11 @@ public class ModuloBaseFrame extends JFrame {
         ));
 
         // Top
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -198,6 +261,11 @@ public class ModuloBaseFrame extends JFrame {
         card.add(lblDesc, BorderLayout.CENTER);
 
         // Botón inferior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         bot.setOpaque(false);
         JButton btn = Ui.boton("Verificar Submódulo " + codigo, true);

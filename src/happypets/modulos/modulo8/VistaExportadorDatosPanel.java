@@ -21,6 +21,11 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -55,8 +60,23 @@ public class VistaExportadorDatosPanel extends JPanel {
     private String formatoSeleccionado = "XLSX";
 
     // Componentes interactivos Paso 1
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel cardOrigen1;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel cardOrigen2;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel cardOrigen3;
 
     // Componentes interactivos Paso 2
@@ -80,6 +100,11 @@ public class VistaExportadorDatosPanel extends JPanel {
     private JLabel lblContadorHistorial;
     private List<HistorialExportacion> historialActual;
 
+    /**
+     * Constructor de VistaExportadorDatosPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaExportadorDatosPanel() {
         setLayout(new BorderLayout(0, 16));
         setBackground(new Color(248, 250, 252));
@@ -87,6 +112,11 @@ public class VistaExportadorDatosPanel extends JPanel {
 
         add(crearCabeceraSuperior(), BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCuerpo = new JPanel();
         panelCuerpo.setLayout(new BoxLayout(panelCuerpo, BoxLayout.Y_AXIS));
         panelCuerpo.setBackground(new Color(248, 250, 252));
@@ -109,14 +139,34 @@ public class VistaExportadorDatosPanel extends JPanel {
         cargarHistorial();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraSuperior() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout(16, 8));
         cab.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlTit = new JPanel();
         pnlTit.setLayout(new BoxLayout(pnlTit, BoxLayout.Y_AXIS));
         pnlTit.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaT = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         filaT.setOpaque(false);
 
@@ -142,6 +192,11 @@ public class VistaExportadorDatosPanel extends JPanel {
 
         cab.add(pnlTit, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setOpaque(false);
 
@@ -164,7 +219,17 @@ public class VistaExportadorDatosPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPaso1OrigenDatos() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccion = new JPanel(new BorderLayout(0, 10));
         seccion.setOpaque(false);
 
@@ -173,6 +238,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         lblPaso.setForeground(new Color(71, 85, 105));
         seccion.add(lblPaso, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel grid = new JPanel(new GridLayout(1, 3, 14, 0));
         grid.setOpaque(false);
 
@@ -218,13 +288,28 @@ public class VistaExportadorDatosPanel extends JPanel {
         return seccion;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaOrigen(String titulo, String badgeTexto, String descripcion,
                                       javax.swing.Icon icono, boolean seleccionada) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(8, 6));
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         actualizarEstiloTarjetaOrigen(card, seleccionada);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -237,6 +322,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         top.add(lblIcono, BorderLayout.EAST);
         card.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 4));
         centro.setOpaque(false);
 
@@ -257,6 +347,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void actualizarEstiloTarjetaOrigen(JPanel card, boolean seleccionada) {
         if (seleccionada) {
             card.setBackground(Ui.TURQUESA_SUAVE);
@@ -284,7 +379,17 @@ public class VistaExportadorDatosPanel extends JPanel {
         actualizarEstimacion();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPaso2SegmentacionYCampos() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 12));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -297,11 +402,21 @@ public class VistaExportadorDatosPanel extends JPanel {
         lblPaso.setForeground(new Color(71, 85, 105));
         card.add(lblPaso, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
         cuerpo.setOpaque(false);
 
         // Fila de 4 Selectores
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaSelectores = new JPanel(new GridLayout(1, 4, 12, 0));
         filaSelectores.setOpaque(false);
 
@@ -358,6 +473,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         cuerpo.add(lblCheckTit);
         cuerpo.add(Box.createVerticalStrut(8));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridChecks = new JPanel(new GridLayout(2, 3, 12, 6));
         gridChecks.setOpaque(false);
 
@@ -383,7 +503,17 @@ public class VistaExportadorDatosPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCajaSelector(String etiqueta, JComboBox<String> combo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(4, 3));
         p.setOpaque(false);
         JLabel l = new JLabel(etiqueta);
@@ -394,7 +524,17 @@ public class VistaExportadorDatosPanel extends JPanel {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPaso3FormatoYEjecucion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(14, 0));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -402,6 +542,11 @@ public class VistaExportadorDatosPanel extends JPanel {
                 BorderFactory.createEmptyBorder(14, 16, 14, 16)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         izq.setOpaque(false);
 
@@ -432,6 +577,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         card.add(izq, BorderLayout.WEST);
 
         // Estimación y botón de exportación
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         der.setOpaque(false);
 
@@ -533,7 +683,17 @@ public class VistaExportadorDatosPanel extends JPanel {
         );
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelHistorialYAlmacenamiento() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -542,9 +702,19 @@ public class VistaExportadorDatosPanel extends JPanel {
         ));
 
         // Cabecera del Historial
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout(12, 0));
         top.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         titIzq.setOpaque(false);
 
@@ -562,6 +732,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         titIzq.add(lblContadorHistorial);
         top.add(titIzq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
@@ -647,6 +822,11 @@ public class VistaExportadorDatosPanel extends JPanel {
         card.add(scroll, BorderLayout.CENTER);
 
         // Barra inferior de Cuota de Almacenamiento en Nube
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlAlmacenamiento = new JPanel(new BorderLayout(14, 4));
         pnlAlmacenamiento.setBackground(new Color(248, 250, 252));
         pnlAlmacenamiento.setBorder(BorderFactory.createCompoundBorder(
@@ -654,6 +834,11 @@ public class VistaExportadorDatosPanel extends JPanel {
                 BorderFactory.createEmptyBorder(10, 14, 10, 14)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
 

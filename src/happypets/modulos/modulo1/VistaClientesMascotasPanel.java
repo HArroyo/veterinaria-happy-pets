@@ -26,6 +26,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -92,6 +97,11 @@ public class VistaClientesMascotasPanel extends JPanel {
 
     // Selector de mascotas
     private JLabel lblContadorMascotas;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelBotonesMascotas;
     private JScrollPane scrollSelectorMascotas;
 
@@ -106,6 +116,11 @@ public class VistaClientesMascotasPanel extends JPanel {
     private JLabel lblPetEsterilizado;
     private JLabel lblPetMicrochip;
     private JLabel lblPetVacunasBadge;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelAlertaAlergias;
     private JLabel lblPetAlergias;
     private JButton btnHistorialClinico;
@@ -136,6 +151,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         return navegacionListener;
     }
 
+    /**
+     * Constructor de VistaClientesMascotasPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaClientesMascotasPanel() {
         setLayout(new BorderLayout(0, 10));
         setOpaque(false);
@@ -145,6 +165,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         add(crearCabeceraVista(), BorderLayout.NORTH);
 
         // 2. Panel central dividido (Master-Detail)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centralSplit = new JPanel(new BorderLayout(14, 0));
         centralSplit.setOpaque(false);
 
@@ -166,11 +191,26 @@ public class VistaClientesMascotasPanel extends JPanel {
     // =========================================================================
     // 1. CABECERA DE LA VISTA
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
         cab.setPreferredSize(new Dimension(0, 42));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -188,6 +228,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         izq.add(lblSub);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
@@ -213,10 +258,24 @@ public class VistaClientesMascotasPanel extends JPanel {
     // =========================================================================
     // 2. COLUMNA IZQUIERDA: DIRECTORIO EN VIVO
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDirectorioIzquierdo() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -234,9 +293,19 @@ public class VistaClientesMascotasPanel extends JPanel {
         panel.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         // Cabecera del directorio
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout(0, 6));
         top.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titFila = new JPanel(new BorderLayout());
         titFila.setOpaque(false);
 
@@ -258,6 +327,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         top.add(titFila, BorderLayout.NORTH);
 
         // Barra de busqueda reactiva
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel searchBox = new JPanel(new BorderLayout(4, 0));
         searchBox.setOpaque(false);
 
@@ -332,11 +406,26 @@ public class VistaClientesMascotasPanel extends JPanel {
     // =========================================================================
     // 3. COLUMNA DERECHA: DOSSIER CLINICO COMPLETO
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDossierDerecho() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel dossier = new JPanel(new BorderLayout(0, 10));
         dossier.setOpaque(false);
 
         // Parte Superior del Dossier: Ficha del Propietario + Selector de Mascotas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel superiorDossier = new JPanel();
         superiorDossier.setOpaque(false);
         superiorDossier.setLayout(new BoxLayout(superiorDossier, BoxLayout.Y_AXIS));
@@ -354,10 +443,24 @@ public class VistaClientesMascotasPanel extends JPanel {
     }
 
     // 3.1. Ficha Ejecutiva del Propietario
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaFichaPropietario() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -373,9 +476,19 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
         // Cabecera de la ficha
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         titIzq.setOpaque(false);
 
@@ -391,6 +504,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         cab.add(titIzq, BorderLayout.WEST);
 
         // Botones de accion rapida del propietario
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         acciones.setOpaque(false);
 
@@ -417,6 +535,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.add(cab, BorderLayout.NORTH);
 
         // Grid de datos del cliente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel grid = new JPanel(new GridLayout(2, 3, 12, 6));
         grid.setOpaque(false);
 
@@ -436,6 +559,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.add(grid, BorderLayout.CENTER);
 
         // Fila inferior: Notas de contacto
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pNotas = new JPanel(new BorderLayout(6, 0));
         pNotas.setOpaque(false);
         pNotas.setBorder(BorderFactory.createCompoundBorder(
@@ -459,10 +587,24 @@ public class VistaClientesMascotasPanel extends JPanel {
     }
 
     // 3.2. Selector de Pacientes / Tarjetas de Mascotas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaSelectorMascotas() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 6)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -478,6 +620,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.setBorder(new EmptyBorder(8, 14, 8, 14));
 
         // Cabecera del selector
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -495,6 +642,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.add(top, BorderLayout.NORTH);
 
         // Contenedor horizontal de botones de mascotas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelBotonesMascotas = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         panelBotonesMascotas.setOpaque(false);
 
@@ -510,7 +662,17 @@ public class VistaClientesMascotasPanel extends JPanel {
     }
 
     // 3.3. Doble Sub-Tarjeta Inferior (Perfil Medico y Visitas Recientes)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSubTarjetasInferiores() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel split = new JPanel(new GridLayout(1, 2, 12, 0));
         split.setOpaque(false);
 
@@ -524,10 +686,24 @@ public class VistaClientesMascotasPanel extends JPanel {
     }
 
     // Sub-Tarjeta 1: Perfil Tecnico de la Mascota
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSubTarjetaPerfilMascota() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -543,9 +719,19 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
         // Cabecera de la sub-tarjeta
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         titIzq.setOpaque(false);
 
@@ -560,6 +746,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         titIzq.add(lblPetCodigoBadge);
         top.add(titIzq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel badgesDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         badgesDer.setOpaque(false);
         lblPetSexoBadge = crearBadge("Macho", new Color(238, 242, 255), new Color(79, 70, 229));
@@ -570,10 +761,20 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.add(top, BorderLayout.NORTH);
 
         // Centro: Metricas clinicas y datos del paciente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel();
         centro.setOpaque(false);
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridSpecs = new JPanel(new GridLayout(3, 2, 10, 6));
         gridSpecs.setOpaque(false);
 
@@ -594,9 +795,18 @@ public class VistaClientesMascotasPanel extends JPanel {
         centro.add(Box.createVerticalStrut(8));
 
         // Alerta de alergias y cuidados
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelAlertaAlergias = new JPanel(new BorderLayout(6, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -628,6 +838,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.add(centro, BorderLayout.CENTER);
 
         // Barra inferior: Acciones clinicas directas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
         footer.setOpaque(false);
 
@@ -662,10 +877,24 @@ public class VistaClientesMascotasPanel extends JPanel {
     }
 
     // Sub-Tarjeta 2: Atenciones Medicas Recientes (Timeline)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSubTarjetaVisitasRecientes() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -681,6 +910,11 @@ public class VistaClientesMascotasPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
         // Cabecera
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -750,6 +984,10 @@ public class VistaClientesMascotasPanel extends JPanel {
         filtrarDirectorio();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarDirectorio() {
         String q = (txtBuscarDirectorio != null) ? txtBuscarDirectorio.getText().trim().toLowerCase() : "";
         modeloListaClientes.clear();
@@ -872,6 +1110,10 @@ public class VistaClientesMascotasPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1167,7 +1409,17 @@ public class VistaClientesMascotasPanel extends JPanel {
     // 6. COMPONENTES AUXILIARES DE ESTILO
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemDato(String etiqueta, JLabel valLabel, boolean destacado) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(0, 2));
         p.setOpaque(false);
 
@@ -1187,6 +1439,10 @@ public class VistaClientesMascotasPanel extends JPanel {
         JLabel badge = new JLabel(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1208,6 +1464,10 @@ public class VistaClientesMascotasPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1246,6 +1506,11 @@ public class VistaClientesMascotasPanel extends JPanel {
     // =========================================================================
     // 7. RENDERIZADOR PERSONALIZADO DEL DIRECTORIO DE CLIENTES
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ClienteListCellRenderer extends JPanel implements ListCellRenderer<Cliente> {
         private static final long serialVersionUID = 1L;
 
@@ -1265,6 +1530,10 @@ public class VistaClientesMascotasPanel extends JPanel {
             lblAvatar = new JLabel("", SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1303,6 +1572,11 @@ public class VistaClientesMascotasPanel extends JPanel {
             lblAvatar.setFont(new Font("Segoe UI", Font.BOLD, 11));
             lblAvatar.setForeground(Color.WHITE);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel pAvatarWrapper = new JPanel(new java.awt.GridBagLayout());
             pAvatarWrapper.setOpaque(false);
             pAvatarWrapper.setPreferredSize(new Dimension(38, 38));
@@ -1311,6 +1585,11 @@ public class VistaClientesMascotasPanel extends JPanel {
             add(pAvatarWrapper, BorderLayout.WEST);
 
             // Centro: Nombre y datos
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel mid = new JPanel();
             mid.setOpaque(false);
             mid.setLayout(new BoxLayout(mid, BoxLayout.Y_AXIS));
@@ -1336,6 +1615,10 @@ public class VistaClientesMascotasPanel extends JPanel {
             lblBadgeMascotas = new JLabel() {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1350,6 +1633,11 @@ public class VistaClientesMascotasPanel extends JPanel {
             lblBadgeMascotas.setBackground(new Color(240, 253, 250));
             lblBadgeMascotas.setBorder(new EmptyBorder(2, 6, 2, 6));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel pDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 8));
             pDer.setOpaque(false);
             pDer.add(lblBadgeMascotas);

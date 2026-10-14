@@ -32,6 +32,11 @@ public class Cita implements Serializable {
     private String observaciones;
     private double costoEstimado;
 
+    /**
+     * Constructor de Cita.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Cita(String idCita, String codigoMascota, String nombreMascota, String especieRaza,
                 String dniCliente, String nombreCliente, String telefonoCliente,
                 LocalDate fecha, LocalTime hora, int duracionMinutos, String veterinario,

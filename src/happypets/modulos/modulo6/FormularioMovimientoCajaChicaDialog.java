@@ -25,6 +25,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -63,16 +68,31 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
     private JTextField txtComprobante;
     private JTextArea txtObservaciones;
 
+    /**
+     * Constructor de FormularioMovimientoCajaChicaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioMovimientoCajaChicaDialog(Frame parent) {
         this(parent, null);
     }
 
+    /**
+     * Constructor de FormularioMovimientoCajaChicaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioMovimientoCajaChicaDialog(Frame parent, MovimientoCajaChica existente) {
         super(parent, existente == null ? "Nuevo Movimiento de Caja Chica" : "Modificación de Movimiento de Caja", true);
         this.existente = existente;
         inicializarUI();
     }
 
+    /**
+     * Construye y organiza la jerarquía visual de la pantalla en Swing.
+     * Ensambla la barra superior de acciones, tarjetas de métricas (KPIs),
+     * tabla maestra de datos y el panel lateral de detalle (Live Detail Hub).
+     */
     private void inicializarUI() {
         setSize(600, 620);
         setLocationRelativeTo(getParent());
@@ -80,6 +100,11 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
         getContentPane().setBackground(new Color(248, 250, 252));
 
         // Header
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -87,6 +112,11 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
                 new EmptyBorder(14, 20, 14, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titulos = new JPanel();
         titulos.setOpaque(false);
         titulos.setLayout(new BoxLayout(titulos, BoxLayout.Y_AXIS));
@@ -119,6 +149,11 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Footer
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footer.setBackground(Color.WHITE);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -140,7 +175,17 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaOperacion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(16, 22, 16, 22));
@@ -201,9 +246,18 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
 
         // Card de Saldo Proyectado
         gbc.gridx = 0; gbc.gridy = 6;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelProyeccion = new JPanel(new GridLayout(1, 2, 10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -232,7 +286,17 @@ public class FormularioMovimientoCajaChicaDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaResponsable() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(16, 22, 16, 22));

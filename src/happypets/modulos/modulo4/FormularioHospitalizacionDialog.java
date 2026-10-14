@@ -24,6 +24,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -78,10 +83,20 @@ public class FormularioHospitalizacionDialog extends JDialog {
             "Box 07", "Box 08", "Box 09"
     };
 
+    /**
+     * Constructor de FormularioHospitalizacionDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioHospitalizacionDialog(Window owner) {
         this(owner, null);
     }
 
+    /**
+     * Constructor de FormularioHospitalizacionDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioHospitalizacionDialog(Window owner, InternamientoHospitalario edicion) {
         super(owner, edicion == null ? "Registrar Ingreso a Hospitalización / UCI" : "Editar Expediente Hospitalario: " + edicion.getIdInternamiento(), ModalityType.APPLICATION_MODAL);
         this.internamientoOriginal = edicion;
@@ -99,6 +114,11 @@ public class FormularioHospitalizacionDialog extends JDialog {
 
     private void construirUi() {
         // Cabecera estilizada
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabecera = new JPanel(new BorderLayout());
         cabecera.setBackground(Color.WHITE);
         cabecera.setBorder(BorderFactory.createCompoundBorder(
@@ -106,6 +126,11 @@ public class FormularioHospitalizacionDialog extends JDialog {
                 new EmptyBorder(16, 20, 16, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titBox = new JPanel();
         titBox.setOpaque(false);
         titBox.setLayout(new BoxLayout(titBox, BoxLayout.Y_AXIS));
@@ -137,6 +162,11 @@ public class FormularioHospitalizacionDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Barra inferior de botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         barraBotones.setBackground(Color.WHITE);
         barraBotones.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -152,7 +182,17 @@ public class FormularioHospitalizacionDialog extends JDialog {
         add(barraBotones, BorderLayout.SOUTH);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabIngreso() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel();
         p.setOpaque(false);
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -171,6 +211,11 @@ public class FormularioHospitalizacionDialog extends JDialog {
         p.add(Box.createVerticalStrut(8));
 
         // Tutor y Teléfono
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaTutor = new JPanel(new GridLayout(1, 2, 10, 0));
         filaTutor.setOpaque(false);
         filaTutor.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -182,6 +227,11 @@ public class FormularioHospitalizacionDialog extends JDialog {
         p.add(Box.createVerticalStrut(8));
 
         // Box Asignado y Nivel de Alerta
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaBox = new JPanel(new GridLayout(1, 2, 10, 0));
         filaBox.setOpaque(false);
         filaBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -206,6 +256,11 @@ public class FormularioHospitalizacionDialog extends JDialog {
         p.add(Box.createVerticalStrut(8));
 
         // Veterinario, Costo y Estado
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaVet = new JPanel(new GridLayout(1, 3, 10, 0));
         filaVet.setOpaque(false);
         filaVet.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -233,13 +288,28 @@ public class FormularioHospitalizacionDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabTerapia() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel();
         p.setOpaque(false);
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         // Constantes Vitales
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaConst = new JPanel(new GridLayout(1, 3, 10, 0));
         filaConst.setOpaque(false);
         filaConst.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -310,7 +380,17 @@ public class FormularioHospitalizacionDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(0, 4));
         p.setOpaque(false);
         p.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -450,6 +530,10 @@ public class FormularioHospitalizacionDialog extends JDialog {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

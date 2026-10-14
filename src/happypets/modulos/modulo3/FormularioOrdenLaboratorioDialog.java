@@ -24,6 +24,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -82,6 +87,11 @@ public class FormularioOrdenLaboratorioDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioOrdenLaboratorioDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioOrdenLaboratorioDialog(Window parent, OrdenLaboratorio ordenExistente, Mascota mascotaInicial, Consumer<OrdenLaboratorio> onGuardado) {
         super(parent, ordenExistente == null ? "Nueva Solicitud de Laboratorio / Imagen" : "Editar Estudio " + ordenExistente.getIdOrden(), ModalityType.APPLICATION_MODAL);
         this.ordenExistente = ordenExistente;
@@ -93,10 +103,20 @@ public class FormularioOrdenLaboratorioDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera Médica
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(13, 148, 136)); // Turquesa laboratorio
         header.setBorder(new EmptyBorder(16, 20, 16, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -130,6 +150,11 @@ public class FormularioOrdenLaboratorioDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Footer
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(new Color(248, 250, 252));
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
@@ -167,7 +192,17 @@ public class FormularioOrdenLaboratorioDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabSolicitud() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -288,12 +323,27 @@ public class FormularioOrdenLaboratorioDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabResultados() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -400,6 +450,11 @@ public class FormularioOrdenLaboratorioDialog extends JDialog {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(12);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;

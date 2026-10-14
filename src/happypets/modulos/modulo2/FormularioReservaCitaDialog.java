@@ -23,10 +23,20 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -82,6 +92,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioReservaCitaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioReservaCitaDialog(Window parent, Cita citaExistente, Consumer<Cita> onGuardar) {
         super(parent, citaExistente == null ? "Agendar Nueva Cita Médica" : "Reprogramar Cita " + citaExistente.getIdCita(), ModalityType.APPLICATION_MODAL);
         this.citaExistente = citaExistente;
@@ -92,10 +107,20 @@ public class FormularioReservaCitaDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // 1. Cabecera superior estilizada
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Ui.TURQUESA);
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -118,6 +143,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         add(header, BorderLayout.NORTH);
 
         // 2. Formulario central
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel form = new JPanel(new GridBagLayout());
         form.setOpaque(false);
         form.setBorder(new EmptyBorder(14, 20, 14, 20));
@@ -157,6 +187,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         cbHora.setBackground(Color.WHITE);
         cbHora.setPreferredSize(new Dimension(130, 30));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelFechaHora = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         panelFechaHora.setOpaque(false);
         panelFechaHora.add(txtFecha);
@@ -197,6 +232,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         cbPrioridad.setBackground(Color.WHITE);
         cbPrioridad.setPreferredSize(new Dimension(120, 30));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelServPrio = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         panelServPrio.setOpaque(false);
         panelServPrio.add(cbServicio);
@@ -210,6 +250,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         txtCosto = Ui.campoTexto(8);
         txtCosto.setText("75.00");
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCosto = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         panelCosto.setOpaque(false);
         JLabel lblMoneda = new JLabel("S/.");
@@ -278,6 +323,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         add(scrollForm, BorderLayout.CENTER);
 
         // 3. Pie con botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(Ui.FONDO);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -395,6 +445,11 @@ public class FormularioReservaCitaDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void agregarCampo(JPanel panel, GridBagConstraints gbc, int row, String etiqueta, JComponent comp) {
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -416,6 +471,10 @@ public class FormularioReservaCitaDialog extends JDialog {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

@@ -20,9 +20,19 @@ public class HistorialExportacion implements Serializable {
     private String estado; // "Completado", "En Proceso", "Fallido"
     private String rutaArchivo;
 
+    /**
+     * Constructor de HistorialExportacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public HistorialExportacion() {
     }
 
+    /**
+     * Constructor de HistorialExportacion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public HistorialExportacion(String idExportacion, String origenDatos, LocalDateTime fechaCreacion,
                                 String filtrosAplicados, String formato, int totalFilas, double tamanoMB,
                                 String estado, String rutaArchivo) {

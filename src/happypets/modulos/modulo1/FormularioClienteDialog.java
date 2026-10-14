@@ -19,10 +19,20 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -55,6 +65,11 @@ public class FormularioClienteDialog extends JDialog {
     private boolean guardado = false;
     private Cliente clienteResultado;
 
+    /**
+     * Constructor de FormularioClienteDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioClienteDialog(Window parent, Cliente clienteExistente, Consumer<Cliente> onGuardar) {
         super(parent, clienteExistente == null ? "Nuevo Propietario" : "Modificar Propietario", ModalityType.APPLICATION_MODAL);
         setSize(560, 640);
@@ -63,10 +78,20 @@ public class FormularioClienteDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera estilizada
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Ui.TURQUESA);
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new javax.swing.BoxLayout(headerTxt, javax.swing.BoxLayout.Y_AXIS));
@@ -88,6 +113,11 @@ public class FormularioClienteDialog extends JDialog {
         add(header, BorderLayout.NORTH);
 
         // Formulario central
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel form = new JPanel(new GridBagLayout());
         form.setOpaque(false);
         form.setBorder(new EmptyBorder(16, 22, 16, 22));
@@ -155,6 +185,11 @@ public class FormularioClienteDialog extends JDialog {
         add(scrollForm, BorderLayout.CENTER);
 
         // Pie de diálogo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(Ui.FONDO);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -204,6 +239,11 @@ public class FormularioClienteDialog extends JDialog {
         add(footer, BorderLayout.SOUTH);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void agregarCampo(JPanel panel, GridBagConstraints gbc, int row, String etiqueta, JComponent comp) {
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -225,6 +265,10 @@ public class FormularioClienteDialog extends JDialog {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

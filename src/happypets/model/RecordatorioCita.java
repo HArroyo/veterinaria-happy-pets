@@ -22,6 +22,11 @@ public class RecordatorioCita implements Serializable {
     private String mensaje;
     private String estado;                // Pendiente, Enviado, Confirmado, Fallido
 
+    /**
+     * Constructor de RecordatorioCita.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RecordatorioCita(String idRecordatorio, String idCita, String nombreMascota,
                             String nombreCliente, String contactoDestino, String canal,
                             LocalDateTime fechaEnvio, String mensaje, String estado) {

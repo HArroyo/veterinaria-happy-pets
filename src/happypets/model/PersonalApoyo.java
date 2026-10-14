@@ -22,9 +22,19 @@ public class PersonalApoyo implements Serializable {
     private String email;
     private String certificaciones;
 
+    /**
+     * Constructor de PersonalApoyo.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public PersonalApoyo() {
     }
 
+    /**
+     * Constructor de PersonalApoyo.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public PersonalApoyo(String id, String nombreCompleto, String cargo, String categoria,
                          String areaAsignada, String extensionInterna, String turno,
                          String estado, String telefono, String email, String certificaciones) {

@@ -17,10 +17,20 @@ public class RolPermiso implements Serializable {
     private boolean activo;
     private Map<String, Boolean> permisosModulos; // Clave: Módulo, Valor: Permiso habilitado
 
+    /**
+     * Constructor de RolPermiso.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RolPermiso() {
         this.permisosModulos = new HashMap<>();
     }
 
+    /**
+     * Constructor de RolPermiso.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RolPermiso(String idRol, String nombreRol, String descripcion, String nivelAcceso, boolean activo) {
         this.idRol = idRol;
         this.nombreRol = nombreRol;

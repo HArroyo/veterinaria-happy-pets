@@ -20,6 +20,11 @@ public class ClientesMascotasFrame extends JFrame {
 
     private final VistaClientesMascotasPanel panelVista;
 
+    /**
+     * Constructor de ClientesMascotasFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ClientesMascotasFrame() {
         setTitle("Happy Pets - Mantenimiento de Clientes y Mascotas");
         setIconImage(Ui.icono());

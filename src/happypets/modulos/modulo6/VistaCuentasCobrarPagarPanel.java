@@ -27,6 +27,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -75,8 +80,23 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
     private final List<FilaCartera> listaCarteraFiltrada = new ArrayList<>();
 
     // Live Hub (Derecha - 42%)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubContenido;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubVacio;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubDetalle;
 
     private JLabel lblHubAvatar;
@@ -98,11 +118,21 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
 
     private FilaCartera itemSeleccionado;
 
+    /**
+     * Constructor de VistaCuentasCobrarPagarPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaCuentasCobrarPagarPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
         // Panel Superior Fijo (Cabecera + KPIs)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSuperior = new JPanel();
         panelSuperior.setOpaque(false);
         panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
@@ -118,6 +148,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         // 3. Contenedor Master-Detail (58% / 42%)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
         panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
@@ -128,10 +163,25 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         recargarDatos();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -149,6 +199,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         izq.add(subtitulo);
         cab.add(izq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
@@ -171,7 +226,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
         fila.setOpaque(false);
         fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 74));
@@ -189,10 +254,24 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardKpi(String titulo, JLabel lblValor, String subtitulo, javax.swing.Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -206,6 +285,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(10, 14, 10, 14));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel texto = new JPanel();
         texto.setOpaque(false);
         texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
@@ -238,7 +322,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
     }
 
     private JSplitPane crearSplitMasterDetail() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel master = crearPanelMasterTable();
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel detail = crearPanelLiveHub();
         detail.setPreferredSize(new Dimension(360, 0));
         detail.setMinimumSize(new Dimension(320, 0));
@@ -251,10 +345,24 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return split;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelMasterTable() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel master = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -269,10 +377,20 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         master.setBorder(new EmptyBorder(12, 14, 12, 14));
 
         // Filtros y Buscador
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabFiltros = new JPanel();
         cabFiltros.setOpaque(false);
         cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
         barraBuscar.setOpaque(false);
 
@@ -294,6 +412,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         cabFiltros.add(Box.createVerticalStrut(8));
 
         // Pills de Filtro
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         pills.setOpaque(false);
 
@@ -365,6 +488,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel cell = new JPanel(new BorderLayout(8, 0));
                 cell.setOpaque(true);
                 cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -376,6 +504,10 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
                 JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
                     private static final long serialVersionUID = 1L;
                     @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -447,11 +579,26 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return master;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelLiveHub() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubContenido = new JPanel(new BorderLayout());
         panelHubContenido.setOpaque(false);
 
         // Panel Hub Vacío
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
         JLabel lblVacio = new JLabel("Seleccione una cuenta para consultar el Live Credit Hub", SwingConstants.CENTER);
@@ -460,9 +607,18 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
         // Panel Detalle Activo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -477,12 +633,21 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         panelHubDetalle.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         // 1. Cabecera del Hub
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabHub = new JPanel(new BorderLayout(10, 0));
         cabHub.setOpaque(false);
 
         lblHubAvatar = new JLabel("C", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -502,6 +667,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
         cabHub.add(lblHubAvatar, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titulosHub = new JPanel();
         titulosHub.setOpaque(false);
         titulosHub.setLayout(new BoxLayout(titulosHub, BoxLayout.Y_AXIS));
@@ -534,7 +704,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -544,6 +724,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         scrollContent.setOpaque(false);
 
         // Telemetría 2x2
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 6, 6));
         gridTelemetria.setOpaque(false);
         gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
@@ -563,6 +748,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         scrollContent.add(vGap(8));
 
         // Especificaciones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionTitular = crearSeccionCard("INFORMACIÓN DEL TITULAR & CONTACTO");
         lblHubTitularTipo = new JTextArea("-");
         configurarTextAreaItem(lblHubTitularTipo);
@@ -576,6 +766,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         scrollContent.add(seccionTitular);
         scrollContent.add(vGap(6));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionOperacion = crearSeccionCard("DETALLE DE LA PRESTACIÓN O COMPRA");
         lblHubConcepto = new JTextArea("-");
         configurarTextAreaItem(lblHubConcepto);
@@ -597,6 +792,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         panelHubDetalle.add(spHub, BorderLayout.CENTER);
 
         // 3. Footer con 4 Botones de Acción 1-click
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         gridAcciones.setOpaque(false);
         gridAcciones.setPreferredSize(new Dimension(0, 62));
@@ -625,7 +825,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return panelHubContenido;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardMiniTelemetria(String titulo, JLabel lblValor, Color colorValor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel c = new JPanel();
         c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(new Color(248, 250, 252));
@@ -647,7 +857,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return c;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSeccionCard(String titulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel sec = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -656,7 +876,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
             }
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -671,6 +901,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         sec.setBackground(Color.WHITE);
         sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         header.setOpaque(false);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -685,7 +920,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return sec;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemLinea(String label, Component valor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(6, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -705,7 +950,17 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
 
     private static Component vGap(int h) {
         Component c = Box.createVerticalStrut(h);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         if (c instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
         }
         return c;
@@ -726,6 +981,10 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         JButton btn = new JButton(texto, icono) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -787,6 +1046,10 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         lblKpiBalance.setText(String.format("S/. %.2f", balance));
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarCartera() {
         String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
         listaCarteraFiltrada.clear();
@@ -864,6 +1127,10 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         return true;
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleItem(FilaCartera f) {
         this.itemSeleccionado = f;
         panelHubContenido.removeAll();
@@ -1095,6 +1362,11 @@ public class VistaCuentasCobrarPagarPanel extends JPanel {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
         private static final long serialVersionUID = 1L;
         @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }

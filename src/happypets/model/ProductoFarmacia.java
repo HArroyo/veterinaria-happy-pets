@@ -27,6 +27,11 @@ public class ProductoFarmacia {
     private String proveedor;
     private String estado; // "Disponible", "Bajo Stock", "Agotado"
 
+    /**
+     * Constructor de ProductoFarmacia.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ProductoFarmacia(String codigo, String nombre, String categoria, String principioActivo,
                             String presentacion, String especieDestino, boolean requiereReceta,
                             boolean cadenaFrio, double precioCosto, double precioVenta,

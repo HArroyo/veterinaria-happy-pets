@@ -22,6 +22,11 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -74,6 +79,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     private JCheckBox chkVacunas;
 
     // Panel de Integraciones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelIntegraciones;
     private JLabel lblContadorIntegraciones;
 
@@ -82,6 +92,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     private JLabel lblUltimoRespaldo;
     private JLabel lblTicketsPendientes;
 
+    /**
+     * Constructor de VistaDashboardAdministracionPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaDashboardAdministracionPanel() {
         setLayout(new BorderLayout());
         setBackground(new Color(248, 250, 252));
@@ -89,7 +104,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         cargarDatos();
     }
 
+    /**
+     * Construye y organiza la jerarquía visual de la pantalla en Swing.
+     * Ensambla la barra superior de acciones, tarjetas de métricas (KPIs),
+     * tabla maestra de datos y el panel lateral de detalle (Live Detail Hub).
+     */
     private void inicializarUI() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenedor = new JPanel();
         contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
         contenedor.setBackground(new Color(248, 250, 252));
@@ -117,7 +142,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         add(scroll, BorderLayout.CENTER);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTopBar() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout(16, 0));
         top.setBackground(Color.WHITE);
         top.setBorder(BorderFactory.createCompoundBorder(
@@ -126,6 +161,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         ));
 
         // Buscador
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         izq.setBackground(Color.WHITE);
         JTextField txtBuscarTop = Ui.campoTexto("Buscar parámetro, usuario o configuración...", 26);
@@ -135,6 +175,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         top.add(izq, BorderLayout.WEST);
 
         // Selector de Sede y Usuario Administrador
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         der.setBackground(Color.WHITE);
 
@@ -149,10 +194,20 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         der.add(cbSedeTop);
 
         // Perfil
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel perfil = new JPanel(new BorderLayout(8, 0));
         perfil.setBackground(Color.WHITE);
         JLabel lblAvatar = new JLabel(Iconos.crearIconoDoctor(28, Ui.TURQUESA_OSCURO));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel textosUser = new JPanel();
         textosUser.setLayout(new BoxLayout(textosUser, BoxLayout.Y_AXIS));
         textosUser.setBackground(Color.WHITE);
@@ -173,10 +228,25 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         return top;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBarraEncabezado() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout(15, 6));
         header.setBackground(new Color(248, 250, 252));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
         izq.setBackground(new Color(248, 250, 252));
@@ -200,6 +270,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         header.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         der.setBackground(new Color(248, 250, 252));
 
@@ -222,7 +297,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         return header;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBarraPestañasPildoras() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         p.setBackground(new Color(248, 250, 252));
 
@@ -251,7 +336,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         return b;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearGridDosColumnas() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel grid = new JPanel(new GridBagLayout());
         grid.setBackground(new Color(248, 250, 252));
         GridBagConstraints g = new GridBagConstraints();
@@ -259,6 +354,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         g.fill = GridBagConstraints.BOTH;
 
         // Columna Izquierda (65% del ancho)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel colIzquierda = new JPanel();
         colIzquierda.setLayout(new BoxLayout(colIzquierda, BoxLayout.Y_AXIS));
         colIzquierda.setBackground(new Color(248, 250, 252));
@@ -271,6 +371,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         grid.add(colIzquierda, g);
 
         // Columna Derecha (35% del ancho)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel colDerecha = new JPanel();
         colDerecha.setLayout(new BoxLayout(colDerecha, BoxLayout.Y_AXIS));
         colDerecha.setBackground(new Color(248, 250, 252));
@@ -289,7 +394,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     }
 
     // Columna Izquierda - Tarjeta 1: Datos Generales
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardDatosGenerales() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 14));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -298,6 +413,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         ));
 
         // Cabecera
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel head = new JPanel(new BorderLayout());
         head.setBackground(Color.WHITE);
         JLabel lblTit = new JLabel("Datos Generales de la Clínica Veterinaria");
@@ -305,6 +425,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lblTit.setForeground(new Color(15, 23, 42));
 
         txtIdentificadorFiscal = Ui.campoTexto(12);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pId = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         pId.setBackground(Color.WHITE);
         pId.add(new JLabel("Identificador Fiscal:"));
@@ -315,6 +440,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         card.add(head, BorderLayout.NORTH);
 
         // Formulario
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(Color.WHITE);
         GridBagConstraints g = new GridBagConstraints();
@@ -352,6 +482,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         form.add(crearCampo("Zona Horaria", cbZonaHoraria), g);
 
         // Logo row
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pLogo = new JPanel(new BorderLayout(14, 0));
         pLogo.setBackground(new Color(248, 250, 252));
         pLogo.setBorder(BorderFactory.createCompoundBorder(
@@ -360,6 +495,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         ));
 
         JLabel lblBox = new JLabel(Iconos.crearIconoHuella(26, Ui.TURQUESA_OSCURO));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel txts = new JPanel();
         txts.setLayout(new BoxLayout(txts, BoxLayout.Y_AXIS));
         txts.setBackground(new Color(248, 250, 252));
@@ -385,7 +525,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCampo(String tit, Component c) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(0, 4));
         p.setBackground(Color.WHITE);
         JLabel l = new JLabel(tit);
@@ -397,7 +547,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     }
 
     // Columna Izquierda - Tarjeta 2: Usuarios Activos
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardUsuarios() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 12));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -406,9 +566,19 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         ));
 
         // Cabecera con Botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel head = new JPanel(new BorderLayout());
         head.setBackground(Color.WHITE);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         izq.setBackground(Color.WHITE);
         izq.add(new JLabel(Iconos.crearIconoUsuario(20, Ui.TURQUESA_OSCURO)));
@@ -416,6 +586,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lblTit.setFont(new Font("Segoe UI", Font.BOLD, 15));
         izq.add(lblTit);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setBackground(Color.WHITE);
 
@@ -499,6 +674,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         card.add(sc, BorderLayout.CENTER);
 
         // Pie de paginación
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel foot = new JPanel(new BorderLayout());
         foot.setBackground(Color.WHITE);
         foot.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
@@ -507,6 +687,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         lblPaginacionUsuarios.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblPaginacionUsuarios.setForeground(new Color(100, 116, 139));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pPags = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         pPags.setBackground(Color.WHITE);
         JButton bAnt = new JButton("Anterior");
@@ -532,7 +717,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     }
 
     // Columna Derecha - Tarjeta 1: Módulo de IA
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardModuloIA() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 12));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -540,6 +735,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                 BorderFactory.createEmptyBorder(18, 20, 18, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel head = new JPanel(new BorderLayout());
         head.setBackground(Color.WHITE);
         JLabel lblTit = new JLabel("Módulo de IA HappyPets");
@@ -556,6 +756,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         head.add(badgeH, BorderLayout.EAST);
         card.add(head, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
         cuerpo.setBackground(Color.WHITE);
@@ -577,6 +782,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         cuerpo.add(crearMiniToggle(chkVacunas, "Calcula fechas óptimas por raza/edad."));
         cuerpo.add(Box.createVerticalStrut(12));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pie = new JPanel(new BorderLayout());
         pie.setBackground(Color.WHITE);
         JLabel lMod = new JLabel("Modelo actual: HappyPet-Core-v1.8");
@@ -594,7 +804,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearMiniToggle(JCheckBox chk, String desc) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(new Color(248, 250, 252));
         p.setBorder(BorderFactory.createCompoundBorder(
@@ -602,6 +822,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                 BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel txt = new JPanel();
         txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
         txt.setBackground(new Color(248, 250, 252));
@@ -621,7 +846,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     }
 
     // Columna Derecha - Tarjeta 2: Integraciones Externas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardIntegraciones() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 12));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -629,6 +864,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                 BorderFactory.createEmptyBorder(18, 20, 18, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel head = new JPanel(new BorderLayout());
         head.setBackground(Color.WHITE);
         JLabel lblTit = new JLabel("Integraciones Externas");
@@ -642,6 +882,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         head.add(lblContadorIntegraciones, BorderLayout.EAST);
         card.add(head, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelIntegraciones = new JPanel();
         panelIntegraciones.setLayout(new BoxLayout(panelIntegraciones, BoxLayout.Y_AXIS));
         panelIntegraciones.setBackground(Color.WHITE);
@@ -651,7 +896,17 @@ public class VistaDashboardAdministracionPanel extends JPanel {
     }
 
     // Columna Derecha - Tarjeta 3: Soporte Técnico
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardSoporteTecnico() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 12));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -659,8 +914,18 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                 BorderFactory.createEmptyBorder(18, 20, 18, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel head = new JPanel(new BorderLayout());
         head.setBackground(Color.WHITE);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         izq.setBackground(Color.WHITE);
         izq.add(new JLabel(Iconos.crearIconoAuriculares(18, Ui.TURQUESA_PROFUNDO)));
@@ -676,6 +941,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         head.add(lblNorm, BorderLayout.EAST);
         card.add(head, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel metricas = new JPanel(new GridLayout(3, 2, 8, 6));
         metricas.setBackground(Color.WHITE);
         metricas.setBorder(BorderFactory.createEmptyBorder(4, 0, 8, 0));
@@ -699,6 +969,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         card.add(metricas, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bot = new JPanel(new GridLayout(1, 2, 8, 0));
         bot.setBackground(Color.WHITE);
 
@@ -715,6 +990,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Sincroniza la vista con el Repositorio Central de Datos.
+     * Recupera la colección correspondiente, aplica transformaciones con Java Streams
+     * y refresca el DefaultTableModel de la tabla visual.
+     */
     private void cargarDatos() {
         ConfiguracionClinica cfg = repo.getConfiguracionClinica();
         if (cfg != null) {
@@ -753,6 +1033,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
 
         for (int i = 0; i < Math.min(4, ints.size()); i++) {
             IntegracionExterna in = ints.get(i);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel r = new JPanel(new BorderLayout(8, 0));
             r.setBackground(new Color(248, 250, 252));
             r.setBorder(BorderFactory.createCompoundBorder(
@@ -760,6 +1045,11 @@ public class VistaDashboardAdministracionPanel extends JPanel {
                     BorderFactory.createEmptyBorder(6, 10, 6, 10)
             ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel t = new JPanel();
             t.setLayout(new BoxLayout(t, BoxLayout.Y_AXIS));
             t.setBackground(new Color(248, 250, 252));

@@ -19,6 +19,11 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -46,12 +51,22 @@ public class FormularioMascotaDialog extends JDialog {
     private boolean guardado = false;
     private Mascota mascotaResultado;
 
+    /**
+     * Constructor de FormularioMascotaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioMascotaDialog(JFrame parent, Mascota mascotaExistente, Consumer<Mascota> onGuardar) {
         super(parent, mascotaExistente == null ? "Nueva Mascota" : "Modificar Mascota", true);
         setSize(520, 560);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Ui.TURQUESA);
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
@@ -62,6 +77,11 @@ public class FormularioMascotaDialog extends JDialog {
         header.add(title, BorderLayout.WEST);
         add(header, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(Color.WHITE);
         form.setBorder(new EmptyBorder(16, 20, 16, 20));
@@ -113,6 +133,11 @@ public class FormularioMascotaDialog extends JDialog {
 
         add(form, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         footer.setBackground(Ui.FONDO);
 
@@ -161,6 +186,11 @@ public class FormularioMascotaDialog extends JDialog {
         add(footer, BorderLayout.SOUTH);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void agregarCampo(JPanel panel, GridBagConstraints gbc, int row, String etiqueta, javax.swing.JComponent comp) {
         gbc.gridx = 0;
         gbc.gridy = row;

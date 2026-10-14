@@ -19,9 +19,19 @@ public class DocumentoRepositorio implements Serializable {
     private String usuarioCarga;  // "admin_user"
     private String rutaArchivo;
 
+    /**
+     * Constructor de DocumentoRepositorio.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DocumentoRepositorio() {
     }
 
+    /**
+     * Constructor de DocumentoRepositorio.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DocumentoRepositorio(String id, String tipoExtension, String nombreArchivo,
                                 String categoria, double tamanoMB, LocalDateTime fechaCarga,
                                 String usuarioCarga, String rutaArchivo) {

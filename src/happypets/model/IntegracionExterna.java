@@ -18,9 +18,19 @@ public class IntegracionExterna implements Serializable {
     private String ambiente; // "Producción", "Sandbox / Pruebas"
     private String ultimaSincronizacion;
 
+    /**
+     * Constructor de IntegracionExterna.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public IntegracionExterna() {
     }
 
+    /**
+     * Constructor de IntegracionExterna.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public IntegracionExterna(String id, String nombre, String subtitulo, String categoria,
                               boolean activa, String endpointUrl, String apiKey,
                               String ambiente, String ultimaSincronizacion) {

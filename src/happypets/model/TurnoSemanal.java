@@ -20,6 +20,11 @@ public class TurnoSemanal implements Serializable {
     private String[] horariosDias; // ej: ["08:00 - 15:00 · Cons. 1", ...]
     private String[] tiposTurnoDias; // ej: ["Mañana", "Tarde", "Guardia", "Descanso"]
 
+    /**
+     * Constructor de TurnoSemanal.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public TurnoSemanal() {
         this.horariosDias = new String[7];
         this.tiposTurnoDias = new String[7];
@@ -29,6 +34,11 @@ public class TurnoSemanal implements Serializable {
         }
     }
 
+    /**
+     * Constructor de TurnoSemanal.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public TurnoSemanal(String id, String profesionalId, String nombreProfesional,
                         String colegiaturaCMPV, String especialidad, String consultorioHabitual,
                         String[] horariosDias, String[] tiposTurnoDias) {

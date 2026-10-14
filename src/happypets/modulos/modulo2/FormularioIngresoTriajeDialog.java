@@ -25,6 +25,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -80,6 +85,11 @@ public class FormularioIngresoTriajeDialog extends JDialog {
         public String toString() { return etiqueta; }
     }
 
+    /**
+     * Constructor de FormularioIngresoTriajeDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioIngresoTriajeDialog(Window parent, PacienteTriaje pacienteExistente, Cita citaPrevia, Consumer<PacienteTriaje> onGuardado) {
         super(parent, pacienteExistente == null ? "Ingreso y Triaje de Paciente" : "Modificar Ficha de Triaje", ModalityType.APPLICATION_MODAL);
         this.pacienteExistente = pacienteExistente;
@@ -91,10 +101,20 @@ public class FormularioIngresoTriajeDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera superior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(13, 148, 136)); // Teal
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -118,6 +138,11 @@ public class FormularioIngresoTriajeDialog extends JDialog {
         add(header, BorderLayout.NORTH);
 
         // Cuerpo del formulario con Scroll
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCuerpo = new JPanel(new GridBagLayout());
         panelCuerpo.setBackground(Color.WHITE);
         panelCuerpo.setBorder(new EmptyBorder(16, 22, 16, 22));
@@ -182,11 +207,21 @@ public class FormularioIngresoTriajeDialog extends JDialog {
         panelCuerpo.add(crearEtiquetaCampo("Constantes Fisiológicas / Signos Vitales al Ingreso"), gbc);
         gridY++;
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSignos = new JPanel(new GridLayout(1, 3, 10, 0));
         panelSignos.setOpaque(false);
 
         txtPeso = crearCampoTexto();
         txtPeso.setText("12.5");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pPeso = new JPanel(new BorderLayout(0, 3));
         pPeso.setOpaque(false);
         JLabel lblP = new JLabel("Peso (kg) *");
@@ -197,6 +232,11 @@ public class FormularioIngresoTriajeDialog extends JDialog {
 
         txtTemperatura = crearCampoTexto();
         txtTemperatura.setText("38.5");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pTemp = new JPanel(new BorderLayout(0, 3));
         pTemp.setOpaque(false);
         JLabel lblT = new JLabel("Temperatura (°C) *");
@@ -207,6 +247,11 @@ public class FormularioIngresoTriajeDialog extends JDialog {
 
         txtFrecuenciaCardiaca = crearCampoTexto();
         txtFrecuenciaCardiaca.setText("95");
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pFc = new JPanel(new BorderLayout(0, 3));
         pFc.setOpaque(false);
         JLabel lblFc = new JLabel("Frec. Cardíaca (ppm) *");
@@ -228,6 +273,11 @@ public class FormularioIngresoTriajeDialog extends JDialog {
         panelCuerpo.add(crearEtiquetaCampo("Nivel de Prioridad Clínica (Escala Manchester de Triaje) *"), gbc);
         gridY++;
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelTriaje = new JPanel(new GridLayout(1, 3, 8, 0));
         panelTriaje.setOpaque(false);
 
@@ -315,6 +365,11 @@ public class FormularioIngresoTriajeDialog extends JDialog {
         add(spGlobal, BorderLayout.CENTER);
 
         // Barra inferior de botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(new Color(248, 250, 252));
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));

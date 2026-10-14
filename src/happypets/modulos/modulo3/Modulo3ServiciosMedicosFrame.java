@@ -27,10 +27,20 @@ public class Modulo3ServiciosMedicosFrame extends JFrame {
     private final VistaLaboratorioImagenesPanel vistaLaboratorio;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo3ServiciosMedicosFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo3ServiciosMedicosFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo3ServiciosMedicosFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo3ServiciosMedicosFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 3: Servicios Médicos y Quirúrgicos");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

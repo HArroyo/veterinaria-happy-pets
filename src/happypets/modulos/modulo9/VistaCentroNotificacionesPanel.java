@@ -23,10 +23,20 @@ import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -71,11 +81,31 @@ public class VistaCentroNotificacionesPanel extends JPanel {
     private JTextField txtBuscar;
     private String categoriaSeleccionada = "Todas";
     private final List<NotificacionSistema> listaNotificacionesFiltrada = new ArrayList<>();
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelPills;
 
     // Live Detail Hub (Derecha - 360px)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubContenido;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubVacio;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubDetalle;
 
     private JLabel lblHubAvatar;
@@ -96,11 +126,21 @@ public class VistaCentroNotificacionesPanel extends JPanel {
 
     private NotificacionSistema notificacionSeleccionada;
 
+    /**
+     * Constructor de VistaCentroNotificacionesPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaCentroNotificacionesPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
         // Panel Superior Fijo (Cabecera + 4 KPIs)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSuperior = new JPanel();
         panelSuperior.setOpaque(false);
         panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
@@ -113,6 +153,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         // Contenedor Master-Detail
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
         panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
@@ -123,11 +168,26 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         recargarDatos();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
         cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -145,6 +205,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         izq.add(subtitulo);
         cab.add(izq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
@@ -160,7 +225,17 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel kpis = new JPanel(new GridLayout(1, 4, 12, 0));
         kpis.setOpaque(false);
         kpis.setPreferredSize(new Dimension(0, 74));
@@ -179,10 +254,24 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return kpis;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -196,6 +285,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(8, 12, 8, 12));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel texto = new JPanel();
         texto.setOpaque(false);
         texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
@@ -243,10 +337,24 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return split;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelMasterTable() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel master = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -261,10 +369,20 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         master.setBorder(new EmptyBorder(12, 14, 12, 14));
 
         // Cabecera Filtros & Buscador
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabFiltros = new JPanel();
         cabFiltros.setOpaque(false);
         cabFiltros.setLayout(new BoxLayout(cabFiltros, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraBuscar = new JPanel(new BorderLayout(8, 0));
         barraBuscar.setOpaque(false);
 
@@ -286,6 +404,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         cabFiltros.add(Box.createVerticalStrut(8));
 
         // Píldoras de Filtro
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelPills = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         panelPills.setOpaque(false);
         actualizarPildorasFiltro();
@@ -323,6 +446,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 7));
                 cell.setOpaque(true);
                 cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -331,6 +459,10 @@ public class VistaCentroNotificacionesPanel extends JPanel {
                 JLabel avatar = new JLabel(id.replace("NOTIF-", "N"), SwingConstants.CENTER) {
                     private static final long serialVersionUID = 1L;
                     @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -361,6 +493,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 11));
                 p.setOpaque(true);
                 p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -403,6 +540,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 11));
                 p.setOpaque(true);
                 p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -502,10 +644,24 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         panelPills.repaint();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelLiveDetailHub() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel detail = new JPanel(new BorderLayout()) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -520,6 +676,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         detail.setPreferredSize(new Dimension(360, 0));
         detail.setMinimumSize(new Dimension(320, 0));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubContenido = new JPanel(new BorderLayout());
         panelHubContenido.setOpaque(false);
 
@@ -532,7 +693,17 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return detail;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearHubVacio() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel vacio = new JPanel();
         vacio.setOpaque(false);
         vacio.setLayout(new BoxLayout(vacio, BoxLayout.Y_AXIS));
@@ -562,7 +733,17 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return vacio;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearHubDetalleActivo() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
 
@@ -572,6 +753,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         scrollContent.setBorder(new EmptyBorder(14, 16, 14, 16));
 
         // 1. Hero Block
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel hero = new JPanel(new BorderLayout(8, 0));
         hero.setOpaque(false);
         hero.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -579,6 +765,10 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         lblHubAvatar = new JLabel("AL", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -597,12 +787,22 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         lblHubAvatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblHubAvatar.setForeground(Ui.ROJO_ERROR);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel avatarBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         avatarBox.setOpaque(false);
         avatarBox.setPreferredSize(new Dimension(46, 46));
         avatarBox.add(lblHubAvatar);
         hero.add(avatarBox, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel heroText = new JPanel();
         heroText.setOpaque(false);
         heroText.setLayout(new BoxLayout(heroText, BoxLayout.Y_AXIS));
@@ -617,6 +817,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         lblHubTipo.setForeground(Ui.ROJO_ERROR);
         lblHubTipo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel rowChips = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         rowChips.setOpaque(false);
         rowChips.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -640,6 +845,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         scrollContent.add(Box.createVerticalStrut(14));
 
         // 2. Telemetría 2x2
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel telemetria = new JPanel(new GridLayout(2, 2, 8, 8));
         telemetria.setOpaque(false);
         telemetria.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -667,12 +877,22 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         txtHubMensaje.setEditable(false);
         txtHubMensaje.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlMensaje = crearSeccionCard("Contenido Completo de la Alerta", txtHubMensaje);
         pnlMensaje.setAlignmentX(Component.LEFT_ALIGNMENT);
         scrollContent.add(pnlMensaje);
         scrollContent.add(Box.createVerticalStrut(10));
 
         // 4. Card Metadatos de Auditoría
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlMeta = new JPanel(new GridLayout(2, 1, 4, 4));
         pnlMeta.setOpaque(false);
 
@@ -687,12 +907,22 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         pnlMeta.add(lblHubPrioridad);
         pnlMeta.add(lblHubTiempoRelativo);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnlMetaCard = crearSeccionCard("Parámetros de Auditoría", pnlMeta);
         pnlMetaCard.setAlignmentX(Component.LEFT_ALIGNMENT);
         scrollContent.add(pnlMetaCard);
         scrollContent.add(Box.createVerticalStrut(14));
 
         // 5. Botonera 2x2 de Acciones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridAcciones = new JPanel(new GridLayout(2, 2, 8, 8));
         gridAcciones.setOpaque(false);
         gridAcciones.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -737,7 +967,17 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return wrapper;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearMicroCard(String etiqueta, JLabel lblValor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel mc = new JPanel();
         mc.setOpaque(false);
         mc.setLayout(new BoxLayout(mc, BoxLayout.Y_AXIS));
@@ -760,7 +1000,17 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return mc;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSeccionCard(String titulo, JComponent contenido) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel sec = new JPanel(new BorderLayout(0, 6));
         sec.setOpaque(false);
         sec.setBorder(BorderFactory.createCompoundBorder(
@@ -796,6 +1046,10 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         filtrarNotificaciones();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarNotificaciones() {
         String q = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
         List<NotificacionSistema> todas = repo.getNotificacionesPorCategoria(categoriaSeleccionada);
@@ -839,6 +1093,10 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         }
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleNotificacion(NotificacionSistema notif) {
         this.notificacionSeleccionada = notif;
         panelHubContenido.removeAll();
@@ -925,6 +1183,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pnl = new JPanel();
         pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
         pnl.setBackground(Color.WHITE);
@@ -968,6 +1231,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
 
         dlg.add(pnl, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         bot.setBackground(new Color(248, 250, 252));
         bot.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -1009,7 +1277,17 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         dlg.setVisible(true);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaCampo(String etiqueta, JComponent comp) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel f = new JPanel(new BorderLayout(8, 0));
         f.setOpaque(false);
         f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
@@ -1024,6 +1302,11 @@ public class VistaCentroNotificacionesPanel extends JPanel {
         return f;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ScrollablePanel extends JPanel implements Scrollable {
         private static final long serialVersionUID = 1L;
 

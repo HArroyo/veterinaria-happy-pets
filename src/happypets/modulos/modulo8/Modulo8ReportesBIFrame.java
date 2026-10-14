@@ -28,10 +28,20 @@ public class Modulo8ReportesBIFrame extends JFrame {
     private final VistaExportadorDatosPanel vistaExportadorDatos;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo8ReportesBIFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo8ReportesBIFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo8ReportesBIFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo8ReportesBIFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 8: Inteligencia de Negocios y Reportes (BI)");
         setIconImage(Ui.icono());

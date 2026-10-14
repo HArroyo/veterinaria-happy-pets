@@ -27,10 +27,20 @@ public class Modulo4EsteticosHospedajeFrame extends JFrame {
     private final VistaAdopcionesPanel vistaAdopciones;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo4EsteticosHospedajeFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo4EsteticosHospedajeFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo4EsteticosHospedajeFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo4EsteticosHospedajeFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 4: Servicios Estéticos y Hospedaje");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

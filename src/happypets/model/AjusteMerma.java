@@ -23,6 +23,11 @@ public class AjusteMerma {
     private String autorizadoPor;
     private String estado; // "Aprobado y Descargado", "Pendiente de Visto Bueno"
 
+    /**
+     * Constructor de AjusteMerma.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public AjusteMerma(String idAjuste, LocalDate fecha, String codigoProducto, String nombreProducto,
                        String numeroLote, String tipo, int cantidad, double costoUnitario,
                        double perdidaValorizada, String motivoDetallado, String autorizadoPor, String estado) {

@@ -27,6 +27,11 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -87,6 +92,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     private JList<DocumentoMascota> listaDocumentos;
 
     // Componentes del Panel Derecho (Detail - Ficha Ejecutiva)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelAvatarMascota;
     private JLabel lblPetNombre;
     private JLabel lblPetCodigoBadge;
@@ -101,6 +111,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     private JLabel lblKpiFacultativoVal;
 
     // Componentes del Visor Oficial Membretado
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel cardVisorDocumento;
     private JLabel lblCertTituloOficial;
     private JLabel lblCertNumeroRegistro;
@@ -120,8 +135,18 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     private JLabel lblCertVeterinarioFirma;
     private JLabel lblCertColegiaturaFirma;
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelSinDocumento;
 
+    /**
+     * Constructor de VistaConstanciasCertificadosPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaConstanciasCertificadosPanel() {
         setLayout(new BorderLayout(0, 10));
         setOpaque(false);
@@ -131,6 +156,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         add(crearCabeceraVista(), BorderLayout.NORTH);
 
         // 2. Panel central dividido (Master-Detail 350px / resto)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centralSplit = new JPanel(new BorderLayout(14, 0));
         centralSplit.setOpaque(false);
 
@@ -155,11 +185,26 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     // =========================================================================
     // 1. CABECERA DE LA VISTA
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
         cab.setPreferredSize(new Dimension(0, 42));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -177,6 +222,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         izq.add(lblSub);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
@@ -206,10 +256,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     // =========================================================================
     // 2. PANEL IZQUIERDO (MASTER): DIRECTORIO + CATÁLOGO DOCUMENTAL
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelIzquierdoMaster() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel master = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -226,9 +290,19 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         master.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         // Sub-panel superior: Directorio de Pacientes
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelPacientes = new JPanel(new BorderLayout(0, 6));
         panelPacientes.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topDirectorio = new JPanel(new BorderLayout());
         topDirectorio.setOpaque(false);
 
@@ -244,6 +318,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         panelPacientes.add(topDirectorio, BorderLayout.NORTH);
 
         // Barra de búsqueda y filtro por especie
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelFiltros = new JPanel(new BorderLayout(6, 0));
         panelFiltros.setOpaque(false);
 
@@ -293,10 +372,20 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         master.add(panelPacientes, BorderLayout.NORTH);
 
         // Sub-panel central: Catálogo de Documentos Emitidos
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelDocumentos = new JPanel(new BorderLayout(0, 6));
         panelDocumentos.setOpaque(false);
         panelDocumentos.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDE));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel topDocs = new JPanel(new BorderLayout());
         topDocs.setOpaque(false);
         topDocs.setBorder(new EmptyBorder(8, 0, 2, 0));
@@ -326,6 +415,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         cbTipoDocumento.setBackground(Color.WHITE);
         cbTipoDocumento.addActionListener(e -> filtrarDocumentosCatalogo());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerDocs = new JPanel();
         headerDocs.setOpaque(false);
         headerDocs.setLayout(new BoxLayout(headerDocs, BoxLayout.Y_AXIS));
@@ -361,7 +455,17 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     // =========================================================================
     // 3. PANEL DERECHO (DETAIL): FICHA EJECUTIVA + VISOR OFICIAL EN VIVO
     // =========================================================================
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDerechoDossier() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel dossier = new JPanel(new BorderLayout(0, 10));
         dossier.setOpaque(false);
 
@@ -374,10 +478,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         return dossier;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFichaEjecutivaPaciente() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -393,21 +511,41 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         card.setBorder(new EmptyBorder(12, 16, 12, 16));
 
         // Parte Superior de la Ficha: Avatar circular + Datos Identificatorios
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerInfo = new JPanel(new BorderLayout(14, 0));
         headerInfo.setOpaque(false);
 
         // Avatar circular grande (50px)
         panelAvatarMascota = crearAvatarCircular(50, "P", COLOR_TURQUESA_SUAVE, COLOR_TURQUESA_OSCURO);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel avatarWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         avatarWrapper.setOpaque(false);
         avatarWrapper.add(panelAvatarMascota);
         headerInfo.add(avatarWrapper, BorderLayout.WEST);
 
         // Textos del paciente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel datosTxt = new JPanel();
         datosTxt.setOpaque(false);
         datosTxt.setLayout(new BoxLayout(datosTxt, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         filaTitulo.setOpaque(false);
         filaTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -441,6 +579,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         card.add(headerInfo, BorderLayout.NORTH);
 
         // Parte Inferior de la Ficha: 4 Micro-KPIs Documentales
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaKpis = new JPanel(new GridLayout(1, 4, 10, 0));
         filaKpis.setOpaque(false);
         filaKpis.setBorder(new EmptyBorder(8, 0, 0, 0));
@@ -460,10 +603,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemKpi(String etiqueta, JLabel lblValor, String sub, Color fondo, Color acento) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel kpi = new JPanel(new BorderLayout(4, 2)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -478,6 +635,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         kpi.setOpaque(false);
         kpi.setBorder(new EmptyBorder(6, 10, 6, 10));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel txt = new JPanel();
         txt.setOpaque(false);
         txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
@@ -503,10 +665,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         return kpi;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardVisorDocumentoOficial() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         cardVisorDocumento = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -539,9 +715,19 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         lblCertColegiaturaFirma = new JLabel("Médico Veterinario Colegiado · CMVP 8492");
 
         // Panel alternativo: Estado vacío sin documento
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelSinDocumento = new JPanel(new BorderLayout());
         panelSinDocumento.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centroVacio = new JPanel();
         centroVacio.setOpaque(false);
         centroVacio.setLayout(new BoxLayout(centroVacio, BoxLayout.Y_AXIS));
@@ -578,6 +764,10 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         return cardVisorDocumento;
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleDocumentoEnVivo(DocumentoMascota doc) {
         this.documentoSeleccionado = doc;
         if (doc == null) {
@@ -589,15 +779,30 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         cardVisorDocumento.setLayout(new BorderLayout(0, 10));
 
         // 1. Cabecera del visor (Membrete de la clínica + Botones de impresión)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerMembrete = new JPanel(new BorderLayout());
         headerMembrete.setOpaque(false);
         headerMembrete.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
         headerMembrete.setPreferredSize(new Dimension(0, 48));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel membreteTxt = new JPanel();
         membreteTxt.setOpaque(false);
         membreteTxt.setLayout(new BoxLayout(membreteTxt, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel logoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         logoRow.setOpaque(false);
         logoRow.add(new JLabel(Iconos.crearIconoCertificado(18, COLOR_TURQUESA)));
@@ -617,6 +822,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         membreteTxt.add(lblLegal);
         headerMembrete.add(membreteTxt, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel derBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
         derBtns.setOpaque(false);
 
@@ -636,16 +846,31 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         cardVisorDocumento.add(headerMembrete, BorderLayout.NORTH);
 
         // 2. Cuerpo de la Hoja Oficial del Certificado (Scrollable)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel hoja = new JPanel();
         hoja.setOpaque(false);
         hoja.setLayout(new BoxLayout(hoja, BoxLayout.Y_AXIS));
         hoja.setBorder(new EmptyBorder(10, 16, 10, 16));
 
         // Título del Certificado
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bannerTitulo = new JPanel(new BorderLayout());
         bannerTitulo.setOpaque(false);
         bannerTitulo.setBorder(new EmptyBorder(4, 0, 12, 0));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bannerCentro = new JPanel();
         bannerCentro.setOpaque(false);
         bannerCentro.setLayout(new BoxLayout(bannerCentro, BoxLayout.Y_AXIS));
@@ -684,6 +909,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         hoja.add(bannerTitulo);
 
         // Cuadro 1: Filiación del Paciente y Propietario (2 Columnas)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaFiliacion = new JPanel(new GridLayout(1, 2, 12, 0));
         filaFiliacion.setOpaque(false);
         filaFiliacion.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
@@ -708,6 +938,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         hoja.add(Box.createVerticalStrut(10));
 
         // Cuadro 3: Vigencia, Motivo y Cláusulas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaVigencia = new JPanel(new GridLayout(1, 2, 12, 0));
         filaVigencia.setOpaque(false);
         filaVigencia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
@@ -719,10 +954,20 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         hoja.add(Box.createVerticalStrut(12));
 
         // Cuadro 4: Sello y Firma Digital del Médico Colegiado
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelFirma = new JPanel(new BorderLayout());
         panelFirma.setOpaque(false);
         panelFirma.setBorder(new EmptyBorder(8, 0, 4, 0));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel selloCentro = new JPanel();
         selloCentro.setOpaque(false);
         selloCentro.setLayout(new BoxLayout(selloCentro, BoxLayout.Y_AXIS));
@@ -767,10 +1012,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         cardVisorDocumento.repaint();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCajaFiliacion(String titulo, String principal, String secundario) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel caja = new JPanel(new BorderLayout(4, 2)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -797,6 +1056,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         lblS.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblS.setForeground(new Color(71, 85, 105));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel();
         cuerpo.setOpaque(false);
         cuerpo.setLayout(new BoxLayout(cuerpo, BoxLayout.Y_AXIS));
@@ -809,10 +1073,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         return caja;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBloqueDictamenSanitario(String titulo, String texto) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bloque = new JPanel(new BorderLayout(0, 6)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -870,6 +1148,10 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         filtrarMascotas();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarMascotas() {
         String query = txtBuscarMascota != null ? txtBuscarMascota.getText().trim().toLowerCase() : "";
         String especie = cbFiltroEspecie != null ? (String) cbFiltroEspecie.getSelectedItem() : "Todas";
@@ -940,6 +1222,10 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         filtrarDocumentosCatalogo();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarDocumentosCatalogo() {
         modeloListaDocumentos.clear();
         if (mascotaSeleccionada == null || listaDocumentosMascota == null) {
@@ -1054,10 +1340,24 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     // 6. COMPONENTES GRÁFICOS PERSONALIZADOS (AVATARES Y RENDERERS)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearAvatarCircular(int diametro, String texto, Color fondo, Color textoColor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel avatar = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -1096,6 +1396,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         return avatar;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void actualizarAvatarCircular(JPanel avatar, String texto, Color fondo, Color textoColor) {
         avatar.putClientProperty("texto", texto);
         avatar.putClientProperty("fondo", fondo);
@@ -1107,6 +1412,10 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         JLabel badge = new JLabel(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1128,6 +1437,10 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1160,6 +1473,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
     // 7. RENDERERS DE LISTA (MASCOTA & DOCUMENTO)
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private class MascotaCellRenderer extends JPanel implements ListCellRenderer<Mascota> {
         private static final long serialVersionUID = 1L;
         private final JLabel lblAvatar;
@@ -1175,6 +1493,10 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
             lblAvatar = new JLabel("", SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1198,11 +1520,21 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
             lblAvatar.setMaximumSize(new Dimension(32, 32));
             lblAvatar.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel avatarWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
             avatarWrap.setOpaque(false);
             avatarWrap.add(lblAvatar);
             add(avatarWrap, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel txt = new JPanel();
             txt.setOpaque(false);
             txt.setLayout(new BoxLayout(txt, BoxLayout.Y_AXIS));
@@ -1251,6 +1583,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private class DocumentoCellRenderer extends JPanel implements ListCellRenderer<DocumentoMascota> {
         private static final long serialVersionUID = 1L;
         private final JLabel lblIconoDoc;
@@ -1264,11 +1601,21 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
             setOpaque(true);
 
             lblIconoDoc = new JLabel(Iconos.crearIconoCertificado(20, COLOR_TURQUESA));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel icoWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
             icoWrap.setOpaque(false);
             icoWrap.add(lblIconoDoc);
             add(icoWrap, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel center = new JPanel();
             center.setOpaque(false);
             center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
@@ -1287,6 +1634,11 @@ public class VistaConstanciasCertificadosPanel extends JPanel {
             add(center, BorderLayout.CENTER);
 
             lblBadgeVigencia = crearBadge("Oficial", new Color(220, 252, 231), new Color(22, 163, 74));
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 4));
             der.setOpaque(false);
             der.add(lblBadgeVigencia);

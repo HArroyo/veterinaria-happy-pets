@@ -21,9 +21,19 @@ public class NotificacionSistema implements Serializable {
     private String prioridad;  // "Alta", "Media", "Baja"
     private String origen;     // "Seguridad", "Servidor", "Almacenamiento", "Auditoría"
 
+    /**
+     * Constructor de NotificacionSistema.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public NotificacionSistema() {
     }
 
+    /**
+     * Constructor de NotificacionSistema.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public NotificacionSistema(String id, String tipo, String categoria, String titulo, String mensaje,
                                LocalDateTime fecha, String tiempoRelativo, boolean leida,
                                String prioridad, String origen) {

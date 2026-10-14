@@ -32,12 +32,22 @@ public class VentaPOS {
     private String estado;            // "Pagada", "Cotización", "Anulada"
     private String cajero;
 
+    /**
+     * Constructor de VentaPOS.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VentaPOS() {
         this.items = new ArrayList<>();
         this.fechaHora = LocalDateTime.now();
         this.estado = "Pagada";
     }
 
+    /**
+     * Constructor de VentaPOS.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VentaPOS(String idVenta, String numeroComprobante, String tipoComprobante,
                     LocalDateTime fechaHora, String clienteNombre, String clienteDocumento,
                     String mascotaNombre, List<ItemVentaPOS> items, double porcentajeDescuento,

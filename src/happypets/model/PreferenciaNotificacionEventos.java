@@ -13,6 +13,11 @@ public class PreferenciaNotificacionEventos implements Serializable {
     private boolean eventosSistema;
     private boolean recordatoriosClinicos;
 
+    /**
+     * Constructor de PreferenciaNotificacionEventos.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public PreferenciaNotificacionEventos() {
         this.alertasCriticas = true;
         this.documentosNuevos = true;
@@ -20,6 +25,11 @@ public class PreferenciaNotificacionEventos implements Serializable {
         this.recordatoriosClinicos = true;
     }
 
+    /**
+     * Constructor de PreferenciaNotificacionEventos.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public PreferenciaNotificacionEventos(boolean alertasCriticas, boolean documentosNuevos,
                                           boolean eventosSistema, boolean recordatoriosClinicos) {
         this.alertasCriticas = alertasCriticas;

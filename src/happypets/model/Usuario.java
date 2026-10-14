@@ -12,10 +12,20 @@ public class Usuario {
     private String especialidadArea;
     private String estado; // "Activo", "Inactivo"
 
+    /**
+     * Constructor de Usuario.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Usuario(String username, String password, String nombreCompleto, String rol, String correo) {
         this(username, password, nombreCompleto, rol, correo, "General", "Activo");
     }
 
+    /**
+     * Constructor de Usuario.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Usuario(String username, String password, String nombreCompleto, String rol, String correo,
                    String especialidadArea, String estado) {
         this.username = username;

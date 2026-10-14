@@ -23,9 +23,19 @@ public class Mascota {
     private String alergias;
     private boolean activo = true;
 
+    /**
+     * Constructor de Mascota.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Mascota() {
     }
 
+    /**
+     * Constructor de Mascota.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Mascota(String codigo, String codigoCliente, String nombre, String especie,
                    String raza, String edadTexto, String sexo, double pesoActualKg,
                    String planVacunal, String alergias, boolean activo) {

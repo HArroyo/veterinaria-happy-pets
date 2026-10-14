@@ -36,6 +36,11 @@ public class AtencionMedica {
     private String estado;
     private double costo;
 
+    /**
+     * Constructor de AtencionMedica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public AtencionMedica(String idConsulta, String codigoMascota, String nombreMascota, String especieRaza,
                           String dniTutor, String nombreTutor, String telefonoTutor, LocalDate fecha, LocalTime hora,
                           String veterinario, String motivoConsulta, double pesoKg, double temperaturaC,

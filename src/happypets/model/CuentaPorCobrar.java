@@ -21,11 +21,21 @@ public class CuentaPorCobrar {
     private String telefonoCliente;
     private String comprobanteReferencia;
 
+    /**
+     * Constructor de CuentaPorCobrar.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public CuentaPorCobrar(String idCuenta, String cliente, String concepto, double monto,
                            LocalDate fechaVence, String estado) {
         this(idCuenta, cliente, concepto, monto, 0.0, LocalDate.now(), fechaVence, estado, "", "");
     }
 
+    /**
+     * Constructor de CuentaPorCobrar.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public CuentaPorCobrar(String idCuenta, String cliente, String concepto, double monto,
                            double montoPagado, LocalDate fechaRegistro, LocalDate fechaVence,
                            String estado, String telefonoCliente, String comprobanteReferencia) {

@@ -26,9 +26,19 @@ public class RegistroAsistencia implements Serializable {
     private String notaJustificacion;
     private boolean marcadoManual;
 
+    /**
+     * Constructor de RegistroAsistencia.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RegistroAsistencia() {
     }
 
+    /**
+     * Constructor de RegistroAsistencia.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public RegistroAsistencia(String id, String personalId, String nombreColaborador,
                               String rol, String categoria, LocalDate fecha, String turno,
                               String horaEntradaEsperada, String horaSalidaEsperada,

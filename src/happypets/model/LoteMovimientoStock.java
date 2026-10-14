@@ -23,6 +23,11 @@ public class LoteMovimientoStock {
     private String responsable;
     private String observacion;
 
+    /**
+     * Constructor de LoteMovimientoStock.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public LoteMovimientoStock(String idMovimiento, String codigoProducto, String nombreProducto,
                                String numeroLote, String tipoMovimiento, int cantidad,
                                int stockPrevio, int stockPosterior, LocalDate fechaMovimiento,

@@ -20,11 +20,21 @@ public class EgresoOperativo {
     private String comprobante;     // Comprobante / N.° Factura / Operación
     private String estado;          // "Pagado", "Programado", "Auditado"
 
+    /**
+     * Constructor de EgresoOperativo.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public EgresoOperativo(String idEgreso, LocalDate fecha, String categoria, String descripcion,
                            String proveedor, double monto, String metodoPago) {
         this(idEgreso, fecha, categoria, descripcion, proveedor, monto, metodoPago, "-", "Pagado");
     }
 
+    /**
+     * Constructor de EgresoOperativo.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public EgresoOperativo(String idEgreso, LocalDate fecha, String categoria, String descripcion,
                            String proveedor, double monto, String metodoPago, String comprobante,
                            String estado) {

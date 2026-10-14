@@ -35,6 +35,11 @@ public class InternamientoHospitalario {
     private double costoDia;
     private String estado; // "Internado / En Tratamiento", "Alta Médica", "Derivado a UCI"
 
+    /**
+     * Constructor de InternamientoHospitalario.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public InternamientoHospitalario(String idInternamiento, String numeroBox, String tipoBox, String codigoMascota,
                                      String nombreMascota, String especieRaza, String nombreTutor, String telefonoTutor,
                                      String diagnosticoIngreso, String veterinarioTratante, LocalDate fechaIngreso,

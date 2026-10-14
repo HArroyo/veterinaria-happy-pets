@@ -27,10 +27,20 @@ public class Modulo5InventarioFarmaciaFrame extends JFrame {
     private final VistaAjustesMermasPanel vistaAjustes;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo5InventarioFarmaciaFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo5InventarioFarmaciaFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo5InventarioFarmaciaFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo5InventarioFarmaciaFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 5: Inventario y Farmacia");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

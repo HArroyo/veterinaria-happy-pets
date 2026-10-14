@@ -28,6 +28,11 @@ public class PacienteTriaje implements Serializable {
     private String consultorioAsignado;   // Consultorio 1, Consultorio 2, Quirófano, Tópico
     private String estado;                // En Espera, Llamado, En Consulta, Atendido
 
+    /**
+     * Constructor de PacienteTriaje.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public PacienteTriaje(String idTicket, String idCita, String codigoMascota,
                           String nombreMascota, String especieRaza, String nombrePropietario,
                           String telefonoPropietario, LocalTime horaLlegada, double pesoKg,

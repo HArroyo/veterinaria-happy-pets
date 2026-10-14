@@ -20,10 +20,20 @@ public class ConstanciasCertificadosFrame extends JFrame {
 
     private final VistaConstanciasCertificadosPanel panelVista;
 
+    /**
+     * Constructor de ConstanciasCertificadosFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConstanciasCertificadosFrame() {
         this(null);
     }
 
+    /**
+     * Constructor de ConstanciasCertificadosFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConstanciasCertificadosFrame(Mascota mascota) {
         setTitle("Happy Pets - Constancias y Certificados Médicos");
         setIconImage(Ui.icono());

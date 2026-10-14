@@ -29,6 +29,11 @@ public class OrdenLaboratorio {
     private String conclusionesRecomendaciones;
     private String estado; // "Solicitado", "En Proceso", "Completado", "Muestra insuficiente"
 
+    /**
+     * Constructor de OrdenLaboratorio.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public OrdenLaboratorio(String idOrden, String categoria, String tipoEstudio, String codigoMascota,
                             String nombreMascota, String especieRaza, String nombreTutor, String telefonoTutor,
                             LocalDate fechaSolicitud, String prioridad, String veterinarioSolicitante,

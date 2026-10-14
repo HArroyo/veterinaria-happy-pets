@@ -27,6 +27,11 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -67,6 +72,11 @@ public class VistaControlStockLotesPanel extends JPanel {
     // Master Table & Filtros
     private JTextField txtBuscar;
     private String tipoFiltroSeleccionado = "TODOS";
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelPillsTipo;
     private JTable tablaMovimientos;
     private DefaultTableModel modeloMovimientos;
@@ -74,8 +84,23 @@ public class VistaControlStockLotesPanel extends JPanel {
     private LoteMovimientoStock movimientoSeleccionado;
 
     // Live Kardex Hub Componentes
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubDetalle;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubVacio;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel contenedorPadre;
     private JLabel lblHubAvatar;
     private JLabel lblHubProducto;
@@ -97,11 +122,21 @@ public class VistaControlStockLotesPanel extends JPanel {
     private JLabel lblHubObservacion;
     private JTextArea lblHubProtocoloFefo;
 
+    /**
+     * Constructor de VistaControlStockLotesPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaControlStockLotesPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
         // Panel Superior Fijo (Cabecera + KPIs)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSuperior = new JPanel();
         panelSuperior.setOpaque(false);
         panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
@@ -117,6 +152,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         // 3. Contenedor Master-Detail (58% / 42%)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
         panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
@@ -127,10 +167,25 @@ public class VistaControlStockLotesPanel extends JPanel {
         recargarDatos();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -148,6 +203,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         izq.add(subtitulo);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
@@ -177,7 +237,17 @@ public class VistaControlStockLotesPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
         fila.setOpaque(false);
 
@@ -195,10 +265,24 @@ public class VistaControlStockLotesPanel extends JPanel {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color acento, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(8, 4)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -212,6 +296,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(8, 12, 8, 12));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -253,10 +342,24 @@ public class VistaControlStockLotesPanel extends JPanel {
         return split;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelMaster() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -271,10 +374,20 @@ public class VistaControlStockLotesPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // Filtros Superiores
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelFiltros = new JPanel();
         panelFiltros.setOpaque(false);
         panelFiltros.setLayout(new BoxLayout(panelFiltros, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaBusqueda = new JPanel(new BorderLayout(8, 0));
         filaBusqueda.setOpaque(false);
 
@@ -300,6 +413,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         panelFiltros.add(Box.createVerticalStrut(8));
 
         // Pills de Tipo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelPillsTipo = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         panelPillsTipo.setOpaque(false);
         String[] tipos = {"TODOS", "Ingreso", "Salida", "Ajuste"};
@@ -359,6 +477,11 @@ public class VistaControlStockLotesPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
                 cell.setOpaque(true);
                 cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -369,6 +492,10 @@ public class VistaControlStockLotesPanel extends JPanel {
                 JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
                     private static final long serialVersionUID = 1L;
                     @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -431,13 +558,28 @@ public class VistaControlStockLotesPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDetail() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         contenedorPadre = new JPanel(new BorderLayout());
         contenedorPadre.setOpaque(false);
         contenedorPadre.setPreferredSize(new Dimension(360, 0));
         contenedorPadre.setMinimumSize(new Dimension(320, 0));
 
         // Panel Estado Vacío
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
         JLabel lblVacio = new JLabel("<html><center>Seleccione un registro del Kardex<br>para inspeccionar su trazabilidad.</center></html>", SwingConstants.CENTER);
@@ -446,9 +588,18 @@ public class VistaControlStockLotesPanel extends JPanel {
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
         // Panel Detalle Activo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -463,12 +614,21 @@ public class VistaControlStockLotesPanel extends JPanel {
         panelHubDetalle.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // 1. Cabecera del Hub
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabHub = new JPanel(new BorderLayout(8, 0));
         cabHub.setOpaque(false);
 
         lblHubAvatar = new JLabel("M", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -488,6 +648,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
         cabHub.add(lblHubAvatar, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel infoMed = new JPanel();
         infoMed.setOpaque(false);
         infoMed.setLayout(new BoxLayout(infoMed, BoxLayout.Y_AXIS));
@@ -522,7 +687,17 @@ public class VistaControlStockLotesPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -532,6 +707,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         scrollContent.setOpaque(false);
 
         // Telemetría 2x2
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 6, 6));
         gridTelemetria.setOpaque(false);
         gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
@@ -551,6 +731,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         scrollContent.add(vGap(8));
 
         // Trazabilidad
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionLote = crearSeccionCard("TRAZABILIDAD DE LOTE & FARMACOPEA");
         lblHubCodigoProd = new JLabel("-");
         lblHubCodigoProd.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -573,6 +758,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         scrollContent.add(vGap(6));
 
         // Auditoría
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionAuditoria = crearSeccionCard("AUDITORÍA DE MOVIMIENTO & ALMACÉN");
         lblHubResponsable = new JLabel("-");
         lblHubResponsable.setFont(new Font("Segoe UI", Font.PLAIN, 11));
@@ -595,6 +785,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         scrollContent.add(vGap(6));
 
         // Protocolo Sanitario
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionFefo = crearSeccionCard("DISPENSACIÓN FEFO (FIRST EXPIRED, FIRST OUT)");
         lblHubProtocoloFefo = new JTextArea("Lote validado bajo política FEFO. Cumple normativa sanitaria.");
         lblHubProtocoloFefo.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -618,6 +813,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         panelHubDetalle.add(spHub, BorderLayout.CENTER);
 
         // 3. Barra de Acciones Rápidas (1-Click)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
         barraAcciones.setPreferredSize(new Dimension(0, 62));
@@ -646,7 +846,17 @@ public class VistaControlStockLotesPanel extends JPanel {
         return contenedorPadre;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCajaTelemetria(String titulo, JLabel lblValor, Color colorAcento) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel c = new JPanel();
         c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(new Color(248, 250, 252));
@@ -668,7 +878,17 @@ public class VistaControlStockLotesPanel extends JPanel {
         return c;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSeccionCard(String titulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel sec = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -677,7 +897,17 @@ public class VistaControlStockLotesPanel extends JPanel {
             }
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -692,6 +922,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         sec.setBackground(Color.WHITE);
         sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         header.setOpaque(false);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -706,7 +941,17 @@ public class VistaControlStockLotesPanel extends JPanel {
         return sec;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemLinea(String label, Component valor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(6, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -726,7 +971,17 @@ public class VistaControlStockLotesPanel extends JPanel {
 
     private static Component vGap(int h) {
         Component c = Box.createVerticalStrut(h);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         if (c instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
         }
         return c;
@@ -756,6 +1011,10 @@ public class VistaControlStockLotesPanel extends JPanel {
         lblKpiMovimientosHoy.setText(String.valueOf(Math.min(todos.size(), 4)));
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarMovimientos() {
         String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
         List<LoteMovimientoStock> todos = repo.getMovimientosStock();
@@ -802,6 +1061,10 @@ public class VistaControlStockLotesPanel extends JPanel {
         }
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleMovimiento(LoteMovimientoStock m) {
         this.movimientoSeleccionado = m;
         contenedorPadre.removeAll();
@@ -999,6 +1262,10 @@ public class VistaControlStockLotesPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1046,6 +1313,10 @@ public class VistaControlStockLotesPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1085,6 +1356,11 @@ public class VistaControlStockLotesPanel extends JPanel {
         return btn;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
         private static final long serialVersionUID = 1L;
         @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }

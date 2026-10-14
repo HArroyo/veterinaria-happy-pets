@@ -15,6 +15,11 @@ public class ProveedorFarmacia {
     private String condicionPago; // "Crédito 30 días", "Contado Factura", "Crédito 15 días"
     private String estado; // "Homologado / Activo", "En Evaluación", "Inactivo"
 
+    /**
+     * Constructor de ProveedorFarmacia.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ProveedorFarmacia(String ruc, String razonSocial, String nombreComercial, String telefono,
                              String correo, String direccion, String contactoAsesor,
                              String condicionPago, String estado) {

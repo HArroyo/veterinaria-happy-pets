@@ -30,6 +30,11 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -124,6 +129,11 @@ public class PantallaPrincipalFrame extends JFrame {
 
     // Vistas integradas del Módulo 1 en CardLayout
     private final CardLayout layoutCards = new CardLayout();
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private final JPanel panelContenedorCards = new JPanel(layoutCards);
     private VistaClientesMascotasPanel vistaClientesMascotas;
     private VistaHistorialClinicoPanel vistaHistorialClinico;
@@ -203,6 +213,11 @@ public class PantallaPrincipalFrame extends JFrame {
     private JComboBox<String> cmbFiltroCitas;
     private JTextField txtBuscarCitaDashboard;
 
+    /**
+     * Constructor de PantallaPrincipalFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public PantallaPrincipalFrame() {
         setTitle("Happy Pets - Panel de Gestión Veterinaria");
         setIconImage(Ui.icono());
@@ -217,6 +232,11 @@ public class PantallaPrincipalFrame extends JFrame {
         add(crearBarraLateralIzquierda(), BorderLayout.WEST);
 
         // 2. Panel Principal (Top Bar + Contenedor de Vistas)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setBackground(COLOR_FONDO_APP);
 
@@ -236,12 +256,22 @@ public class PantallaPrincipalFrame extends JFrame {
      * Construye la barra lateral izquierda (Sidebar) con logo, dashboard, 10 módulos con submenús y logout.
      */
     private JPanel crearBarraLateralIzquierda() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel sidebar = new JPanel(new BorderLayout());
         sidebar.setPreferredSize(new Dimension(270, 0));
         sidebar.setBackground(COLOR_SIDEBAR);
         sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, COLOR_BORDE));
 
         // Cabecera del Sidebar con Logotipo institucional
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerLogo = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 16));
         headerLogo.setBackground(COLOR_SIDEBAR);
         headerLogo.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
@@ -249,6 +279,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel logoBadge = new JLabel("HP", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -263,6 +297,11 @@ public class PantallaPrincipalFrame extends JFrame {
         logoBadge.setFont(new Font("Segoe UI", Font.BOLD, 17));
         headerLogo.add(logoBadge);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titulosLogo = new JPanel();
         titulosLogo.setOpaque(false);
         titulosLogo.setLayout(new BoxLayout(titulosLogo, BoxLayout.Y_AXIS));
@@ -282,6 +321,11 @@ public class PantallaPrincipalFrame extends JFrame {
         sidebar.add(headerLogo, BorderLayout.NORTH);
 
         // Contenedor scrolleable de los módulos y submenús
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel menuLista = new JPanel();
         menuLista.setBackground(COLOR_SIDEBAR);
         menuLista.setLayout(new BoxLayout(menuLista, BoxLayout.Y_AXIS));
@@ -325,6 +369,11 @@ public class PantallaPrincipalFrame extends JFrame {
         sidebar.add(scrollMenu, BorderLayout.CENTER);
 
         // Pie del sidebar con opción Cerrar Sesión (como en la captura)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new BorderLayout());
         footer.setBackground(COLOR_SIDEBAR);
         footer.setBorder(BorderFactory.createCompoundBorder(
@@ -335,6 +384,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JButton btnLogout = new JButton(" Cerrar Sesión") {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 if (getModel().isRollover()) {
                     Graphics2D g2 = (Graphics2D) g.create();
@@ -375,6 +428,11 @@ public class PantallaPrincipalFrame extends JFrame {
      * Barra superior (Top Bar) con buscador, botón toggle, campana de notificaciones y bloque de usuario.
      */
     private JPanel crearBarraTopHeader() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setPreferredSize(new Dimension(0, 64));
         top.setBackground(Color.WHITE);
@@ -385,13 +443,27 @@ public class PantallaPrincipalFrame extends JFrame {
         ));
 
         // Izquierda: Solo Buscador redondeado (sin botón hamburguesa)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 2));
         izq.setOpaque(false);
 
         // Barra de búsqueda redondeada con icono
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel searchBox = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -445,6 +517,11 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(izq, BorderLayout.WEST);
 
         // Derecha: Notificaciones + Perfil de Usuario con avatar circular (igual a la captura)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 2));
         der.setOpaque(false);
 
@@ -468,6 +545,11 @@ public class PantallaPrincipalFrame extends JFrame {
         String nombreMostrar = "Harry Martin Arroyo Preciado"; // Representando al usuario en sesión según captura
         String rolMostrar = user != null ? user.getRol() : "Administrador";
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel userText = new JPanel();
         userText.setOpaque(false);
         userText.setLayout(new BoxLayout(userText, BoxLayout.Y_AXIS));
@@ -490,6 +572,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel avatar = new JLabel("HM", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -704,6 +790,11 @@ public class PantallaPrincipalFrame extends JFrame {
      *   - Columna Derecha: Alertas clínicas urgentes, Capacidad hospitalaria, Médicos de guardia y Telemetría IA
      */
     private JScrollPane crearContenedorDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenido = new JPanel();
         contenido.setBackground(COLOR_FONDO_APP);
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
@@ -729,10 +820,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return scroll;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearHeroHeaderDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel hero = new JPanel(new BorderLayout(20, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -749,11 +854,21 @@ public class PantallaPrincipalFrame extends JFrame {
         hero.setBorder(new EmptyBorder(16, 22, 16, 22));
 
         // Lado Izquierdo: Insignia + Título + Subtítulo con alineación estricta a la izquierda
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
         izq.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel badgePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         badgePanel.setOpaque(false);
         badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -789,6 +904,11 @@ public class PantallaPrincipalFrame extends JFrame {
         hero.add(izq, BorderLayout.WEST);
 
         // Lado Derecho: Botones de Acción Rápida con iconos vectoriales nítidos y sin emojis
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel derAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         derAcciones.setOpaque(false);
 
@@ -832,6 +952,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JButton btnRefreshDash = new JButton() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -861,7 +985,17 @@ public class PantallaPrincipalFrame extends JFrame {
         return hero;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpiWeb() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 5, 14, 0));
         fila.setOpaque(false);
 
@@ -918,10 +1052,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardKpi(String valor, String etiqueta, String subtexto, Color colorFondoIco, Color colorIcono, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(12, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -939,6 +1087,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badgeIcono = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -951,6 +1103,11 @@ public class PantallaPrincipalFrame extends JFrame {
         badgeIcono.setPreferredSize(new Dimension(44, 44));
         card.add(badgeIcono, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel text = new JPanel();
         text.setOpaque(false);
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
@@ -977,11 +1134,26 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCuerpoDashboardDosColumnas() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cuerpo = new JPanel(new BorderLayout(18, 0));
         cuerpo.setOpaque(false);
 
         // Columna Izquierda (Operativa Principal)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel colIzquierda = new JPanel();
         colIzquierda.setOpaque(false);
         colIzquierda.setLayout(new BoxLayout(colIzquierda, BoxLayout.Y_AXIS));
@@ -997,6 +1169,11 @@ public class PantallaPrincipalFrame extends JFrame {
         cuerpo.add(colIzquierda, BorderLayout.CENTER);
 
         // Columna Derecha (Panel Ejecutivo y Alertas)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel colDerecha = new JPanel();
         colDerecha.setOpaque(false);
         colDerecha.setLayout(new BoxLayout(colDerecha, BoxLayout.Y_AXIS));
@@ -1017,10 +1194,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return cuerpo;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaCitasHoyDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1035,9 +1226,19 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout(10, 0));
         top.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         titIzq.setOpaque(false);
 
@@ -1049,6 +1250,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badgeEnVivo = new JLabel("  EN VIVO ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1076,6 +1281,11 @@ public class PantallaPrincipalFrame extends JFrame {
 
         top.add(titIzq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel derFiltros = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         derFiltros.setOpaque(false);
 
@@ -1249,6 +1459,10 @@ public class PantallaPrincipalFrame extends JFrame {
             JLabel badge = new JLabel("  " + val + "  ", SwingConstants.CENTER) {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1263,6 +1477,11 @@ public class PantallaPrincipalFrame extends JFrame {
             badge.setOpaque(false);
             badge.setBorder(new EmptyBorder(2, 6, 2, 6));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -1271,10 +1490,24 @@ public class PantallaPrincipalFrame extends JFrame {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaTablaPacientes() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1289,9 +1522,19 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout(10, 0));
         top.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         titIzq.setOpaque(false);
 
@@ -1310,6 +1553,11 @@ public class PantallaPrincipalFrame extends JFrame {
 
         top.add(titIzq, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         der.setOpaque(false);
 
@@ -1345,6 +1593,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JButton btnRef = new JButton() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1411,10 +1663,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearLanzadorModulosDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 12)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1429,6 +1695,11 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 16, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -1444,6 +1715,11 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(lblSub, BorderLayout.SOUTH);
         card.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel grid = new JPanel(new GridLayout(2, 3, 12, 12));
         grid.setOpaque(false);
 
@@ -1523,10 +1799,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaLanzador(String titulo, String subtitulo, Icon icono, Color colorFondoIco, Runnable accion) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1546,6 +1836,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badgeIcono = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1558,6 +1852,11 @@ public class PantallaPrincipalFrame extends JFrame {
         badgeIcono.setPreferredSize(new Dimension(38, 38));
         card.add(badgeIcono, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel text = new JPanel();
         text.setOpaque(false);
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
@@ -1595,10 +1894,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaAlertasDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1613,6 +1926,11 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -1623,6 +1941,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badgeNum = new JLabel(" 4 activas ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1641,6 +1963,11 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(badgeNum, BorderLayout.EAST);
         card.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel lista = new JPanel();
         lista.setLayout(new BoxLayout(lista, BoxLayout.Y_AXIS));
         lista.setOpaque(false);
@@ -1654,7 +1981,17 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemAlerta(String titulo, String detalle, String badgeTexto, Color colorBadgeFondo, Color colorBadgeTexto) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel item = new JPanel(new BorderLayout(8, 0));
         item.setOpaque(false);
         item.setBorder(BorderFactory.createCompoundBorder(
@@ -1662,6 +1999,11 @@ public class PantallaPrincipalFrame extends JFrame {
                 new EmptyBorder(6, 0, 6, 0)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel textos = new JPanel();
         textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
         textos.setOpaque(false);
@@ -1682,6 +2024,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badge = new JLabel(" " + badgeTexto + " ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1699,10 +2045,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return item;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaOcupacionDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1717,6 +2077,11 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -1727,6 +2092,11 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(lblTit, BorderLayout.WEST);
         card.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barras = new JPanel();
         barras.setLayout(new BoxLayout(barras, BoxLayout.Y_AXIS));
         barras.setOpaque(false);
@@ -1743,10 +2113,25 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBarraProgresoVisual(String titulo, int actual, int total, Color colorBarra) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(6, 4));
         p.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -1763,9 +2148,18 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(lblValor, BorderLayout.EAST);
         p.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barra = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1784,10 +2178,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaMedicosGuardiaDashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1802,6 +2210,11 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -1812,6 +2225,11 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(lblTit, BorderLayout.WEST);
         card.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel lista = new JPanel();
         lista.setLayout(new BoxLayout(lista, BoxLayout.Y_AXIS));
         lista.setOpaque(false);
@@ -1825,7 +2243,17 @@ public class PantallaPrincipalFrame extends JFrame {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemMedico(String nombre, String especialidad, String estado, Color colorFondoBadge, Color colorTextoBadge) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel item = new JPanel(new BorderLayout(8, 0));
         item.setOpaque(false);
         item.setBorder(BorderFactory.createCompoundBorder(
@@ -1836,6 +2264,11 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel ico = new JLabel(Iconos.crearIconoDoctor(18, Ui.TURQUESA_PROFUNDO));
         item.add(ico, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel text = new JPanel();
         text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
         text.setOpaque(false);
@@ -1856,6 +2289,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badge = new JLabel(" " + estado + " ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1874,10 +2311,24 @@ public class PantallaPrincipalFrame extends JFrame {
         return item;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaTelemetriaIADashboard() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 10)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1892,6 +2343,11 @@ public class PantallaPrincipalFrame extends JFrame {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -1904,6 +2360,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JLabel badgeIA = new JLabel(" v1.8 ACTIVO ", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1922,6 +2382,11 @@ public class PantallaPrincipalFrame extends JFrame {
         top.add(badgeIA, BorderLayout.EAST);
         card.add(top, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filas = new JPanel();
         filas.setLayout(new BoxLayout(filas, BoxLayout.Y_AXIS));
         filas.setOpaque(false);
@@ -2021,6 +2486,10 @@ public class PantallaPrincipalFrame extends JFrame {
         }
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarTabla(String query) {
         if (modeloTabla == null) return;
         if (query == null || query.trim().isEmpty() || "Buscar cliente, paciente, historia...".equals(query)) {
@@ -2098,7 +2567,17 @@ public class PantallaPrincipalFrame extends JFrame {
      */
     private class ModuloMenuUI {
         final DefinicionModulo def;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         final JPanel panelContenedor;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         final JPanel panelSubmodulos;
         final JButton btnCabecera;
         final JLabel lblChevron;
@@ -2109,6 +2588,11 @@ public class PantallaPrincipalFrame extends JFrame {
             this.def = def;
             this.expandido = expandirInicialmente;
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             panelContenedor = new JPanel();
             panelContenedor.setOpaque(false);
             panelContenedor.setLayout(new BoxLayout(panelContenedor, BoxLayout.Y_AXIS));
@@ -2119,6 +2603,10 @@ public class PantallaPrincipalFrame extends JFrame {
             btnCabecera = new JButton() {
                 private static final long serialVersionUID = 1L;
                 @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -2142,6 +2630,11 @@ public class PantallaPrincipalFrame extends JFrame {
             btnCabecera.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
             // Icono + Nombre del módulo a la izquierda
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel izq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
             izq.setOpaque(false);
             izq.add(new JLabel(def.icono));
@@ -2155,6 +2648,11 @@ public class PantallaPrincipalFrame extends JFrame {
             btnCabecera.add(lblChevron, BorderLayout.EAST);
 
             // Panel que contiene los submódulos indentados
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             panelSubmodulos = new JPanel();
             panelSubmodulos.setOpaque(false);
             panelSubmodulos.setLayout(new BoxLayout(panelSubmodulos, BoxLayout.Y_AXIS));
@@ -2195,6 +2693,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -2233,6 +2735,10 @@ public class PantallaPrincipalFrame extends JFrame {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

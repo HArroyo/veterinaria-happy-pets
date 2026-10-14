@@ -29,6 +29,11 @@ public class ReservaHospedaje {
     private double costoTotal;
     private String estado; // "Confirmada", "En Estadía / Hospedado", "Finalizada / Check-out", "Cancelada"
 
+    /**
+     * Constructor de ReservaHospedaje.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ReservaHospedaje(String idReserva, String numeroSuite, String codigoMascota, String nombreMascota,
                             String especieRaza, String nombreTutor, String telefonoTutor, String telefonoEmergencia,
                             LocalDate fechaCheckIn, LocalDate fechaCheckOut, int numeroNoches,

@@ -17,9 +17,19 @@ public class DocumentoMascota {
     private String rutaArchivo;
     private boolean disponible = true;
 
+    /**
+     * Constructor de DocumentoMascota.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DocumentoMascota() {
     }
 
+    /**
+     * Constructor de DocumentoMascota.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DocumentoMascota(String codigo, String codigoMascota, String tipo, String descripcion,
                             LocalDate fechaActualizacion, boolean disponible) {
         this.codigo = codigo;

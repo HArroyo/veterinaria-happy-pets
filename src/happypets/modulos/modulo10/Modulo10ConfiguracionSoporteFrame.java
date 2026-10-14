@@ -29,10 +29,20 @@ public class Modulo10ConfiguracionSoporteFrame extends JFrame {
     private final VistaModuloIASoportePanel vistaIASoporte;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo10ConfiguracionSoporteFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo10ConfiguracionSoporteFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo10ConfiguracionSoporteFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo10ConfiguracionSoporteFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 10: Configuración, Integraciones y Soporte");
         setIconImage(Ui.icono());

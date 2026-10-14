@@ -27,6 +27,11 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -66,6 +71,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
     // Master Table & Filtros
     private JTextField txtBuscar;
     private String categoriaFiltroSeleccionada = "TODOS";
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelPillsCategoria;
     private JTable tablaProductos;
     private DefaultTableModel modeloProductos;
@@ -73,8 +83,23 @@ public class VistaCatalogoProductosPanel extends JPanel {
     private ProductoFarmacia productoSeleccionado;
 
     // Live Product Hub Componentes
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubDetalle;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelHubVacio;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel contenedorPadre;
     private JLabel lblHubAvatar;
     private JLabel lblHubNombre;
@@ -100,11 +125,21 @@ public class VistaCatalogoProductosPanel extends JPanel {
     private JLabel lblHubStockMinimo;
     private JTextArea txtHubPosologiaIndicacion;
 
+    /**
+     * Constructor de VistaCatalogoProductosPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaCatalogoProductosPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
         // Panel Superior Fijo (Cabecera + KPIs)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSuperior = new JPanel();
         panelSuperior.setOpaque(false);
         panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
@@ -120,6 +155,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
 
         // 3. Contenedor Master-Detail (58% / 42%)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setOpaque(false);
         panelCentro.setBorder(new EmptyBorder(0, 18, 14, 18));
@@ -130,10 +170,25 @@ public class VistaCatalogoProductosPanel extends JPanel {
         recargarDatos();
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -151,6 +206,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         izq.add(subtitulo);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         der.setOpaque(false);
 
@@ -180,7 +240,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 4, 12, 0));
         fila.setOpaque(false);
 
@@ -198,10 +268,24 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaKpi(String titulo, JLabel lblValor, String subtitulo, Color acento, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(8, 4)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -215,6 +299,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         card.setOpaque(false);
         card.setBorder(new EmptyBorder(8, 12, 8, 12));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -256,10 +345,24 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return split;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelMaster() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -274,10 +377,20 @@ public class VistaCatalogoProductosPanel extends JPanel {
         card.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // Filtros Superiores (Búsqueda + Pills de Categoría)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelFiltros = new JPanel();
         panelFiltros.setOpaque(false);
         panelFiltros.setLayout(new BoxLayout(panelFiltros, BoxLayout.Y_AXIS));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaBusqueda = new JPanel(new BorderLayout(8, 0));
         filaBusqueda.setOpaque(false);
 
@@ -303,6 +416,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         panelFiltros.add(Box.createVerticalStrut(8));
 
         // Pills de Categoría
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelPillsCategoria = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         panelPillsCategoria.setOpaque(false);
         String[] categorias = {"TODOS", "Antibiótico", "Antiparasitario", "Analgésico / AINE", "Vacuna / Biológico", "Alimento Clínico", "Material Quirúrgico"};
@@ -361,6 +479,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel cell = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
                 cell.setOpaque(true);
                 cell.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -371,6 +494,10 @@ public class VistaCatalogoProductosPanel extends JPanel {
                 JLabel avatar = new JLabel(letra, SwingConstants.CENTER) {
                     private static final long serialVersionUID = 1L;
                     @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2 = (Graphics2D) g.create();
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -434,13 +561,28 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return card;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPanelDetail() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         contenedorPadre = new JPanel(new BorderLayout());
         contenedorPadre.setOpaque(false);
         contenedorPadre.setPreferredSize(new Dimension(360, 0));
         contenedorPadre.setMinimumSize(new Dimension(320, 0));
 
         // Panel Estado Vacío
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubVacio = new JPanel(new BorderLayout());
         panelHubVacio.setOpaque(false);
         JLabel lblVacio = new JLabel("<html><center>Seleccione un producto del catálogo<br>para ver su ficha técnica.</center></html>", SwingConstants.CENTER);
@@ -449,9 +591,18 @@ public class VistaCatalogoProductosPanel extends JPanel {
         panelHubVacio.add(lblVacio, BorderLayout.CENTER);
 
         // Panel Detalle Activo
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelHubDetalle = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -466,12 +617,21 @@ public class VistaCatalogoProductosPanel extends JPanel {
         panelHubDetalle.setBorder(new EmptyBorder(10, 12, 10, 12));
 
         // 1. Cabecera del Hub
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabHub = new JPanel(new BorderLayout(8, 0));
         cabHub.setOpaque(false);
 
         lblHubAvatar = new JLabel("P", SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -491,6 +651,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         lblHubAvatar.setForeground(Ui.TURQUESA_PROFUNDO);
         cabHub.add(lblHubAvatar, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel infoMed = new JPanel();
         infoMed.setOpaque(false);
         infoMed.setLayout(new BoxLayout(infoMed, BoxLayout.Y_AXIS));
@@ -525,7 +690,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
             private static final long serialVersionUID = 1L;
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -535,6 +710,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         scrollContent.setOpaque(false);
 
         // Telemetría 2x2
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel gridTelemetria = new JPanel(new GridLayout(2, 2, 6, 6));
         gridTelemetria.setOpaque(false);
         gridTelemetria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
@@ -554,6 +734,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         scrollContent.add(vGap(8));
 
         // Ficha Farmacológica
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionFarmaco = crearSeccionCard("ESPECIFICACIONES FARMACOLÓGICAS");
         lblHubPrincipioActivo = new JTextArea("-");
         lblHubPrincipioActivo.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -586,6 +771,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         scrollContent.add(vGap(6));
 
         // Requisitos Sanitarios & Conservación
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionSanitaria = crearSeccionCard("CONDICIONES SANITARIAS & CONSERVACIÓN");
         lblHubChipReceta = new JLabel("Venta Libre Veterinaria");
         lblHubChipReceta.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -608,6 +798,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         scrollContent.add(vGap(6));
 
         // Trazabilidad de Lote & Laboratorio
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel seccionTrazabilidad = crearSeccionCard("TRAZABILIDAD DE LOTE & PROVEEDOR");
         lblHubLoteVigente = new JLabel("-");
         lblHubLoteVigente.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -637,6 +832,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         panelHubDetalle.add(spHub, BorderLayout.CENTER);
 
         // 3. Barra de Acciones Rápidas (1-Click)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraAcciones = new JPanel(new GridLayout(2, 2, 6, 6));
         barraAcciones.setOpaque(false);
         barraAcciones.setPreferredSize(new Dimension(0, 62));
@@ -665,7 +865,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return contenedorPadre;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCajaTelemetria(String titulo, JLabel lblValor, Color colorAcento) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel c = new JPanel();
         c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
         c.setBackground(new Color(248, 250, 252));
@@ -687,7 +897,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return c;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearSeccionCard(String titulo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel sec = new JPanel() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -696,7 +916,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
             }
             @Override
             protected void addImpl(Component comp, Object constraints, int index) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 if (comp instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                     ((javax.swing.JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 super.addImpl(comp, constraints, index);
@@ -711,6 +941,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         sec.setBackground(Color.WHITE);
         sec.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         header.setOpaque(false);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -725,7 +960,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return sec;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearItemLinea(String label, Component valor) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(6, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -745,7 +990,17 @@ public class VistaCatalogoProductosPanel extends JPanel {
 
     private static Component vGap(int h) {
         Component c = Box.createVerticalStrut(h);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         if (c instanceof javax.swing.JComponent) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             ((javax.swing.JComponent) c).setAlignmentX(Component.LEFT_ALIGNMENT);
         }
         return c;
@@ -779,6 +1034,10 @@ public class VistaCatalogoProductosPanel extends JPanel {
         lblKpiRecetaRetenida.setText(String.valueOf(recetas));
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarProductos() {
         String query = txtBuscar != null ? txtBuscar.getText().trim().toLowerCase() : "";
         List<ProductoFarmacia> todos = repo.getProductosFarmacia();
@@ -824,6 +1083,10 @@ public class VistaCatalogoProductosPanel extends JPanel {
         }
     }
 
+    /**
+     * Actualiza el panel lateral derecho (Live Detail Hub) con la información del registro seleccionado.
+     * Si el argumento es nulo, restablece el panel mostrando el estado de selección vacía.
+     */
     private void mostrarDetalleProducto(ProductoFarmacia p) {
         this.productoSeleccionado = p;
         contenedorPadre.removeAll();
@@ -1045,6 +1308,10 @@ public class VistaCatalogoProductosPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1092,6 +1359,10 @@ public class VistaCatalogoProductosPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1131,6 +1402,11 @@ public class VistaCatalogoProductosPanel extends JPanel {
         return btn;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private static class ScrollablePanel extends JPanel implements javax.swing.Scrollable {
         private static final long serialVersionUID = 1L;
         @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }

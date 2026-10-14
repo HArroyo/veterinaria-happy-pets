@@ -19,12 +19,22 @@ public class MovimientoCajaChica {
     private String comprobante;    // txtComprobante (ej. Recibo #042, Boleta B001-102, Vale #15)
     private double saldoResultante;
 
+    /**
+     * Constructor de MovimientoCajaChica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public MovimientoCajaChica(String idMovimiento, LocalDate fecha, String tipo,
                                String concepto, double monto, String responsable,
                                String comprobante) {
         this(idMovimiento, fecha, tipo, concepto, monto, responsable, comprobante, 0.0);
     }
 
+    /**
+     * Constructor de MovimientoCajaChica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public MovimientoCajaChica(String idMovimiento, LocalDate fecha, String tipo,
                                String concepto, double monto, String responsable,
                                String comprobante, double saldoResultante) {

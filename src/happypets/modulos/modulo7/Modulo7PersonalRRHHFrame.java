@@ -28,10 +28,20 @@ public class Modulo7PersonalRRHHFrame extends JFrame {
     private final VistaAsistenciasPermisosPanel vistaAsistenciasPermisos;
     private final JTabbedPane tabs;
 
+    /**
+     * Constructor de Modulo7PersonalRRHHFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo7PersonalRRHHFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo7PersonalRRHHFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo7PersonalRRHHFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 7: Personal y Recursos Humanos (RRHH)");
         setIconImage(Ui.icono());

@@ -20,10 +20,20 @@ public class HistorialClinicoFrame extends JFrame {
 
     private final VistaHistorialClinicoPanel panelVista;
 
+    /**
+     * Constructor de HistorialClinicoFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public HistorialClinicoFrame() {
         this(null);
     }
 
+    /**
+     * Constructor de HistorialClinicoFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public HistorialClinicoFrame(Mascota mascota) {
         setTitle("Happy Pets - Historial Clínico de Mascotas");
         setIconImage(Ui.icono());

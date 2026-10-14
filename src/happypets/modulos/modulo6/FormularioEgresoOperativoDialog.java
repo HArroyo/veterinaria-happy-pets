@@ -21,6 +21,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -56,16 +61,31 @@ public class FormularioEgresoOperativoDialog extends JDialog {
     private JTextField txtComprobante;
     private JComboBox<String> cbEstado;
 
+    /**
+     * Constructor de FormularioEgresoOperativoDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioEgresoOperativoDialog(Frame parent) {
         this(parent, null);
     }
 
+    /**
+     * Constructor de FormularioEgresoOperativoDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioEgresoOperativoDialog(Frame parent, EgresoOperativo existente) {
         super(parent, existente == null ? "Nuevo Egreso Operativo Presupuestal" : "Modificación de Egreso Operativo", true);
         this.existente = existente;
         inicializarUI();
     }
 
+    /**
+     * Construye y organiza la jerarquía visual de la pantalla en Swing.
+     * Ensambla la barra superior de acciones, tarjetas de métricas (KPIs),
+     * tabla maestra de datos y el panel lateral de detalle (Live Detail Hub).
+     */
     private void inicializarUI() {
         setSize(600, 620);
         setLocationRelativeTo(getParent());
@@ -73,6 +93,11 @@ public class FormularioEgresoOperativoDialog extends JDialog {
         getContentPane().setBackground(new Color(248, 250, 252));
 
         // Header
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -80,6 +105,11 @@ public class FormularioEgresoOperativoDialog extends JDialog {
                 new EmptyBorder(14, 20, 14, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titulos = new JPanel();
         titulos.setOpaque(false);
         titulos.setLayout(new BoxLayout(titulos, BoxLayout.Y_AXIS));
@@ -112,6 +142,11 @@ public class FormularioEgresoOperativoDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Footer
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footer.setBackground(Color.WHITE);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -131,7 +166,17 @@ public class FormularioEgresoOperativoDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaConcepto() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(16, 22, 16, 22));
@@ -195,7 +240,17 @@ public class FormularioEgresoOperativoDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaPago() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(16, 22, 16, 22));

@@ -26,6 +26,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -68,10 +73,20 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
     private JTextField txtLoteActual;
     private JTextField txtFechaVencimiento;
 
+    /**
+     * Constructor de FormularioProductoFarmaciaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioProductoFarmaciaDialog(Frame parent) {
         this(parent, null);
     }
 
+    /**
+     * Constructor de FormularioProductoFarmaciaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioProductoFarmaciaDialog(Frame parent, ProductoFarmacia existente) {
         super(parent, existente == null ? "Nuevo Fármaco / Producto Veterinario" : "Editar Producto - " + existente.getCodigo(), true);
         this.productoExistente = existente;
@@ -100,11 +115,26 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabecera() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setBackground(Color.WHITE);
         cab.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel textos = new JPanel();
         textos.setOpaque(false);
         textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
@@ -128,7 +158,17 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaBasica() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -193,6 +233,11 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
 
         // Fila 8: Checkboxes de requisitos sanitarios
         gbc.gridx = 0; gbc.gridy = 8; gbc.gridwidth = 2;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 6));
         panelChecks.setOpaque(false);
 
@@ -213,7 +258,17 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaPreciosStock() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(14, 18, 14, 18));
@@ -301,7 +356,17 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearBotoneraInferior() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         barra.setBackground(Color.WHITE);
         barra.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -485,6 +550,10 @@ public class FormularioProductoFarmaciaDialog extends JDialog {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

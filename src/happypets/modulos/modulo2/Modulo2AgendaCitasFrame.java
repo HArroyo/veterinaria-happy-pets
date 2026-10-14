@@ -25,10 +25,20 @@ public class Modulo2AgendaCitasFrame extends JFrame {
     private final VistaRecordatoriosPanel vistaRecordatorios;
     private final VistaSalaEsperaTriajePanel vistaSalaEspera;
 
+    /**
+     * Constructor de Modulo2AgendaCitasFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo2AgendaCitasFrame() {
         this(0);
     }
 
+    /**
+     * Constructor de Modulo2AgendaCitasFrame.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public Modulo2AgendaCitasFrame(int pestanaInicial) {
         setTitle("Happy Pets - Módulo 2: Agenda y Citas");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

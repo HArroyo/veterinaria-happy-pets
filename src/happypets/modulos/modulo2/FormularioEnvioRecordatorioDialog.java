@@ -23,6 +23,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -65,6 +70,11 @@ public class FormularioEnvioRecordatorioDialog extends JDialog {
         }
     }
 
+    /**
+     * Constructor de FormularioEnvioRecordatorioDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioEnvioRecordatorioDialog(Window parent, Cita citaPreseleccionada, Consumer<RecordatorioCita> onEnviado) {
         super(parent, "Redactar y Emitir Recordatorio", ModalityType.APPLICATION_MODAL);
         this.onEnviado = onEnviado;
@@ -75,10 +85,20 @@ public class FormularioEnvioRecordatorioDialog extends JDialog {
         getContentPane().setBackground(Color.WHITE);
 
         // Cabecera superior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(22, 163, 74)); // WhatsApp Green
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel headerTxt = new JPanel();
         headerTxt.setOpaque(false);
         headerTxt.setLayout(new BoxLayout(headerTxt, BoxLayout.Y_AXIS));
@@ -100,6 +120,11 @@ public class FormularioEnvioRecordatorioDialog extends JDialog {
         add(header, BorderLayout.NORTH);
 
         // Cuerpo con GridBagLayout
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel form = new JPanel(new GridBagLayout());
         form.setOpaque(false);
         form.setBorder(new EmptyBorder(16, 20, 16, 20));
@@ -127,6 +152,11 @@ public class FormularioEnvioRecordatorioDialog extends JDialog {
         form.add(cbCitas, gbc);
 
         // Fila 1: Canal de transmisión
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pCanales = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         pCanales.setOpaque(false);
 
@@ -208,6 +238,11 @@ public class FormularioEnvioRecordatorioDialog extends JDialog {
         add(form, BorderLayout.CENTER);
 
         // Barra de botones inferior
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         footer.setBackground(new Color(248, 250, 252));
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));

@@ -21,11 +21,21 @@ public class CuentaPorPagar {
     private String rucProveedor;
     private String facturaProveedor;
 
+    /**
+     * Constructor de CuentaPorPagar.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public CuentaPorPagar(String idCuenta, String proveedor, String concepto, double monto,
                           LocalDate fechaVence, String estado) {
         this(idCuenta, proveedor, concepto, monto, 0.0, LocalDate.now(), fechaVence, estado, "", "");
     }
 
+    /**
+     * Constructor de CuentaPorPagar.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public CuentaPorPagar(String idCuenta, String proveedor, String concepto, double monto,
                           double montoPagado, LocalDate fechaRegistro, LocalDate fechaVence,
                           String estado, String rucProveedor, String facturaProveedor) {

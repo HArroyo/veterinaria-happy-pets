@@ -29,6 +29,11 @@ public class ServicioGrooming {
     private double costo;
     private String estado; // "En Espera", "En Baño", "En Corte y Secado", "Listo para Entrega", "Entregado"
 
+    /**
+     * Constructor de ServicioGrooming.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ServicioGrooming(String idGrooming, String codigoMascota, String nombreMascota, String especieRaza,
                             String nombreTutor, String telefonoTutor, LocalDate fecha, LocalTime horaTurno,
                             String groomer, String tipoServicio, String controlEctoparasitos, String estadoPiel,

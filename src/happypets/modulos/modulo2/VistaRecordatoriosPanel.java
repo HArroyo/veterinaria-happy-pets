@@ -29,6 +29,11 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -89,9 +94,19 @@ public class VistaRecordatoriosPanel extends JPanel {
     private RecordatorioCita recordatorioSeleccionado = null;
 
     // Panel Detalle / Simulador Móvil
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel panelDetalleSimulador;
     private JLabel lblSimuladorContacto;
     private JLabel lblSimuladorSub;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel headerSimulador;
     private JTextArea txtSimuladorBurbuja;
     private JLabel lblSimuladorHoraCheck;
@@ -101,10 +116,20 @@ public class VistaRecordatoriosPanel extends JPanel {
     private JLabel lblBadgeEstado;
     private JLabel lblBadgeCita;
 
+    /**
+     * Constructor de VistaRecordatoriosPanel.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public VistaRecordatoriosPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel contenido = new JPanel();
         contenido.setOpaque(false);
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
@@ -121,6 +146,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         // 3. Contenedor Master-Detail (Tabla 58% + Simulador Móvil 42%)
         contenido.add(crearContenedorMasterDetail());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
         wrapper.add(contenido, BorderLayout.NORTH);
@@ -139,12 +169,27 @@ public class VistaRecordatoriosPanel extends JPanel {
     // 1. CABECERA Y KPIS
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCabeceraVista() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cab = new JPanel(new BorderLayout());
         cab.setOpaque(false);
         cab.setPreferredSize(new Dimension(0, 42));
         cab.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel izq = new JPanel();
         izq.setOpaque(false);
         izq.setLayout(new BoxLayout(izq, BoxLayout.Y_AXIS));
@@ -162,6 +207,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         izq.add(lblSub);
         cab.add(izq, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
         der.setOpaque(false);
 
@@ -188,7 +238,17 @@ public class VistaRecordatoriosPanel extends JPanel {
         return cab;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaKpis() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel fila = new JPanel(new GridLayout(1, 4, 10, 0));
         fila.setOpaque(false);
         fila.setPreferredSize(new Dimension(0, 56));
@@ -207,10 +267,24 @@ public class VistaRecordatoriosPanel extends JPanel {
         return fila;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearCardKpi(JLabel lblVal, String etiqueta, JLabel lblSub, Color bgIco, Icon icono) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(10, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -228,6 +302,10 @@ public class VistaRecordatoriosPanel extends JPanel {
         JLabel badge = new JLabel(icono, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -240,6 +318,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         badge.setPreferredSize(new Dimension(36, 36));
         card.add(badge, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pText = new JPanel();
         pText.setOpaque(false);
         pText.setLayout(new BoxLayout(pText, BoxLayout.Y_AXIS));
@@ -268,7 +351,17 @@ public class VistaRecordatoriosPanel extends JPanel {
     // 2. MASTER-DETAIL: TABLA HISTÓRICA Y SIMULADOR SMARTPHONE
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearContenedorMasterDetail() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel split = new JPanel(new BorderLayout(14, 0));
         split.setOpaque(false);
 
@@ -281,10 +374,24 @@ public class VistaRecordatoriosPanel extends JPanel {
         return split;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaMaster() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel card = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -300,9 +407,19 @@ public class VistaRecordatoriosPanel extends JPanel {
         card.setBorder(new EmptyBorder(12, 14, 12, 14));
 
         // Barra superior de herramientas con selector de vista (Tabs)
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pTop = new JPanel(new BorderLayout(8, 6));
         pTop.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pTabs = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         pTabs.setOpaque(false);
 
@@ -322,9 +439,19 @@ public class VistaRecordatoriosPanel extends JPanel {
         pTop.add(lblContadorRegistros, BorderLayout.EAST);
 
         // Barra de Filtros secundarios
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pFiltros = new JPanel(new BorderLayout(8, 0));
         pFiltros.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pCombos = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         pCombos.setOpaque(false);
 
@@ -354,6 +481,11 @@ public class VistaRecordatoriosPanel extends JPanel {
             @Override public void changedUpdate(DocumentEvent e) { filtrarDatos(); }
         });
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pBusq = new JPanel(new BorderLayout(4, 0));
         pBusq.setOpaque(false);
         JLabel lblLupa = new JLabel(Iconos.crearIconoBuscar(13, COLOR_TEXTO_MUTED));
@@ -413,6 +545,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         card.add(sp, BorderLayout.CENTER);
 
         // Barra inferior de acciones master
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         bot.setOpaque(false);
 
@@ -439,10 +576,24 @@ public class VistaRecordatoriosPanel extends JPanel {
     // 3. DETAIL: SIMULADOR SMARTPHONE Y FICHA EN VIVO
     // =========================================================================
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTarjetaSimuladorMovil() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         panelDetalleSimulador = new JPanel(new BorderLayout(0, 8)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -459,6 +610,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         panelDetalleSimulador.setPreferredSize(new Dimension(380, 0));
 
         // 1. Cabecera ejecutiva del contacto
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
@@ -472,11 +628,21 @@ public class VistaRecordatoriosPanel extends JPanel {
         panelDetalleSimulador.add(top, BorderLayout.NORTH);
 
         // 2. Ficha del Paciente y Cita + Teléfono Inteligente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel centro = new JPanel();
         centro.setOpaque(false);
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 
         // Ficha ejecutiva
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cardFicha = new JPanel(new BorderLayout(10, 0));
         cardFicha.setBackground(new Color(248, 250, 252));
         cardFicha.setBorder(BorderFactory.createCompoundBorder(
@@ -493,6 +659,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         lblFichaTutor.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblFichaTutor.setForeground(COLOR_TEXTO_MUTED);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pFichaText = new JPanel();
         pFichaText.setOpaque(false);
         pFichaText.setLayout(new BoxLayout(pFichaText, BoxLayout.Y_AXIS));
@@ -502,6 +673,11 @@ public class VistaRecordatoriosPanel extends JPanel {
 
         cardFicha.add(pFichaText, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pFichaBadges = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         pFichaBadges.setOpaque(false);
         lblBadgeCanal = crearBadgePastilla("WhatsApp", new Color(220, 252, 231), new Color(22, 163, 74));
@@ -514,9 +690,18 @@ public class VistaRecordatoriosPanel extends JPanel {
         centro.add(Box.createVerticalStrut(8));
 
         // Smartphone Frame Simulator
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel phoneFrame = new JPanel(new BorderLayout()) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -532,9 +717,18 @@ public class VistaRecordatoriosPanel extends JPanel {
         phoneFrame.setPreferredSize(new Dimension(350, 240));
 
         // Phone Header
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         headerSimulador = new JPanel(new BorderLayout(8, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -554,6 +748,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         JLabel avatarSim = crearAvatarCircular("HP", 28, Color.WHITE, new Color(7, 94, 84));
         headerSimulador.add(avatarSim, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pHeaderTxt = new JPanel();
         pHeaderTxt.setOpaque(false);
         pHeaderTxt.setLayout(new BoxLayout(pHeaderTxt, BoxLayout.Y_AXIS));
@@ -573,12 +772,26 @@ public class VistaRecordatoriosPanel extends JPanel {
         phoneFrame.add(headerSimulador, BorderLayout.NORTH);
 
         // Chat Body con burbuja saliente
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel chatBody = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 14));
         chatBody.setOpaque(false);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bubble = new JPanel(new BorderLayout(4, 4)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -603,6 +816,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         txtSimuladorBurbuja.setOpaque(false);
         bubble.add(txtSimuladorBurbuja, BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel pBubbleBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         pBubbleBottom.setOpaque(false);
 
@@ -619,6 +837,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         panelDetalleSimulador.add(centro, BorderLayout.CENTER);
 
         // 3. Barra de Acciones Operativas Inmediatas
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel bot = new JPanel(new GridLayout(2, 2, 6, 6));
         bot.setOpaque(false);
         bot.setBorder(new EmptyBorder(6, 0, 0, 0));
@@ -697,6 +920,10 @@ public class VistaRecordatoriosPanel extends JPanel {
         filtrarDatos();
     }
 
+    /**
+     * Aplica criterios de filtrado dinámico en memoria sobre los registros.
+     * Evalúa texto de búsqueda (búsqueda predictiva) y filtros por categoría o estado.
+     */
     private void filtrarDatos() {
         modeloRecordatorios.setRowCount(0);
         listaRecordatoriosActual.clear();
@@ -951,6 +1178,10 @@ public class VistaRecordatoriosPanel extends JPanel {
         JLabel lbl = new JLabel(texto, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -982,6 +1213,10 @@ public class VistaRecordatoriosPanel extends JPanel {
         JLabel l = new JLabel(texto, SwingConstants.CENTER) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1001,6 +1236,11 @@ public class VistaRecordatoriosPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel p = new JPanel(new BorderLayout(8, 0));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -1012,11 +1252,21 @@ public class VistaRecordatoriosPanel extends JPanel {
                 String tutor = arr[1] != null ? arr[1].toString() : "";
 
                 JLabel av = crearAvatarCircular(extraerIniciales(pet), 28, COLOR_AZUL_SUAVE, COLOR_AZUL_OSCURO);
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel avWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4));
                 avWrap.setOpaque(false);
                 avWrap.add(av);
                 p.add(avWrap, BorderLayout.WEST);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
                 JPanel pTxt = new JPanel();
                 pTxt.setOpaque(false);
                 pTxt.setLayout(new BoxLayout(pTxt, BoxLayout.Y_AXIS));
@@ -1053,6 +1303,11 @@ public class VistaRecordatoriosPanel extends JPanel {
                 fg = new Color(147, 51, 234);
             }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -1078,6 +1333,11 @@ public class VistaRecordatoriosPanel extends JPanel {
                 fg = new Color(2, 132, 199);
             }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
             JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
             p.setOpaque(true);
             p.setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252)));
@@ -1107,6 +1367,10 @@ public class VistaRecordatoriosPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1140,6 +1404,10 @@ public class VistaRecordatoriosPanel extends JPanel {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

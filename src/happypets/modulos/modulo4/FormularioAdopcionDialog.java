@@ -23,6 +23,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -71,10 +76,20 @@ public class FormularioAdopcionDialog extends JDialog {
     private JTextField txtAdoptanteTelefono;
     private JTextField txtAdoptanteDireccion;
 
+    /**
+     * Constructor de FormularioAdopcionDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioAdopcionDialog(Window owner) {
         this(owner, null);
     }
 
+    /**
+     * Constructor de FormularioAdopcionDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioAdopcionDialog(Window owner, MascotaAdopcion edicion) {
         super(owner, edicion == null ? "Registrar Nuevo Animal Rescatado" : "Editar Ficha de Rescatado: " + edicion.getIdMascotaAdopcion(), ModalityType.APPLICATION_MODAL);
         this.mascotaOriginal = edicion;
@@ -92,6 +107,11 @@ public class FormularioAdopcionDialog extends JDialog {
 
     private void construirUi() {
         // Cabecera estilizada
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel cabecera = new JPanel(new BorderLayout());
         cabecera.setBackground(Color.WHITE);
         cabecera.setBorder(BorderFactory.createCompoundBorder(
@@ -99,6 +119,11 @@ public class FormularioAdopcionDialog extends JDialog {
                 new EmptyBorder(16, 20, 16, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titBox = new JPanel();
         titBox.setOpaque(false);
         titBox.setLayout(new BoxLayout(titBox, BoxLayout.Y_AXIS));
@@ -130,6 +155,11 @@ public class FormularioAdopcionDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // Barra inferior de botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel barraBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         barraBotones.setBackground(Color.WHITE);
         barraBotones.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -145,13 +175,28 @@ public class FormularioAdopcionDialog extends JDialog {
         add(barraBotones, BorderLayout.SOUTH);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabRescatado() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel();
         p.setOpaque(false);
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         // Nombre y Especie
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaNom = new JPanel(new GridLayout(1, 2, 10, 0));
         filaNom.setOpaque(false);
         filaNom.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -167,6 +212,11 @@ public class FormularioAdopcionDialog extends JDialog {
         p.add(Box.createVerticalStrut(8));
 
         // Raza, Edad, Sexo y Tamaño
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaDet = new JPanel(new GridLayout(1, 4, 8, 0));
         filaDet.setOpaque(false);
         filaDet.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -200,6 +250,11 @@ public class FormularioAdopcionDialog extends JDialog {
         p.add(lblSan);
         p.add(Box.createVerticalStrut(4));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         panelChecks.setOpaque(false);
         panelChecks.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
@@ -252,6 +307,11 @@ public class FormularioAdopcionDialog extends JDialog {
         p.add(Box.createVerticalStrut(8));
 
         // Donación y Estado
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaCierre = new JPanel(new GridLayout(1, 2, 10, 0));
         filaCierre.setOpaque(false);
         filaCierre.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -275,7 +335,17 @@ public class FormularioAdopcionDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearTabAdoptante() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel();
         p.setOpaque(false);
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -288,6 +358,11 @@ public class FormularioAdopcionDialog extends JDialog {
         p.add(Box.createVerticalStrut(8));
 
         // Nombre y DNI
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel filaPost = new JPanel(new GridLayout(1, 2, 10, 0));
         filaPost.setOpaque(false);
         filaPost.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -313,7 +388,17 @@ public class FormularioAdopcionDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearFilaCampo(String etiqueta, Component campo) {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(0, 4));
         p.setOpaque(false);
         p.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -415,6 +500,10 @@ public class FormularioAdopcionDialog extends JDialog {
         JButton btn = new JButton(texto) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

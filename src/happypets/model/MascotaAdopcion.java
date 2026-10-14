@@ -30,6 +30,11 @@ public class MascotaAdopcion {
     private double cuotaDonacion;
     private String estado; // "Disponible", "En Evaluación", "En Adaptación (Prueba)", "Adoptado con Éxito"
 
+    /**
+     * Constructor de MascotaAdopcion.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public MascotaAdopcion(String idMascotaAdopcion, String nombre, String especie, String raza,
                            String edadEstimada, String sexo, String tamano, String temperamento,
                            String historiaRescate, boolean esterilizado, boolean vacunado, boolean desparasitado,

@@ -20,9 +20,19 @@ public class ConsultaClinica {
     private String observaciones;
     private String estado;
 
+    /**
+     * Constructor de ConsultaClinica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConsultaClinica() {
     }
 
+    /**
+     * Constructor de ConsultaClinica.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public ConsultaClinica(String codigo, String codigoMascota, LocalDate fecha,
                            String motivo, String sintomas, String diagnostico,
                            String tratamiento, String veterinario, double pesoKg,

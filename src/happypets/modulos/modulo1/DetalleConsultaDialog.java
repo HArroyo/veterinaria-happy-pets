@@ -15,6 +15,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -30,12 +35,22 @@ import happypets.model.Mascota;
 public class DetalleConsultaDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor de DetalleConsultaDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public DetalleConsultaDialog(JFrame parent, ConsultaClinica consulta, Mascota mascota) {
         super(parent, "Detalle de Consulta Clínica - " + (consulta != null ? consulta.getCodigo() : ""), true);
         setSize(650, 580);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Ui.TURQUESA);
         header.setBorder(new EmptyBorder(14, 20, 14, 20));
@@ -51,6 +66,11 @@ public class DetalleConsultaDialog extends JDialog {
         header.add(dateLbl, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel body = new JPanel(new GridBagLayout());
         body.setBackground(Color.WHITE);
         body.setBorder(new EmptyBorder(18, 22, 18, 22));
@@ -98,6 +118,11 @@ public class DetalleConsultaDialog extends JDialog {
 
         add(new JScrollPane(body), BorderLayout.CENTER);
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new BorderLayout());
         footer.setBackground(Ui.FONDO);
         footer.setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -108,6 +133,11 @@ public class DetalleConsultaDialog extends JDialog {
         add(footer, BorderLayout.SOUTH);
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private void agregarFila(JPanel panel, GridBagConstraints gbc, int row, String etiqueta, String valor) {
         gbc.gridx = 0;
         gbc.gridy = row;

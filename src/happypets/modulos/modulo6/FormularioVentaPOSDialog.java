@@ -26,6 +26,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -86,6 +91,11 @@ public class FormularioVentaPOSDialog extends JDialog {
     private JLabel lblVueltoCalculado;
     private JTextField txtCajero;
 
+    /**
+     * Constructor de FormularioVentaPOSDialog.
+     * Inicializa los componentes gráficos, configura layouts, asigna estilos
+     * institucionales y carga los datos desde el repositorio central.
+     */
     public FormularioVentaPOSDialog(Frame parent) {
         super(parent, "Nueva Venta POS / Emisión de Comprobante", true);
         cargarOpcionesCatalogo();
@@ -113,6 +123,11 @@ public class FormularioVentaPOSDialog extends JDialog {
         }
     }
 
+    /**
+     * Construye y organiza la jerarquía visual de la pantalla en Swing.
+     * Ensambla la barra superior de acciones, tarjetas de métricas (KPIs),
+     * tabla maestra de datos y el panel lateral de detalle (Live Detail Hub).
+     */
     private void inicializarUI() {
         setSize(780, 700);
         setLocationRelativeTo(getParent());
@@ -120,6 +135,11 @@ public class FormularioVentaPOSDialog extends JDialog {
         getContentPane().setBackground(new Color(248, 250, 252));
 
         // 1. Header institucional
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -127,6 +147,11 @@ public class FormularioVentaPOSDialog extends JDialog {
                 new EmptyBorder(14, 20, 14, 20)
         ));
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel titulos = new JPanel();
         titulos.setOpaque(false);
         titulos.setLayout(new BoxLayout(titulos, BoxLayout.Y_AXIS));
@@ -159,6 +184,11 @@ public class FormularioVentaPOSDialog extends JDialog {
         add(tabs, BorderLayout.CENTER);
 
         // 3. Footer con Botones
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footer.setBackground(Color.WHITE);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Ui.BORDE_SUAVE));
@@ -182,12 +212,27 @@ public class FormularioVentaPOSDialog extends JDialog {
         }
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaCarrito() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new BorderLayout(0, 10));
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(14, 18, 14, 18));
 
         // Selector superior de Producto / Servicio
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelSelect = new JPanel(new GridBagLayout());
         panelSelect.setBackground(Color.WHITE);
         panelSelect.setBorder(BorderFactory.createCompoundBorder(
@@ -264,6 +309,11 @@ public class FormularioVentaPOSDialog extends JDialog {
         p.add(scrollTabla, BorderLayout.CENTER);
 
         // Panel inferior del carrito con Descuento y Totales
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelTotales = new JPanel(new BorderLayout(10, 0));
         panelTotales.setBackground(Color.WHITE);
         panelTotales.setBorder(BorderFactory.createCompoundBorder(
@@ -278,6 +328,11 @@ public class FormularioVentaPOSDialog extends JDialog {
         panelTotales.add(btnQuitar, BorderLayout.WEST);
 
         // Resumen monetario
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelResumen = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         panelResumen.setOpaque(false);
 
@@ -315,7 +370,17 @@ public class FormularioVentaPOSDialog extends JDialog {
         return p;
     }
 
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
     private JPanel crearPestanaFacturacion() {
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel p = new JPanel(new GridBagLayout());
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(16, 22, 16, 22));
@@ -425,9 +490,18 @@ public class FormularioVentaPOSDialog extends JDialog {
 
         // 5. Card resumen de Vuelto / Liquidación
         gbc.gridx = 0; gbc.gridy = 8; gbc.gridwidth = 2;
+    /**
+     * Crea y parametriza la tabla maestra de datos.
+     * Configura el modelo no editable, ancho de columnas, ordenamiento,
+     * renderizadores visuales con avatares circulares y chips de estado.
+     */
         JPanel panelVuelto = new JPanel(new GridLayout(1, 2, 12, 0)) {
             private static final long serialVersionUID = 1L;
             @Override
+            /**
+             * Renderizado gráfico personalizado en Java2D.
+             * Activa Antialiasing para bordes suaves y realiza el cálculo geométrico preciso.
+             */
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
